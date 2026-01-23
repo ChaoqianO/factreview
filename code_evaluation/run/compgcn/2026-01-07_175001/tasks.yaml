@@ -1,0 +1,20 @@
+- id: install_deps
+  cwd: '{paper_root}'
+  cmd:
+  - python
+  - -m
+  - pip
+  - install
+  - -r
+  - '{paper_root}/requirements.txt'
+  timeout_sec: 3600
+  use_conda: true
+  enabled: false
+- id: repo_smoke
+  cwd: '{paper_root}'
+  cmd:
+  - python
+  - run.py
+  - --help
+  timeout_sec: 600
+  use_conda: true

@@ -1,0 +1,4 @@
+cwd: E:\code\fastMCP\ai_review\code_evaluation\run\compgcn_gpu\2026-01-07_gpu
+cmd: docker run --rm --gpus all -v E:\code\fastMCP\ai_review\code_evaluation\baseline\compgcn\source_gpu:/app -v E:\code\fastMCP\ai_review\code_evaluation\run\compgcn_gpu\2026-01-07_gpu:/workspace/run_dir -w /app -e CODE_EVAL_RUN_DIR=/workspace/run_dir -e CODE_EVAL_ARTIFACT_DIR=/workspace/run_dir/artifacts -e CODE_EVAL_PAPER_DIR=/app -e CODE_EVAL_PAPER_ROOT=/app code-eval-paper:compgcn_gpu-db4e8c1254bf python run.py -name fb_transe_sub -data FB15k-237 -score_func transe -opn sub -gamma 9 -hid_drop 0.1 -init_dim 200 -gpu 0 -num_workers 4
+rc: 1
+sec: 34.035

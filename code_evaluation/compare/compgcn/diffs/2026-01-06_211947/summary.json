@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-01-06_211947",
+  "status": "failed",
+  "attempts": 1,
+  "run_result": {
+    "success": false,
+    "failed_task": "repo_smoke",
+    "failed_task_cwd": "/app",
+    "failed_task_cmd": [
+      "python",
+      "run.py",
+      "--help"
+    ],
+    "returncode": 1,
+    "stderr_tail": "Traceback (most recent call last):\n  File \"run.py\", line 1, in <module>\n    from helper import *\n  File \"/app/helper.py\", line 13, in <module>\n    from torch_scatter import scatter_add\n  File \"/home/user/.local/lib/python3.7/site-packages/torch_scatter/__init__.py\", line 64, in <module>\n    f'Detected that PyTorch and torch_scatter were compiled with '\nRuntimeError: Detected that PyTorch and torch_scatter were compiled with different CUDA versions. PyTorch has CUDA version 10.1 and torch_scatter has CUDA version 0.0. Please reinstall the torch_scatter that matches your PyTorch install.\n",
+    "stdout_tail": "",
+    "logs": {
+      "command": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\run\\compgcn\\2026-01-06_211947\\logs\\repo_smoke_attempt0_command.txt",
+      "stdout": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\run\\compgcn\\2026-01-06_211947\\logs\\repo_smoke_attempt0_stdout.log",
+      "stderr": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\run\\compgcn\\2026-01-06_211947\\logs\\repo_smoke_attempt0_stderr.log"
+    }
+  },
+  "judge": {},
+  "artifacts": {
+    "files": []
+  }
+}

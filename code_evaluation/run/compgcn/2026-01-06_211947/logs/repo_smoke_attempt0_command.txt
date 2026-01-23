@@ -1,0 +1,4 @@
+cwd: E:\code\fastMCP\ai_review\code_evaluation\run\compgcn\2026-01-06_211947
+cmd: docker run --rm -v E:\code\fastMCP\ai_review\code_evaluation\run\compgcn\2026-01-06_211947:/workspace/run_dir -w /app -e CODE_EVAL_RUN_DIR=/workspace/run_dir -e CODE_EVAL_ARTIFACT_DIR=/workspace/run_dir/artifacts code-eval-paper:compgcn-88dc89c58769 python run.py --help
+rc: 1
+sec: 0.835

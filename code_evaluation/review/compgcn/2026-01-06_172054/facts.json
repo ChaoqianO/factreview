@@ -1,0 +1,30 @@
+{
+  "paper_key": "compgcn",
+  "run_id": "2026-01-06_172054",
+  "status": "failed",
+  "repo_url": "",
+  "paper_pdf": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\papers\\compgcn\\compgcn_Composition-based Multi-Relational Graph Convolutional Networks.pdf",
+  "paper_pdf_extracted_md": "",
+  "paper_root": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\baseline\\compgcn\\source",
+  "local_source_path": "",
+  "conda_prefix": "",
+  "tasks_path": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\baseline\\compgcn\\tasks.yaml",
+  "baseline_path": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\baseline\\compgcn\\baseline.json",
+  "artifacts_index": {
+    "files": []
+  },
+  "run_result": {
+    "success": false,
+    "failed_task": "prepare_env_ensure_docker",
+    "returncode": 1
+  },
+  "judge": {},
+  "paths": {
+    "run_dir": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\run\\compgcn\\2026-01-06_172054",
+    "issues_jsonl": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\run\\compgcn\\2026-01-06_172054\\issues.jsonl",
+    "issues_md": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\run\\compgcn\\2026-01-06_172054\\issues.md",
+    "compare_report": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\compare\\compgcn\\reports\\2026-01-06_172054.md",
+    "compare_diff_dir": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\compare\\compgcn\\diffs\\2026-01-06_172054"
+  },
+  "suggestions": []
+}
