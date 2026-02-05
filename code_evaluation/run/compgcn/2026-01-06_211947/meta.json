@@ -1,0 +1,15 @@
+{
+  "run_id": "2026-01-06_211947",
+  "platform": "Windows 10 (10.0.26100)",
+  "python": "3.11.14 | packaged by conda-forge | (main, Oct 22 2025, 22:35:28) [MSC v.1944 64 bit (AMD64)]",
+  "cwd": "E:\\code\\fastMCP\\ai_review\\code_evaluation",
+  "paper_root": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\baseline\\compgcn\\source",
+  "tasks_path": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\baseline\\compgcn\\tasks.yaml",
+  "baseline_path": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\baseline\\compgcn\\baseline.json",
+  "llm": {
+    "provider": "",
+    "model": "",
+    "base_url": "",
+    "no_llm": false
+  }
+}

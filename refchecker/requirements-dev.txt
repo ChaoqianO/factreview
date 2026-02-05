@@ -1,0 +1,30 @@
+# Development/CI dependencies - minimal set for running tests
+# Use this for testing and CI to avoid disk space issues
+
+# Core dependencies - required for basic functionality
+numpy<2  # Pin to NumPy 1.x for compatibility
+requests>=2.25.0
+beautifulsoup4>=4.9.0
+pypdf>=5.0.0
+arxiv>=1.4.0
+python-dateutil>=2.8.0
+tqdm>=4.60.0
+colorama>=0.4.4
+fuzzywuzzy>=0.18.0
+python-Levenshtein>=0.12.0
+pandas>=1.3.0
+pdfplumber>=0.6.0
+
+# Testing dependencies
+pytest>=6.0.0
+pytest-cov>=2.0.0
+
+# Note: The following are NOT included to save disk space in CI:
+# - openai, anthropic, google-generativeai (LLM providers - imported lazily)
+# - torch, vllm (local model inference - very large)
+# - scikit-learn, nltk, joblib (optional ML features)
+# - black, isort, flake8, mypy (linting - not needed for tests)
+# - lxml, pikepdf, selenium (optional parsing features)
+# - huggingface_hub (HuggingFace API)
+#
+# Install full requirements.txt if you need these features

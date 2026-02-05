@@ -1,0 +1,230 @@
+- id: cleanup
+  cwd: '{paper_root}'
+  cmd:
+  - python
+  - -c
+  - "import shutil; from pathlib import Path; p=Path('.');\nfor d in ['checkpoints','log','data']:\n  shutil.rmtree(p/d, ignore_errors=True)\n(p/'checkpoints').mkdir(parents=True, exist_ok=True)\n(p/'log').mkdir(parents=True, exist_ok=True)\n(p/'data').mkdir(parents=True, exist_ok=True)\nprint('ok')\n"
+  timeout_sec: 600
+  enabled: true
+
+- id: extract_data
+  cwd: '{paper_root}'
+  cmd:
+  - python
+  - -c
+  - "import zipfile; from pathlib import Path; p=Path('.'); (p/'data').mkdir(parents=True, exist_ok=True);\nfor z in ['FB15k-237.zip','WN18RR.zip']:\n  zp=p/'data_compressed'/z\n  with zipfile.ZipFile(str(zp),'r') as f: f.extractall(str(p/'data'))\nprint('extracted')\n"
+  timeout_sec: 1200
+  enabled: true
+
+- id: repo_smoke
+  cwd: '{paper_root}'
+  cmd:
+  - python
+  - run.py
+  - --help
+  timeout_sec: 600
+  enabled: true
+
+# =====================
+# FB15k-237 experiments
+# =====================
+- id: train_fb_transe_sub
+  cwd: '{paper_root}'
+  cmd: [python, run.py, -name, fb_transe_sub, -data, FB15k-237, -score_func, transe, -opn, sub, -gamma, '9', -hid_drop, '0.1', -init_dim, '200', -gpu, '-1', -num_workers, '0']
+  timeout_sec: 21600
+  enabled: true
+- id: eval_fb_transe_sub
+  cwd: '{paper_root}'
+  cmd: [python, codeeval_eval_ckpt.py, --prefix, fb_transe_sub, --out, '{run_dir}/artifacts/metrics/fb_transe_sub.json', --split, test]
+  timeout_sec: 1800
+  enabled: true
+
+- id: train_fb_transe_mult
+  cwd: '{paper_root}'
+  cmd: [python, run.py, -name, fb_transe_mult, -data, FB15k-237, -score_func, transe, -opn, mult, -gamma, '9', -hid_drop, '0.2', -init_dim, '200', -gpu, '-1', -num_workers, '0']
+  timeout_sec: 21600
+  enabled: true
+- id: eval_fb_transe_mult
+  cwd: '{paper_root}'
+  cmd: [python, codeeval_eval_ckpt.py, --prefix, fb_transe_mult, --out, '{run_dir}/artifacts/metrics/fb_transe_mult.json', --split, test]
+  timeout_sec: 1800
+  enabled: true
+
+- id: train_fb_transe_corr
+  cwd: '{paper_root}'
+  cmd: [python, run.py, -name, fb_transe_corr, -data, FB15k-237, -score_func, transe, -opn, corr, -gamma, '40', -hid_drop, '0.1', -init_dim, '200', -gpu, '-1', -num_workers, '0']
+  timeout_sec: 21600
+  enabled: true
+- id: eval_fb_transe_corr
+  cwd: '{paper_root}'
+  cmd: [python, codeeval_eval_ckpt.py, --prefix, fb_transe_corr, --out, '{run_dir}/artifacts/metrics/fb_transe_corr.json', --split, test]
+  timeout_sec: 1800
+  enabled: true
+
+- id: train_fb_distmult_sub
+  cwd: '{paper_root}'
+  cmd: [python, run.py, -name, fb_distmult_sub, -data, FB15k-237, -score_func, distmult, -opn, sub, -gcn_dim, '150', -gcn_layer, '2', -gpu, '-1', -num_workers, '0']
+  timeout_sec: 21600
+  enabled: true
+- id: eval_fb_distmult_sub
+  cwd: '{paper_root}'
+  cmd: [python, codeeval_eval_ckpt.py, --prefix, fb_distmult_sub, --out, '{run_dir}/artifacts/metrics/fb_distmult_sub.json', --split, test]
+  timeout_sec: 1800
+  enabled: true
+
+- id: train_fb_distmult_mult
+  cwd: '{paper_root}'
+  cmd: [python, run.py, -name, fb_distmult_mult, -data, FB15k-237, -score_func, distmult, -opn, mult, -gcn_dim, '150', -gcn_layer, '2', -gpu, '-1', -num_workers, '0']
+  timeout_sec: 21600
+  enabled: true
+- id: eval_fb_distmult_mult
+  cwd: '{paper_root}'
+  cmd: [python, codeeval_eval_ckpt.py, --prefix, fb_distmult_mult, --out, '{run_dir}/artifacts/metrics/fb_distmult_mult.json', --split, test]
+  timeout_sec: 1800
+  enabled: true
+
+- id: train_fb_distmult_corr
+  cwd: '{paper_root}'
+  cmd: [python, run.py, -name, fb_distmult_corr, -data, FB15k-237, -score_func, distmult, -opn, corr, -gcn_dim, '150', -gcn_layer, '2', -gpu, '-1', -num_workers, '0']
+  timeout_sec: 21600
+  enabled: true
+- id: eval_fb_distmult_corr
+  cwd: '{paper_root}'
+  cmd: [python, codeeval_eval_ckpt.py, --prefix, fb_distmult_corr, --out, '{run_dir}/artifacts/metrics/fb_distmult_corr.json', --split, test]
+  timeout_sec: 1800
+  enabled: true
+
+- id: train_fb_conve_sub
+  cwd: '{paper_root}'
+  cmd: [python, run.py, -name, fb_conve_sub, -data, FB15k-237, -score_func, conve, -opn, sub, -ker_sz, '5', -gpu, '-1', -num_workers, '0']
+  timeout_sec: 21600
+  enabled: true
+- id: eval_fb_conve_sub
+  cwd: '{paper_root}'
+  cmd: [python, codeeval_eval_ckpt.py, --prefix, fb_conve_sub, --out, '{run_dir}/artifacts/metrics/fb_conve_sub.json', --split, test]
+  timeout_sec: 1800
+  enabled: true
+
+- id: train_fb_conve_mult
+  cwd: '{paper_root}'
+  cmd: [python, run.py, -name, fb_conve_mult, -data, FB15k-237, -score_func, conve, -opn, mult, -gpu, '-1', -num_workers, '0']
+  timeout_sec: 21600
+  enabled: true
+- id: eval_fb_conve_mult
+  cwd: '{paper_root}'
+  cmd: [python, codeeval_eval_ckpt.py, --prefix, fb_conve_mult, --out, '{run_dir}/artifacts/metrics/fb_conve_mult.json', --split, test]
+  timeout_sec: 1800
+  enabled: true
+
+- id: train_fb_conve_corr
+  cwd: '{paper_root}'
+  cmd: [python, run.py, -name, fb_conve_corr, -data, FB15k-237, -score_func, conve, -opn, corr, -gpu, '-1', -num_workers, '0']
+  timeout_sec: 21600
+  enabled: true
+- id: eval_fb_conve_corr
+  cwd: '{paper_root}'
+  cmd: [python, codeeval_eval_ckpt.py, --prefix, fb_conve_corr, --out, '{run_dir}/artifacts/metrics/fb_conve_corr.json', --split, test]
+  timeout_sec: 1800
+  enabled: true
+
+# ==================
+# WN18RR experiments
+# ==================
+- id: train_wn_transe_sub
+  cwd: '{paper_root}'
+  cmd: [python, run.py, -name, wn_transe_sub, -data, WN18RR, -score_func, transe, -opn, sub, -gamma, '9', -hid_drop, '0.1', -init_dim, '200', -gpu, '-1', -num_workers, '0']
+  timeout_sec: 21600
+  enabled: true
+- id: eval_wn_transe_sub
+  cwd: '{paper_root}'
+  cmd: [python, codeeval_eval_ckpt.py, --prefix, wn_transe_sub, --out, '{run_dir}/artifacts/metrics/wn_transe_sub.json', --split, test]
+  timeout_sec: 1800
+  enabled: true
+
+- id: train_wn_transe_mult
+  cwd: '{paper_root}'
+  cmd: [python, run.py, -name, wn_transe_mult, -data, WN18RR, -score_func, transe, -opn, mult, -gamma, '9', -hid_drop, '0.2', -init_dim, '200', -gpu, '-1', -num_workers, '0']
+  timeout_sec: 21600
+  enabled: true
+- id: eval_wn_transe_mult
+  cwd: '{paper_root}'
+  cmd: [python, codeeval_eval_ckpt.py, --prefix, wn_transe_mult, --out, '{run_dir}/artifacts/metrics/wn_transe_mult.json', --split, test]
+  timeout_sec: 1800
+  enabled: true
+
+- id: train_wn_transe_corr
+  cwd: '{paper_root}'
+  cmd: [python, run.py, -name, wn_transe_corr, -data, WN18RR, -score_func, transe, -opn, corr, -gamma, '40', -hid_drop, '0.1', -init_dim, '200', -gpu, '-1', -num_workers, '0']
+  timeout_sec: 21600
+  enabled: true
+- id: eval_wn_transe_corr
+  cwd: '{paper_root}'
+  cmd: [python, codeeval_eval_ckpt.py, --prefix, wn_transe_corr, --out, '{run_dir}/artifacts/metrics/wn_transe_corr.json', --split, test]
+  timeout_sec: 1800
+  enabled: true
+
+- id: train_wn_distmult_sub
+  cwd: '{paper_root}'
+  cmd: [python, run.py, -name, wn_distmult_sub, -data, WN18RR, -score_func, distmult, -opn, sub, -gcn_dim, '150', -gcn_layer, '2', -gpu, '-1', -num_workers, '0']
+  timeout_sec: 21600
+  enabled: true
+- id: eval_wn_distmult_sub
+  cwd: '{paper_root}'
+  cmd: [python, codeeval_eval_ckpt.py, --prefix, wn_distmult_sub, --out, '{run_dir}/artifacts/metrics/wn_distmult_sub.json', --split, test]
+  timeout_sec: 1800
+  enabled: true
+
+- id: train_wn_distmult_mult
+  cwd: '{paper_root}'
+  cmd: [python, run.py, -name, wn_distmult_mult, -data, WN18RR, -score_func, distmult, -opn, mult, -gcn_dim, '150', -gcn_layer, '2', -gpu, '-1', -num_workers, '0']
+  timeout_sec: 21600
+  enabled: true
+- id: eval_wn_distmult_mult
+  cwd: '{paper_root}'
+  cmd: [python, codeeval_eval_ckpt.py, --prefix, wn_distmult_mult, --out, '{run_dir}/artifacts/metrics/wn_distmult_mult.json', --split, test]
+  timeout_sec: 1800
+  enabled: true
+
+- id: train_wn_distmult_corr
+  cwd: '{paper_root}'
+  cmd: [python, run.py, -name, wn_distmult_corr, -data, WN18RR, -score_func, distmult, -opn, corr, -gcn_dim, '150', -gcn_layer, '2', -gpu, '-1', -num_workers, '0']
+  timeout_sec: 21600
+  enabled: true
+- id: eval_wn_distmult_corr
+  cwd: '{paper_root}'
+  cmd: [python, codeeval_eval_ckpt.py, --prefix, wn_distmult_corr, --out, '{run_dir}/artifacts/metrics/wn_distmult_corr.json', --split, test]
+  timeout_sec: 1800
+  enabled: true
+
+- id: train_wn_conve_sub
+  cwd: '{paper_root}'
+  cmd: [python, run.py, -name, wn_conve_sub, -data, WN18RR, -score_func, conve, -opn, sub, -ker_sz, '5', -gpu, '-1', -num_workers, '0']
+  timeout_sec: 21600
+  enabled: true
+- id: eval_wn_conve_sub
+  cwd: '{paper_root}'
+  cmd: [python, codeeval_eval_ckpt.py, --prefix, wn_conve_sub, --out, '{run_dir}/artifacts/metrics/wn_conve_sub.json', --split, test]
+  timeout_sec: 1800
+  enabled: true
+
+- id: train_wn_conve_mult
+  cwd: '{paper_root}'
+  cmd: [python, run.py, -name, wn_conve_mult, -data, WN18RR, -score_func, conve, -opn, mult, -gpu, '-1', -num_workers, '0']
+  timeout_sec: 21600
+  enabled: true
+- id: eval_wn_conve_mult
+  cwd: '{paper_root}'
+  cmd: [python, codeeval_eval_ckpt.py, --prefix, wn_conve_mult, --out, '{run_dir}/artifacts/metrics/wn_conve_mult.json', --split, test]
+  timeout_sec: 1800
+  enabled: true
+
+- id: train_wn_conve_corr
+  cwd: '{paper_root}'
+  cmd: [python, run.py, -name, wn_conve_corr, -data, WN18RR, -score_func, conve, -opn, corr, -gpu, '-1', -num_workers, '0']
+  timeout_sec: 21600
+  enabled: true
+- id: eval_wn_conve_corr
+  cwd: '{paper_root}'
+  cmd: [python, codeeval_eval_ckpt.py, --prefix, wn_conve_corr, --out, '{run_dir}/artifacts/metrics/wn_conve_corr.json', --split, test]
+  timeout_sec: 1800
+  enabled: true

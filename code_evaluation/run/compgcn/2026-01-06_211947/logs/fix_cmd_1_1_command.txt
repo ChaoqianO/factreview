@@ -1,0 +1,4 @@
+cwd: E:\code\fastMCP\ai_review\code_evaluation\run\compgcn\2026-01-06_211947
+cmd: docker run --rm -v E:\code\fastMCP\ai_review\code_evaluation\baseline\compgcn:/workspace/paper_dir -v E:\code\fastMCP\ai_review\code_evaluation\run\compgcn\2026-01-06_211947:/workspace/run_dir -e CODE_EVAL_RUN_DIR=/workspace/run_dir -e CODE_EVAL_ARTIFACT_DIR=/workspace/run_dir/artifacts -e CODE_EVAL_PAPER_DIR=/workspace/paper_dir -e CODE_EVAL_PAPER_ROOT=/workspace/paper_dir/source -e CODE_EVAL_PYTHON_SPEC=3.7 code-evaluation:latest --mode run --paper-dir /workspace/paper_dir --paper-root /workspace/paper_dir/source --cwd /workspace/paper_dir/source --timeout-sec 600 -- bash -lc python -m pip uninstall -y torch-scatter && python -m pip install torch-scatter -f https://data.pyg.org/whl/torch-1.7.0+cu101.html
+rc: 127
+sec: 600.016

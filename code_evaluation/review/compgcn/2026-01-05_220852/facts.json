@@ -1,0 +1,37 @@
+{
+  "paper_key": "compgcn",
+  "run_id": "2026-01-05_220852",
+  "status": "failed",
+  "repo_url": "",
+  "paper_pdf": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\papers\\compgcn\\compgcn_Composition-based Multi-Relational Graph Convolutional Networks.pdf",
+  "paper_pdf_extracted_md": "",
+  "paper_root": "",
+  "local_source_path": "",
+  "conda_prefix": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\baseline\\compgcn\\env\\conda",
+  "tasks_path": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\baseline\\compgcn\\tasks.yaml",
+  "baseline_path": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\baseline\\compgcn\\baseline.json",
+  "artifacts_index": {
+    "files": []
+  },
+  "run_result": {
+    "success": false,
+    "failed_task": "prepare_env_install_torch",
+    "returncode": 1,
+    "stderr_tail": ": /whl/torch_stable.html\n\nWARNING: Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLError(1, '[SSL: KRB5_S_TKT_NYV] unexpected eof while reading (_ssl.c:1091)'))': /whl/torch_stable.html\n\nWARNING: Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLError(1, '[SSL: KRB5_S_TKT_NYV] unexpected eof while reading (_ssl.c:1091)'))': /whl/torch_stable.html\n\nWARNING: Retrying (Retry(total=4, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLError(1, '[SSL: KRB5_S_TKT_NYV] unexpected eof while reading (_ssl.c:1091)'))': /simple/torch/\n\nWARNING: Retrying (Retry(total=3, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLError(1, '[SSL: KRB5_S_TKT_NYV] unexpected eof while reading (_ssl.c:1091)'))': /simple/torch/\n\nWARNING: Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLError(1, '[SSL: KRB5_S_TKT_NYV] unexpected eof while reading (_ssl.c:1091)'))': /simple/torch/\n\nWARNING: Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLError(1, '[SSL: KRB5_S_TKT_NYV] unexpected eof while reading (_ssl.c:1091)'))': /simple/torch/\n\nWARNING: Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLError(1, '[SSL: KRB5_S_TKT_NYV] unexpected eof while reading (_ssl.c:1091)'))': /simple/torch/\n\nERROR: Could not find a version that satisfies the requirement torch==1.4.0 (from versions: none)\n\nERROR: No matching distribution found for torch==1.4.0\n\nWARNING: There was an error checking the latest version of pip.\n\n\nERROR conda.cli.main_run:execute(49): `conda run python -m pip install torch==1.4.0 -f https://download.pytorch.org/whl/torch_stable.html` failed. (See above for error)\n",
+    "stdout_tail": "Looking in indexes: https://pypi.tuna.tsinghua.edu.cn/simple\n\nLooking in links: https://download.pytorch.org/whl/torch_stable.html\n\nCould not fetch URL https://download.pytorch.org/whl/torch_stable.html: There was a problem confirming the ssl certificate: HTTPSConnectionPool(host='download.pytorch.org', port=443): Max retries exceeded with url: /whl/torch_stable.html (Caused by SSLError(SSLError(1, '[SSL: KRB5_S_TKT_NYV] unexpected eof while reading (_ssl.c:1091)'))) - skipping\n\nCould not fetch URL https://pypi.tuna.tsinghua.edu.cn/simple/torch/: There was a problem confirming the ssl certificate: HTTPSConnectionPool(host='pypi.tuna.tsinghua.edu.cn', port=443): Max retries exceeded with url: /simple/torch/ (Caused by SSLError(SSLError(1, '[SSL: KRB5_S_TKT_NYV] unexpected eof while reading (_ssl.c:1091)'))) - skipping\n\n\n",
+    "logs": {
+      "command": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\run\\compgcn\\2026-01-05_220852\\logs\\env_install_torch_command.txt",
+      "stdout": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\run\\compgcn\\2026-01-05_220852\\logs\\env_install_torch_stdout.log",
+      "stderr": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\run\\compgcn\\2026-01-05_220852\\logs\\env_install_torch_stderr.log"
+    }
+  },
+  "judge": {},
+  "paths": {
+    "run_dir": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\run\\compgcn\\2026-01-05_220852",
+    "issues_jsonl": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\run\\compgcn\\2026-01-05_220852\\issues.jsonl",
+    "issues_md": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\run\\compgcn\\2026-01-05_220852\\issues.md",
+    "compare_report": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\compare\\compgcn\\reports\\2026-01-05_220852.md",
+    "compare_diff_dir": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\compare\\compgcn\\diffs\\2026-01-05_220852"
+  },
+  "suggestions": []
+}

@@ -1,0 +1,4 @@
+cwd: E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source
+cmd: cmd /c conda run -p E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\env\conda python -m pip install -r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source/requirements.txt
+rc: 0
+sec: 4.295
