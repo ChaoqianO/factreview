@@ -2,11 +2,146 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, List, Tuple
 
 from ..tools.fs import ensure_dir, write_text
 from ..tools.meta import index_artifacts
 from ..tools.recorder import append_event, write_issues_md
+
+
+def _load_json_if_exists(path: Path) -> Dict[str, Any]:
+    try:
+        if path.exists():
+            data = json.loads(path.read_text(encoding="utf-8", errors="ignore"))
+            return data if isinstance(data, dict) else {}
+    except Exception:
+        pass
+    return {}
+
+
+def _read_text_if_exists(path: Path) -> str:
+    try:
+        if path.exists():
+            return path.read_text(encoding="utf-8", errors="ignore")
+    except Exception:
+        pass
+    return ""
+
+
+def _md_table(columns: List[str], rows: List[List[str]]) -> List[str]:
+    lines: List[str] = []
+    lines.append("| " + " | ".join(columns) + " |")
+    lines.append("| " + " | ".join(["---"] * len(columns)) + " |")
+    for row in rows:
+        vals = [str(x).replace("\n", " ").strip() for x in row]
+        lines.append("| " + " | ".join(vals) + " |")
+    return lines
+
+
+def _task_family(task_id: str) -> str:
+    if task_id.startswith("train_"):
+        return "train"
+    if task_id.startswith("eval_"):
+        return "eval"
+    if "prepare" in task_id or "setup" in task_id:
+        return "prepare"
+    if "smoke" in task_id:
+        return "smoke"
+    return "other"
+
+
+def _task_dataset(task_id: str) -> str:
+    s = task_id.lower()
+    if "fb15k" in s:
+        return "FB15k-237"
+    if "wn18rr" in s:
+        return "WN18RR"
+    return ""
+
+
+def _task_variant(task_id: str) -> str:
+    s = task_id
+    for prefix in ("train_", "eval_"):
+        if s.startswith(prefix):
+            s = s[len(prefix) :]
+            break
+    for suffix in ("_fb15k_237", "_wn18rr"):
+        if s.endswith(suffix):
+            s = s[: -len(suffix)]
+    return s
+
+
+def _summarize_tasks(tasks: List[Dict[str, Any]]) -> Dict[str, Any]:
+    total = len(tasks)
+    passed = sum(1 for t in tasks if t.get("success") and not t.get("skipped"))
+    skipped = sum(1 for t in tasks if t.get("skipped"))
+    failed = sum(1 for t in tasks if not t.get("success"))
+    dry_run = sum(1 for t in tasks if t.get("dry_run"))
+    by_family: Dict[str, int] = {}
+    by_dataset: Dict[str, Dict[str, int]] = {}
+    for t in tasks:
+        task_id = str(t.get("id") or "")
+        fam = _task_family(task_id)
+        ds = _task_dataset(task_id) or "n/a"
+        by_family[fam] = by_family.get(fam, 0) + 1
+        bucket = by_dataset.setdefault(ds, {"train": 0, "eval": 0, "other": 0})
+        if fam in {"train", "eval"}:
+            bucket[fam] += 1
+        else:
+            bucket["other"] += 1
+    return {
+        "total": total,
+        "passed": passed,
+        "skipped": skipped,
+        "failed": failed,
+        "dry_run": dry_run,
+        "by_family": by_family,
+        "by_dataset": by_dataset,
+    }
+
+
+def _judge_highlights(judge: Dict[str, Any]) -> Tuple[str, List[str], List[Dict[str, Any]]]:
+    results = judge.get("results") or []
+    label = "failed"
+    notes: List[str] = []
+    baseline_checks: List[Dict[str, Any]] = []
+    if judge.get("passed") is True:
+        label = "passed"
+    elif isinstance(results, list) and any(isinstance(r, dict) and r.get("type") == "inconclusive_no_baseline" for r in results):
+        label = "inconclusive"
+        notes.append("No deterministic baseline checks are defined yet, so the run cannot be judged against paper claims.")
+    for r in results if isinstance(results, list) else []:
+        if not isinstance(r, dict):
+            continue
+        if r.get("type") == "llm_judge":
+            resp = r.get("response") or {}
+            why = resp.get("why") or []
+            if isinstance(why, list):
+                notes.extend([str(x) for x in why[:6]])
+            checks = resp.get("suggested_baseline_checks") or []
+            if isinstance(checks, list):
+                baseline_checks.extend([c for c in checks if isinstance(c, dict)])
+        elif r.get("type") == "paper_table_alignment":
+            matched = int(r.get("matched") or 0)
+            failed_n = int(r.get("failed_n") or 0)
+            notes.append(f"Deterministic paper-table alignment matched {matched} targets with {failed_n} mismatches.")
+        elif r.get("passed") is False and r.get("type") not in {"inconclusive_no_baseline", "llm_judge"}:
+            notes.append(f"Check `{r.get('type')}` failed.")
+    deduped: List[str] = []
+    seen = set()
+    for n in notes:
+        if not n or n in seen:
+            continue
+        seen.add(n)
+        deduped.append(n)
+    return label, deduped, baseline_checks
+
+
+def _artifact_highlights(artifacts_index: Dict[str, Any]) -> List[str]:
+    files = artifacts_index.get("files") or []
+    if not isinstance(files, list) or not files:
+        return []
+    return [str(x) for x in files[:12]]
 
 
 def finalize_node(state: Dict[str, Any]) -> Dict[str, Any]:
@@ -50,31 +185,114 @@ def finalize_node(state: Dict[str, Any]) -> Dict[str, Any]:
     reports_dir = ensure_dir(compare_root / "reports")
     diffs_dir = ensure_dir(compare_root / "diffs" / str(run_info.get("id") or "unknown"))
 
-    # main report (human-readable)
-    md_lines = []
-    md_lines.append(f"# Code Evaluation Report: {run_info.get('id')}")
+    cfg = state.get("config") or {}
+    run_result = state.get("run_result") or {}
+    judge = state.get("judge") or {}
+    tasks = run_result.get("tasks") or []
+    tasks = tasks if isinstance(tasks, list) else []
+    task_summary = _summarize_tasks(tasks)
+    judge_label, judge_notes, suggested_checks = _judge_highlights(judge)
+    artifact_files = _artifact_highlights(artifacts_index)
+
+    # main report (human-readable, reviewer-oriented)
+    md_lines: List[str] = []
+    md_lines.append(f"# Reproduction Review Report: {paper_key}")
     md_lines.append("")
-    md_lines.append(f"- **status**: {state.get('status')}")
-    md_lines.append(f"- **attempts**: {state.get('attempt', 0)}")
-    md_lines.append(f"- **passed**: {state.get('judge', {}).get('passed')}")
+    md_lines.append(f"Run ID: `{run_info.get('id')}`")
     md_lines.append("")
-    md_lines.append("## Judge results")
+    md_lines.append("## Executive Summary")
     md_lines.append("")
-    md_lines.append("```json")
-    md_lines.append(json.dumps(state.get("judge", {}), ensure_ascii=False, indent=2))
-    md_lines.append("```")
+    md_lines.append(f"- Final status: `{state.get('status')}`")
+    md_lines.append(f"- Judge outcome: `{judge_label}`")
+    md_lines.append(f"- Workflow attempts: `{state.get('attempt', 0)}`")
+    md_lines.append(f"- Total tasks in this run: `{task_summary['total']}`")
+    md_lines.append(f"- Task execution summary: `{task_summary['passed']} passed`, `{task_summary['skipped']} skipped`, `{task_summary['failed']} failed`")
+    if task_summary["dry_run"]:
+        md_lines.append(f"- Dry-run tasks: `{task_summary['dry_run']}`")
+    if not judge_notes:
+        md_lines.append("- Overall assessment: evidence was collected without major reported issues.")
+    else:
+        md_lines.append("- Overall assessment:")
+        for n in judge_notes[:4]:
+            md_lines.append(f"  - {n}")
     md_lines.append("")
-    md_lines.append("## Run result")
+
+    md_lines.append("## Run Configuration")
     md_lines.append("")
-    md_lines.append("```json")
-    md_lines.append(json.dumps(state.get("run_result", {}), ensure_ascii=False, indent=2))
-    md_lines.append("```")
+    md_lines.append(f"- Paper key: `{paper_key}`")
+    md_lines.append(f"- Source root: `{cfg.get('paper_root') or ''}`")
+    md_lines.append(f"- Tasks file: `{cfg.get('tasks_path') or ''}`")
+    md_lines.append(f"- Baseline file: `{cfg.get('baseline_path') or ''}`")
+    md_lines.append(f"- PDF path: `{cfg.get('paper_pdf') or ''}`")
+    md_lines.append(f"- Repo URL: `{cfg.get('paper_repo_url') or ''}`")
+    md_lines.append(f"- Dry run: `{bool(cfg.get('dry_run'))}`")
+    md_lines.append(f"- LLM provider: `{cfg.get('llm_provider') or ''}`")
+    md_lines.append(f"- LLM model: `{cfg.get('llm_model') or ''}`")
     md_lines.append("")
-    md_lines.append("## Artifacts index")
+
+    md_lines.append("## Experiment Coverage")
     md_lines.append("")
-    md_lines.append("```json")
-    md_lines.append(json.dumps(artifacts_index, ensure_ascii=False, indent=2))
-    md_lines.append("```")
+    fam_rows = [[k, str(v)] for k, v in sorted(task_summary["by_family"].items())]
+    if fam_rows:
+        md_lines.extend(_md_table(["Category", "Count"], fam_rows))
+        md_lines.append("")
+    dataset_rows = []
+    for ds, counts in sorted(task_summary["by_dataset"].items()):
+        dataset_rows.append([ds, str(counts.get("train", 0)), str(counts.get("eval", 0)), str(counts.get("other", 0))])
+    if dataset_rows:
+        md_lines.extend(_md_table(["Dataset", "Train", "Eval", "Other"], dataset_rows))
+        md_lines.append("")
+
+    matrix_rows: List[List[str]] = []
+    for t in tasks:
+        task_id = str(t.get("id") or "")
+        fam = _task_family(task_id)
+        ds = _task_dataset(task_id)
+        if fam not in {"train", "eval"}:
+            continue
+        status = "skipped" if t.get("skipped") else ("ok" if t.get("success") else "failed")
+        if t.get("dry_run"):
+            status = "dry-run"
+        matrix_rows.append([fam, ds or "n/a", _task_variant(task_id), status])
+    if matrix_rows:
+        md_lines.append("### Task Matrix")
+        md_lines.append("")
+        md_lines.extend(_md_table(["Type", "Dataset", "Variant", "Status"], matrix_rows[:60]))
+        md_lines.append("")
+
+    md_lines.append("## Validation Outcome")
+    md_lines.append("")
+    md_lines.append(f"- Deterministic pass/fail: `{bool(judge.get('passed'))}`")
+    md_lines.append(f"- Review verdict: `{judge_label}`")
+    if judge_notes:
+        md_lines.append("- Key findings:")
+        for note in judge_notes:
+            md_lines.append(f"  - {note}")
+    else:
+        md_lines.append("- No additional findings were recorded.")
+    md_lines.append("")
+
+    if suggested_checks:
+        md_lines.append("## Recommended Baseline Checks")
+        md_lines.append("")
+        md_lines.append("These checks were suggested so future runs can be judged deterministically against paper claims.")
+        md_lines.append("")
+        for chk in suggested_checks[:12]:
+            md_lines.append(f"- `{json.dumps(chk, ensure_ascii=False)}`")
+        md_lines.append("")
+
+    md_lines.append("## Available Evidence")
+    md_lines.append("")
+    md_lines.append(f"- Run directory: `{run_dir}`")
+    md_lines.append(f"- Compare report: `{reports_dir / f'{run_info.get('id')}.md'}`")
+    md_lines.append(f"- Issues log: `{run_dir / 'issues.md'}`")
+    md_lines.append(f"- Artifact file count: `{len(artifacts_index.get('files') or [])}`")
+    if artifact_files:
+        md_lines.append("- Sample artifact paths:")
+        for p in artifact_files:
+            md_lines.append(f"  - `{p}`")
+    else:
+        md_lines.append("- No archived artifacts were found for this run.")
     md_lines.append("")
 
     # Optional: deterministic paper alignment report (if produced by judge/run)
@@ -92,6 +310,54 @@ def finalize_node(state: Dict[str, Any]) -> Dict[str, Any]:
             md_lines.append(f"- alignment_json: {alignment_json}")
             md_lines.append("")
 
+    tables_index = _load_json_if_exists(artifacts_dir / "tables" / "index.json")
+    if tables_index:
+        md_lines.append("## Metrics Tables")
+        md_lines.append("")
+        md_lines.append("Auto-generated metrics tables are available under `artifacts/tables/`.")
+        md_lines.append("")
+        md_lines.append("```json")
+        md_lines.append(json.dumps(tables_index, ensure_ascii=False, indent=2))
+        md_lines.append("```")
+        md_lines.append("")
+
+    md_lines.append("## Reviewer-Facing Template")
+    md_lines.append("")
+    md_lines.append("Use the following scaffold when turning this run into a reviewer-facing reproduction summary.")
+    md_lines.append("")
+    md_lines.append("### 1. Claim")
+    md_lines.append("")
+    md_lines.append("- The submitted code was executed through the `code_evaluation` workflow on the provided repository snapshot.")
+    md_lines.append("- The workflow attempted to reproduce the paper's reported experiments and collect machine-readable outputs.")
+    md_lines.append("")
+    md_lines.append("### 2. What Was Actually Run")
+    md_lines.append("")
+    md_lines.append("- Report the task matrix above, emphasizing datasets, variants, and whether the run was a dry run or a real execution.")
+    md_lines.append("- If some experiments were not executed, state that explicitly rather than implying full coverage.")
+    md_lines.append("")
+    md_lines.append("### 3. Quantitative Comparison")
+    md_lines.append("")
+    md_lines.append("- Insert aligned paper-vs-run metric tables here once baseline checks and artifact metrics are available.")
+    md_lines.append("- Prefer MRR, MR, Hits@1, Hits@3, and Hits@10 when those metrics exist.")
+    md_lines.append("")
+    md_lines.append("### 4. Deviations and Risks")
+    md_lines.append("")
+    if judge_notes:
+        for note in judge_notes[:6]:
+            md_lines.append(f"- {note}")
+    else:
+        md_lines.append("- No major deviations were recorded in this run.")
+    md_lines.append("")
+    md_lines.append("### 5. Recommendation")
+    md_lines.append("")
+    if judge_label == "passed":
+        md_lines.append("- The run provides enough evidence to support a positive reproduction statement, subject to reviewer interpretation.")
+    elif judge_label == "inconclusive":
+        md_lines.append("- The current run is not yet sufficient for a final reproduction claim; baseline checks and/or real metric artifacts are still needed.")
+    else:
+        md_lines.append("- The current evidence indicates the reproduction should not yet be presented as successful.")
+    md_lines.append("")
+
     report_path = reports_dir / f"{run_info.get('id')}.md"
     write_text(report_path, "\n".join(md_lines) + "\n")
 
@@ -101,10 +367,6 @@ def finalize_node(state: Dict[str, Any]) -> Dict[str, Any]:
     # 4) "facts pack" for final review writing (separate from baseline/run/compare)
     review_root = Path(__file__).resolve().parents[2] / "review" / paper_key / str(run_info.get("id") or "unknown")
     ensure_dir(review_root)
-
-    cfg = state.get("config") or {}
-    run_result = state.get("run_result") or {}
-    judge = state.get("judge") or {}
 
     # Deterministic actionable hints (no LLM)
     suggestions: list[dict[str, Any]] = []
@@ -151,6 +413,7 @@ def finalize_node(state: Dict[str, Any]) -> Dict[str, Any]:
         "artifacts_index": artifacts_index,
         "run_result": run_result,
         "judge": judge,
+        "task_summary": task_summary,
         "paths": {
             "run_dir": str(run_dir),
             "issues_jsonl": str(run_dir / "issues.jsonl"),

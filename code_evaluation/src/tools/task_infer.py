@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import shlex
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
@@ -54,9 +55,210 @@ def _extract_example_commands_from_readme(readme_text: str) -> List[str]:
             if not s or s.startswith("#"):
                 continue
             cmds.append(s)
-            if len(cmds) >= 6:
+            if len(cmds) >= 24:
                 return cmds
     return cmds
+
+
+def _detect_benchmark_datasets(repo_root: Path) -> List[str]:
+    data_dir = repo_root / "data"
+    if not data_dir.exists() or not data_dir.is_dir():
+        return []
+    out: List[str] = []
+    for p in sorted(data_dir.iterdir()):
+        if not p.is_dir():
+            continue
+        name = p.name.strip()
+        if not name:
+            continue
+        out.append(name)
+        if len(out) >= 20:
+            break
+    return out
+
+
+def _entrypoint_arg_hints(repo_root: Path, entrypoints: List[str], max_chars: int = 4000) -> Dict[str, str]:
+    hints: Dict[str, str] = {}
+    for ep in entrypoints[:5]:
+        txt = _read_optional(repo_root / ep, max_chars=max_chars)
+        if not txt.strip():
+            continue
+        lines: List[str] = []
+        for ln in txt.splitlines():
+            s = ln.strip()
+            if "add_argument(" in s or "ArgumentParser(" in s:
+                lines.append(s)
+            if len(lines) >= 40:
+                break
+        if lines:
+            hints[ep] = "\n".join(lines)
+    return hints
+
+
+def _cmd_flag_value(cmd: List[str], *flags: str) -> str:
+    for i, tok in enumerate(cmd[:-1]):
+        if tok in flags:
+            return str(cmd[i + 1])
+    return ""
+
+
+def _strip_flag(cmd: List[str], *flags: str) -> List[str]:
+    out: List[str] = []
+    skip_next = False
+    for i, tok in enumerate(cmd):
+        if skip_next:
+            skip_next = False
+            continue
+        if tok in flags:
+            if i + 1 < len(cmd):
+                skip_next = True
+            continue
+        out.append(tok)
+    return out
+
+
+def _safe_id_part(raw: str) -> str:
+    s = raw.strip().lower()
+    s = re.sub(r"[^a-z0-9]+", "_", s)
+    s = re.sub(r"_+", "_", s).strip("_")
+    return s or "task"
+
+
+def _build_readme_matrix_tasks(readme_example_cmds: List[str], datasets: List[str], mode: str) -> List[Dict[str, Any]]:
+    parsed_runs: List[List[str]] = []
+    for raw in readme_example_cmds:
+        s = (raw or "").strip()
+        if not s.startswith("python run.py "):
+            continue
+        try:
+            parts = shlex.split(s, posix=True)
+        except Exception:
+            continue
+        if len(parts) >= 2 and parts[0] == "python" and parts[1] == "run.py":
+            parsed_runs.append(parts)
+
+    if not parsed_runs:
+        return []
+
+    multi_dataset = len(datasets) > 1
+    expanded_datasets = datasets if datasets else [""]
+    out: List[Dict[str, Any]] = []
+    seen_ids: set[str] = set()
+
+    for parts in parsed_runs:
+        base_cmd = _strip_flag(_strip_flag(parts[2:], "-name", "--name"), "-data", "--data")
+        explicit_name = _cmd_flag_value(parts, "-name", "--name").strip()
+        score_func = _cmd_flag_value(parts, "-score_func", "--score_func").strip() or "run"
+        opn = _cmd_flag_value(parts, "-opn", "--opn").strip()
+        explicit_dataset = _cmd_flag_value(parts, "-data", "--data").strip()
+
+        dataset_values = [explicit_dataset] if explicit_dataset else expanded_datasets
+        for dataset in dataset_values:
+            dataset_tag = _safe_id_part(dataset) if dataset else ""
+            name_base = _safe_id_part(explicit_name or "_".join(x for x in [score_func, opn] if x))
+            run_name = name_base
+            if multi_dataset and dataset_tag:
+                run_name = f"{name_base}_{dataset_tag}"
+            task_id = f"train_{run_name}"
+            if task_id in seen_ids:
+                continue
+
+            cmd = ["python", "run.py", "-name", run_name]
+            if dataset:
+                cmd.extend(["-data", dataset])
+            cmd.extend(base_cmd)
+
+            out.append(
+                {
+                    "id": task_id,
+                    "enabled": mode == "full",
+                    "cwd": "{paper_root}",
+                    "cmd": cmd,
+                    "timeout_sec": 86400,
+                    "use_conda": True,
+                    "artifact_paths": ["checkpoints/**", "log/**"],
+                }
+            )
+            seen_ids.add(task_id)
+    return out
+
+
+def _is_training_task(task: Dict[str, Any]) -> bool:
+    cmd = task.get("cmd")
+    if not isinstance(cmd, list) or len(cmd) < 2:
+        return False
+    if cmd[0] != "python":
+        return False
+    if cmd[1] != "run.py":
+        return False
+    return "-h" not in cmd and "--help" not in cmd
+
+
+def _append_eval_export_tasks(repo_root: Path, tasks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    evaluator = repo_root / "codeeval_eval_ckpt.py"
+    if not evaluator.exists():
+        return tasks
+
+    existing_ids = {
+        str(t.get("id") or "").strip()
+        for t in tasks
+        if isinstance(t, dict)
+    }
+    out: List[Dict[str, Any]] = list(tasks)
+    for task in tasks:
+        if not isinstance(task, dict) or not _is_training_task(task):
+            continue
+        cmd = task.get("cmd")
+        assert isinstance(cmd, list)
+        run_name = _cmd_flag_value(cmd, "-name", "--name").strip()
+        task_id = str(task.get("id") or "").strip()
+        if not run_name or not task_id:
+            continue
+
+        eval_id = f"eval_{task_id[6:]}" if task_id.startswith("train_") else f"eval_{task_id}"
+        if eval_id in existing_ids:
+            continue
+
+        out_path = f"./metrics/{task_id}_test.json"
+        out.append(
+            {
+                "id": eval_id,
+                "enabled": bool(task.get("enabled", True)),
+                "cwd": "{paper_root}",
+                "cmd": [
+                    "python",
+                    "codeeval_eval_ckpt.py",
+                    "--ckpt-dir",
+                    "./checkpoints",
+                    "--prefix",
+                    run_name,
+                    "--out",
+                    out_path,
+                    "--split",
+                    "test",
+                ],
+                "timeout_sec": 1800,
+                "use_conda": True,
+                "artifact_paths": [out_path.lstrip("./")],
+            }
+        )
+        existing_ids.add(eval_id)
+    return out
+
+
+def _finalize_tasks(
+    *,
+    repo_root: Path,
+    tasks: List[Dict[str, Any]],
+    readme_example_cmds: List[str],
+    datasets: List[str],
+    mode: str,
+) -> List[Dict[str, Any]]:
+    matrix_tasks = _build_readme_matrix_tasks(readme_example_cmds, datasets, mode=mode)
+    if matrix_tasks:
+        non_train = [t for t in tasks if isinstance(t, dict) and not _is_training_task(t)]
+        tasks = non_train + matrix_tasks
+    return _append_eval_export_tasks(repo_root, tasks)
 
 
 def infer_tasks_heuristic(repo_root: str, mode: str = "smoke") -> InferResult:
@@ -65,6 +267,7 @@ def infer_tasks_heuristic(repo_root: str, mode: str = "smoke") -> InferResult:
     req = _read_optional(root / "requirements.txt", max_chars=8000)
     entrypoints = _guess_entrypoints(root)
     examples = _extract_example_commands_from_readme(readme)
+    datasets = _detect_benchmark_datasets(root)
 
     # Default install step. We keep it lightweight and let the framework's prepare/fix deal with stdlib-in-req.
     tasks: List[Dict[str, Any]] = [
@@ -126,9 +329,17 @@ def infer_tasks_heuristic(repo_root: str, mode: str = "smoke") -> InferResult:
                 }
             )
 
+    tasks = _finalize_tasks(
+        repo_root=root,
+        tasks=tasks,
+        readme_example_cmds=examples,
+        datasets=datasets,
+        mode=mode,
+    )
     evidence = {
         "mode": mode,
         "entrypoints": entrypoints,
+        "datasets_detected": datasets,
         "readme_has_content": bool(readme.strip()),
         "requirements_present": bool(req.strip()),
         "readme_example_cmds": examples,
@@ -154,16 +365,26 @@ def infer_tasks_llm(
     readme = _read_optional(root / "README.md", max_chars=14000)
     req = _read_optional(root / "requirements.txt", max_chars=8000)
     entrypoints = _guess_entrypoints(root)
+    readme_example_cmds = _extract_example_commands_from_readme(readme)
+    datasets = _detect_benchmark_datasets(root)
+    entrypoint_hints = _entrypoint_arg_hints(root, entrypoints)
 
     # Keep prompt small but informative. The goal is to produce tasks that actually reflect the repo's README
     # (download/preprocess/train/eval) while staying safe by default.
     prompt = {
         "goal": "Generate tasks.yaml for running/evaluating this repo in a reproducible way.",
         "mode": mode,
-        "platform": {"os": os.name},
+        "platform": {
+            "host_os": os.name,
+            "execution_os": "linux",
+            "execution_environment": "docker paper_image",
+        },
         "repo_root": str(root),
         "files_top_level": [p.name for p in sorted(root.iterdir())][:200],
         "entrypoints_detected": entrypoints,
+        "entrypoint_arg_hints": entrypoint_hints,
+        "datasets_detected": datasets,
+        "readme_example_commands": readme_example_cmds,
         "readme_md_excerpt": readme,
         "paper_mineru_md_excerpt": (paper_md_excerpt or ""),
         "requirements_txt_excerpt": req,
@@ -188,8 +409,13 @@ def infer_tasks_llm(
             "Include at least one smoke task (help/print/version) as an early, fast validation step.",
             "If proposing any heavy task (downloads dataset, trains model), set enabled=false unless mode=='full'.",
             "Do not propose source code edits.",
-            "Commands must be compatible with shell=False: use cmd arrays; if on Windows and you need a shell, use ['cmd','/c', '<command>'].",
-            "For multi-step shell pipelines, use ['bash','-lc','...'] (Linux) or ['cmd','/c','...'] (Windows).",
+            "Tasks execute inside a Linux Docker container even when the host machine is Windows. Do not emit Windows-only wrappers like ['cmd','/c', ...] unless the repo itself explicitly requires Windows shells.",
+            "Commands must be compatible with shell=False: use argv arrays. For multi-step shell pipelines use ['bash','-lc','...'] because execution is Linux-based.",
+            "When README lists multiple reproduction commands, preserve the full set of distinct commands instead of sampling only one or two representative examples.",
+            "When datasets_detected contains multiple benchmark datasets and the training entrypoint supports a dataset flag, expand reproduction tasks across those datasets unless the README clearly restricts a command to one dataset.",
+            "When a training command does not specify a run name but the CLI supports one, add a stable explicit run name so downstream checkpoints/logs can be located deterministically.",
+            "If the repo contains a local evaluator/export script that can turn checkpoints into machine-readable metrics, add follow-up eval/export tasks for each training task.",
+            "If you emit a pip install task, prefer id='install_deps'. In paper-image Docker mode, avoid redundant runtime installs unless they are clearly necessary beyond image build.",
             "Use {paper_root} in cwd/cmd paths instead of hardcoding absolute paths.",
         ],
     }
@@ -220,8 +446,16 @@ def infer_tasks_llm(
             continue
         cleaned.append(t)
 
+    finalized = cleaned or infer_tasks_heuristic(repo_root, mode=mode).tasks
+    finalized = _finalize_tasks(
+        repo_root=root,
+        tasks=finalized,
+        readme_example_cmds=readme_example_cmds,
+        datasets=datasets,
+        mode=mode,
+    )
     evidence = {"mode": mode, "llm_used": True, "llm_provider": llm_cfg.provider, "llm_model": llm_cfg.model, "raw": resp}
-    return InferResult(tasks=cleaned or infer_tasks_heuristic(repo_root, mode=mode).tasks, evidence=evidence)
+    return InferResult(tasks=finalized, evidence=evidence)
 
 
 

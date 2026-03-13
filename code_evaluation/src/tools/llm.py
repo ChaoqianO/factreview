@@ -2,8 +2,12 @@ from __future__ import annotations
 
 import json
 import os
+import re
 from dataclasses import dataclass
-from typing import Any, Dict, Optional
+from typing import Any, Dict
+
+from .codex_auth import get_codex_auth
+from .codex_client import invoke_codex
 
 
 @dataclass(frozen=True)
@@ -16,26 +20,73 @@ class LLMConfig:
     max_tokens: int = 1500
 
 
+def _resolve_openai_codex_model(explicit_model: str = "") -> str:
+    candidate = (os.getenv("OPENAI_CODEX_MODEL") or "").strip()
+    if candidate:
+        return candidate
+    if "codex" in (explicit_model or "").lower():
+        return explicit_model
+    return "gpt-5.3-codex"
+
+
 def resolve_llm_config(provider: str = "", model: str = "", base_url: str = "") -> LLMConfig:
     prov = (provider or os.getenv("MODEL_PROVIDER", "openai")).lower().strip()
+
     if prov == "deepseek":
-        api_key = os.getenv("DEEPSEEK_API_KEY")
+        api_key = (os.getenv("DEEPSEEK_API_KEY") or "").strip() or None
         base = base_url or os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com")
         mdl = model or os.getenv("DEEPSEEK_MODEL", "deepseek-chat")
-    elif prov == "qwen":
-        api_key = os.getenv("QWEN_API_KEY")
+        return LLMConfig(provider=prov, model=mdl, base_url=base, api_key=api_key)
+
+    if prov == "qwen":
+        api_key = (os.getenv("QWEN_API_KEY") or "").strip() or None
         base = base_url or os.getenv("QWEN_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
         mdl = model or os.getenv("QWEN_MODEL", "qwen-3")
-    elif prov == "claude":
-        api_key = os.getenv("CLAUDE_API_KEY")
+        return LLMConfig(provider=prov, model=mdl, base_url=base, api_key=api_key)
+
+    if prov == "claude":
+        api_key = (os.getenv("CLAUDE_API_KEY") or "").strip() or None
         base = base_url or os.getenv("CLAUDE_BASE_URL", "https://api.anthropic.com")
         mdl = model or os.getenv("CLAUDE_MODEL", "claude-4-sonnet")
-    else:
-        api_key = os.getenv("OPENAI_API_KEY")
-        base = base_url or os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
-        mdl = model or os.getenv("OPENAI_MODEL", "gpt-5")
+        return LLMConfig(provider=prov, model=mdl, base_url=base, api_key=api_key)
 
-    return LLMConfig(provider=prov, model=mdl, base_url=base, api_key=api_key)
+    if prov == "openai-codex":
+        return LLMConfig(
+            provider="openai-codex",
+            model=model or _resolve_openai_codex_model(),
+            base_url=base_url or os.getenv("OPENAI_CODEX_BASE_URL", "https://chatgpt.com/backend-api/codex"),
+            api_key=None,
+        )
+
+    api_key = (os.getenv("OPENAI_API_KEY") or "").strip() or None
+    if api_key:
+        return LLMConfig(
+            provider="openai",
+            model=model or os.getenv("OPENAI_MODEL", "gpt-5"),
+            base_url=base_url or os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1"),
+            api_key=api_key,
+        )
+
+    # No API key: automatically fall back to the Codex subscription backend.
+    return LLMConfig(
+        provider="openai-codex",
+        model=_resolve_openai_codex_model(model),
+        base_url=base_url or os.getenv("OPENAI_CODEX_BASE_URL", "https://chatgpt.com/backend-api/codex"),
+        api_key=None,
+    )
+
+
+def _parse_json_response(text: str) -> Dict[str, Any]:
+    try:
+        return json.loads(text)
+    except Exception:
+        match = re.search(r"\{[\s\S]*\}", text or "")
+        if match:
+            try:
+                return json.loads(match.group(0))
+            except Exception:
+                pass
+    return {"status": "unknown", "raw": text}
 
 
 def llm_json(
@@ -44,13 +95,10 @@ def llm_json(
     cfg: LLMConfig,
 ) -> Dict[str, Any]:
     """
-    Minimal OpenAI-compatible JSON response helper.
-    Works with OpenAI-compatible endpoints (OpenAI/DeepSeek/Qwen compatible-mode).
-    Claude supported via anthropic SDK.
+    Minimal JSON response helper for the providers used in code_evaluation.
     """
     try:
         if cfg.provider == "claude":
-            # Keep dependency footprint minimal: import only when used.
             from anthropic import Anthropic
 
             client = Anthropic(api_key=cfg.api_key)
@@ -61,15 +109,22 @@ def llm_json(
                 system=system,
                 messages=[{"role": "user", "content": prompt}],
             )
-            # anthropic returns list of content blocks
             text = ""
             try:
                 if resp.content and len(resp.content) > 0:
                     text = (resp.content[0].text or "").strip()
             except Exception:
                 text = str(resp).strip()
+        elif cfg.provider == "openai-codex":
+            auth = get_codex_auth(allow_browser_login=True)
+            text = invoke_codex(
+                prompt=prompt,
+                system=system,
+                auth=auth,
+                model=cfg.model,
+                base_url=cfg.base_url or "https://chatgpt.com/backend-api/codex",
+            )
         else:
-            # OpenAI-compatible endpoints
             from openai import OpenAI
 
             client = OpenAI(api_key=cfg.api_key, base_url=cfg.base_url)
@@ -84,7 +139,6 @@ def llm_json(
             )
             text = (resp.choices[0].message.content or "").strip()
     except Exception as e:
-        # Never crash the workflow because of LLM provider/model issues.
         return {
             "status": "error",
             "error": f"{type(e).__name__}: {e}",
@@ -93,19 +147,6 @@ def llm_json(
             "base_url": cfg.base_url,
         }
 
-    # best-effort JSON extraction
-    try:
-        return json.loads(text)
-    except Exception:
-        # try find first {...}
-        import re
-
-        m = re.search(r"\{[\s\S]*\}", text)
-        if m:
-            try:
-                return json.loads(m.group(0))
-            except Exception:
-                pass
-    return {"status": "unknown", "raw": text}
+    return _parse_json_response(text)
 
 

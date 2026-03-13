@@ -10,11 +10,9 @@ from typing import Any, Dict, List
 
 from ..tools.docker import docker_ensure_paper_image, docker_strategy
 from ..tools.fs import ensure_dir, write_text
-from ..tools.meta import collect_meta, write_meta
 from ..tools.pdf_mineru import extract_with_mineru, mineru_available
 from ..tools.recorder import append_event
 from ..tools.runner import persist_command_result, run_command
-from ..tools.task_infer import infer_tasks_heuristic, infer_tasks_llm
 
 
 def _repo_root() -> Path:
@@ -453,6 +451,7 @@ def prepare_node(state: Dict[str, Any]) -> Dict[str, Any]:
     cfg["docker_strategy"] = strategy
 
     # Tasks and baseline paths (wrapper config stored under baseline/<paper_key>/ by default).
+    # The dedicated `plan` node will generate/normalize tasks and load baseline contents.
     tasks_path = str(cfg.get("tasks_path") or "").strip()
     baseline_path = str(cfg.get("baseline_path") or "").strip()
     if not tasks_path:
@@ -462,146 +461,28 @@ def prepare_node(state: Dict[str, Any]) -> Dict[str, Any]:
     cfg["tasks_path"] = tasks_path
     cfg["baseline_path"] = baseline_path
 
-    # Create default tasks if missing (or when auto_tasks is enabled).
-    tasks_p = Path(tasks_path)
-    if (not tasks_p.exists()) or bool(cfg.get("auto_tasks")):
-        mode = str(cfg.get("auto_tasks_mode") or "smoke").strip() or "smoke"
-        force = bool(cfg.get("auto_tasks_force"))
-        if tasks_p.exists() and (not force) and bool(cfg.get("auto_tasks")):
-            append_event(run_dir, "tasks_keep_existing", {"path": tasks_path})
-        else:
-            # Prefer LLM when available (this is the default behavior when tasks are missing),
-            # because heuristics tend to produce generic smoke tasks.
-            paper_md_excerpt = ""
-            try:
-                mdp = str(cfg.get("paper_pdf_extracted_md") or "").strip()
-                if mdp:
-                    txt = _read_text(Path(mdp))
-                    if len(txt) > 14000:
-                        txt = txt[:14000] + "\n...(truncated)\n"
-                    paper_md_excerpt = txt
-            except Exception:
-                paper_md_excerpt = ""
-
-            use_llm = (not bool(cfg.get("no_llm")))  # user didn't disable
-            # If provider/model is unset but env is configured, task_infer will still work;
-            # it falls back to heuristics if LLM call fails.
-            if use_llm:
-                ir = infer_tasks_llm(
-                    str(paper_root),
-                    mode=mode,
-                    cfg_provider=str(cfg.get("llm_provider") or ""),
-                    cfg_model=str(cfg.get("llm_model") or ""),
-                    cfg_base_url=str(cfg.get("llm_base_url") or ""),
-                    paper_md_excerpt=paper_md_excerpt,
-                )
-            else:
-                ir = infer_tasks_heuristic(str(paper_root), mode=mode if bool(cfg.get("auto_tasks")) else "smoke")
-            _write_yaml_or_json(tasks_p, ir.tasks)
-            write_text(logs_dir / "tasks_infer_evidence.json", json.dumps(ir.evidence, ensure_ascii=False, indent=2) + "\n")
-            _write_tasks_risk_report(tasks_p, logs_dir)
-            append_event(run_dir, "tasks_written", {"path": str(tasks_p), "count": len(ir.tasks)})
-
-    # In per-paper image mode, dependencies are installed during image build.
-    # Disable the default install_deps task to avoid reinstalling and changing the environment at runtime.
-    if strategy == "paper_image":
-        try:
-            import yaml  # type: ignore
-
-            raw = tasks_p.read_text(encoding="utf-8", errors="ignore")
-            data = yaml.safe_load(raw)
-            if isinstance(data, list):
-                changed = False
-                for t in data:
-                    if not isinstance(t, dict):
-                        continue
-                    if str(t.get("id") or "").strip() != "install_deps":
-                        continue
-                    cmd = t.get("cmd")
-                    if isinstance(cmd, list) and cmd[:4] == ["python", "-m", "pip", "install"] and "-r" in cmd:
-                        t["enabled"] = False
-                        changed = True
-                if changed:
-                    tasks_p.write_text(yaml.safe_dump(data, allow_unicode=True, sort_keys=False), encoding="utf-8", errors="ignore")
-                    append_event(run_dir, "tasks_patch_disable_install_deps", {"path": str(tasks_p)})
-        except Exception:
-            pass
-
-    # Always persist the effective tasks into the run directory to avoid relying on external YAML parsers
-    # or baseline folder state. The runner will use this per-run tasks file.
-    try:
-        run_tasks_path = Path(run_dir) / "tasks.yaml"
-        raw_tasks = ""
-        try:
-            raw_tasks = tasks_p.read_text(encoding="utf-8", errors="ignore") if tasks_p.exists() else ""
-        except Exception:
-            raw_tasks = ""
-        if raw_tasks.strip():
-            write_text(run_tasks_path, raw_tasks)
-            cfg["tasks_path"] = str(run_tasks_path)
-            tasks_path = str(run_tasks_path)
-            tasks_p = run_tasks_path
-            append_event(run_dir, "tasks_persist_run_dir", {"path": str(run_tasks_path)})
-    except Exception:
-        pass
-
-    # Create default baseline if missing and load baseline into state.
-    baseline_p = Path(baseline_path)
-    _ensure_default_baseline(baseline_p)
-    try:
-        baseline_raw = json.loads(_read_text(baseline_p) or "{}")
-        state["baseline"] = baseline_raw if isinstance(baseline_raw, dict) else {}
-    except Exception:
-        state["baseline"] = {}
-
     # Persist config into state
     cfg["paper_key"] = paper_key
     cfg["paper_pdf"] = paper_pdf
     cfg["paper_root"] = str(paper_root)
     state["config"] = cfg
 
-    # Write deterministic meta.json for the run.
-    try:
-        meta = collect_meta(
-            run_id=run_id,
-            paper_root=str(paper_root),
-            tasks_path=str(tasks_p),
-            baseline_path=str(baseline_p),
-            llm_cfg={
-                "provider": str(cfg.get("llm_provider") or ""),
-                "model": str(cfg.get("llm_model") or ""),
-                "base_url": str(cfg.get("llm_base_url") or ""),
-                "no_llm": bool(cfg.get("no_llm")),
-            },
-        )
-        write_meta(meta, run_dir)
-    except Exception:
-        pass
-
-    if dry_run:
-        append_event(run_dir, "prepare_ok", {"dry_run": True})
-        state.setdefault("history", []).append({"kind": "prepare_ok", "data": {"dry_run": True}})
-        state["status"] = "running"
-        return state
-
     # Only supported docker strategy: per-paper image build.
-    ok_img, img_or_msg = docker_ensure_paper_image(
-        cfg,
-        paper_key=paper_key,
-        paper_root_host=str(paper_root),
-        python_spec=python_spec,
-        timeout_sec=3600,
-    )
-    if not ok_img:
-        err = "docker_paper_image_build_failed"
-        append_event(run_dir, "prepare_error", {"error": err, "detail": img_or_msg})
-        state.setdefault("history", []).append({"kind": "prepare_error", "data": {"error": err, "detail": img_or_msg}})
-        state["status"] = "failed"
-        return state
-    cfg["docker_paper_image"] = img_or_msg
-
-    # Persist a run manifest after we know the effective docker image id/tag.
-    _write_run_manifest(run_dir=run_dir, cfg=cfg, baseline_dir=baseline_dir)
+    if not dry_run:
+        ok_img, img_or_msg = docker_ensure_paper_image(
+            cfg,
+            paper_key=paper_key,
+            paper_root_host=str(paper_root),
+            python_spec=python_spec,
+            timeout_sec=3600,
+        )
+        if not ok_img:
+            err = "docker_paper_image_build_failed"
+            append_event(run_dir, "prepare_error", {"error": err, "detail": img_or_msg})
+            state.setdefault("history", []).append({"kind": "prepare_error", "data": {"error": err, "detail": img_or_msg}})
+            state["status"] = "failed"
+            return state
+        cfg["docker_paper_image"] = img_or_msg
 
     append_event(run_dir, "prepare_ok", {"paper_root": str(paper_root), "python_spec": python_spec})
     state.setdefault("history", []).append({"kind": "prepare_ok", "data": {"paper_root": str(paper_root), "python_spec": python_spec}})

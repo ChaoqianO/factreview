@@ -1,3 +1,52 @@
 {
-  "checks": []
+  "checks": [
+    {
+      "type": "json_value",
+      "path": "metrics/fb237_transe_test.json",
+      "json_path": [
+        "ok"
+      ],
+      "expected": true
+    },
+    {
+      "type": "json_value",
+      "path": "metrics/fb237_distmult_test.json",
+      "json_path": [
+        "ok"
+      ],
+      "expected": true
+    },
+    {
+      "type": "json_value",
+      "path": "metrics/fb237_conve_test.json",
+      "json_path": [
+        "ok"
+      ],
+      "expected": true
+    },
+    {
+      "type": "json_value",
+      "path": "metrics/wn18rr_transe_test.json",
+      "json_path": [
+        "ok"
+      ],
+      "expected": true
+    },
+    {
+      "type": "json_value",
+      "path": "metrics/wn18rr_distmult_test.json",
+      "json_path": [
+        "ok"
+      ],
+      "expected": true
+    },
+    {
+      "type": "json_value",
+      "path": "metrics/wn18rr_conve_test.json",
+      "json_path": [
+        "ok"
+      ],
+      "expected": true
+    }
+  ]
 }

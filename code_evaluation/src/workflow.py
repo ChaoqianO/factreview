@@ -6,6 +6,7 @@ from typing import Any, Dict
 from langgraph.graph import StateGraph, START, END
 
 from .nodes.prepare import prepare_node
+from .nodes.plan import plan_node
 from .nodes.run import run_node
 from .nodes.judge import judge_node
 from .nodes.fix import fix_node
@@ -60,6 +61,12 @@ def _route_after_prepare(state: State) -> str:
         }
         if last_err in recoverable:
             return "fix"
+        return "finalize"
+    return "plan"
+
+
+def _route_after_plan(state: State) -> str:
+    if state.get("status") == "failed":
         return "finalize"
     return "run"
 
@@ -120,6 +127,7 @@ class CodeEvalOrchestrator:
     def _build_workflow(self) -> StateGraph:
         g = StateGraph(State)
         g.add_node("prepare", prepare_node)
+        g.add_node("plan", plan_node)
         g.add_node("run", run_node)
         g.add_node("judge", judge_node)
         g.add_node("fix", fix_node)
@@ -127,6 +135,7 @@ class CodeEvalOrchestrator:
 
         g.add_edge(START, "prepare")
         g.add_conditional_edges("prepare", _route_after_prepare)
+        g.add_conditional_edges("plan", _route_after_plan)
         g.add_conditional_edges("run", _route_after_run)
         g.add_conditional_edges("judge", _route_after_judge)
         g.add_conditional_edges("fix", _route_after_fix)

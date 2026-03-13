@@ -103,6 +103,7 @@ def run_node(state: Dict[str, Any]) -> Dict[str, Any]:
         return state
 
     results = []
+    total_tasks = len(tasks)
     for idx, task in enumerate(tasks, 1):
         task_id = str(task.get("id") or f"task_{idx}")
         enabled = bool(task.get("enabled", True))
@@ -141,6 +142,8 @@ def run_node(state: Dict[str, Any]) -> Dict[str, Any]:
             "task_start",
             {
                 "task": task_id,
+                "task_index": idx,
+                "task_total": total_tasks,
                 "attempt": attempt,
                 "cwd": cwd,
                 "cmd": cmd,
@@ -152,13 +155,34 @@ def run_node(state: Dict[str, Any]) -> Dict[str, Any]:
 
         if not enabled:
             results.append({"id": task_id, "success": True, "skipped": True})
-            append_event(run_dir, "task_skipped", {"task": task_id, "attempt": attempt, "reason": "enabled=false"})
+            append_event(
+                run_dir,
+                "task_skipped",
+                {
+                    "task": task_id,
+                    "task_index": idx,
+                    "task_total": total_tasks,
+                    "attempt": attempt,
+                    "reason": "enabled=false",
+                },
+            )
             continue
 
         if dry_run:
             write_text(logs_dir / f"{task_id}_dry_run.txt", f"[DRY RUN] cwd={cwd}\ncmd={' '.join(cmd)}\n")
             results.append({"id": task_id, "success": True, "dry_run": True})
-            append_event(run_dir, "task_done", {"task": task_id, "attempt": attempt, "success": True, "dry_run": True})
+            append_event(
+                run_dir,
+                "task_done",
+                {
+                    "task": task_id,
+                    "task_index": idx,
+                    "task_total": total_tasks,
+                    "attempt": attempt,
+                    "success": True,
+                    "dry_run": True,
+                },
+            )
             continue
 
         env = os.environ.copy()
@@ -213,6 +237,8 @@ def run_node(state: Dict[str, Any]) -> Dict[str, Any]:
             "task_done",
             {
                 "task": task_id,
+                "task_index": idx,
+                "task_total": total_tasks,
                 "attempt": attempt,
                 "success": ok,
                 "returncode": res.returncode,
@@ -227,6 +253,8 @@ def run_node(state: Dict[str, Any]) -> Dict[str, Any]:
             state["run_result"] = {
                 "success": False,
                 "failed_task": task_id,
+                "task_index": idx,
+                "task_total": total_tasks,
                 "failed_task_cwd": cwd,
                 "failed_task_cmd": cmd,
                 "returncode": res.returncode,
@@ -285,7 +313,17 @@ def run_node(state: Dict[str, Any]) -> Dict[str, Any]:
                 except Exception:
                     continue
             if copied:
-                append_event(run_dir, "artifacts_archived", {"task": task_id, "count": len(copied), "paths": copied})
+                append_event(
+                    run_dir,
+                    "artifacts_archived",
+                    {
+                        "task": task_id,
+                        "task_index": idx,
+                        "task_total": total_tasks,
+                        "count": len(copied),
+                        "paths": copied,
+                    },
+                )
 
     # Optional: generic summarization (if metrics JSONs were produced into artifacts).
     try:
@@ -295,7 +333,7 @@ def run_node(state: Dict[str, Any]) -> Dict[str, Any]:
 
     state["status"] = "running"
     state["run_result"] = {"success": True, "tasks": results}
-    append_event(run_dir, "run_ok", {"tasks": results})
+    append_event(run_dir, "run_ok", {"tasks": results, "task_total": total_tasks})
     state.setdefault("history", []).append({"kind": "run_ok", "data": {"tasks": results}})
     return state
 

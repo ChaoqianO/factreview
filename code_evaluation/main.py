@@ -153,18 +153,22 @@ async def _amain() -> int:
                 paper_key = Path(run_dir).parent.name
             except Exception:
                 pass
-        print(f"[code_evaluation] paper_key={paper_key} run_id={run_id} success={bool(result.get('success'))}")
+        status = str(st.get("status") or ("success" if bool(result.get("success")) else "failed"))
+        print("")
+        print("=== Code Evaluation Summary ===")
+        print(f"status   : {status}")
+        print(f"paper    : {paper_key}")
+        print(f"run id   : {run_id}")
         if repo_url:
-            print(f"[code_evaluation] repo_url={repo_url}")
+            print(f"repo url : {repo_url}")
         if paper_root:
-            print(f"[code_evaluation] paper_root={paper_root}")
+            print(f"source   : {paper_root}")
         if report and report.exists():
-            print(f"[code_evaluation] report={report}")
+            print(f"report   : {report}")
         if run_dir:
-            print(f"[code_evaluation] run_dir={run_dir}")
-            # On failure, point to the first place to look.
+            print(f"run dir  : {run_dir}")
             if not bool(result.get("success")):
-                print(f"[code_evaluation] see={Path(run_dir) / 'issues.md'}")
+                print(f"see      : {Path(run_dir) / 'issues.md'}")
     except Exception:
         pass
     return 0 if result.get("success") else 1

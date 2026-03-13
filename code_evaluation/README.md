@@ -126,6 +126,59 @@ This is recorded to `run/<paper_key>/<run_id>/logs/judge_llm_prompt.json` and `j
 
 To disable it, use `--no-llm`.
 
+## LLM authentication: API key or Codex login
+
+By default this project uses **API keys** from env vars:
+
+- OpenAI-compatible: `OPENAI_API_KEY`
+- Claude: `CLAUDE_API_KEY`
+- DeepSeek: `DEEPSEEK_API_KEY`
+- Qwen: `QWEN_API_KEY`
+
+### OpenAI path with automatic Codex fallback
+
+If `MODEL_PROVIDER=openai` and `OPENAI_API_KEY` is present, the workflow uses the normal OpenAI-compatible API path.
+
+If `MODEL_PROVIDER=openai` but `OPENAI_API_KEY` is empty, the workflow automatically falls back to the **OpenAI Codex subscription backend**.
+
+### Explicit Codex provider
+
+You can also set:
+
+- `MODEL_PROVIDER=openai-codex`
+
+This always uses the Codex/ChatGPT backend at `https://chatgpt.com/backend-api/codex`.
+
+### How Codex login is resolved
+
+The lookup order is:
+
+1. Existing local auth cache:
+   - `CODEX_HOME/auth.json`
+   - `~/.codex/auth.json`
+   - `~/.clawdbot/.../auth-profiles.json`
+   - `~/.openclaw/.../auth-profiles.json`
+2. If no cache is found, the CLI starts a browser-based OpenAI Codex login flow.
+
+If browser login is needed, configure:
+
+- `OPENAI_CODEX_CLIENT_ID`
+- `OPENAI_CODEX_REDIRECT_URI` (default `http://127.0.0.1:1455/auth/callback`)
+- (optional) `OPENAI_CODEX_AUTH_URL` (default `https://auth.openai.com/oauth/authorize`)
+- (optional) `OPENAI_CODEX_TOKEN_URL` (default `https://auth.openai.com/oauth/token`)
+- (optional) `OPENAI_CODEX_SCOPE`
+- (optional) `OPENAI_CODEX_CLIENT_SECRET`
+- (optional) `OPENAI_CODEX_NO_BROWSER=1`
+
+After a successful browser login, the token is written to `~/.codex/auth.json`, so later runs can reuse it.
+
+### Codex model settings
+
+- `OPENAI_CODEX_MODEL` defaults to `gpt-5.3-codex`
+- `OPENAI_CODEX_BASE_URL` defaults to `https://chatgpt.com/backend-api/codex`
+
+The example env file (`env_example.txt`) includes both the API-key path and the Codex settings.
+
 ## PDF table/structure extraction (MinerU, required by default)
 
 By default, when you provide `--paper-pdf`, the system **requires MinerU** (Magic-PDF) and will run it to extract structured markdown.
