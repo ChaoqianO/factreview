@@ -1,0 +1,2 @@
+[console_scripts]
+pysearch = search_engine_parser.core.cli:runner

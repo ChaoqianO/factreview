@@ -1,0 +1,73 @@
+- id: smoke_help
+  enabled: true
+  cwd: '{paper_root}'
+  cmd:
+  - python
+  - run.py
+  - -h
+  timeout_sec: 300
+  use_conda: true
+  artifact_paths: []
+- id: install_requirements
+  enabled: true
+  cwd: '{paper_root}'
+  cmd:
+  - python
+  - -m
+  - pip
+  - install
+  - -r
+  - requirements.txt
+  timeout_sec: 1800
+  use_conda: true
+  artifact_paths: []
+- id: prep_extract_dataset_setup
+  enabled: true
+  cwd: '{paper_root}'
+  cmd:
+  - cmd
+  - /c
+  - if exist preprocess.sh (bash preprocess.sh) else (echo preprocess.sh not found,
+    skipping)
+  timeout_sec: 1200
+  use_conda: true
+  artifact_paths:
+  - data/**
+- id: train_best_model_readme
+  enabled: true
+  cwd: '{paper_root}'
+  cmd:
+  - python
+  - run.py
+  - -name
+  - best_model
+  - -score_func
+  - conve
+  - -opn
+  - corr
+  timeout_sec: 86400
+  use_conda: true
+  artifact_paths:
+  - checkpoints/**
+  - log/**
+- id: train_transe_sub_readme
+  enabled: true
+  cwd: '{paper_root}'
+  cmd:
+  - python
+  - run.py
+  - -score_func
+  - transe
+  - -opn
+  - sub
+  - -gamma
+  - '9'
+  - -hid_drop
+  - '0.1'
+  - -init_dim
+  - '200'
+  timeout_sec: 86400
+  use_conda: true
+  artifact_paths:
+  - checkpoints/**
+  - log/**

@@ -1,0 +1,2 @@
+[DRY RUN] cwd=/app
+cmd=python run.py -name distmult_mult_wn18rr -data WN18RR -score_func distmult -opn mult -gcn_dim 150 -gcn_layer 2

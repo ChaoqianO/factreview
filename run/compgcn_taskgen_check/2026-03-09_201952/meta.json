@@ -1,0 +1,15 @@
+{
+  "run_id": "2026-03-09_201952",
+  "platform": "Windows 10 (10.0.26100)",
+  "python": "3.9.13 (main, Aug 25 2022, 23:51:50) [MSC v.1916 64 bit (AMD64)]",
+  "cwd": "E:\\code\\fastMCP\\ai_review\\code_evaluation",
+  "paper_root": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\baseline\\compgcn\\source_gpu",
+  "tasks_path": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\run\\compgcn_taskgen_check\\2026-03-09_201952\\tasks.yaml",
+  "baseline_path": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\baseline\\compgcn_taskgen_check\\baseline.json",
+  "llm": {
+    "provider": "",
+    "model": "",
+    "base_url": "",
+    "no_llm": false
+  }
+}

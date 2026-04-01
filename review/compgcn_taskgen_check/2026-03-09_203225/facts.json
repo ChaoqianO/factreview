@@ -1,0 +1,364 @@
+{
+  "paper_key": "compgcn_taskgen_check",
+  "run_id": "2026-03-09_203225",
+  "status": "inconclusive",
+  "repo_url": "",
+  "paper_pdf": "",
+  "paper_pdf_extracted_md": "",
+  "paper_root": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\baseline\\compgcn\\source_gpu",
+  "local_source_path": "",
+  "conda_prefix": "",
+  "tasks_path": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\run\\compgcn_taskgen_check\\2026-03-09_203225\\tasks.yaml",
+  "baseline_path": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\baseline\\compgcn_taskgen_check\\baseline.json",
+  "artifacts_index": {
+    "files": []
+  },
+  "run_result": {
+    "success": true,
+    "tasks": [
+      {
+        "id": "smoke_help",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "prepare_data_preprocess",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "train_transe_sub_fb15k_237",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "train_transe_sub_wn18rr",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "train_transe_mult_fb15k_237",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "train_transe_mult_wn18rr",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "train_transe_corr_fb15k_237",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "train_transe_corr_wn18rr",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "train_distmult_sub_fb15k_237",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "train_distmult_sub_wn18rr",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "train_distmult_mult_fb15k_237",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "train_distmult_mult_wn18rr",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "train_distmult_corr_fb15k_237",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "train_distmult_corr_wn18rr",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "train_conve_sub_fb15k_237",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "train_conve_sub_wn18rr",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "train_conve_mult_fb15k_237",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "train_conve_mult_wn18rr",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "train_conve_corr_fb15k_237",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "train_conve_corr_wn18rr",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "train_best_model_fb15k_237",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "train_best_model_wn18rr",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "eval_transe_sub_fb15k_237",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "eval_transe_sub_wn18rr",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "eval_transe_mult_fb15k_237",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "eval_transe_mult_wn18rr",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "eval_transe_corr_fb15k_237",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "eval_transe_corr_wn18rr",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "eval_distmult_sub_fb15k_237",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "eval_distmult_sub_wn18rr",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "eval_distmult_mult_fb15k_237",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "eval_distmult_mult_wn18rr",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "eval_distmult_corr_fb15k_237",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "eval_distmult_corr_wn18rr",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "eval_conve_sub_fb15k_237",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "eval_conve_sub_wn18rr",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "eval_conve_mult_fb15k_237",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "eval_conve_mult_wn18rr",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "eval_conve_corr_fb15k_237",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "eval_conve_corr_wn18rr",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "eval_best_model_fb15k_237",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "eval_best_model_wn18rr",
+        "success": true,
+        "dry_run": true
+      }
+    ]
+  },
+  "judge": {
+    "passed": false,
+    "results": [
+      {
+        "type": "inconclusive_no_baseline",
+        "passed": false,
+        "run_success": true
+      },
+      {
+        "type": "llm_judge",
+        "mode": "assist",
+        "passed": false,
+        "verdict": "inconclusive",
+        "confidence": 0.13,
+        "response": {
+          "verdict": "inconclusive",
+          "confidence": 0.13,
+          "why": [
+            "All listed tasks were executed in dry_run mode, so no real training/evaluation appears to have been performed.",
+            "No paper PDF/content excerpt is provided, so claimed target metrics are unavailable for comparison.",
+            "No artifacts were indexed (artifacts_index.files is empty), so there is no metric/log/checkpoint evidence to validate reproduction quality."
+          ],
+          "suggested_artifacts": [
+            "artifacts/**/train*.log",
+            "artifacts/**/eval*.log",
+            "artifacts/**/metrics*.json",
+            "artifacts/**/results*.json",
+            "artifacts/**/checkpoints/*",
+            "artifacts/**/config*.json",
+            "artifacts/**/args*.txt",
+            "artifacts/**/stdout*.txt"
+          ],
+          "suggested_baseline_checks": [
+            {
+              "type": "file_exists",
+              "path": "artifacts/train_best_model_fb15k_237/train.log"
+            },
+            {
+              "type": "file_exists",
+              "path": "artifacts/eval_best_model_fb15k_237/results.json"
+            },
+            {
+              "type": "file_exists",
+              "path": "artifacts/train_best_model_wn18rr/train.log"
+            },
+            {
+              "type": "file_exists",
+              "path": "artifacts/eval_best_model_wn18rr/results.json"
+            },
+            {
+              "type": "json_value",
+              "path": "artifacts/eval_best_model_fb15k_237/results.json",
+              "json_path": [
+                "mrr"
+              ],
+              "expected": 0.0,
+              "tolerance": 0.0
+            },
+            {
+              "type": "json_value",
+              "path": "artifacts/eval_best_model_fb15k_237/results.json",
+              "json_path": [
+                "hits@10"
+              ],
+              "expected": 0.0,
+              "tolerance": 0.0
+            },
+            {
+              "type": "json_value",
+              "path": "artifacts/eval_best_model_wn18rr/results.json",
+              "json_path": [
+                "mrr"
+              ],
+              "expected": 0.0,
+              "tolerance": 0.0
+            },
+            {
+              "type": "json_value",
+              "path": "artifacts/eval_best_model_wn18rr/results.json",
+              "json_path": [
+                "hits@10"
+              ],
+              "expected": 0.0,
+              "tolerance": 0.0
+            },
+            {
+              "type": "csv_agg",
+              "path": "artifacts/**/all_runs_summary.csv",
+              "expr": {
+                "groupby": [
+                  "dataset",
+                  "model",
+                  "opn"
+                ],
+                "agg": {
+                  "mrr": "mean"
+                }
+              },
+              "expected": [
+                {
+                  "dataset": "FB15k-237",
+                  "model": "compgcn",
+                  "opn": "corr",
+                  "mrr": 0.0
+                },
+                {
+                  "dataset": "WN18RR",
+                  "model": "compgcn",
+                  "opn": "corr",
+                  "mrr": 0.0
+                }
+              ],
+              "tolerance": 0.0
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "paths": {
+    "run_dir": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\run\\compgcn_taskgen_check\\2026-03-09_203225",
+    "issues_jsonl": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\run\\compgcn_taskgen_check\\2026-03-09_203225\\issues.jsonl",
+    "issues_md": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\run\\compgcn_taskgen_check\\2026-03-09_203225\\issues.md",
+    "compare_report": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\compare\\compgcn_taskgen_check\\reports\\2026-03-09_203225.md",
+    "compare_diff_dir": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\compare\\compgcn_taskgen_check\\diffs\\2026-03-09_203225"
+  },
+  "suggestions": [
+    {
+      "type": "define_baseline",
+      "why": "No baseline checks defined; cannot verify paper results.",
+      "next": "Fill baseline/<paper_key>/baseline.json checks to match a paper table row and ensure artifact_paths collect required outputs."
+    }
+  ]
+}

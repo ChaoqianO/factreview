@@ -1,0 +1,2 @@
+[DRY RUN] cwd=/app
+cmd=python codeeval_eval_ckpt.py --ckpt-dir ./checkpoints --prefix distmult_sub --out ./metrics/train_distmult_sub_test.json --split test

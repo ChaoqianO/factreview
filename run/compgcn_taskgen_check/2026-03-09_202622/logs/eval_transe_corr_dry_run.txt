@@ -1,0 +1,2 @@
+[DRY RUN] cwd=/app
+cmd=python codeeval_eval_ckpt.py --ckpt-dir ./checkpoints --prefix transe_corr --out ./metrics/train_transe_corr_test.json --split test

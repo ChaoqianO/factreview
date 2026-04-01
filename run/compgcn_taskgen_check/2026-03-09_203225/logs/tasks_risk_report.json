@@ -1,0 +1,807 @@
+[
+  {
+    "id": "smoke_help",
+    "enabled": true,
+    "timeout_sec": 300,
+    "risk": "smoke",
+    "cmd": [
+      "python",
+      "run.py",
+      "-h"
+    ]
+  },
+  {
+    "id": "prepare_data_preprocess",
+    "enabled": true,
+    "timeout_sec": 1200,
+    "risk": "unknown",
+    "cmd": [
+      "bash",
+      "preprocess.sh"
+    ]
+  },
+  {
+    "id": "train_transe_sub_fb15k_237",
+    "enabled": true,
+    "timeout_sec": 86400,
+    "risk": "smoke",
+    "cmd": [
+      "python",
+      "run.py",
+      "-name",
+      "transe_sub_fb15k_237",
+      "-data",
+      "FB15k-237",
+      "-score_func",
+      "transe",
+      "-opn",
+      "sub",
+      "-gamma",
+      "9",
+      "-hid_drop",
+      "0.1",
+      "-init_dim",
+      "200"
+    ]
+  },
+  {
+    "id": "train_transe_sub_wn18rr",
+    "enabled": true,
+    "timeout_sec": 86400,
+    "risk": "smoke",
+    "cmd": [
+      "python",
+      "run.py",
+      "-name",
+      "transe_sub_wn18rr",
+      "-data",
+      "WN18RR",
+      "-score_func",
+      "transe",
+      "-opn",
+      "sub",
+      "-gamma",
+      "9",
+      "-hid_drop",
+      "0.1",
+      "-init_dim",
+      "200"
+    ]
+  },
+  {
+    "id": "train_transe_mult_fb15k_237",
+    "enabled": true,
+    "timeout_sec": 86400,
+    "risk": "smoke",
+    "cmd": [
+      "python",
+      "run.py",
+      "-name",
+      "transe_mult_fb15k_237",
+      "-data",
+      "FB15k-237",
+      "-score_func",
+      "transe",
+      "-opn",
+      "mult",
+      "-gamma",
+      "9",
+      "-hid_drop",
+      "0.2",
+      "-init_dim",
+      "200"
+    ]
+  },
+  {
+    "id": "train_transe_mult_wn18rr",
+    "enabled": true,
+    "timeout_sec": 86400,
+    "risk": "smoke",
+    "cmd": [
+      "python",
+      "run.py",
+      "-name",
+      "transe_mult_wn18rr",
+      "-data",
+      "WN18RR",
+      "-score_func",
+      "transe",
+      "-opn",
+      "mult",
+      "-gamma",
+      "9",
+      "-hid_drop",
+      "0.2",
+      "-init_dim",
+      "200"
+    ]
+  },
+  {
+    "id": "train_transe_corr_fb15k_237",
+    "enabled": true,
+    "timeout_sec": 86400,
+    "risk": "smoke",
+    "cmd": [
+      "python",
+      "run.py",
+      "-name",
+      "transe_corr_fb15k_237",
+      "-data",
+      "FB15k-237",
+      "-score_func",
+      "transe",
+      "-opn",
+      "corr",
+      "-gamma",
+      "40",
+      "-hid_drop",
+      "0.1",
+      "-init_dim",
+      "200"
+    ]
+  },
+  {
+    "id": "train_transe_corr_wn18rr",
+    "enabled": true,
+    "timeout_sec": 86400,
+    "risk": "smoke",
+    "cmd": [
+      "python",
+      "run.py",
+      "-name",
+      "transe_corr_wn18rr",
+      "-data",
+      "WN18RR",
+      "-score_func",
+      "transe",
+      "-opn",
+      "corr",
+      "-gamma",
+      "40",
+      "-hid_drop",
+      "0.1",
+      "-init_dim",
+      "200"
+    ]
+  },
+  {
+    "id": "train_distmult_sub_fb15k_237",
+    "enabled": true,
+    "timeout_sec": 86400,
+    "risk": "heavy",
+    "cmd": [
+      "python",
+      "run.py",
+      "-name",
+      "distmult_sub_fb15k_237",
+      "-data",
+      "FB15k-237",
+      "-score_func",
+      "distmult",
+      "-opn",
+      "sub",
+      "-gcn_dim",
+      "150",
+      "-gcn_layer",
+      "2"
+    ]
+  },
+  {
+    "id": "train_distmult_sub_wn18rr",
+    "enabled": true,
+    "timeout_sec": 86400,
+    "risk": "heavy",
+    "cmd": [
+      "python",
+      "run.py",
+      "-name",
+      "distmult_sub_wn18rr",
+      "-data",
+      "WN18RR",
+      "-score_func",
+      "distmult",
+      "-opn",
+      "sub",
+      "-gcn_dim",
+      "150",
+      "-gcn_layer",
+      "2"
+    ]
+  },
+  {
+    "id": "train_distmult_mult_fb15k_237",
+    "enabled": true,
+    "timeout_sec": 86400,
+    "risk": "heavy",
+    "cmd": [
+      "python",
+      "run.py",
+      "-name",
+      "distmult_mult_fb15k_237",
+      "-data",
+      "FB15k-237",
+      "-score_func",
+      "distmult",
+      "-opn",
+      "mult",
+      "-gcn_dim",
+      "150",
+      "-gcn_layer",
+      "2"
+    ]
+  },
+  {
+    "id": "train_distmult_mult_wn18rr",
+    "enabled": true,
+    "timeout_sec": 86400,
+    "risk": "heavy",
+    "cmd": [
+      "python",
+      "run.py",
+      "-name",
+      "distmult_mult_wn18rr",
+      "-data",
+      "WN18RR",
+      "-score_func",
+      "distmult",
+      "-opn",
+      "mult",
+      "-gcn_dim",
+      "150",
+      "-gcn_layer",
+      "2"
+    ]
+  },
+  {
+    "id": "train_distmult_corr_fb15k_237",
+    "enabled": true,
+    "timeout_sec": 86400,
+    "risk": "heavy",
+    "cmd": [
+      "python",
+      "run.py",
+      "-name",
+      "distmult_corr_fb15k_237",
+      "-data",
+      "FB15k-237",
+      "-score_func",
+      "distmult",
+      "-opn",
+      "corr",
+      "-gcn_dim",
+      "150",
+      "-gcn_layer",
+      "2"
+    ]
+  },
+  {
+    "id": "train_distmult_corr_wn18rr",
+    "enabled": true,
+    "timeout_sec": 86400,
+    "risk": "heavy",
+    "cmd": [
+      "python",
+      "run.py",
+      "-name",
+      "distmult_corr_wn18rr",
+      "-data",
+      "WN18RR",
+      "-score_func",
+      "distmult",
+      "-opn",
+      "corr",
+      "-gcn_dim",
+      "150",
+      "-gcn_layer",
+      "2"
+    ]
+  },
+  {
+    "id": "train_conve_sub_fb15k_237",
+    "enabled": true,
+    "timeout_sec": 86400,
+    "risk": "heavy",
+    "cmd": [
+      "python",
+      "run.py",
+      "-name",
+      "conve_sub_fb15k_237",
+      "-data",
+      "FB15k-237",
+      "-score_func",
+      "conve",
+      "-opn",
+      "sub",
+      "-ker_sz",
+      "5"
+    ]
+  },
+  {
+    "id": "train_conve_sub_wn18rr",
+    "enabled": true,
+    "timeout_sec": 86400,
+    "risk": "heavy",
+    "cmd": [
+      "python",
+      "run.py",
+      "-name",
+      "conve_sub_wn18rr",
+      "-data",
+      "WN18RR",
+      "-score_func",
+      "conve",
+      "-opn",
+      "sub",
+      "-ker_sz",
+      "5"
+    ]
+  },
+  {
+    "id": "train_conve_mult_fb15k_237",
+    "enabled": true,
+    "timeout_sec": 86400,
+    "risk": "heavy",
+    "cmd": [
+      "python",
+      "run.py",
+      "-name",
+      "conve_mult_fb15k_237",
+      "-data",
+      "FB15k-237",
+      "-score_func",
+      "conve",
+      "-opn",
+      "mult"
+    ]
+  },
+  {
+    "id": "train_conve_mult_wn18rr",
+    "enabled": true,
+    "timeout_sec": 86400,
+    "risk": "heavy",
+    "cmd": [
+      "python",
+      "run.py",
+      "-name",
+      "conve_mult_wn18rr",
+      "-data",
+      "WN18RR",
+      "-score_func",
+      "conve",
+      "-opn",
+      "mult"
+    ]
+  },
+  {
+    "id": "train_conve_corr_fb15k_237",
+    "enabled": true,
+    "timeout_sec": 86400,
+    "risk": "heavy",
+    "cmd": [
+      "python",
+      "run.py",
+      "-name",
+      "conve_corr_fb15k_237",
+      "-data",
+      "FB15k-237",
+      "-score_func",
+      "conve",
+      "-opn",
+      "corr"
+    ]
+  },
+  {
+    "id": "train_conve_corr_wn18rr",
+    "enabled": true,
+    "timeout_sec": 86400,
+    "risk": "heavy",
+    "cmd": [
+      "python",
+      "run.py",
+      "-name",
+      "conve_corr_wn18rr",
+      "-data",
+      "WN18RR",
+      "-score_func",
+      "conve",
+      "-opn",
+      "corr"
+    ]
+  },
+  {
+    "id": "train_best_model_fb15k_237",
+    "enabled": true,
+    "timeout_sec": 86400,
+    "risk": "heavy",
+    "cmd": [
+      "python",
+      "run.py",
+      "-name",
+      "best_model_fb15k_237",
+      "-data",
+      "FB15k-237",
+      "-score_func",
+      "conve",
+      "-opn",
+      "corr"
+    ]
+  },
+  {
+    "id": "train_best_model_wn18rr",
+    "enabled": true,
+    "timeout_sec": 86400,
+    "risk": "heavy",
+    "cmd": [
+      "python",
+      "run.py",
+      "-name",
+      "best_model_wn18rr",
+      "-data",
+      "WN18RR",
+      "-score_func",
+      "conve",
+      "-opn",
+      "corr"
+    ]
+  },
+  {
+    "id": "eval_transe_sub_fb15k_237",
+    "enabled": true,
+    "timeout_sec": 1800,
+    "risk": "heavy",
+    "cmd": [
+      "python",
+      "codeeval_eval_ckpt.py",
+      "--ckpt-dir",
+      "./checkpoints",
+      "--prefix",
+      "transe_sub_fb15k_237",
+      "--out",
+      "./metrics/train_transe_sub_fb15k_237_test.json",
+      "--split",
+      "test"
+    ]
+  },
+  {
+    "id": "eval_transe_sub_wn18rr",
+    "enabled": true,
+    "timeout_sec": 1800,
+    "risk": "heavy",
+    "cmd": [
+      "python",
+      "codeeval_eval_ckpt.py",
+      "--ckpt-dir",
+      "./checkpoints",
+      "--prefix",
+      "transe_sub_wn18rr",
+      "--out",
+      "./metrics/train_transe_sub_wn18rr_test.json",
+      "--split",
+      "test"
+    ]
+  },
+  {
+    "id": "eval_transe_mult_fb15k_237",
+    "enabled": true,
+    "timeout_sec": 1800,
+    "risk": "heavy",
+    "cmd": [
+      "python",
+      "codeeval_eval_ckpt.py",
+      "--ckpt-dir",
+      "./checkpoints",
+      "--prefix",
+      "transe_mult_fb15k_237",
+      "--out",
+      "./metrics/train_transe_mult_fb15k_237_test.json",
+      "--split",
+      "test"
+    ]
+  },
+  {
+    "id": "eval_transe_mult_wn18rr",
+    "enabled": true,
+    "timeout_sec": 1800,
+    "risk": "heavy",
+    "cmd": [
+      "python",
+      "codeeval_eval_ckpt.py",
+      "--ckpt-dir",
+      "./checkpoints",
+      "--prefix",
+      "transe_mult_wn18rr",
+      "--out",
+      "./metrics/train_transe_mult_wn18rr_test.json",
+      "--split",
+      "test"
+    ]
+  },
+  {
+    "id": "eval_transe_corr_fb15k_237",
+    "enabled": true,
+    "timeout_sec": 1800,
+    "risk": "heavy",
+    "cmd": [
+      "python",
+      "codeeval_eval_ckpt.py",
+      "--ckpt-dir",
+      "./checkpoints",
+      "--prefix",
+      "transe_corr_fb15k_237",
+      "--out",
+      "./metrics/train_transe_corr_fb15k_237_test.json",
+      "--split",
+      "test"
+    ]
+  },
+  {
+    "id": "eval_transe_corr_wn18rr",
+    "enabled": true,
+    "timeout_sec": 1800,
+    "risk": "heavy",
+    "cmd": [
+      "python",
+      "codeeval_eval_ckpt.py",
+      "--ckpt-dir",
+      "./checkpoints",
+      "--prefix",
+      "transe_corr_wn18rr",
+      "--out",
+      "./metrics/train_transe_corr_wn18rr_test.json",
+      "--split",
+      "test"
+    ]
+  },
+  {
+    "id": "eval_distmult_sub_fb15k_237",
+    "enabled": true,
+    "timeout_sec": 1800,
+    "risk": "heavy",
+    "cmd": [
+      "python",
+      "codeeval_eval_ckpt.py",
+      "--ckpt-dir",
+      "./checkpoints",
+      "--prefix",
+      "distmult_sub_fb15k_237",
+      "--out",
+      "./metrics/train_distmult_sub_fb15k_237_test.json",
+      "--split",
+      "test"
+    ]
+  },
+  {
+    "id": "eval_distmult_sub_wn18rr",
+    "enabled": true,
+    "timeout_sec": 1800,
+    "risk": "heavy",
+    "cmd": [
+      "python",
+      "codeeval_eval_ckpt.py",
+      "--ckpt-dir",
+      "./checkpoints",
+      "--prefix",
+      "distmult_sub_wn18rr",
+      "--out",
+      "./metrics/train_distmult_sub_wn18rr_test.json",
+      "--split",
+      "test"
+    ]
+  },
+  {
+    "id": "eval_distmult_mult_fb15k_237",
+    "enabled": true,
+    "timeout_sec": 1800,
+    "risk": "heavy",
+    "cmd": [
+      "python",
+      "codeeval_eval_ckpt.py",
+      "--ckpt-dir",
+      "./checkpoints",
+      "--prefix",
+      "distmult_mult_fb15k_237",
+      "--out",
+      "./metrics/train_distmult_mult_fb15k_237_test.json",
+      "--split",
+      "test"
+    ]
+  },
+  {
+    "id": "eval_distmult_mult_wn18rr",
+    "enabled": true,
+    "timeout_sec": 1800,
+    "risk": "heavy",
+    "cmd": [
+      "python",
+      "codeeval_eval_ckpt.py",
+      "--ckpt-dir",
+      "./checkpoints",
+      "--prefix",
+      "distmult_mult_wn18rr",
+      "--out",
+      "./metrics/train_distmult_mult_wn18rr_test.json",
+      "--split",
+      "test"
+    ]
+  },
+  {
+    "id": "eval_distmult_corr_fb15k_237",
+    "enabled": true,
+    "timeout_sec": 1800,
+    "risk": "heavy",
+    "cmd": [
+      "python",
+      "codeeval_eval_ckpt.py",
+      "--ckpt-dir",
+      "./checkpoints",
+      "--prefix",
+      "distmult_corr_fb15k_237",
+      "--out",
+      "./metrics/train_distmult_corr_fb15k_237_test.json",
+      "--split",
+      "test"
+    ]
+  },
+  {
+    "id": "eval_distmult_corr_wn18rr",
+    "enabled": true,
+    "timeout_sec": 1800,
+    "risk": "heavy",
+    "cmd": [
+      "python",
+      "codeeval_eval_ckpt.py",
+      "--ckpt-dir",
+      "./checkpoints",
+      "--prefix",
+      "distmult_corr_wn18rr",
+      "--out",
+      "./metrics/train_distmult_corr_wn18rr_test.json",
+      "--split",
+      "test"
+    ]
+  },
+  {
+    "id": "eval_conve_sub_fb15k_237",
+    "enabled": true,
+    "timeout_sec": 1800,
+    "risk": "heavy",
+    "cmd": [
+      "python",
+      "codeeval_eval_ckpt.py",
+      "--ckpt-dir",
+      "./checkpoints",
+      "--prefix",
+      "conve_sub_fb15k_237",
+      "--out",
+      "./metrics/train_conve_sub_fb15k_237_test.json",
+      "--split",
+      "test"
+    ]
+  },
+  {
+    "id": "eval_conve_sub_wn18rr",
+    "enabled": true,
+    "timeout_sec": 1800,
+    "risk": "heavy",
+    "cmd": [
+      "python",
+      "codeeval_eval_ckpt.py",
+      "--ckpt-dir",
+      "./checkpoints",
+      "--prefix",
+      "conve_sub_wn18rr",
+      "--out",
+      "./metrics/train_conve_sub_wn18rr_test.json",
+      "--split",
+      "test"
+    ]
+  },
+  {
+    "id": "eval_conve_mult_fb15k_237",
+    "enabled": true,
+    "timeout_sec": 1800,
+    "risk": "heavy",
+    "cmd": [
+      "python",
+      "codeeval_eval_ckpt.py",
+      "--ckpt-dir",
+      "./checkpoints",
+      "--prefix",
+      "conve_mult_fb15k_237",
+      "--out",
+      "./metrics/train_conve_mult_fb15k_237_test.json",
+      "--split",
+      "test"
+    ]
+  },
+  {
+    "id": "eval_conve_mult_wn18rr",
+    "enabled": true,
+    "timeout_sec": 1800,
+    "risk": "heavy",
+    "cmd": [
+      "python",
+      "codeeval_eval_ckpt.py",
+      "--ckpt-dir",
+      "./checkpoints",
+      "--prefix",
+      "conve_mult_wn18rr",
+      "--out",
+      "./metrics/train_conve_mult_wn18rr_test.json",
+      "--split",
+      "test"
+    ]
+  },
+  {
+    "id": "eval_conve_corr_fb15k_237",
+    "enabled": true,
+    "timeout_sec": 1800,
+    "risk": "heavy",
+    "cmd": [
+      "python",
+      "codeeval_eval_ckpt.py",
+      "--ckpt-dir",
+      "./checkpoints",
+      "--prefix",
+      "conve_corr_fb15k_237",
+      "--out",
+      "./metrics/train_conve_corr_fb15k_237_test.json",
+      "--split",
+      "test"
+    ]
+  },
+  {
+    "id": "eval_conve_corr_wn18rr",
+    "enabled": true,
+    "timeout_sec": 1800,
+    "risk": "heavy",
+    "cmd": [
+      "python",
+      "codeeval_eval_ckpt.py",
+      "--ckpt-dir",
+      "./checkpoints",
+      "--prefix",
+      "conve_corr_wn18rr",
+      "--out",
+      "./metrics/train_conve_corr_wn18rr_test.json",
+      "--split",
+      "test"
+    ]
+  },
+  {
+    "id": "eval_best_model_fb15k_237",
+    "enabled": true,
+    "timeout_sec": 1800,
+    "risk": "heavy",
+    "cmd": [
+      "python",
+      "codeeval_eval_ckpt.py",
+      "--ckpt-dir",
+      "./checkpoints",
+      "--prefix",
+      "best_model_fb15k_237",
+      "--out",
+      "./metrics/train_best_model_fb15k_237_test.json",
+      "--split",
+      "test"
+    ]
+  },
+  {
+    "id": "eval_best_model_wn18rr",
+    "enabled": true,
+    "timeout_sec": 1800,
+    "risk": "heavy",
+    "cmd": [
+      "python",
+      "codeeval_eval_ckpt.py",
+      "--ckpt-dir",
+      "./checkpoints",
+      "--prefix",
+      "best_model_wn18rr",
+      "--out",
+      "./metrics/train_best_model_wn18rr_test.json",
+      "--split",
+      "test"
+    ]
+  }
+]

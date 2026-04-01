@@ -1,0 +1,2 @@
+/app/run.py:314: UserWarning: where received a uint8 condition tensor. This behavior is deprecated and will be removed in a future version of PyTorch. Use a boolean condition instead. (Triggered internally at /opt/conda/conda-bld/pytorch_1716905979055/work/aten/src/ATen/native/TensorCompare.cpp:530.)
+  pred 			= torch.where(label.byte(), -torch.ones_like(pred) * 10000000, pred)

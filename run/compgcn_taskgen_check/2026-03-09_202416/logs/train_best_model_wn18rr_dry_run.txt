@@ -1,0 +1,2 @@
+[DRY RUN] cwd=/app
+cmd=python run.py -name best_model_wn18rr -data WN18RR -score_func conve -opn corr

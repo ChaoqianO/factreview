@@ -1,0 +1,2 @@
+[DRY RUN] cwd=/app
+cmd=python codeeval_eval_ckpt.py --ckpt-dir ./checkpoints --prefix best_model --out ./metrics/train_best_model_test.json --split test

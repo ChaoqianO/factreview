@@ -1,0 +1,40 @@
+2026-01-07 19:15:00,095 - [INFO] - {'name': 'fb_transe_sub_07_01_2026_13_37_18', 'dataset': 'FB15k-237', 'model': 'compgcn', 'score_func': 'transe', 'opn': 'sub', 'batch_size': 128, 'gamma': 9.0, 'gpu': '-1', 'max_epochs': 500, 'l2': 0.0, 'lr': 0.001, 'lbl_smooth': 0.1, 'num_workers': 4, 'seed': 41504, 'restore': False, 'bias': False, 'num_bases': -1, 'init_dim': 200, 'gcn_dim': 200, 'embed_dim': 200, 'gcn_layer': 1, 'dropout': 0.1, 'hid_drop': 0.1, 'hid_drop2': 0.3, 'feat_drop': 0.3, 'k_w': 10, 'k_h': 20, 'num_filt': 200, 'ker_sz': 7, 'log_dir': './log/', 'config_dir': './config/', 'num_ent': 14541, 'num_rel': 237}
+{'batch_size': 128,
+ 'bias': False,
+ 'config_dir': './config/',
+ 'dataset': 'FB15k-237',
+ 'dropout': 0.1,
+ 'embed_dim': 200,
+ 'feat_drop': 0.3,
+ 'gamma': 9.0,
+ 'gcn_dim': 200,
+ 'gcn_layer': 1,
+ 'gpu': '-1',
+ 'hid_drop': 0.1,
+ 'hid_drop2': 0.3,
+ 'init_dim': 200,
+ 'k_h': 20,
+ 'k_w': 10,
+ 'ker_sz': 7,
+ 'l2': 0.0,
+ 'lbl_smooth': 0.1,
+ 'log_dir': './log/',
+ 'lr': 0.001,
+ 'max_epochs': 500,
+ 'model': 'compgcn',
+ 'name': 'fb_transe_sub_07_01_2026_13_37_18',
+ 'num_bases': -1,
+ 'num_ent': 14541,
+ 'num_filt': 200,
+ 'num_rel': 237,
+ 'num_workers': 4,
+ 'opn': 'sub',
+ 'restore': False,
+ 'score_func': 'transe',
+ 'seed': 41504}
+2026-01-07 19:15:09,919 - [INFO] - [Test, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:17:59,706 - [INFO] - [Test, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:19:31,393 - [INFO] - [Test, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:22:04,588 - [INFO] - [Test, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:23:33,755 - [INFO] - [Epoch -1 test]: MRR: Tail : 0.43566, Head : 0.23374, Avg : 0.3347
+{"ok": true, "out": "/workspace/run_dir/artifacts/metrics/fb_transe_sub.json"}

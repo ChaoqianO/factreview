@@ -1,0 +1,13 @@
+[
+  {
+    "id": "table_001",
+    "caption": "compgcn_gpu reproduction test on FB15k-237",
+    "dataset": "FB15k-237",
+    "split": "test",
+    "html_path": "html/table_001.html",
+    "md_path": "md/table_001.md",
+    "source_metrics": [
+      "fb_transe_sub.json"
+    ]
+  }
+]

@@ -1,0 +1,11 @@
+cwd: E:\code\fastMCP\ai_review\code_evaluation\run\compgcn\2026-01-07_200533
+cmd: docker run --rm -v E:\code\fastMCP\ai_review\code_evaluation\baseline\compgcn\source:/app -v E:\code\fastMCP\ai_review\code_evaluation\run\compgcn\2026-01-07_200533:/workspace/run_dir -w /app -e CODE_EVAL_RUN_DIR=/workspace/run_dir -e CODE_EVAL_ARTIFACT_DIR=/workspace/run_dir/artifacts -e CODE_EVAL_PAPER_DIR=/app -e CODE_EVAL_PAPER_ROOT=/app code-eval-paper:compgcn-48b44b291763 python -c import shutil; from pathlib import Path; p=Path('.');
+for d in ['checkpoints','log','data']:
+  shutil.rmtree(p/d, ignore_errors=True)
+(p/'checkpoints').mkdir(parents=True, exist_ok=True)
+(p/'log').mkdir(parents=True, exist_ok=True)
+(p/'data').mkdir(parents=True, exist_ok=True)
+print('ok')
+
+rc: 0
+sec: 0.653

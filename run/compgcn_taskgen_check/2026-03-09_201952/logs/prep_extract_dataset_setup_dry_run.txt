@@ -1,0 +1,2 @@
+[DRY RUN] cwd=/app
+cmd=cmd /c if exist preprocess.sh (bash preprocess.sh) else (echo preprocess.sh not found, skipping)

@@ -1,0 +1,44 @@
+# Copy this file to .env and fill in as needed.
+#   - Windows PowerShell: Copy-Item env_example.txt .env
+#   - Bash: cp env_example.txt .env
+#
+# LLM provider selection (openai/openai-codex/deepseek/qwen/claude)
+MODEL_PROVIDER=openai
+
+# OpenAI API-key path. If OPENAI_API_KEY is empty and MODEL_PROVIDER=openai,
+# the workflow automatically falls back to OpenAI Codex browser/login-cache auth.
+OPENAI_API_KEY=
+OPENAI_BASE_URL=https://api.openai.com/v1
+OPENAI_MODEL=gpt-5
+
+# OpenAI Codex subscription path
+# - Explicitly enable with MODEL_PROVIDER=openai-codex
+# - Or leave MODEL_PROVIDER=openai and let the code auto-fallback when OPENAI_API_KEY is empty
+OPENAI_CODEX_BASE_URL=https://chatgpt.com/backend-api/codex
+OPENAI_CODEX_MODEL=gpt-5.3-codex
+# Required only when there is no cached login in ~/.codex/auth.json or ~/.clawdbot/...
+OPENAI_CODEX_CLIENT_ID=
+OPENAI_CODEX_REDIRECT_URI=http://127.0.0.1:1455/auth/callback
+# Optional overrides for manual OpenAI auth app configuration
+OPENAI_CODEX_AUTH_URL=https://auth.openai.com/oauth/authorize
+OPENAI_CODEX_TOKEN_URL=https://auth.openai.com/oauth/token
+OPENAI_CODEX_SCOPE=
+OPENAI_CODEX_CLIENT_SECRET=
+OPENAI_CODEX_NO_BROWSER=0
+
+# DeepSeek
+DEEPSEEK_API_KEY=
+DEEPSEEK_BASE_URL=https://api.deepseek.com
+DEEPSEEK_MODEL=deepseek-chat
+
+# Qwen (DashScope compatible-mode)
+QWEN_API_KEY=
+QWEN_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
+QWEN_MODEL=qwen-3
+
+# Claude
+CLAUDE_API_KEY=
+CLAUDE_BASE_URL=https://api.anthropic.com
+CLAUDE_MODEL=claude-4-sonnet
+
+

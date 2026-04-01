@@ -1,0 +1,4 @@
+{"ts": 1768904155.7291293, "kind": "prepare_start", "data": {"paper_key": "compgcn", "paper_pdf": "papers\\compgcn\\compgcn_Composition-based Multi-Relational Graph Convolutional Networks.pdf", "paper_root": ""}}
+{"ts": 1768904155.7301302, "kind": "prepare_use_local_source", "data": {"path": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\baseline\\compgcn\\source_gpu"}}
+{"ts": 1768904155.759296, "kind": "prepare_error", "data": {"error": "pdf_extract_required_but_mineru_unavailable", "hint": "Install MinerU and ensure `mineru` is on PATH (see: https://github.com/opendatalab/MinerU). Or rerun with --no-pdf-extract to bypass (not recommended)."}}
+{"ts": 1768904155.76709, "kind": "finalize", "data": {"report": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\compare\\paper\\reports\\2026-01-20_181555.md", "diff_dir": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\compare\\paper\\diffs\\2026-01-20_181555"}}
