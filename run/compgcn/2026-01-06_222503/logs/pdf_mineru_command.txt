@@ -1,0 +1,4 @@
+cwd: E:\code\fastMCP\ai_review\code_evaluation\papers\compgcn
+cmd: magic-pdf -i E:\code\fastMCP\ai_review\code_evaluation\papers\compgcn\compgcn_Composition-based Multi-Relational Graph Convolutional Networks.pdf -o E:\code\fastMCP\ai_review\code_evaluation\baseline\compgcn\paper_extracted\mineru\paper.mineru.md
+rc: 2
+sec: 4.639

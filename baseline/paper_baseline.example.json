@@ -1,0 +1,36 @@
+{
+  "checks": [
+    {
+      "id": "expected_figure_exists",
+      "type": "file_exists",
+      "path": "figs/exp2_success_by_bucket.png"
+    },
+    {
+      "id": "example_json_value",
+      "type": "json_value",
+      "path": "metrics.json",
+      "json_path": ["exp2", "success_rate"],
+      "expected": 0.73,
+      "tolerance": 0.02
+    },
+    {
+      "id": "example_csv_agg",
+      "type": "csv_agg",
+      "path": "results.csv",
+      "expr": {
+        "groupby": ["method"],
+        "agg": { "success": "mean" }
+      },
+      "expected": [
+        { "method": "baseline", "success": 0.20 },
+        { "method": "ours", "success": 0.64 }
+      ],
+      "tolerance": 0.02
+    }
+  ]
+}
+
+
+
+
+

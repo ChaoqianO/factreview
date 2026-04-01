@@ -1,0 +1,13 @@
+{
+  "run_id": "2026-01-06_213850",
+  "status": "failed",
+  "attempts": 1,
+  "run_result": {
+    "success": false,
+    "error": "tasks file missing/invalid. Provide --tasks pointing to a yaml/json task list."
+  },
+  "judge": {},
+  "artifacts": {
+    "files": []
+  }
+}

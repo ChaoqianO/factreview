@@ -1,0 +1,240 @@
+{
+  "paper_key": "compgcn_taskgen_check",
+  "run_id": "2026-03-09_202416",
+  "status": "inconclusive",
+  "repo_url": "",
+  "paper_pdf": "",
+  "paper_pdf_extracted_md": "",
+  "paper_root": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\baseline\\compgcn\\source_gpu",
+  "local_source_path": "",
+  "conda_prefix": "",
+  "tasks_path": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\run\\compgcn_taskgen_check\\2026-03-09_202416\\tasks.yaml",
+  "baseline_path": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\baseline\\compgcn_taskgen_check\\baseline.json",
+  "artifacts_index": {
+    "files": []
+  },
+  "run_result": {
+    "success": true,
+    "tasks": [
+      {
+        "id": "smoke_help",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "prepare_data",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "train_transe_sub_fb15k237",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "train_transe_mult_fb15k237",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "train_transe_corr_fb15k237",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "train_distmult_sub_fb15k237",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "train_distmult_mult_fb15k237",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "train_distmult_corr_fb15k237",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "train_conve_sub_fb15k237",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "train_conve_mult_fb15k237",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "train_conve_corr_fb15k237",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "train_best_model_fb15k237",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "train_transe_sub_wn18rr",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "train_transe_mult_wn18rr",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "train_transe_corr_wn18rr",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "train_distmult_sub_wn18rr",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "train_distmult_mult_wn18rr",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "train_distmult_corr_wn18rr",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "train_conve_sub_wn18rr",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "train_conve_mult_wn18rr",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "train_conve_corr_wn18rr",
+        "success": true,
+        "dry_run": true
+      },
+      {
+        "id": "train_best_model_wn18rr",
+        "success": true,
+        "dry_run": true
+      }
+    ]
+  },
+  "judge": {
+    "passed": false,
+    "results": [
+      {
+        "type": "inconclusive_no_baseline",
+        "passed": false,
+        "run_success": true
+      },
+      {
+        "type": "llm_judge",
+        "mode": "assist",
+        "passed": false,
+        "verdict": "inconclusive",
+        "confidence": 0.18,
+        "response": {
+          "verdict": "inconclusive",
+          "confidence": 0.18,
+          "why": [
+            "All reported tasks were executed in dry_run mode, so no actual training/evaluation appears to have been performed.",
+            "No artifacts were indexed (artifacts_index.files is empty), so there are no logs, checkpoints, or metric outputs to compare against claimed paper results.",
+            "Paper excerpt and baseline checks are empty, so there is no target metric table or acceptance thresholds available for verification."
+          ],
+          "suggested_artifacts": [
+            "runs/**/train.log",
+            "runs/**/eval.log",
+            "runs/**/metrics.json",
+            "runs/**/results.csv",
+            "checkpoints/**/*.pt",
+            "config/**/*.yaml",
+            "data/**/FB15k-237*",
+            "data/**/WN18RR*"
+          ],
+          "suggested_baseline_checks": [
+            {
+              "type": "file_exists",
+              "path": "runs/fb15k237/train_best_model_fb15k237/metrics.json"
+            },
+            {
+              "type": "file_exists",
+              "path": "runs/wn18rr/train_best_model_wn18rr/metrics.json"
+            },
+            {
+              "type": "json_value",
+              "path": "runs/fb15k237/train_best_model_fb15k237/metrics.json",
+              "json_path": [
+                "test",
+                "MRR"
+              ],
+              "expected": 0.0,
+              "tolerance": 1.0
+            },
+            {
+              "type": "json_value",
+              "path": "runs/wn18rr/train_best_model_wn18rr/metrics.json",
+              "json_path": [
+                "test",
+                "MRR"
+              ],
+              "expected": 0.0,
+              "tolerance": 1.0
+            },
+            {
+              "type": "csv_agg",
+              "path": "runs/**/results.csv",
+              "expr": {
+                "groupby": [
+                  "dataset",
+                  "model",
+                  "composition"
+                ],
+                "agg": {
+                  "MRR": "max"
+                }
+              },
+              "expected": [
+                {
+                  "dataset": "FB15k-237",
+                  "model": "best",
+                  "composition": "best",
+                  "MRR": 0.0
+                },
+                {
+                  "dataset": "WN18RR",
+                  "model": "best",
+                  "composition": "best",
+                  "MRR": 0.0
+                }
+              ],
+              "tolerance": 1.0
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "paths": {
+    "run_dir": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\run\\compgcn_taskgen_check\\2026-03-09_202416",
+    "issues_jsonl": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\run\\compgcn_taskgen_check\\2026-03-09_202416\\issues.jsonl",
+    "issues_md": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\run\\compgcn_taskgen_check\\2026-03-09_202416\\issues.md",
+    "compare_report": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\compare\\compgcn_taskgen_check\\reports\\2026-03-09_202416.md",
+    "compare_diff_dir": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\compare\\compgcn_taskgen_check\\diffs\\2026-03-09_202416"
+  },
+  "suggestions": [
+    {
+      "type": "define_baseline",
+      "why": "No baseline checks defined; cannot verify paper results.",
+      "next": "Fill baseline/<paper_key>/baseline.json checks to match a paper table row and ensure artifact_paths collect required outputs."
+    }
+  ]
+}

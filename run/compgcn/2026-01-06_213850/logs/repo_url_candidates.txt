@@ -1,0 +1,2 @@
+https://github.com/malllabiisc/CompGCN
+https://github.com/KnowledgeBaseCompleter/eval-ConvKB

@@ -1,0 +1,1731 @@
+2026-01-07 13:37:18,915 - [INFO] - {'name': 'fb_transe_sub_07_01_2026_13_37_18', 'dataset': 'FB15k-237', 'model': 'compgcn', 'score_func': 'transe', 'opn': 'sub', 'batch_size': 128, 'gamma': 9.0, 'gpu': '0', 'max_epochs': 500, 'l2': 0.0, 'lr': 0.001, 'lbl_smooth': 0.1, 'num_workers': 4, 'seed': 41504, 'restore': False, 'bias': False, 'num_bases': -1, 'init_dim': 200, 'gcn_dim': 200, 'embed_dim': None, 'gcn_layer': 1, 'dropout': 0.1, 'hid_drop': 0.1, 'hid_drop2': 0.3, 'feat_drop': 0.3, 'k_w': 10, 'k_h': 20, 'num_filt': 200, 'ker_sz': 7, 'log_dir': './log/', 'config_dir': './config/'}
+{'batch_size': 128,
+ 'bias': False,
+ 'config_dir': './config/',
+ 'dataset': 'FB15k-237',
+ 'dropout': 0.1,
+ 'embed_dim': None,
+ 'feat_drop': 0.3,
+ 'gamma': 9.0,
+ 'gcn_dim': 200,
+ 'gcn_layer': 1,
+ 'gpu': '0',
+ 'hid_drop': 0.1,
+ 'hid_drop2': 0.3,
+ 'init_dim': 200,
+ 'k_h': 20,
+ 'k_w': 10,
+ 'ker_sz': 7,
+ 'l2': 0.0,
+ 'lbl_smooth': 0.1,
+ 'log_dir': './log/',
+ 'lr': 0.001,
+ 'max_epochs': 500,
+ 'model': 'compgcn',
+ 'name': 'fb_transe_sub_07_01_2026_13_37_18',
+ 'num_bases': -1,
+ 'num_filt': 200,
+ 'num_workers': 4,
+ 'opn': 'sub',
+ 'restore': False,
+ 'score_func': 'transe',
+ 'seed': 41504}
+2026-01-07 13:37:26,888 - [INFO] - [E:0| 0]: Train Loss:0.029754,  Val MRR:0.0	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:37:40,963 - [INFO] - [E:0| 100]: Train Loss:0.02718,  Val MRR:0.0	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:37:55,207 - [INFO] - [E:0| 200]: Train Loss:0.025194,  Val MRR:0.0	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:38:09,328 - [INFO] - [E:0| 300]: Train Loss:0.020962,  Val MRR:0.0	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:38:23,695 - [INFO] - [E:0| 400]: Train Loss:0.019555,  Val MRR:0.0	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:38:37,708 - [INFO] - [E:0| 500]: Train Loss:0.017692,  Val MRR:0.0	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:38:51,831 - [INFO] - [E:0| 600]: Train Loss:0.016429,  Val MRR:0.0	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:39:06,125 - [INFO] - [E:0| 700]: Train Loss:0.015653,  Val MRR:0.0	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:39:20,134 - [INFO] - [E:0| 800]: Train Loss:0.014896,  Val MRR:0.0	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:39:34,157 - [INFO] - [E:0| 900]: Train Loss:0.01442,  Val MRR:0.0	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:39:48,178 - [INFO] - [E:0| 1000]: Train Loss:0.014071,  Val MRR:0.0	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:40:03,491 - [INFO] - [E:0| 1100]: Train Loss:0.01358,  Val MRR:0.0	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:40:17,811 - [INFO] - [Epoch:0]:  Training Loss:0.01323
+
+2026-01-07 13:40:18,115 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:40:27,094 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:40:30,838 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:40:39,808 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:40:42,998 - [INFO] - [Epoch 0 valid]: MRR: Tail : 0.10879, Head : 0.10005, Avg : 0.10442
+2026-01-07 13:40:43,510 - [INFO] - [Epoch 0]: Training Loss: 0.013228, Valid MRR: 0.10442
+
+
+2026-01-07 13:40:43,999 - [INFO] - [E:1| 0]: Train Loss:0.0085556,  Val MRR:0.10442	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:41:04,044 - [INFO] - [E:1| 100]: Train Loss:0.00787,  Val MRR:0.10442	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:41:24,060 - [INFO] - [E:1| 200]: Train Loss:0.0079798,  Val MRR:0.10442	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:41:44,621 - [INFO] - [E:1| 300]: Train Loss:0.0077025,  Val MRR:0.10442	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:42:05,031 - [INFO] - [E:1| 400]: Train Loss:0.0076858,  Val MRR:0.10442	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:42:25,277 - [INFO] - [E:1| 500]: Train Loss:0.0076592,  Val MRR:0.10442	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:42:45,569 - [INFO] - [E:1| 600]: Train Loss:0.0077722,  Val MRR:0.10442	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:43:06,430 - [INFO] - [E:1| 700]: Train Loss:0.0076998,  Val MRR:0.10442	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:43:26,965 - [INFO] - [E:1| 800]: Train Loss:0.0075198,  Val MRR:0.10442	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:43:47,786 - [INFO] - [E:1| 900]: Train Loss:0.0075878,  Val MRR:0.10442	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:44:08,860 - [INFO] - [E:1| 1000]: Train Loss:0.0078035,  Val MRR:0.10442	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:44:29,959 - [INFO] - [E:1| 1100]: Train Loss:0.0077093,  Val MRR:0.10442	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:44:44,055 - [INFO] - [Epoch:1]:  Training Loss:0.007864
+
+2026-01-07 13:44:44,322 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:44:53,235 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:44:56,710 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:45:05,654 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:45:08,844 - [INFO] - [Epoch 1 valid]: MRR: Tail : 0.1595, Head : 0.13547, Avg : 0.14749
+2026-01-07 13:45:09,293 - [INFO] - [Epoch 1]: Training Loss: 0.0078639, Valid MRR: 0.14749
+
+
+2026-01-07 13:45:09,713 - [INFO] - [E:2| 0]: Train Loss:0.0066645,  Val MRR:0.14749	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:45:29,884 - [INFO] - [E:2| 100]: Train Loss:0.0068574,  Val MRR:0.14749	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:45:50,224 - [INFO] - [E:2| 200]: Train Loss:0.0076008,  Val MRR:0.14749	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:46:10,066 - [INFO] - [E:2| 300]: Train Loss:0.0074954,  Val MRR:0.14749	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:46:29,925 - [INFO] - [E:2| 400]: Train Loss:0.007555,  Val MRR:0.14749	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:46:51,310 - [INFO] - [E:2| 500]: Train Loss:0.0077586,  Val MRR:0.14749	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:47:12,870 - [INFO] - [E:2| 600]: Train Loss:0.0076472,  Val MRR:0.14749	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:47:34,047 - [INFO] - [E:2| 700]: Train Loss:0.0075112,  Val MRR:0.14749	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:47:55,871 - [INFO] - [E:2| 800]: Train Loss:0.0074433,  Val MRR:0.14749	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:48:17,598 - [INFO] - [E:2| 900]: Train Loss:0.0077433,  Val MRR:0.14749	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:48:39,236 - [INFO] - [E:2| 1000]: Train Loss:0.0076995,  Val MRR:0.14749	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:49:01,082 - [INFO] - [E:2| 1100]: Train Loss:0.0075433,  Val MRR:0.14749	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:49:15,984 - [INFO] - [Epoch:2]:  Training Loss:0.007607
+
+2026-01-07 13:49:16,423 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:49:25,669 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:49:29,362 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:49:38,655 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:49:42,046 - [INFO] - [Epoch 2 valid]: MRR: Tail : 0.16068, Head : 0.14945, Avg : 0.15506
+2026-01-07 13:49:42,482 - [INFO] - [Epoch 2]: Training Loss: 0.007607, Valid MRR: 0.15506
+
+
+2026-01-07 13:49:43,031 - [INFO] - [E:3| 0]: Train Loss:0.0055522,  Val MRR:0.15506	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:50:04,067 - [INFO] - [E:3| 100]: Train Loss:0.0057249,  Val MRR:0.15506	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:50:25,068 - [INFO] - [E:3| 200]: Train Loss:0.006659,  Val MRR:0.15506	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:50:46,444 - [INFO] - [E:3| 300]: Train Loss:0.007291,  Val MRR:0.15506	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:51:07,709 - [INFO] - [E:3| 400]: Train Loss:0.0072717,  Val MRR:0.15506	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:51:28,909 - [INFO] - [E:3| 500]: Train Loss:0.0072791,  Val MRR:0.15506	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:51:50,094 - [INFO] - [E:3| 600]: Train Loss:0.0073625,  Val MRR:0.15506	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:52:11,319 - [INFO] - [E:3| 700]: Train Loss:0.0072752,  Val MRR:0.15506	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:52:32,533 - [INFO] - [E:3| 800]: Train Loss:0.0074432,  Val MRR:0.15506	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:52:53,899 - [INFO] - [E:3| 900]: Train Loss:0.0073311,  Val MRR:0.15506	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:53:17,415 - [INFO] - [E:3| 1000]: Train Loss:0.0074008,  Val MRR:0.15506	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:53:39,292 - [INFO] - [E:3| 1100]: Train Loss:0.0074448,  Val MRR:0.15506	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:53:54,527 - [INFO] - [Epoch:3]:  Training Loss:0.007445
+
+2026-01-07 13:53:55,030 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:54:04,464 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:54:08,344 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:54:17,762 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:54:21,202 - [INFO] - [Epoch 3 valid]: MRR: Tail : 0.18476, Head : 0.15971, Avg : 0.17223
+2026-01-07 13:54:21,773 - [INFO] - [Epoch 3]: Training Loss: 0.0074453, Valid MRR: 0.17223
+
+
+2026-01-07 13:54:22,371 - [INFO] - [E:4| 0]: Train Loss:0.0048654,  Val MRR:0.17223	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:54:43,281 - [INFO] - [E:4| 100]: Train Loss:0.0071287,  Val MRR:0.17223	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:55:03,649 - [INFO] - [E:4| 200]: Train Loss:0.0075038,  Val MRR:0.17223	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:55:22,072 - [INFO] - [E:4| 300]: Train Loss:0.0074793,  Val MRR:0.17223	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:55:40,227 - [INFO] - [E:4| 400]: Train Loss:0.0074986,  Val MRR:0.17223	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:56:00,154 - [INFO] - [E:4| 500]: Train Loss:0.0074577,  Val MRR:0.17223	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:56:20,330 - [INFO] - [E:4| 600]: Train Loss:0.0072164,  Val MRR:0.17223	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:56:40,514 - [INFO] - [E:4| 700]: Train Loss:0.0071742,  Val MRR:0.17223	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:57:00,872 - [INFO] - [E:4| 800]: Train Loss:0.0071189,  Val MRR:0.17223	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:57:21,130 - [INFO] - [E:4| 900]: Train Loss:0.0072465,  Val MRR:0.17223	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:57:40,857 - [INFO] - [E:4| 1000]: Train Loss:0.0073207,  Val MRR:0.17223	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:58:01,416 - [INFO] - [E:4| 1100]: Train Loss:0.0071551,  Val MRR:0.17223	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:58:15,300 - [INFO] - [Epoch:4]:  Training Loss:0.007041
+
+2026-01-07 13:58:15,603 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:58:24,378 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:58:27,877 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:58:36,551 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:58:39,873 - [INFO] - [Epoch 4 valid]: MRR: Tail : 0.22368, Head : 0.16534, Avg : 0.19451
+2026-01-07 13:58:40,226 - [INFO] - [Epoch 4]: Training Loss: 0.007041, Valid MRR: 0.19451
+
+
+2026-01-07 13:58:40,609 - [INFO] - [E:5| 0]: Train Loss:0.0052935,  Val MRR:0.19451	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:59:00,799 - [INFO] - [E:5| 100]: Train Loss:0.0064087,  Val MRR:0.19451	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:59:21,043 - [INFO] - [E:5| 200]: Train Loss:0.0058993,  Val MRR:0.19451	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 13:59:41,888 - [INFO] - [E:5| 300]: Train Loss:0.0064016,  Val MRR:0.19451	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:00:02,442 - [INFO] - [E:5| 400]: Train Loss:0.0068073,  Val MRR:0.19451	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:00:22,958 - [INFO] - [E:5| 500]: Train Loss:0.0065815,  Val MRR:0.19451	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:00:43,071 - [INFO] - [E:5| 600]: Train Loss:0.0068231,  Val MRR:0.19451	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:01:03,021 - [INFO] - [E:5| 700]: Train Loss:0.0069601,  Val MRR:0.19451	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:01:23,864 - [INFO] - [E:5| 800]: Train Loss:0.0067662,  Val MRR:0.19451	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:01:44,230 - [INFO] - [E:5| 900]: Train Loss:0.0066211,  Val MRR:0.19451	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:02:04,472 - [INFO] - [E:5| 1000]: Train Loss:0.006687,  Val MRR:0.19451	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:02:24,635 - [INFO] - [E:5| 1100]: Train Loss:0.0065446,  Val MRR:0.19451	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:02:38,681 - [INFO] - [Epoch:5]:  Training Loss:0.006468
+
+2026-01-07 14:02:39,024 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:02:47,873 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:02:51,575 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:03:00,390 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:03:03,691 - [INFO] - [Epoch 5 valid]: MRR: Tail : 0.22117, Head : 0.17059, Avg : 0.19588
+2026-01-07 14:03:04,077 - [INFO] - [Epoch 5]: Training Loss: 0.0064683, Valid MRR: 0.19588
+
+
+2026-01-07 14:03:04,496 - [INFO] - [E:6| 0]: Train Loss:0.0036108,  Val MRR:0.19588	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:03:24,031 - [INFO] - [E:6| 100]: Train Loss:0.0059521,  Val MRR:0.19588	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:03:43,264 - [INFO] - [E:6| 200]: Train Loss:0.0055168,  Val MRR:0.19588	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:04:03,606 - [INFO] - [E:6| 300]: Train Loss:0.0058602,  Val MRR:0.19588	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:04:24,112 - [INFO] - [E:6| 400]: Train Loss:0.0059931,  Val MRR:0.19588	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:04:43,463 - [INFO] - [E:6| 500]: Train Loss:0.0055778,  Val MRR:0.19588	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:05:02,650 - [INFO] - [E:6| 600]: Train Loss:0.0052634,  Val MRR:0.19588	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:05:22,104 - [INFO] - [E:6| 700]: Train Loss:0.0052769,  Val MRR:0.19588	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:05:41,962 - [INFO] - [E:6| 800]: Train Loss:0.0050465,  Val MRR:0.19588	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:06:01,623 - [INFO] - [E:6| 900]: Train Loss:0.0049638,  Val MRR:0.19588	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:06:20,968 - [INFO] - [E:6| 1000]: Train Loss:0.0048339,  Val MRR:0.19588	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:06:40,129 - [INFO] - [E:6| 1100]: Train Loss:0.0048786,  Val MRR:0.19588	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:06:53,538 - [INFO] - [Epoch:6]:  Training Loss:0.004746
+
+2026-01-07 14:06:53,802 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:07:02,506 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:07:05,954 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:07:14,761 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:07:17,976 - [INFO] - [Epoch 6 valid]: MRR: Tail : 0.29098, Head : 0.19798, Avg : 0.24448
+2026-01-07 14:07:18,344 - [INFO] - [Epoch 6]: Training Loss: 0.0047459, Valid MRR: 0.24448
+
+
+2026-01-07 14:07:18,718 - [INFO] - [E:7| 0]: Train Loss:0.0027176,  Val MRR:0.24448	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:07:38,532 - [INFO] - [E:7| 100]: Train Loss:0.0053929,  Val MRR:0.24448	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:07:58,820 - [INFO] - [E:7| 200]: Train Loss:0.0049663,  Val MRR:0.24448	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:08:18,724 - [INFO] - [E:7| 300]: Train Loss:0.0046782,  Val MRR:0.24448	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:08:38,507 - [INFO] - [E:7| 400]: Train Loss:0.0048628,  Val MRR:0.24448	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:08:58,596 - [INFO] - [E:7| 500]: Train Loss:0.0048932,  Val MRR:0.24448	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:09:18,355 - [INFO] - [E:7| 600]: Train Loss:0.0046556,  Val MRR:0.24448	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:09:37,893 - [INFO] - [E:7| 700]: Train Loss:0.004388,  Val MRR:0.24448	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:09:57,003 - [INFO] - [E:7| 800]: Train Loss:0.0042925,  Val MRR:0.24448	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:10:15,999 - [INFO] - [E:7| 900]: Train Loss:0.0041881,  Val MRR:0.24448	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:10:35,684 - [INFO] - [E:7| 1000]: Train Loss:0.0040841,  Val MRR:0.24448	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:10:55,364 - [INFO] - [E:7| 1100]: Train Loss:0.0041237,  Val MRR:0.24448	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:11:08,439 - [INFO] - [Epoch:7]:  Training Loss:0.004062
+
+2026-01-07 14:11:08,688 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:11:17,441 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:11:20,858 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:11:29,677 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:11:32,859 - [INFO] - [Epoch 7 valid]: MRR: Tail : 0.26539, Head : 0.19726, Avg : 0.23132
+2026-01-07 14:11:32,863 - [INFO] - [Epoch 7]: Training Loss: 0.0040616, Valid MRR: 0.24448
+
+
+2026-01-07 14:11:33,275 - [INFO] - [E:8| 0]: Train Loss:0.0020108,  Val MRR:0.24448	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:11:52,697 - [INFO] - [E:8| 100]: Train Loss:0.0041887,  Val MRR:0.24448	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:12:11,594 - [INFO] - [E:8| 200]: Train Loss:0.0034263,  Val MRR:0.24448	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:12:30,287 - [INFO] - [E:8| 300]: Train Loss:0.0031958,  Val MRR:0.24448	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:12:49,487 - [INFO] - [E:8| 400]: Train Loss:0.0034253,  Val MRR:0.24448	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:13:08,458 - [INFO] - [E:8| 500]: Train Loss:0.0036078,  Val MRR:0.24448	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:13:27,991 - [INFO] - [E:8| 600]: Train Loss:0.0034699,  Val MRR:0.24448	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:13:47,537 - [INFO] - [E:8| 700]: Train Loss:0.0033829,  Val MRR:0.24448	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:14:08,255 - [INFO] - [E:8| 800]: Train Loss:0.0034582,  Val MRR:0.24448	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:14:28,442 - [INFO] - [E:8| 900]: Train Loss:0.0034097,  Val MRR:0.24448	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:14:48,229 - [INFO] - [E:8| 1000]: Train Loss:0.0034127,  Val MRR:0.24448	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:15:08,038 - [INFO] - [E:8| 1100]: Train Loss:0.0035805,  Val MRR:0.24448	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:15:21,506 - [INFO] - [Epoch:8]:  Training Loss:0.003657
+
+2026-01-07 14:15:21,771 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:15:30,540 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:15:34,021 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:15:42,807 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:15:45,986 - [INFO] - [Epoch 8 valid]: MRR: Tail : 0.30079, Head : 0.20535, Avg : 0.25307
+2026-01-07 14:15:46,384 - [INFO] - [Epoch 8]: Training Loss: 0.0036573, Valid MRR: 0.25307
+
+
+2026-01-07 14:15:46,762 - [INFO] - [E:9| 0]: Train Loss:0.0024038,  Val MRR:0.25307	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:16:06,444 - [INFO] - [E:9| 100]: Train Loss:0.004343,  Val MRR:0.25307	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:16:25,538 - [INFO] - [E:9| 200]: Train Loss:0.003666,  Val MRR:0.25307	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:16:44,315 - [INFO] - [E:9| 300]: Train Loss:0.0036895,  Val MRR:0.25307	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:17:03,319 - [INFO] - [E:9| 400]: Train Loss:0.0037426,  Val MRR:0.25307	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:17:22,516 - [INFO] - [E:9| 500]: Train Loss:0.0043479,  Val MRR:0.25307	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:17:41,706 - [INFO] - [E:9| 600]: Train Loss:0.0041317,  Val MRR:0.25307	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:18:01,619 - [INFO] - [E:9| 700]: Train Loss:0.0039337,  Val MRR:0.25307	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:18:20,847 - [INFO] - [E:9| 800]: Train Loss:0.0039328,  Val MRR:0.25307	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:18:40,320 - [INFO] - [E:9| 900]: Train Loss:0.0038866,  Val MRR:0.25307	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:19:00,007 - [INFO] - [E:9| 1000]: Train Loss:0.0037961,  Val MRR:0.25307	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:19:18,900 - [INFO] - [E:9| 1100]: Train Loss:0.0036893,  Val MRR:0.25307	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:19:32,075 - [INFO] - [Epoch:9]:  Training Loss:0.003678
+
+2026-01-07 14:19:32,322 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:19:41,147 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:19:45,378 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:19:54,450 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:19:57,643 - [INFO] - [Epoch 9 valid]: MRR: Tail : 0.29696, Head : 0.20131, Avg : 0.24914
+2026-01-07 14:19:57,644 - [INFO] - [Epoch 9]: Training Loss: 0.0036782, Valid MRR: 0.25307
+
+
+2026-01-07 14:19:58,034 - [INFO] - [E:10| 0]: Train Loss:0.002448,  Val MRR:0.25307	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:20:17,400 - [INFO] - [E:10| 100]: Train Loss:0.0045771,  Val MRR:0.25307	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:20:36,248 - [INFO] - [E:10| 200]: Train Loss:0.0039712,  Val MRR:0.25307	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:20:55,751 - [INFO] - [E:10| 300]: Train Loss:0.0036309,  Val MRR:0.25307	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:21:14,713 - [INFO] - [E:10| 400]: Train Loss:0.0035149,  Val MRR:0.25307	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:21:33,768 - [INFO] - [E:10| 500]: Train Loss:0.0034378,  Val MRR:0.25307	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:21:53,343 - [INFO] - [E:10| 600]: Train Loss:0.0038277,  Val MRR:0.25307	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:22:12,374 - [INFO] - [E:10| 700]: Train Loss:0.0037253,  Val MRR:0.25307	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:22:31,313 - [INFO] - [E:10| 800]: Train Loss:0.0036451,  Val MRR:0.25307	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:22:50,638 - [INFO] - [E:10| 900]: Train Loss:0.0036203,  Val MRR:0.25307	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:23:09,795 - [INFO] - [E:10| 1000]: Train Loss:0.0036719,  Val MRR:0.25307	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:23:29,051 - [INFO] - [E:10| 1100]: Train Loss:0.0035775,  Val MRR:0.25307	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:23:42,621 - [INFO] - [Epoch:10]:  Training Loss:0.003534
+
+2026-01-07 14:23:42,908 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:23:51,831 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:23:55,415 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:24:04,464 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:24:07,781 - [INFO] - [Epoch 10 valid]: MRR: Tail : 0.30751, Head : 0.20558, Avg : 0.25654
+2026-01-07 14:24:08,227 - [INFO] - [Epoch 10]: Training Loss: 0.0035339, Valid MRR: 0.25654
+
+
+2026-01-07 14:24:08,734 - [INFO] - [E:11| 0]: Train Loss:0.0025236,  Val MRR:0.25654	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:24:29,100 - [INFO] - [E:11| 100]: Train Loss:0.0046883,  Val MRR:0.25654	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:24:48,449 - [INFO] - [E:11| 200]: Train Loss:0.0046868,  Val MRR:0.25654	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:25:07,918 - [INFO] - [E:11| 300]: Train Loss:0.0041283,  Val MRR:0.25654	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:25:27,552 - [INFO] - [E:11| 400]: Train Loss:0.0038602,  Val MRR:0.25654	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:25:47,052 - [INFO] - [E:11| 500]: Train Loss:0.0036676,  Val MRR:0.25654	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:26:05,857 - [INFO] - [E:11| 600]: Train Loss:0.0035768,  Val MRR:0.25654	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:26:24,958 - [INFO] - [E:11| 700]: Train Loss:0.0034802,  Val MRR:0.25654	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:26:44,120 - [INFO] - [E:11| 800]: Train Loss:0.003382,  Val MRR:0.25654	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:27:02,865 - [INFO] - [E:11| 900]: Train Loss:0.0034269,  Val MRR:0.25654	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:27:21,967 - [INFO] - [E:11| 1000]: Train Loss:0.0033598,  Val MRR:0.25654	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:27:40,959 - [INFO] - [E:11| 1100]: Train Loss:0.0034964,  Val MRR:0.25654	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:27:54,010 - [INFO] - [Epoch:11]:  Training Loss:0.003464
+
+2026-01-07 14:27:54,282 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:28:02,944 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:28:06,358 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:28:15,028 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:28:18,183 - [INFO] - [Epoch 11 valid]: MRR: Tail : 0.32672, Head : 0.21372, Avg : 0.27022
+2026-01-07 14:28:18,558 - [INFO] - [Epoch 11]: Training Loss: 0.0034636, Valid MRR: 0.27022
+
+
+2026-01-07 14:28:18,985 - [INFO] - [E:12| 0]: Train Loss:0.0031227,  Val MRR:0.27022	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:28:38,150 - [INFO] - [E:12| 100]: Train Loss:0.006507,  Val MRR:0.27022	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:28:56,901 - [INFO] - [E:12| 200]: Train Loss:0.0044774,  Val MRR:0.27022	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:29:15,233 - [INFO] - [E:12| 300]: Train Loss:0.0038476,  Val MRR:0.27022	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:29:33,454 - [INFO] - [E:12| 400]: Train Loss:0.0037841,  Val MRR:0.27022	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:29:52,062 - [INFO] - [E:12| 500]: Train Loss:0.0035749,  Val MRR:0.27022	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:30:10,440 - [INFO] - [E:12| 600]: Train Loss:0.0037505,  Val MRR:0.27022	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:30:28,811 - [INFO] - [E:12| 700]: Train Loss:0.003614,  Val MRR:0.27022	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:30:47,224 - [INFO] - [E:12| 800]: Train Loss:0.0035248,  Val MRR:0.27022	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:31:05,737 - [INFO] - [E:12| 900]: Train Loss:0.0034827,  Val MRR:0.27022	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:31:24,398 - [INFO] - [E:12| 1000]: Train Loss:0.0034378,  Val MRR:0.27022	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:31:42,949 - [INFO] - [E:12| 1100]: Train Loss:0.003393,  Val MRR:0.27022	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:31:55,869 - [INFO] - [Epoch:12]:  Training Loss:0.003349
+
+2026-01-07 14:31:56,087 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:32:04,774 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:32:08,182 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:32:16,865 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:32:20,024 - [INFO] - [Epoch 12 valid]: MRR: Tail : 0.33581, Head : 0.21214, Avg : 0.27398
+2026-01-07 14:32:20,434 - [INFO] - [Epoch 12]: Training Loss: 0.0033491, Valid MRR: 0.27398
+
+
+2026-01-07 14:32:20,795 - [INFO] - [E:13| 0]: Train Loss:0.00238,  Val MRR:0.27398	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:32:40,060 - [INFO] - [E:13| 100]: Train Loss:0.0044863,  Val MRR:0.27398	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:32:58,594 - [INFO] - [E:13| 200]: Train Loss:0.0034167,  Val MRR:0.27398	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:33:17,248 - [INFO] - [E:13| 300]: Train Loss:0.0033028,  Val MRR:0.27398	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:33:36,180 - [INFO] - [E:13| 400]: Train Loss:0.003277,  Val MRR:0.27398	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:33:54,842 - [INFO] - [E:13| 500]: Train Loss:0.0032054,  Val MRR:0.27398	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:34:14,682 - [INFO] - [E:13| 600]: Train Loss:0.0032035,  Val MRR:0.27398	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:34:33,781 - [INFO] - [E:13| 700]: Train Loss:0.0031848,  Val MRR:0.27398	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:34:52,447 - [INFO] - [E:13| 800]: Train Loss:0.0034198,  Val MRR:0.27398	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:35:10,822 - [INFO] - [E:13| 900]: Train Loss:0.0033952,  Val MRR:0.27398	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:35:29,083 - [INFO] - [E:13| 1000]: Train Loss:0.0033777,  Val MRR:0.27398	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:35:47,635 - [INFO] - [E:13| 1100]: Train Loss:0.0032829,  Val MRR:0.27398	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:36:00,318 - [INFO] - [Epoch:13]:  Training Loss:0.003222
+
+2026-01-07 14:36:00,601 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:36:09,284 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:36:12,724 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:36:21,417 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:36:24,570 - [INFO] - [Epoch 13 valid]: MRR: Tail : 0.33802, Head : 0.21287, Avg : 0.27544
+2026-01-07 14:36:24,977 - [INFO] - [Epoch 13]: Training Loss: 0.003222, Valid MRR: 0.27544
+
+
+2026-01-07 14:36:25,378 - [INFO] - [E:14| 0]: Train Loss:0.0022321,  Val MRR:0.27544	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:36:44,682 - [INFO] - [E:14| 100]: Train Loss:0.002413,  Val MRR:0.27544	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:37:03,129 - [INFO] - [E:14| 200]: Train Loss:0.0031442,  Val MRR:0.27544	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:37:21,358 - [INFO] - [E:14| 300]: Train Loss:0.0028395,  Val MRR:0.27544	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:37:39,738 - [INFO] - [E:14| 400]: Train Loss:0.0032018,  Val MRR:0.27544	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:37:58,274 - [INFO] - [E:14| 500]: Train Loss:0.0030952,  Val MRR:0.27544	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:38:16,925 - [INFO] - [E:14| 600]: Train Loss:0.0030684,  Val MRR:0.27544	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:38:35,723 - [INFO] - [E:14| 700]: Train Loss:0.0032022,  Val MRR:0.27544	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:38:54,879 - [INFO] - [E:14| 800]: Train Loss:0.0031718,  Val MRR:0.27544	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:39:14,173 - [INFO] - [E:14| 900]: Train Loss:0.0031191,  Val MRR:0.27544	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:39:33,735 - [INFO] - [E:14| 1000]: Train Loss:0.0030669,  Val MRR:0.27544	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:39:53,366 - [INFO] - [E:14| 1100]: Train Loss:0.0031007,  Val MRR:0.27544	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:40:06,736 - [INFO] - [Epoch:14]:  Training Loss:0.003179
+
+2026-01-07 14:40:07,120 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:40:15,853 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:40:19,266 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:40:28,047 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:40:31,240 - [INFO] - [Epoch 14 valid]: MRR: Tail : 0.33249, Head : 0.21258, Avg : 0.27253
+2026-01-07 14:40:31,241 - [INFO] - [Epoch 14]: Training Loss: 0.0031792, Valid MRR: 0.27544
+
+
+2026-01-07 14:40:31,649 - [INFO] - [E:15| 0]: Train Loss:0.0022974,  Val MRR:0.27544	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:40:50,550 - [INFO] - [E:15| 100]: Train Loss:0.0028569,  Val MRR:0.27544	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:41:10,006 - [INFO] - [E:15| 200]: Train Loss:0.0031723,  Val MRR:0.27544	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:41:28,965 - [INFO] - [E:15| 300]: Train Loss:0.0028754,  Val MRR:0.27544	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:41:48,073 - [INFO] - [E:15| 400]: Train Loss:0.0032007,  Val MRR:0.27544	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:42:07,092 - [INFO] - [E:15| 500]: Train Loss:0.003311,  Val MRR:0.27544	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:42:26,347 - [INFO] - [E:15| 600]: Train Loss:0.0032774,  Val MRR:0.27544	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:42:46,291 - [INFO] - [E:15| 700]: Train Loss:0.0031591,  Val MRR:0.27544	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:43:05,571 - [INFO] - [E:15| 800]: Train Loss:0.0032225,  Val MRR:0.27544	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:43:24,622 - [INFO] - [E:15| 900]: Train Loss:0.0031697,  Val MRR:0.27544	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:43:44,083 - [INFO] - [E:15| 1000]: Train Loss:0.003235,  Val MRR:0.27544	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:44:04,456 - [INFO] - [E:15| 1100]: Train Loss:0.0031869,  Val MRR:0.27544	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:44:18,702 - [INFO] - [Epoch:15]:  Training Loss:0.003141
+
+2026-01-07 14:44:18,972 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:44:27,767 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:44:31,227 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:44:40,172 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:44:43,325 - [INFO] - [Epoch 15 valid]: MRR: Tail : 0.33598, Head : 0.21306, Avg : 0.27452
+2026-01-07 14:44:43,326 - [INFO] - [Epoch 15]: Training Loss: 0.003141, Valid MRR: 0.27544
+
+
+2026-01-07 14:44:43,710 - [INFO] - [E:16| 0]: Train Loss:0.0076896,  Val MRR:0.27544	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:45:03,383 - [INFO] - [E:16| 100]: Train Loss:0.0025642,  Val MRR:0.27544	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:45:22,602 - [INFO] - [E:16| 200]: Train Loss:0.0025873,  Val MRR:0.27544	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:45:41,585 - [INFO] - [E:16| 300]: Train Loss:0.0029845,  Val MRR:0.27544	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:46:01,173 - [INFO] - [E:16| 400]: Train Loss:0.0028656,  Val MRR:0.27544	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:46:20,074 - [INFO] - [E:16| 500]: Train Loss:0.0028029,  Val MRR:0.27544	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:46:39,016 - [INFO] - [E:16| 600]: Train Loss:0.0030027,  Val MRR:0.27544	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:46:58,612 - [INFO] - [E:16| 700]: Train Loss:0.003114,  Val MRR:0.27544	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:47:18,414 - [INFO] - [E:16| 800]: Train Loss:0.0030427,  Val MRR:0.27544	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:47:38,797 - [INFO] - [E:16| 900]: Train Loss:0.003217,  Val MRR:0.27544	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:47:58,671 - [INFO] - [E:16| 1000]: Train Loss:0.003178,  Val MRR:0.27544	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:48:17,988 - [INFO] - [E:16| 1100]: Train Loss:0.0031552,  Val MRR:0.27544	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:48:31,526 - [INFO] - [Epoch:16]:  Training Loss:0.003122
+
+2026-01-07 14:48:31,785 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:48:40,529 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:48:43,955 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:48:52,702 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:48:55,917 - [INFO] - [Epoch 16 valid]: MRR: Tail : 0.34126, Head : 0.2133, Avg : 0.27728
+2026-01-07 14:48:56,307 - [INFO] - [Epoch 16]: Training Loss: 0.0031219, Valid MRR: 0.27728
+
+
+2026-01-07 14:48:56,679 - [INFO] - [E:17| 0]: Train Loss:0.0020769,  Val MRR:0.27728	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:49:16,463 - [INFO] - [E:17| 100]: Train Loss:0.0040101,  Val MRR:0.27728	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:49:35,481 - [INFO] - [E:17| 200]: Train Loss:0.0038876,  Val MRR:0.27728	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:49:54,774 - [INFO] - [E:17| 300]: Train Loss:0.0035993,  Val MRR:0.27728	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:50:13,897 - [INFO] - [E:17| 400]: Train Loss:0.0033362,  Val MRR:0.27728	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:50:33,212 - [INFO] - [E:17| 500]: Train Loss:0.0032462,  Val MRR:0.27728	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:50:53,427 - [INFO] - [E:17| 600]: Train Loss:0.0031761,  Val MRR:0.27728	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:51:13,417 - [INFO] - [E:17| 700]: Train Loss:0.0030557,  Val MRR:0.27728	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:51:32,860 - [INFO] - [E:17| 800]: Train Loss:0.0029894,  Val MRR:0.27728	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:51:53,111 - [INFO] - [E:17| 900]: Train Loss:0.0030554,  Val MRR:0.27728	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:52:12,370 - [INFO] - [E:17| 1000]: Train Loss:0.0030596,  Val MRR:0.27728	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:52:31,405 - [INFO] - [E:17| 1100]: Train Loss:0.0031484,  Val MRR:0.27728	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:52:45,125 - [INFO] - [Epoch:17]:  Training Loss:0.003117
+
+2026-01-07 14:52:45,367 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:52:54,068 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:52:57,515 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:53:06,198 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:53:09,379 - [INFO] - [Epoch 17 valid]: MRR: Tail : 0.33581, Head : 0.21016, Avg : 0.27299
+2026-01-07 14:53:09,384 - [INFO] - [Epoch 17]: Training Loss: 0.0031169, Valid MRR: 0.27728
+
+
+2026-01-07 14:53:09,838 - [INFO] - [E:18| 0]: Train Loss:0.0020364,  Val MRR:0.27728	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:53:29,837 - [INFO] - [E:18| 100]: Train Loss:0.0022806,  Val MRR:0.27728	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:53:49,711 - [INFO] - [E:18| 200]: Train Loss:0.0026138,  Val MRR:0.27728	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:54:10,276 - [INFO] - [E:18| 300]: Train Loss:0.0025884,  Val MRR:0.27728	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:54:30,287 - [INFO] - [E:18| 400]: Train Loss:0.0025083,  Val MRR:0.27728	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:54:50,057 - [INFO] - [E:18| 500]: Train Loss:0.0026099,  Val MRR:0.27728	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:55:09,040 - [INFO] - [E:18| 600]: Train Loss:0.0026316,  Val MRR:0.27728	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:55:27,986 - [INFO] - [E:18| 700]: Train Loss:0.0026287,  Val MRR:0.27728	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:55:47,465 - [INFO] - [E:18| 800]: Train Loss:0.0025677,  Val MRR:0.27728	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:56:07,076 - [INFO] - [E:18| 900]: Train Loss:0.002614,  Val MRR:0.27728	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:56:27,047 - [INFO] - [E:18| 1000]: Train Loss:0.0027173,  Val MRR:0.27728	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:56:47,192 - [INFO] - [E:18| 1100]: Train Loss:0.002883,  Val MRR:0.27728	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:57:00,518 - [INFO] - [Epoch:18]:  Training Loss:0.002829
+
+2026-01-07 14:57:00,801 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:57:09,592 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:57:13,085 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:57:21,776 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:57:24,971 - [INFO] - [Epoch 18 valid]: MRR: Tail : 0.35225, Head : 0.21743, Avg : 0.28484
+2026-01-07 14:57:25,379 - [INFO] - [Epoch 18]: Training Loss: 0.0028289, Valid MRR: 0.28484
+
+
+2026-01-07 14:57:25,811 - [INFO] - [E:19| 0]: Train Loss:0.0020974,  Val MRR:0.28484	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:57:44,991 - [INFO] - [E:19| 100]: Train Loss:0.002095,  Val MRR:0.28484	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:58:04,403 - [INFO] - [E:19| 200]: Train Loss:0.0020441,  Val MRR:0.28484	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:58:23,497 - [INFO] - [E:19| 300]: Train Loss:0.0020778,  Val MRR:0.28484	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:58:42,658 - [INFO] - [E:19| 400]: Train Loss:0.0023911,  Val MRR:0.28484	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:59:02,159 - [INFO] - [E:19| 500]: Train Loss:0.0024322,  Val MRR:0.28484	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:59:21,350 - [INFO] - [E:19| 600]: Train Loss:0.0028078,  Val MRR:0.28484	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:59:40,093 - [INFO] - [E:19| 700]: Train Loss:0.0028143,  Val MRR:0.28484	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 14:59:59,284 - [INFO] - [E:19| 800]: Train Loss:0.0028156,  Val MRR:0.28484	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:00:18,965 - [INFO] - [E:19| 900]: Train Loss:0.002772,  Val MRR:0.28484	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:00:38,405 - [INFO] - [E:19| 1000]: Train Loss:0.002715,  Val MRR:0.28484	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:00:58,619 - [INFO] - [E:19| 1100]: Train Loss:0.0027012,  Val MRR:0.28484	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:01:12,382 - [INFO] - [Epoch:19]:  Training Loss:0.002843
+
+2026-01-07 15:01:12,677 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:01:21,474 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:01:24,915 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:01:33,639 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:01:36,828 - [INFO] - [Epoch 19 valid]: MRR: Tail : 0.35996, Head : 0.21722, Avg : 0.28859
+2026-01-07 15:01:37,173 - [INFO] - [Epoch 19]: Training Loss: 0.0028434, Valid MRR: 0.28859
+
+
+2026-01-07 15:01:37,561 - [INFO] - [E:20| 0]: Train Loss:0.0023952,  Val MRR:0.28859	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:01:57,551 - [INFO] - [E:20| 100]: Train Loss:0.0021026,  Val MRR:0.28859	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:02:16,721 - [INFO] - [E:20| 200]: Train Loss:0.0021142,  Val MRR:0.28859	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:02:35,824 - [INFO] - [E:20| 300]: Train Loss:0.0026409,  Val MRR:0.28859	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:02:55,182 - [INFO] - [E:20| 400]: Train Loss:0.0025559,  Val MRR:0.28859	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:03:14,481 - [INFO] - [E:20| 500]: Train Loss:0.0024724,  Val MRR:0.28859	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:03:33,703 - [INFO] - [E:20| 600]: Train Loss:0.0025072,  Val MRR:0.28859	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:03:53,504 - [INFO] - [E:20| 700]: Train Loss:0.0028177,  Val MRR:0.28859	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:04:13,725 - [INFO] - [E:20| 800]: Train Loss:0.0028039,  Val MRR:0.28859	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:04:33,429 - [INFO] - [E:20| 900]: Train Loss:0.0028178,  Val MRR:0.28859	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:04:52,917 - [INFO] - [E:20| 1000]: Train Loss:0.0027674,  Val MRR:0.28859	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:05:12,492 - [INFO] - [E:20| 1100]: Train Loss:0.0027172,  Val MRR:0.28859	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:05:26,320 - [INFO] - [Epoch:20]:  Training Loss:0.002734
+
+2026-01-07 15:05:26,578 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:05:35,394 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:05:38,864 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:05:47,650 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:05:50,810 - [INFO] - [Epoch 20 valid]: MRR: Tail : 0.36783, Head : 0.21631, Avg : 0.29207
+2026-01-07 15:05:51,234 - [INFO] - [Epoch 20]: Training Loss: 0.0027339, Valid MRR: 0.29207
+
+
+2026-01-07 15:05:51,628 - [INFO] - [E:21| 0]: Train Loss:0.0020772,  Val MRR:0.29207	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:06:11,050 - [INFO] - [E:21| 100]: Train Loss:0.002386,  Val MRR:0.29207	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:06:30,302 - [INFO] - [E:21| 200]: Train Loss:0.002248,  Val MRR:0.29207	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:06:49,730 - [INFO] - [E:21| 300]: Train Loss:0.0022633,  Val MRR:0.29207	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:07:09,193 - [INFO] - [E:21| 400]: Train Loss:0.0022285,  Val MRR:0.29207	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:07:28,568 - [INFO] - [E:21| 500]: Train Loss:0.0025777,  Val MRR:0.29207	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:07:48,083 - [INFO] - [E:21| 600]: Train Loss:0.0024883,  Val MRR:0.29207	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:08:07,047 - [INFO] - [E:21| 700]: Train Loss:0.0026079,  Val MRR:0.29207	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:08:26,247 - [INFO] - [E:21| 800]: Train Loss:0.00264,  Val MRR:0.29207	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:08:45,650 - [INFO] - [E:21| 900]: Train Loss:0.0025862,  Val MRR:0.29207	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:09:04,671 - [INFO] - [E:21| 1000]: Train Loss:0.0025133,  Val MRR:0.29207	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:09:23,971 - [INFO] - [E:21| 1100]: Train Loss:0.0025123,  Val MRR:0.29207	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:09:37,545 - [INFO] - [Epoch:21]:  Training Loss:0.002568
+
+2026-01-07 15:09:37,807 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:09:46,698 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:09:50,094 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:09:59,103 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:10:02,353 - [INFO] - [Epoch 21 valid]: MRR: Tail : 0.37111, Head : 0.22365, Avg : 0.29738
+2026-01-07 15:10:02,748 - [INFO] - [Epoch 21]: Training Loss: 0.0025676, Valid MRR: 0.29738
+
+
+2026-01-07 15:10:03,217 - [INFO] - [E:22| 0]: Train Loss:0.001968,  Val MRR:0.29738	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:10:23,226 - [INFO] - [E:22| 100]: Train Loss:0.003422,  Val MRR:0.29738	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:10:43,115 - [INFO] - [E:22| 200]: Train Loss:0.0029354,  Val MRR:0.29738	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:11:02,746 - [INFO] - [E:22| 300]: Train Loss:0.0026607,  Val MRR:0.29738	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:11:21,564 - [INFO] - [E:22| 400]: Train Loss:0.0026808,  Val MRR:0.29738	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:11:40,790 - [INFO] - [E:22| 500]: Train Loss:0.0025641,  Val MRR:0.29738	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:12:00,311 - [INFO] - [E:22| 600]: Train Loss:0.0024607,  Val MRR:0.29738	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:12:20,616 - [INFO] - [E:22| 700]: Train Loss:0.0023738,  Val MRR:0.29738	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:12:40,817 - [INFO] - [E:22| 800]: Train Loss:0.0023357,  Val MRR:0.29738	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:13:00,919 - [INFO] - [E:22| 900]: Train Loss:0.0024415,  Val MRR:0.29738	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:13:20,314 - [INFO] - [E:22| 1000]: Train Loss:0.0023806,  Val MRR:0.29738	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:13:39,796 - [INFO] - [E:22| 1100]: Train Loss:0.0023481,  Val MRR:0.29738	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:13:53,806 - [INFO] - [Epoch:22]:  Training Loss:0.002366
+
+2026-01-07 15:13:54,086 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:14:02,998 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:14:06,725 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:14:15,734 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:14:19,032 - [INFO] - [Epoch 22 valid]: MRR: Tail : 0.38529, Head : 0.22116, Avg : 0.30323
+2026-01-07 15:14:19,450 - [INFO] - [Epoch 22]: Training Loss: 0.0023662, Valid MRR: 0.30323
+
+
+2026-01-07 15:14:19,875 - [INFO] - [E:23| 0]: Train Loss:0.0018759,  Val MRR:0.30323	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:14:40,511 - [INFO] - [E:23| 100]: Train Loss:0.0019116,  Val MRR:0.30323	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:15:00,437 - [INFO] - [E:23| 200]: Train Loss:0.0018342,  Val MRR:0.30323	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:15:19,965 - [INFO] - [E:23| 300]: Train Loss:0.0017808,  Val MRR:0.30323	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:15:39,907 - [INFO] - [E:23| 400]: Train Loss:0.0019241,  Val MRR:0.30323	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:15:59,319 - [INFO] - [E:23| 500]: Train Loss:0.0019551,  Val MRR:0.30323	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:16:19,245 - [INFO] - [E:23| 600]: Train Loss:0.0018971,  Val MRR:0.30323	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:16:39,091 - [INFO] - [E:23| 700]: Train Loss:0.0018688,  Val MRR:0.30323	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:16:59,906 - [INFO] - [E:23| 800]: Train Loss:0.0018284,  Val MRR:0.30323	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:17:19,477 - [INFO] - [E:23| 900]: Train Loss:0.0018501,  Val MRR:0.30323	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:17:39,212 - [INFO] - [E:23| 1000]: Train Loss:0.0018706,  Val MRR:0.30323	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:17:58,894 - [INFO] - [E:23| 1100]: Train Loss:0.0019347,  Val MRR:0.30323	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:18:12,569 - [INFO] - [Epoch:23]:  Training Loss:0.002022
+
+2026-01-07 15:18:12,820 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:18:21,611 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:18:25,102 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:18:33,833 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:18:37,049 - [INFO] - [Epoch 23 valid]: MRR: Tail : 0.39521, Head : 0.22475, Avg : 0.30998
+2026-01-07 15:18:37,400 - [INFO] - [Epoch 23]: Training Loss: 0.0020221, Valid MRR: 0.30998
+
+
+2026-01-07 15:18:37,820 - [INFO] - [E:24| 0]: Train Loss:0.0014279,  Val MRR:0.30998	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:18:58,221 - [INFO] - [E:24| 100]: Train Loss:0.002323,  Val MRR:0.30998	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:19:19,321 - [INFO] - [E:24| 200]: Train Loss:0.0020299,  Val MRR:0.30998	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:19:40,137 - [INFO] - [E:24| 300]: Train Loss:0.0019121,  Val MRR:0.30998	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:20:00,513 - [INFO] - [E:24| 400]: Train Loss:0.0020171,  Val MRR:0.30998	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:20:21,801 - [INFO] - [E:24| 500]: Train Loss:0.0019722,  Val MRR:0.30998	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:20:42,547 - [INFO] - [E:24| 600]: Train Loss:0.0019335,  Val MRR:0.30998	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:21:02,957 - [INFO] - [E:24| 700]: Train Loss:0.0019412,  Val MRR:0.30998	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:21:23,430 - [INFO] - [E:24| 800]: Train Loss:0.0020164,  Val MRR:0.30998	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:21:44,278 - [INFO] - [E:24| 900]: Train Loss:0.0020115,  Val MRR:0.30998	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:22:05,018 - [INFO] - [E:24| 1000]: Train Loss:0.0020649,  Val MRR:0.30998	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:22:25,806 - [INFO] - [E:24| 1100]: Train Loss:0.0021235,  Val MRR:0.30998	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:22:39,805 - [INFO] - [Epoch:24]:  Training Loss:0.002104
+
+2026-01-07 15:22:40,150 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:22:49,106 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:22:52,654 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:23:01,590 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:23:04,879 - [INFO] - [Epoch 24 valid]: MRR: Tail : 0.39751, Head : 0.221, Avg : 0.30926
+2026-01-07 15:23:04,880 - [INFO] - [Epoch 24]: Training Loss: 0.0021035, Valid MRR: 0.30998
+
+
+2026-01-07 15:23:05,312 - [INFO] - [E:25| 0]: Train Loss:0.0016854,  Val MRR:0.30998	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:23:25,581 - [INFO] - [E:25| 100]: Train Loss:0.0020323,  Val MRR:0.30998	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:23:46,333 - [INFO] - [E:25| 200]: Train Loss:0.0026855,  Val MRR:0.30998	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:24:07,681 - [INFO] - [E:25| 300]: Train Loss:0.0023644,  Val MRR:0.30998	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:24:28,970 - [INFO] - [E:25| 400]: Train Loss:0.0023358,  Val MRR:0.30998	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:24:49,690 - [INFO] - [E:25| 500]: Train Loss:0.002218,  Val MRR:0.30998	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:25:09,849 - [INFO] - [E:25| 600]: Train Loss:0.0021396,  Val MRR:0.30998	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:25:30,729 - [INFO] - [E:25| 700]: Train Loss:0.0021332,  Val MRR:0.30998	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:25:51,534 - [INFO] - [E:25| 800]: Train Loss:0.0021839,  Val MRR:0.30998	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:26:11,990 - [INFO] - [E:25| 900]: Train Loss:0.0021917,  Val MRR:0.30998	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:26:32,538 - [INFO] - [E:25| 1000]: Train Loss:0.0021513,  Val MRR:0.30998	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:26:53,282 - [INFO] - [E:25| 1100]: Train Loss:0.0021483,  Val MRR:0.30998	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:27:07,287 - [INFO] - [Epoch:25]:  Training Loss:0.00212
+
+2026-01-07 15:27:07,558 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:27:16,432 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:27:19,992 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:27:28,858 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:27:32,103 - [INFO] - [Epoch 25 valid]: MRR: Tail : 0.4132, Head : 0.227, Avg : 0.3201
+2026-01-07 15:27:32,539 - [INFO] - [Epoch 25]: Training Loss: 0.0021201, Valid MRR: 0.3201
+
+
+2026-01-07 15:27:32,938 - [INFO] - [E:26| 0]: Train Loss:0.0013281,  Val MRR:0.3201	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:27:53,562 - [INFO] - [E:26| 100]: Train Loss:0.002164,  Val MRR:0.3201	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:28:13,795 - [INFO] - [E:26| 200]: Train Loss:0.0019283,  Val MRR:0.3201	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:28:34,751 - [INFO] - [E:26| 300]: Train Loss:0.0019393,  Val MRR:0.3201	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:28:55,656 - [INFO] - [E:26| 400]: Train Loss:0.0019356,  Val MRR:0.3201	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:29:16,241 - [INFO] - [E:26| 500]: Train Loss:0.0019407,  Val MRR:0.3201	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:29:36,921 - [INFO] - [E:26| 600]: Train Loss:0.0018937,  Val MRR:0.3201	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:29:57,606 - [INFO] - [E:26| 700]: Train Loss:0.0019396,  Val MRR:0.3201	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:30:18,294 - [INFO] - [E:26| 800]: Train Loss:0.001955,  Val MRR:0.3201	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:30:38,845 - [INFO] - [E:26| 900]: Train Loss:0.0019365,  Val MRR:0.3201	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:30:59,321 - [INFO] - [E:26| 1000]: Train Loss:0.0019408,  Val MRR:0.3201	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:31:19,896 - [INFO] - [E:26| 1100]: Train Loss:0.0020676,  Val MRR:0.3201	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:31:33,974 - [INFO] - [Epoch:26]:  Training Loss:0.00205
+
+2026-01-07 15:31:34,247 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:31:43,150 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:31:46,688 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:31:55,524 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:31:58,822 - [INFO] - [Epoch 26 valid]: MRR: Tail : 0.37706, Head : 0.22226, Avg : 0.29966
+2026-01-07 15:31:58,823 - [INFO] - [Epoch 26]: Training Loss: 0.0020501, Valid MRR: 0.3201
+
+
+2026-01-07 15:31:59,288 - [INFO] - [E:27| 0]: Train Loss:0.0017646,  Val MRR:0.3201	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:32:19,821 - [INFO] - [E:27| 100]: Train Loss:0.0017277,  Val MRR:0.3201	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:32:40,521 - [INFO] - [E:27| 200]: Train Loss:0.0019851,  Val MRR:0.3201	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:33:01,650 - [INFO] - [E:27| 300]: Train Loss:0.0021179,  Val MRR:0.3201	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:33:22,220 - [INFO] - [E:27| 400]: Train Loss:0.0021496,  Val MRR:0.3201	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:33:42,631 - [INFO] - [E:27| 500]: Train Loss:0.0021075,  Val MRR:0.3201	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:34:03,795 - [INFO] - [E:27| 600]: Train Loss:0.0021326,  Val MRR:0.3201	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:34:25,026 - [INFO] - [E:27| 700]: Train Loss:0.0021013,  Val MRR:0.3201	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:34:46,059 - [INFO] - [E:27| 800]: Train Loss:0.0021159,  Val MRR:0.3201	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:35:06,648 - [INFO] - [E:27| 900]: Train Loss:0.0020737,  Val MRR:0.3201	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:35:27,343 - [INFO] - [E:27| 1000]: Train Loss:0.002041,  Val MRR:0.3201	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:35:47,838 - [INFO] - [E:27| 1100]: Train Loss:0.0020514,  Val MRR:0.3201	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:36:02,203 - [INFO] - [Epoch:27]:  Training Loss:0.002029
+
+2026-01-07 15:36:02,453 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:36:11,344 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:36:14,885 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:36:23,819 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:36:27,077 - [INFO] - [Epoch 27 valid]: MRR: Tail : 0.40205, Head : 0.2267, Avg : 0.31437
+2026-01-07 15:36:27,078 - [INFO] - [Epoch 27]: Training Loss: 0.002029, Valid MRR: 0.3201
+
+
+2026-01-07 15:36:27,514 - [INFO] - [E:28| 0]: Train Loss:0.0017478,  Val MRR:0.3201	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:36:48,162 - [INFO] - [E:28| 100]: Train Loss:0.0019533,  Val MRR:0.3201	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:37:08,524 - [INFO] - [E:28| 200]: Train Loss:0.0019689,  Val MRR:0.3201	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:37:29,120 - [INFO] - [E:28| 300]: Train Loss:0.0020315,  Val MRR:0.3201	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:37:50,025 - [INFO] - [E:28| 400]: Train Loss:0.0020242,  Val MRR:0.3201	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:38:10,799 - [INFO] - [E:28| 500]: Train Loss:0.001946,  Val MRR:0.3201	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:38:31,698 - [INFO] - [E:28| 600]: Train Loss:0.0019911,  Val MRR:0.3201	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:38:52,410 - [INFO] - [E:28| 700]: Train Loss:0.0019473,  Val MRR:0.3201	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:39:13,284 - [INFO] - [E:28| 800]: Train Loss:0.0020286,  Val MRR:0.3201	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:39:33,920 - [INFO] - [E:28| 900]: Train Loss:0.0019839,  Val MRR:0.3201	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:39:54,619 - [INFO] - [E:28| 1000]: Train Loss:0.0019764,  Val MRR:0.3201	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:40:15,243 - [INFO] - [E:28| 1100]: Train Loss:0.0020253,  Val MRR:0.3201	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:40:29,371 - [INFO] - [Epoch:28]:  Training Loss:0.002005
+
+2026-01-07 15:40:29,622 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:40:38,562 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:40:42,109 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:40:51,124 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:40:54,370 - [INFO] - [Epoch 28 valid]: MRR: Tail : 0.42144, Head : 0.22799, Avg : 0.32472
+2026-01-07 15:40:54,872 - [INFO] - [Epoch 28]: Training Loss: 0.0020045, Valid MRR: 0.32472
+
+
+2026-01-07 15:40:55,281 - [INFO] - [E:29| 0]: Train Loss:0.0014569,  Val MRR:0.32472	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:41:16,066 - [INFO] - [E:29| 100]: Train Loss:0.0018137,  Val MRR:0.32472	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:41:36,527 - [INFO] - [E:29| 200]: Train Loss:0.0020159,  Val MRR:0.32472	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:41:57,145 - [INFO] - [E:29| 300]: Train Loss:0.0020032,  Val MRR:0.32472	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:42:18,220 - [INFO] - [E:29| 400]: Train Loss:0.0020069,  Val MRR:0.32472	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:42:39,090 - [INFO] - [E:29| 500]: Train Loss:0.0019373,  Val MRR:0.32472	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:42:59,739 - [INFO] - [E:29| 600]: Train Loss:0.0019095,  Val MRR:0.32472	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:43:20,291 - [INFO] - [E:29| 700]: Train Loss:0.0018742,  Val MRR:0.32472	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:43:41,055 - [INFO] - [E:29| 800]: Train Loss:0.0018745,  Val MRR:0.32472	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:44:02,246 - [INFO] - [E:29| 900]: Train Loss:0.0018873,  Val MRR:0.32472	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:44:23,627 - [INFO] - [E:29| 1000]: Train Loss:0.0019075,  Val MRR:0.32472	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:44:44,408 - [INFO] - [E:29| 1100]: Train Loss:0.0019577,  Val MRR:0.32472	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:44:58,768 - [INFO] - [Epoch:29]:  Training Loss:0.001936
+
+2026-01-07 15:44:59,020 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:45:07,896 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:45:11,493 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:45:20,374 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:45:23,648 - [INFO] - [Epoch 29 valid]: MRR: Tail : 0.43521, Head : 0.22948, Avg : 0.33234
+2026-01-07 15:45:24,045 - [INFO] - [Epoch 29]: Training Loss: 0.0019357, Valid MRR: 0.33234
+
+
+2026-01-07 15:45:24,439 - [INFO] - [E:30| 0]: Train Loss:0.001861,  Val MRR:0.33234	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:45:44,746 - [INFO] - [E:30| 100]: Train Loss:0.001867,  Val MRR:0.33234	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:46:05,430 - [INFO] - [E:30| 200]: Train Loss:0.002035,  Val MRR:0.33234	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:46:26,180 - [INFO] - [E:30| 300]: Train Loss:0.0019074,  Val MRR:0.33234	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:46:46,962 - [INFO] - [E:30| 400]: Train Loss:0.0019055,  Val MRR:0.33234	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:47:07,573 - [INFO] - [E:30| 500]: Train Loss:0.0019627,  Val MRR:0.33234	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:47:28,214 - [INFO] - [E:30| 600]: Train Loss:0.0018959,  Val MRR:0.33234	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:47:48,970 - [INFO] - [E:30| 700]: Train Loss:0.0018565,  Val MRR:0.33234	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:48:09,657 - [INFO] - [E:30| 800]: Train Loss:0.0018673,  Val MRR:0.33234	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:48:30,395 - [INFO] - [E:30| 900]: Train Loss:0.0018733,  Val MRR:0.33234	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:48:50,993 - [INFO] - [E:30| 1000]: Train Loss:0.00188,  Val MRR:0.33234	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:49:11,497 - [INFO] - [E:30| 1100]: Train Loss:0.0019293,  Val MRR:0.33234	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:49:25,453 - [INFO] - [Epoch:30]:  Training Loss:0.001918
+
+2026-01-07 15:49:25,713 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:49:34,651 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:49:38,082 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:49:47,171 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:49:50,408 - [INFO] - [Epoch 30 valid]: MRR: Tail : 0.39577, Head : 0.22292, Avg : 0.30935
+2026-01-07 15:49:50,409 - [INFO] - [Epoch 30]: Training Loss: 0.0019182, Valid MRR: 0.33234
+
+
+2026-01-07 15:49:50,797 - [INFO] - [E:31| 0]: Train Loss:0.00166,  Val MRR:0.33234	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:50:10,616 - [INFO] - [E:31| 100]: Train Loss:0.0024541,  Val MRR:0.33234	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:50:31,578 - [INFO] - [E:31| 200]: Train Loss:0.0020465,  Val MRR:0.33234	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:50:52,238 - [INFO] - [E:31| 300]: Train Loss:0.0019238,  Val MRR:0.33234	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:51:12,854 - [INFO] - [E:31| 400]: Train Loss:0.001921,  Val MRR:0.33234	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:51:33,677 - [INFO] - [E:31| 500]: Train Loss:0.0018565,  Val MRR:0.33234	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:51:54,372 - [INFO] - [E:31| 600]: Train Loss:0.0019096,  Val MRR:0.33234	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:52:15,165 - [INFO] - [E:31| 700]: Train Loss:0.0018703,  Val MRR:0.33234	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:52:35,643 - [INFO] - [E:31| 800]: Train Loss:0.0019053,  Val MRR:0.33234	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:52:56,180 - [INFO] - [E:31| 900]: Train Loss:0.0019162,  Val MRR:0.33234	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:53:16,839 - [INFO] - [E:31| 1000]: Train Loss:0.001922,  Val MRR:0.33234	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:53:37,478 - [INFO] - [E:31| 1100]: Train Loss:0.0019431,  Val MRR:0.33234	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:53:52,150 - [INFO] - [Epoch:31]:  Training Loss:0.001925
+
+2026-01-07 15:53:52,423 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:54:01,579 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:54:05,295 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:54:14,693 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:54:18,184 - [INFO] - [Epoch 31 valid]: MRR: Tail : 0.41487, Head : 0.22692, Avg : 0.3209
+2026-01-07 15:54:18,185 - [INFO] - [Epoch 31]: Training Loss: 0.0019251, Valid MRR: 0.33234
+
+
+2026-01-07 15:54:18,653 - [INFO] - [E:32| 0]: Train Loss:0.0015215,  Val MRR:0.33234	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:54:39,336 - [INFO] - [E:32| 100]: Train Loss:0.0018452,  Val MRR:0.33234	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:55:00,058 - [INFO] - [E:32| 200]: Train Loss:0.0018767,  Val MRR:0.33234	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:55:20,385 - [INFO] - [E:32| 300]: Train Loss:0.0018725,  Val MRR:0.33234	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:55:40,793 - [INFO] - [E:32| 400]: Train Loss:0.0018769,  Val MRR:0.33234	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:56:01,955 - [INFO] - [E:32| 500]: Train Loss:0.0018721,  Val MRR:0.33234	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:56:23,346 - [INFO] - [E:32| 600]: Train Loss:0.0018283,  Val MRR:0.33234	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:56:44,367 - [INFO] - [E:32| 700]: Train Loss:0.0018022,  Val MRR:0.33234	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:57:04,825 - [INFO] - [E:32| 800]: Train Loss:0.0018883,  Val MRR:0.33234	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:57:25,721 - [INFO] - [E:32| 900]: Train Loss:0.0018644,  Val MRR:0.33234	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:57:46,368 - [INFO] - [E:32| 1000]: Train Loss:0.001869,  Val MRR:0.33234	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:58:06,594 - [INFO] - [E:32| 1100]: Train Loss:0.001918,  Val MRR:0.33234	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:58:20,938 - [INFO] - [Epoch:32]:  Training Loss:0.001899
+
+2026-01-07 15:58:21,272 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:58:30,153 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:58:33,763 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:58:42,620 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:58:45,914 - [INFO] - [Epoch 32 valid]: MRR: Tail : 0.43504, Head : 0.22983, Avg : 0.33244
+2026-01-07 15:58:46,451 - [INFO] - [Epoch 32]: Training Loss: 0.0018986, Valid MRR: 0.33244
+
+
+2026-01-07 15:58:46,957 - [INFO] - [E:33| 0]: Train Loss:0.0017338,  Val MRR:0.33244	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:59:07,126 - [INFO] - [E:33| 100]: Train Loss:0.0018285,  Val MRR:0.33244	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:59:27,547 - [INFO] - [E:33| 200]: Train Loss:0.0017245,  Val MRR:0.33244	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 15:59:48,312 - [INFO] - [E:33| 300]: Train Loss:0.001775,  Val MRR:0.33244	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:00:08,834 - [INFO] - [E:33| 400]: Train Loss:0.0018692,  Val MRR:0.33244	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:00:29,698 - [INFO] - [E:33| 500]: Train Loss:0.0018177,  Val MRR:0.33244	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:00:50,928 - [INFO] - [E:33| 600]: Train Loss:0.0017769,  Val MRR:0.33244	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:01:11,755 - [INFO] - [E:33| 700]: Train Loss:0.0017797,  Val MRR:0.33244	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:01:32,474 - [INFO] - [E:33| 800]: Train Loss:0.0017634,  Val MRR:0.33244	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:01:53,257 - [INFO] - [E:33| 900]: Train Loss:0.0017458,  Val MRR:0.33244	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:02:13,711 - [INFO] - [E:33| 1000]: Train Loss:0.0017759,  Val MRR:0.33244	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:02:34,810 - [INFO] - [E:33| 1100]: Train Loss:0.0017969,  Val MRR:0.33244	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:02:49,211 - [INFO] - [Epoch:33]:  Training Loss:0.001841
+
+2026-01-07 16:02:49,460 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:02:58,333 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:03:01,894 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:03:10,852 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:03:14,146 - [INFO] - [Epoch 33 valid]: MRR: Tail : 0.43708, Head : 0.23077, Avg : 0.33392
+2026-01-07 16:03:14,599 - [INFO] - [Epoch 33]: Training Loss: 0.0018413, Valid MRR: 0.33392
+
+
+2026-01-07 16:03:15,024 - [INFO] - [E:34| 0]: Train Loss:0.0015128,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:03:35,429 - [INFO] - [E:34| 100]: Train Loss:0.001812,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:03:56,588 - [INFO] - [E:34| 200]: Train Loss:0.0017999,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:04:18,021 - [INFO] - [E:34| 300]: Train Loss:0.001805,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:04:39,085 - [INFO] - [E:34| 400]: Train Loss:0.0018022,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:05:00,112 - [INFO] - [E:34| 500]: Train Loss:0.0018311,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:05:20,837 - [INFO] - [E:34| 600]: Train Loss:0.0018158,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:05:41,013 - [INFO] - [E:34| 700]: Train Loss:0.0018102,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:06:01,869 - [INFO] - [E:34| 800]: Train Loss:0.0017805,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:06:22,423 - [INFO] - [E:34| 900]: Train Loss:0.0017729,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:06:43,232 - [INFO] - [E:34| 1000]: Train Loss:0.0017723,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:07:03,895 - [INFO] - [E:34| 1100]: Train Loss:0.0017774,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:07:18,132 - [INFO] - [Epoch:34]:  Training Loss:0.001795
+
+2026-01-07 16:07:18,470 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:07:27,320 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:07:30,889 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:07:39,761 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:07:43,073 - [INFO] - [Epoch 34 valid]: MRR: Tail : 0.3986, Head : 0.22586, Avg : 0.31223
+2026-01-07 16:07:43,074 - [INFO] - [Epoch 34]: Training Loss: 0.0017946, Valid MRR: 0.33392
+
+
+2026-01-07 16:07:43,515 - [INFO] - [E:35| 0]: Train Loss:0.0014602,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:08:03,959 - [INFO] - [E:35| 100]: Train Loss:0.0015651,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:08:24,605 - [INFO] - [E:35| 200]: Train Loss:0.0016369,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:08:45,387 - [INFO] - [E:35| 300]: Train Loss:0.0015902,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:09:06,034 - [INFO] - [E:35| 400]: Train Loss:0.0016107,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:09:26,501 - [INFO] - [E:35| 500]: Train Loss:0.0016517,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:09:47,520 - [INFO] - [E:35| 600]: Train Loss:0.0016563,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:10:08,314 - [INFO] - [E:35| 700]: Train Loss:0.001637,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:10:28,838 - [INFO] - [E:35| 800]: Train Loss:0.0016636,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:10:49,622 - [INFO] - [E:35| 900]: Train Loss:0.0016853,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:11:09,926 - [INFO] - [E:35| 1000]: Train Loss:0.0016851,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:11:30,622 - [INFO] - [E:35| 1100]: Train Loss:0.0017011,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:11:44,884 - [INFO] - [Epoch:35]:  Training Loss:0.001706
+
+2026-01-07 16:11:45,164 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:11:54,091 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:11:57,614 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:12:06,507 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:12:09,739 - [INFO] - [Epoch 35 valid]: MRR: Tail : 0.43481, Head : 0.22943, Avg : 0.33212
+2026-01-07 16:12:09,740 - [INFO] - [Epoch 35]: Training Loss: 0.0017063, Valid MRR: 0.33392
+
+
+2026-01-07 16:12:10,177 - [INFO] - [E:36| 0]: Train Loss:0.0012131,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:12:30,682 - [INFO] - [E:36| 100]: Train Loss:0.0015028,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:12:51,587 - [INFO] - [E:36| 200]: Train Loss:0.0016394,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:13:12,165 - [INFO] - [E:36| 300]: Train Loss:0.0016847,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:13:32,632 - [INFO] - [E:36| 400]: Train Loss:0.0016603,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:13:53,535 - [INFO] - [E:36| 500]: Train Loss:0.0017218,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:14:15,457 - [INFO] - [E:36| 600]: Train Loss:0.0017061,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:14:36,745 - [INFO] - [E:36| 700]: Train Loss:0.0016727,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:14:57,737 - [INFO] - [E:36| 800]: Train Loss:0.0016866,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:15:18,457 - [INFO] - [E:36| 900]: Train Loss:0.0016615,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:15:39,061 - [INFO] - [E:36| 1000]: Train Loss:0.0016597,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:15:59,427 - [INFO] - [E:36| 1100]: Train Loss:0.0016506,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:16:13,761 - [INFO] - [Epoch:36]:  Training Loss:0.00164
+
+2026-01-07 16:16:14,030 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:16:22,933 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:16:26,470 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:16:35,467 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:16:38,705 - [INFO] - [Epoch 36 valid]: MRR: Tail : 0.43181, Head : 0.23048, Avg : 0.33115
+2026-01-07 16:16:38,710 - [INFO] - [Epoch 36]: Training Loss: 0.0016396, Valid MRR: 0.33392
+
+
+2026-01-07 16:16:39,220 - [INFO] - [E:37| 0]: Train Loss:0.0019243,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:17:00,073 - [INFO] - [E:37| 100]: Train Loss:0.0015651,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:17:20,508 - [INFO] - [E:37| 200]: Train Loss:0.0015464,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:17:41,150 - [INFO] - [E:37| 300]: Train Loss:0.0015205,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:18:01,790 - [INFO] - [E:37| 400]: Train Loss:0.0015017,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:18:22,420 - [INFO] - [E:37| 500]: Train Loss:0.0015372,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:18:43,384 - [INFO] - [E:37| 600]: Train Loss:0.0015553,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:19:04,343 - [INFO] - [E:37| 700]: Train Loss:0.0015644,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:19:24,934 - [INFO] - [E:37| 800]: Train Loss:0.0015574,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:19:45,758 - [INFO] - [E:37| 900]: Train Loss:0.0015521,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:20:05,751 - [INFO] - [E:37| 1000]: Train Loss:0.0016136,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:20:26,168 - [INFO] - [E:37| 1100]: Train Loss:0.0016449,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:20:40,501 - [INFO] - [Epoch:37]:  Training Loss:0.001648
+
+2026-01-07 16:20:40,865 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:20:49,786 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:20:53,334 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:21:02,283 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:21:05,496 - [INFO] - [Epoch 37 valid]: MRR: Tail : 0.41841, Head : 0.22589, Avg : 0.32215
+2026-01-07 16:21:05,500 - [INFO] - [Epoch 37]: Training Loss: 0.0016483, Valid MRR: 0.33392
+
+
+2026-01-07 16:21:06,009 - [INFO] - [E:38| 0]: Train Loss:0.0013664,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:21:26,417 - [INFO] - [E:38| 100]: Train Loss:0.002225,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:21:47,126 - [INFO] - [E:38| 200]: Train Loss:0.0020698,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:22:07,544 - [INFO] - [E:38| 300]: Train Loss:0.0019579,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:22:28,254 - [INFO] - [E:38| 400]: Train Loss:0.0019584,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:22:48,928 - [INFO] - [E:38| 500]: Train Loss:0.0019577,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:23:09,472 - [INFO] - [E:38| 600]: Train Loss:0.0019066,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:23:30,041 - [INFO] - [E:38| 700]: Train Loss:0.0019517,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:23:51,248 - [INFO] - [E:38| 800]: Train Loss:0.0019154,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:24:12,640 - [INFO] - [E:38| 900]: Train Loss:0.0019504,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:24:33,659 - [INFO] - [E:38| 1000]: Train Loss:0.001922,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:24:54,462 - [INFO] - [E:38| 1100]: Train Loss:0.0019252,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:25:08,681 - [INFO] - [Epoch:38]:  Training Loss:0.001958
+
+2026-01-07 16:25:08,960 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:25:17,951 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:25:21,414 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:25:30,382 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:25:33,595 - [INFO] - [Epoch 38 valid]: MRR: Tail : 0.4352, Head : 0.23093, Avg : 0.33306
+2026-01-07 16:25:33,596 - [INFO] - [Epoch 38]: Training Loss: 0.0019583, Valid MRR: 0.33392
+
+
+2026-01-07 16:25:34,022 - [INFO] - [E:39| 0]: Train Loss:0.001671,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:25:54,737 - [INFO] - [E:39| 100]: Train Loss:0.0019987,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:26:15,412 - [INFO] - [E:39| 200]: Train Loss:0.001978,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:26:35,860 - [INFO] - [E:39| 300]: Train Loss:0.0019695,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:26:56,745 - [INFO] - [E:39| 400]: Train Loss:0.0019607,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:27:16,982 - [INFO] - [E:39| 500]: Train Loss:0.0018989,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:27:37,559 - [INFO] - [E:39| 600]: Train Loss:0.0018561,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:27:58,469 - [INFO] - [E:39| 700]: Train Loss:0.0018703,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:28:19,211 - [INFO] - [E:39| 800]: Train Loss:0.0018802,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:28:39,911 - [INFO] - [E:39| 900]: Train Loss:0.0019134,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:29:00,590 - [INFO] - [E:39| 1000]: Train Loss:0.0019467,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:29:21,335 - [INFO] - [E:39| 1100]: Train Loss:0.0019693,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:29:35,676 - [INFO] - [Epoch:39]:  Training Loss:0.001955
+
+2026-01-07 16:29:35,936 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:29:45,100 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:29:48,667 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:29:57,579 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:30:00,886 - [INFO] - [Epoch 39 valid]: MRR: Tail : 0.40676, Head : 0.22714, Avg : 0.31695
+2026-01-07 16:30:00,887 - [INFO] - [Epoch 39]: Training Loss: 0.0019551, Valid MRR: 0.33392
+
+
+2026-01-07 16:30:01,329 - [INFO] - [E:40| 0]: Train Loss:0.0016051,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:30:22,029 - [INFO] - [E:40| 100]: Train Loss:0.0020881,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:30:42,363 - [INFO] - [E:40| 200]: Train Loss:0.0020071,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:31:02,667 - [INFO] - [E:40| 300]: Train Loss:0.0019801,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:31:23,415 - [INFO] - [E:40| 400]: Train Loss:0.0019715,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:31:44,064 - [INFO] - [E:40| 500]: Train Loss:0.0019713,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:32:04,723 - [INFO] - [E:40| 600]: Train Loss:0.0019187,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:32:25,347 - [INFO] - [E:40| 700]: Train Loss:0.0019303,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:32:46,493 - [INFO] - [E:40| 800]: Train Loss:0.0019654,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:33:07,093 - [INFO] - [E:40| 900]: Train Loss:0.0020017,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:33:27,730 - [INFO] - [E:40| 1000]: Train Loss:0.0020266,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:33:48,700 - [INFO] - [E:40| 1100]: Train Loss:0.0019885,  Val MRR:0.33392	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:34:03,227 - [INFO] - [Epoch:40]:  Training Loss:0.001968
+
+2026-01-07 16:34:03,533 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:34:12,852 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:34:16,589 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:34:25,613 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:34:28,926 - [INFO] - [Epoch 40 valid]: MRR: Tail : 0.43899, Head : 0.23267, Avg : 0.33583
+2026-01-07 16:34:29,512 - [INFO] - [Epoch 40]: Training Loss: 0.0019677, Valid MRR: 0.33583
+
+
+2026-01-07 16:34:30,082 - [INFO] - [E:41| 0]: Train Loss:0.00125,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:34:50,708 - [INFO] - [E:41| 100]: Train Loss:0.0016344,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:35:11,197 - [INFO] - [E:41| 200]: Train Loss:0.0019128,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:35:31,786 - [INFO] - [E:41| 300]: Train Loss:0.0021293,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:35:52,542 - [INFO] - [E:41| 400]: Train Loss:0.002069,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:36:13,273 - [INFO] - [E:41| 500]: Train Loss:0.0019886,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:36:33,327 - [INFO] - [E:41| 600]: Train Loss:0.0019698,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:36:54,110 - [INFO] - [E:41| 700]: Train Loss:0.0019698,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:37:15,315 - [INFO] - [E:41| 800]: Train Loss:0.00197,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:37:36,066 - [INFO] - [E:41| 900]: Train Loss:0.0019655,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:37:56,566 - [INFO] - [E:41| 1000]: Train Loss:0.001933,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:38:16,836 - [INFO] - [E:41| 1100]: Train Loss:0.0019382,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:38:31,097 - [INFO] - [Epoch:41]:  Training Loss:0.001945
+
+2026-01-07 16:38:31,384 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:38:40,275 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:38:43,769 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:38:52,579 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:38:55,795 - [INFO] - [Epoch 41 valid]: MRR: Tail : 0.42767, Head : 0.23078, Avg : 0.32923
+2026-01-07 16:38:55,796 - [INFO] - [Epoch 41]: Training Loss: 0.0019453, Valid MRR: 0.33583
+
+
+2026-01-07 16:38:56,190 - [INFO] - [E:42| 0]: Train Loss:0.0021516,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:39:16,177 - [INFO] - [E:42| 100]: Train Loss:0.0015459,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:39:36,388 - [INFO] - [E:42| 200]: Train Loss:0.0015968,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:39:56,931 - [INFO] - [E:42| 300]: Train Loss:0.0017938,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:40:16,829 - [INFO] - [E:42| 400]: Train Loss:0.001891,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:40:36,935 - [INFO] - [E:42| 500]: Train Loss:0.0018572,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:40:57,388 - [INFO] - [E:42| 600]: Train Loss:0.0018226,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:41:17,553 - [INFO] - [E:42| 700]: Train Loss:0.0019564,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:41:37,369 - [INFO] - [E:42| 800]: Train Loss:0.0019086,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:41:58,195 - [INFO] - [E:42| 900]: Train Loss:0.0019461,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:42:18,799 - [INFO] - [E:42| 1000]: Train Loss:0.0019493,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:42:38,948 - [INFO] - [E:42| 1100]: Train Loss:0.0019242,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:42:53,068 - [INFO] - [Epoch:42]:  Training Loss:0.001936
+
+2026-01-07 16:42:53,317 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:43:02,167 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:43:05,810 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:43:14,737 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:43:18,146 - [INFO] - [Epoch 42 valid]: MRR: Tail : 0.43068, Head : 0.22858, Avg : 0.32963
+2026-01-07 16:43:18,147 - [INFO] - [Epoch 42]: Training Loss: 0.0019362, Valid MRR: 0.33583
+
+
+2026-01-07 16:43:18,751 - [INFO] - [E:43| 0]: Train Loss:0.0016641,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:43:36,463 - [INFO] - [E:43| 100]: Train Loss:0.0019219,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:43:56,987 - [INFO] - [E:43| 200]: Train Loss:0.0018972,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:44:18,437 - [INFO] - [E:43| 300]: Train Loss:0.0018229,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:44:39,449 - [INFO] - [E:43| 400]: Train Loss:0.0019075,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:45:00,313 - [INFO] - [E:43| 500]: Train Loss:0.0019026,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:45:20,734 - [INFO] - [E:43| 600]: Train Loss:0.0018601,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:45:39,983 - [INFO] - [E:43| 700]: Train Loss:0.0019172,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:46:00,708 - [INFO] - [E:43| 800]: Train Loss:0.0020227,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:46:21,551 - [INFO] - [E:43| 900]: Train Loss:0.0020117,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:46:41,821 - [INFO] - [E:43| 1000]: Train Loss:0.0019784,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:47:01,774 - [INFO] - [E:43| 1100]: Train Loss:0.0019453,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:47:15,703 - [INFO] - [Epoch:43]:  Training Loss:0.001926
+
+2026-01-07 16:47:16,002 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:47:24,840 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:47:28,325 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:47:37,106 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:47:40,319 - [INFO] - [Epoch 43 valid]: MRR: Tail : 0.43775, Head : 0.23153, Avg : 0.33464
+2026-01-07 16:47:40,320 - [INFO] - [Epoch 43]: Training Loss: 0.0019259, Valid MRR: 0.33583
+
+
+2026-01-07 16:47:40,820 - [INFO] - [E:44| 0]: Train Loss:0.0018158,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:48:01,267 - [INFO] - [E:44| 100]: Train Loss:0.0019203,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:48:21,223 - [INFO] - [E:44| 200]: Train Loss:0.0020442,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:48:41,211 - [INFO] - [E:44| 300]: Train Loss:0.0021659,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:49:00,954 - [INFO] - [E:44| 400]: Train Loss:0.0021033,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:49:20,548 - [INFO] - [E:44| 500]: Train Loss:0.0021235,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:49:40,421 - [INFO] - [E:44| 600]: Train Loss:0.0020993,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:50:00,367 - [INFO] - [E:44| 700]: Train Loss:0.0020757,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:50:19,929 - [INFO] - [E:44| 800]: Train Loss:0.0020173,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:50:39,513 - [INFO] - [E:44| 900]: Train Loss:0.001995,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:51:00,000 - [INFO] - [E:44| 1000]: Train Loss:0.0019555,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:51:20,765 - [INFO] - [E:44| 1100]: Train Loss:0.0019242,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:51:35,103 - [INFO] - [Epoch:44]:  Training Loss:0.001907
+
+2026-01-07 16:51:35,463 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:51:44,414 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:51:47,971 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:51:56,889 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:52:00,111 - [INFO] - [Epoch 44 valid]: MRR: Tail : 0.43612, Head : 0.23317, Avg : 0.33465
+2026-01-07 16:52:00,112 - [INFO] - [Epoch 44]: Training Loss: 0.0019074, Valid MRR: 0.33583
+
+
+2026-01-07 16:52:00,517 - [INFO] - [E:45| 0]: Train Loss:0.0013519,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:52:20,988 - [INFO] - [E:45| 100]: Train Loss:0.001853,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:52:41,791 - [INFO] - [E:45| 200]: Train Loss:0.0017534,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:53:02,394 - [INFO] - [E:45| 300]: Train Loss:0.0019754,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:53:23,143 - [INFO] - [E:45| 400]: Train Loss:0.0019936,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:53:44,142 - [INFO] - [E:45| 500]: Train Loss:0.0019109,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:54:05,530 - [INFO] - [E:45| 600]: Train Loss:0.0018939,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:54:26,899 - [INFO] - [E:45| 700]: Train Loss:0.001891,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:54:47,801 - [INFO] - [E:45| 800]: Train Loss:0.0018606,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:55:08,539 - [INFO] - [E:45| 900]: Train Loss:0.001871,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:55:29,198 - [INFO] - [E:45| 1000]: Train Loss:0.0018801,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:55:50,196 - [INFO] - [E:45| 1100]: Train Loss:0.0018766,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:56:04,499 - [INFO] - [Epoch:45]:  Training Loss:0.001878
+
+2026-01-07 16:56:04,742 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:56:13,649 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:56:17,195 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:56:26,098 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:56:29,382 - [INFO] - [Epoch 45 valid]: MRR: Tail : 0.43737, Head : 0.2316, Avg : 0.33448
+2026-01-07 16:56:29,383 - [INFO] - [Epoch 45]: Training Loss: 0.0018785, Valid MRR: 0.33583
+
+
+2026-01-07 16:56:29,800 - [INFO] - [E:46| 0]: Train Loss:0.0016822,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:56:50,582 - [INFO] - [E:46| 100]: Train Loss:0.0015546,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:57:11,385 - [INFO] - [E:46| 200]: Train Loss:0.0015922,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:57:31,925 - [INFO] - [E:46| 300]: Train Loss:0.001888,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:57:52,350 - [INFO] - [E:46| 400]: Train Loss:0.0018864,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:58:13,093 - [INFO] - [E:46| 500]: Train Loss:0.0018211,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:58:33,943 - [INFO] - [E:46| 600]: Train Loss:0.0018308,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:58:54,381 - [INFO] - [E:46| 700]: Train Loss:0.0018731,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:59:15,060 - [INFO] - [E:46| 800]: Train Loss:0.0018617,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:59:35,864 - [INFO] - [E:46| 900]: Train Loss:0.0018312,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 16:59:56,794 - [INFO] - [E:46| 1000]: Train Loss:0.0018219,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:00:17,486 - [INFO] - [E:46| 1100]: Train Loss:0.001856,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:00:31,771 - [INFO] - [Epoch:46]:  Training Loss:0.001842
+
+2026-01-07 17:00:32,043 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:00:40,919 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:00:44,466 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:00:53,381 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:00:56,652 - [INFO] - [Epoch 46 valid]: MRR: Tail : 0.42116, Head : 0.23169, Avg : 0.32642
+2026-01-07 17:00:56,653 - [INFO] - [Epoch 46]: Training Loss: 0.0018417, Valid MRR: 0.33583
+
+
+2026-01-07 17:00:57,062 - [INFO] - [E:47| 0]: Train Loss:0.001536,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:01:17,521 - [INFO] - [E:47| 100]: Train Loss:0.0021067,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:01:38,098 - [INFO] - [E:47| 200]: Train Loss:0.0018423,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:01:58,949 - [INFO] - [E:47| 300]: Train Loss:0.0018559,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:02:19,264 - [INFO] - [E:47| 400]: Train Loss:0.0017788,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:02:39,609 - [INFO] - [E:47| 500]: Train Loss:0.001799,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:03:00,399 - [INFO] - [E:47| 600]: Train Loss:0.0017833,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:03:21,017 - [INFO] - [E:47| 700]: Train Loss:0.0018162,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:03:41,768 - [INFO] - [E:47| 800]: Train Loss:0.0017766,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:04:03,019 - [INFO] - [E:47| 900]: Train Loss:0.0017769,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:04:24,292 - [INFO] - [E:47| 1000]: Train Loss:0.0017614,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:04:45,358 - [INFO] - [E:47| 1100]: Train Loss:0.0017532,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:04:59,439 - [INFO] - [Epoch:47]:  Training Loss:0.001781
+
+2026-01-07 17:04:59,693 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:05:08,589 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:05:12,128 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:05:20,989 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:05:24,246 - [INFO] - [Epoch 47 valid]: MRR: Tail : 0.43296, Head : 0.22872, Avg : 0.33084
+2026-01-07 17:05:24,247 - [INFO] - [Epoch 47]: Training Loss: 0.0017808, Valid MRR: 0.33583
+
+
+2026-01-07 17:05:24,726 - [INFO] - [E:48| 0]: Train Loss:0.0014972,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:05:45,151 - [INFO] - [E:48| 100]: Train Loss:0.001499,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:06:05,324 - [INFO] - [E:48| 200]: Train Loss:0.0015781,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:06:25,919 - [INFO] - [E:48| 300]: Train Loss:0.0015228,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:06:46,124 - [INFO] - [E:48| 400]: Train Loss:0.0014969,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:07:06,442 - [INFO] - [E:48| 500]: Train Loss:0.0015078,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:07:26,757 - [INFO] - [E:48| 600]: Train Loss:0.0015722,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:07:47,152 - [INFO] - [E:48| 700]: Train Loss:0.0016156,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:08:07,696 - [INFO] - [E:48| 800]: Train Loss:0.001671,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:08:28,541 - [INFO] - [E:48| 900]: Train Loss:0.0016676,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:08:49,093 - [INFO] - [E:48| 1000]: Train Loss:0.0017059,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:09:09,881 - [INFO] - [E:48| 1100]: Train Loss:0.0017802,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:09:24,149 - [INFO] - [Epoch:48]:  Training Loss:0.001769
+
+2026-01-07 17:09:24,478 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:09:33,452 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:09:36,888 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:09:45,848 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:09:49,069 - [INFO] - [Epoch 48 valid]: MRR: Tail : 0.43314, Head : 0.23261, Avg : 0.33288
+2026-01-07 17:09:49,069 - [INFO] - [Epoch 48]: Training Loss: 0.001769, Valid MRR: 0.33583
+
+
+2026-01-07 17:09:49,467 - [INFO] - [E:49| 0]: Train Loss:0.0013536,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:10:10,013 - [INFO] - [E:49| 100]: Train Loss:0.0016067,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:10:31,195 - [INFO] - [E:49| 200]: Train Loss:0.0017567,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:10:52,045 - [INFO] - [E:49| 300]: Train Loss:0.0017757,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:11:12,955 - [INFO] - [E:49| 400]: Train Loss:0.0017911,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:11:33,946 - [INFO] - [E:49| 500]: Train Loss:0.001751,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:11:54,711 - [INFO] - [E:49| 600]: Train Loss:0.0017981,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:12:15,359 - [INFO] - [E:49| 700]: Train Loss:0.001773,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:12:35,972 - [INFO] - [E:49| 800]: Train Loss:0.0018337,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:12:57,015 - [INFO] - [E:49| 900]: Train Loss:0.0018984,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:13:17,740 - [INFO] - [E:49| 1000]: Train Loss:0.0018679,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:13:38,487 - [INFO] - [E:49| 1100]: Train Loss:0.0018593,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:13:53,207 - [INFO] - [Epoch:49]:  Training Loss:0.001843
+
+2026-01-07 17:13:53,578 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:14:02,781 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:14:06,482 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:14:15,723 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:14:19,067 - [INFO] - [Epoch 49 valid]: MRR: Tail : 0.4383, Head : 0.23244, Avg : 0.33537
+2026-01-07 17:14:19,070 - [INFO] - [Epoch 49]: Training Loss: 0.0018429, Valid MRR: 0.33583
+
+
+2026-01-07 17:14:19,593 - [INFO] - [E:50| 0]: Train Loss:0.0013809,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:14:40,290 - [INFO] - [E:50| 100]: Train Loss:0.0020777,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:15:01,160 - [INFO] - [E:50| 200]: Train Loss:0.0020888,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:15:21,842 - [INFO] - [E:50| 300]: Train Loss:0.0019701,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:15:42,560 - [INFO] - [E:50| 400]: Train Loss:0.0018582,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:16:03,158 - [INFO] - [E:50| 500]: Train Loss:0.0017955,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:16:23,975 - [INFO] - [E:50| 600]: Train Loss:0.0018347,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:16:44,551 - [INFO] - [E:50| 700]: Train Loss:0.0018028,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:17:04,945 - [INFO] - [E:50| 800]: Train Loss:0.0017714,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:17:25,741 - [INFO] - [E:50| 900]: Train Loss:0.0017778,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:17:46,271 - [INFO] - [E:50| 1000]: Train Loss:0.0017859,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:18:07,103 - [INFO] - [E:50| 1100]: Train Loss:0.0017904,  Val MRR:0.33583	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:18:21,638 - [INFO] - [Epoch:50]:  Training Loss:0.001811
+
+2026-01-07 17:18:21,938 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:18:31,000 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:18:34,641 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:18:43,548 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:18:46,857 - [INFO] - [Epoch 50 valid]: MRR: Tail : 0.44016, Head : 0.23569, Avg : 0.33793
+2026-01-07 17:18:47,440 - [INFO] - [Epoch 50]: Training Loss: 0.0018114, Valid MRR: 0.33793
+
+
+2026-01-07 17:18:47,985 - [INFO] - [E:51| 0]: Train Loss:0.001423,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:19:08,565 - [INFO] - [E:51| 100]: Train Loss:0.0017986,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:19:29,102 - [INFO] - [E:51| 200]: Train Loss:0.0018912,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:19:49,847 - [INFO] - [E:51| 300]: Train Loss:0.0019592,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:20:10,487 - [INFO] - [E:51| 400]: Train Loss:0.0018334,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:20:31,110 - [INFO] - [E:51| 500]: Train Loss:0.0017638,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:20:51,724 - [INFO] - [E:51| 600]: Train Loss:0.0017658,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:21:12,600 - [INFO] - [E:51| 700]: Train Loss:0.0017585,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:21:33,195 - [INFO] - [E:51| 800]: Train Loss:0.0017221,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:21:54,012 - [INFO] - [E:51| 900]: Train Loss:0.0017105,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:22:14,845 - [INFO] - [E:51| 1000]: Train Loss:0.0016835,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:22:35,431 - [INFO] - [E:51| 1100]: Train Loss:0.0016606,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:22:49,753 - [INFO] - [Epoch:51]:  Training Loss:0.001644
+
+2026-01-07 17:22:50,050 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:22:59,067 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:23:02,780 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:23:11,707 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:23:14,883 - [INFO] - [Epoch 51 valid]: MRR: Tail : 0.43708, Head : 0.23567, Avg : 0.33638
+2026-01-07 17:23:14,883 - [INFO] - [Epoch 51]: Training Loss: 0.0016443, Valid MRR: 0.33793
+
+
+2026-01-07 17:23:15,352 - [INFO] - [E:52| 0]: Train Loss:0.0022424,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:23:35,707 - [INFO] - [E:52| 100]: Train Loss:0.0017044,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:23:56,880 - [INFO] - [E:52| 200]: Train Loss:0.001593,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:24:18,112 - [INFO] - [E:52| 300]: Train Loss:0.0015905,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:24:38,843 - [INFO] - [E:52| 400]: Train Loss:0.0015243,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:24:59,359 - [INFO] - [E:52| 500]: Train Loss:0.0014923,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:25:19,780 - [INFO] - [E:52| 600]: Train Loss:0.0014651,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:25:40,457 - [INFO] - [E:52| 700]: Train Loss:0.0014539,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:26:00,946 - [INFO] - [E:52| 800]: Train Loss:0.0014395,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:26:21,521 - [INFO] - [E:52| 900]: Train Loss:0.0014285,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:26:42,173 - [INFO] - [E:52| 1000]: Train Loss:0.0014227,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:27:02,625 - [INFO] - [E:52| 1100]: Train Loss:0.0014117,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:27:16,957 - [INFO] - [Epoch:52]:  Training Loss:0.001405
+
+2026-01-07 17:27:17,232 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:27:26,170 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:27:29,781 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:27:38,784 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:27:42,079 - [INFO] - [Epoch 52 valid]: MRR: Tail : 0.43894, Head : 0.2341, Avg : 0.33652
+2026-01-07 17:27:42,080 - [INFO] - [Epoch 52]: Training Loss: 0.001405, Valid MRR: 0.33793
+
+
+2026-01-07 17:27:42,522 - [INFO] - [E:53| 0]: Train Loss:0.0013266,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:28:03,153 - [INFO] - [E:53| 100]: Train Loss:0.0013337,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:28:23,365 - [INFO] - [E:53| 200]: Train Loss:0.0013211,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:28:44,203 - [INFO] - [E:53| 300]: Train Loss:0.0013155,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:29:04,950 - [INFO] - [E:53| 400]: Train Loss:0.001318,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:29:25,506 - [INFO] - [E:53| 500]: Train Loss:0.0013138,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:29:46,232 - [INFO] - [E:53| 600]: Train Loss:0.0013101,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:30:06,914 - [INFO] - [E:53| 700]: Train Loss:0.0013108,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:30:27,506 - [INFO] - [E:53| 800]: Train Loss:0.0013095,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:30:48,101 - [INFO] - [E:53| 900]: Train Loss:0.0013205,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:31:08,866 - [INFO] - [E:53| 1000]: Train Loss:0.0013244,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:31:29,423 - [INFO] - [E:53| 1100]: Train Loss:0.0013242,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:31:43,662 - [INFO] - [Epoch:53]:  Training Loss:0.001325
+
+2026-01-07 17:31:44,023 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:31:53,084 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:31:56,622 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:32:05,779 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:32:09,047 - [INFO] - [Epoch 53 valid]: MRR: Tail : 0.43691, Head : 0.2335, Avg : 0.33521
+2026-01-07 17:32:09,047 - [INFO] - [Epoch 53]: Training Loss: 0.0013247, Valid MRR: 0.33793
+
+
+2026-01-07 17:32:09,478 - [INFO] - [E:54| 0]: Train Loss:0.0011278,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:32:30,282 - [INFO] - [E:54| 100]: Train Loss:0.0012727,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:32:51,106 - [INFO] - [E:54| 200]: Train Loss:0.0012856,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:33:11,271 - [INFO] - [E:54| 300]: Train Loss:0.0013023,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:33:32,077 - [INFO] - [E:54| 400]: Train Loss:0.0013158,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:33:53,186 - [INFO] - [E:54| 500]: Train Loss:0.0013095,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:34:14,617 - [INFO] - [E:54| 600]: Train Loss:0.0013065,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:34:35,866 - [INFO] - [E:54| 700]: Train Loss:0.0013077,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:34:56,848 - [INFO] - [E:54| 800]: Train Loss:0.0013118,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:35:17,319 - [INFO] - [E:54| 900]: Train Loss:0.001316,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:35:38,107 - [INFO] - [E:54| 1000]: Train Loss:0.0013212,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:35:59,187 - [INFO] - [E:54| 1100]: Train Loss:0.0013191,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:36:13,372 - [INFO] - [Epoch:54]:  Training Loss:0.00132
+
+2026-01-07 17:36:13,690 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:36:22,653 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:36:26,209 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:36:35,125 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:36:38,400 - [INFO] - [Epoch 54 valid]: MRR: Tail : 0.43886, Head : 0.23523, Avg : 0.33704
+2026-01-07 17:36:38,401 - [INFO] - [Epoch 54]: Training Loss: 0.0013203, Valid MRR: 0.33793
+
+
+2026-01-07 17:36:38,862 - [INFO] - [E:55| 0]: Train Loss:0.0011966,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:36:59,684 - [INFO] - [E:55| 100]: Train Loss:0.0012742,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:37:19,946 - [INFO] - [E:55| 200]: Train Loss:0.0012886,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:37:40,523 - [INFO] - [E:55| 300]: Train Loss:0.0012924,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:38:01,198 - [INFO] - [E:55| 400]: Train Loss:0.0013062,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:38:21,485 - [INFO] - [E:55| 500]: Train Loss:0.0013055,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:38:42,379 - [INFO] - [E:55| 600]: Train Loss:0.0013162,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:39:03,052 - [INFO] - [E:55| 700]: Train Loss:0.0013231,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:39:23,773 - [INFO] - [E:55| 800]: Train Loss:0.0013319,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:39:44,402 - [INFO] - [E:55| 900]: Train Loss:0.0013297,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:40:05,240 - [INFO] - [E:55| 1000]: Train Loss:0.0013269,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:40:25,914 - [INFO] - [E:55| 1100]: Train Loss:0.0013224,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:40:40,143 - [INFO] - [Epoch:55]:  Training Loss:0.001322
+
+2026-01-07 17:40:40,461 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:40:49,559 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:40:53,145 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:41:02,010 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:41:05,190 - [INFO] - [Epoch 55 valid]: MRR: Tail : 0.43774, Head : 0.23662, Avg : 0.33718
+2026-01-07 17:41:05,191 - [INFO] - [Epoch 55]: Training Loss: 0.0013218, Valid MRR: 0.33793
+
+
+2026-01-07 17:41:05,654 - [INFO] - [E:56| 0]: Train Loss:0.0013862,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:41:26,596 - [INFO] - [E:56| 100]: Train Loss:0.0012717,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:41:47,090 - [INFO] - [E:56| 200]: Train Loss:0.0013042,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:42:07,764 - [INFO] - [E:56| 300]: Train Loss:0.0013033,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:42:28,395 - [INFO] - [E:56| 400]: Train Loss:0.0013018,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:42:49,076 - [INFO] - [E:56| 500]: Train Loss:0.0013061,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:43:09,459 - [INFO] - [E:56| 600]: Train Loss:0.0013057,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:43:30,244 - [INFO] - [E:56| 700]: Train Loss:0.0013104,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:43:50,902 - [INFO] - [E:56| 800]: Train Loss:0.0013109,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:44:12,077 - [INFO] - [E:56| 900]: Train Loss:0.0013169,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:44:33,211 - [INFO] - [E:56| 1000]: Train Loss:0.0013205,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:44:53,625 - [INFO] - [E:56| 1100]: Train Loss:0.0013199,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:45:07,712 - [INFO] - [Epoch:56]:  Training Loss:0.001323
+
+2026-01-07 17:45:07,955 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:45:16,923 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:45:20,439 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:45:29,346 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:45:32,673 - [INFO] - [Epoch 56 valid]: MRR: Tail : 0.42454, Head : 0.23473, Avg : 0.32963
+2026-01-07 17:45:32,675 - [INFO] - [Epoch 56]: Training Loss: 0.0013233, Valid MRR: 0.33793
+
+
+2026-01-07 17:45:33,110 - [INFO] - [E:57| 0]: Train Loss:0.0013261,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:45:54,031 - [INFO] - [E:57| 100]: Train Loss:0.0013292,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:46:14,744 - [INFO] - [E:57| 200]: Train Loss:0.0013093,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:46:35,405 - [INFO] - [E:57| 300]: Train Loss:0.0013252,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:46:55,825 - [INFO] - [E:57| 400]: Train Loss:0.0013321,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:47:16,422 - [INFO] - [E:57| 500]: Train Loss:0.0013359,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:47:37,230 - [INFO] - [E:57| 600]: Train Loss:0.0013359,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:47:58,142 - [INFO] - [E:57| 700]: Train Loss:0.0013294,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:48:18,731 - [INFO] - [E:57| 800]: Train Loss:0.0013275,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:48:39,572 - [INFO] - [E:57| 900]: Train Loss:0.0013234,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:49:00,355 - [INFO] - [E:57| 1000]: Train Loss:0.0013199,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:49:20,989 - [INFO] - [E:57| 1100]: Train Loss:0.0013194,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:49:35,349 - [INFO] - [Epoch:57]:  Training Loss:0.001323
+
+2026-01-07 17:49:35,695 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:49:44,652 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:49:48,299 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:49:57,256 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:50:00,467 - [INFO] - [Epoch 57 valid]: MRR: Tail : 0.42254, Head : 0.23234, Avg : 0.32744
+2026-01-07 17:50:00,469 - [INFO] - [Epoch 57]: Training Loss: 0.001323, Valid MRR: 0.33793
+
+
+2026-01-07 17:50:00,928 - [INFO] - [E:58| 0]: Train Loss:0.0014838,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:50:21,449 - [INFO] - [E:58| 100]: Train Loss:0.0012992,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:50:42,534 - [INFO] - [E:58| 200]: Train Loss:0.0013044,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:51:03,280 - [INFO] - [E:58| 300]: Train Loss:0.0013067,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:51:23,605 - [INFO] - [E:58| 400]: Train Loss:0.0013064,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:51:44,505 - [INFO] - [E:58| 500]: Train Loss:0.0013091,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:52:05,103 - [INFO] - [E:58| 600]: Train Loss:0.0013211,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:52:25,294 - [INFO] - [E:58| 700]: Train Loss:0.0013144,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:52:45,758 - [INFO] - [E:58| 800]: Train Loss:0.0013139,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:53:06,493 - [INFO] - [E:58| 900]: Train Loss:0.0013148,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:53:27,205 - [INFO] - [E:58| 1000]: Train Loss:0.0013137,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:53:47,644 - [INFO] - [E:58| 1100]: Train Loss:0.0013178,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:54:01,989 - [INFO] - [Epoch:58]:  Training Loss:0.00132
+
+2026-01-07 17:54:02,300 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:54:11,264 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:54:14,880 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:54:23,946 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:54:27,189 - [INFO] - [Epoch 58 valid]: MRR: Tail : 0.44066, Head : 0.23312, Avg : 0.33689
+2026-01-07 17:54:27,191 - [INFO] - [Epoch 58]: Training Loss: 0.0013197, Valid MRR: 0.33793
+
+
+2026-01-07 17:54:27,626 - [INFO] - [E:59| 0]: Train Loss:0.0012377,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:54:49,043 - [INFO] - [E:59| 100]: Train Loss:0.0013217,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:55:10,051 - [INFO] - [E:59| 200]: Train Loss:0.0013156,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:55:30,463 - [INFO] - [E:59| 300]: Train Loss:0.0013092,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:55:51,231 - [INFO] - [E:59| 400]: Train Loss:0.0013157,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:56:12,065 - [INFO] - [E:59| 500]: Train Loss:0.0013152,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:56:32,971 - [INFO] - [E:59| 600]: Train Loss:0.0013133,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:56:53,739 - [INFO] - [E:59| 700]: Train Loss:0.0013164,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:57:14,415 - [INFO] - [E:59| 800]: Train Loss:0.0013185,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:57:35,129 - [INFO] - [E:59| 900]: Train Loss:0.0013129,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:57:56,060 - [INFO] - [E:59| 1000]: Train Loss:0.0013122,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:58:16,792 - [INFO] - [E:59| 1100]: Train Loss:0.0013154,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:58:31,207 - [INFO] - [Epoch:59]:  Training Loss:0.001319
+
+2026-01-07 17:58:31,535 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:58:40,401 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:58:44,010 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:58:52,925 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:58:56,182 - [INFO] - [Epoch 59 valid]: MRR: Tail : 0.42507, Head : 0.23619, Avg : 0.33063
+2026-01-07 17:58:56,183 - [INFO] - [Epoch 59]: Training Loss: 0.0013189, Valid MRR: 0.33793
+
+
+2026-01-07 17:58:56,676 - [INFO] - [E:60| 0]: Train Loss:0.001312,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:59:17,325 - [INFO] - [E:60| 100]: Train Loss:0.0012942,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:59:38,183 - [INFO] - [E:60| 200]: Train Loss:0.0013462,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 17:59:59,204 - [INFO] - [E:60| 300]: Train Loss:0.0013252,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:00:20,038 - [INFO] - [E:60| 400]: Train Loss:0.0013192,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:00:40,745 - [INFO] - [E:60| 500]: Train Loss:0.001324,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:01:01,419 - [INFO] - [E:60| 600]: Train Loss:0.0013254,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:01:22,222 - [INFO] - [E:60| 700]: Train Loss:0.0013252,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:01:42,856 - [INFO] - [E:60| 800]: Train Loss:0.0013207,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:02:03,558 - [INFO] - [E:60| 900]: Train Loss:0.0013189,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:02:24,381 - [INFO] - [E:60| 1000]: Train Loss:0.0013175,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:02:45,188 - [INFO] - [E:60| 1100]: Train Loss:0.0013162,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:02:59,532 - [INFO] - [Epoch:60]:  Training Loss:0.001318
+
+2026-01-07 18:02:59,769 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:03:08,675 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:03:12,178 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:03:21,147 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:03:24,390 - [INFO] - [Epoch 60 valid]: MRR: Tail : 0.43939, Head : 0.23467, Avg : 0.33703
+2026-01-07 18:03:24,391 - [INFO] - Gamma decay on saturation, updated value of gamma: 4.0
+2026-01-07 18:03:24,392 - [INFO] - [Epoch 60]: Training Loss: 0.0013178, Valid MRR: 0.33793
+
+
+2026-01-07 18:03:24,856 - [INFO] - [E:61| 0]: Train Loss:0.0020829,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:03:45,336 - [INFO] - [E:61| 100]: Train Loss:0.001587,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:04:06,670 - [INFO] - [E:61| 200]: Train Loss:0.0015474,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:04:28,170 - [INFO] - [E:61| 300]: Train Loss:0.0015225,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:04:48,555 - [INFO] - [E:61| 400]: Train Loss:0.0015195,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:05:08,942 - [INFO] - [E:61| 500]: Train Loss:0.001547,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:05:29,623 - [INFO] - [E:61| 600]: Train Loss:0.0015492,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:05:50,280 - [INFO] - [E:61| 700]: Train Loss:0.0015461,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:06:11,049 - [INFO] - [E:61| 800]: Train Loss:0.0015339,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:06:31,833 - [INFO] - [E:61| 900]: Train Loss:0.0015349,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:06:52,463 - [INFO] - [E:61| 1000]: Train Loss:0.0015331,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:07:13,071 - [INFO] - [E:61| 1100]: Train Loss:0.0015287,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:07:27,303 - [INFO] - [Epoch:61]:  Training Loss:0.001531
+
+2026-01-07 18:07:27,575 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:07:36,536 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:07:40,112 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:07:49,006 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:07:52,267 - [INFO] - [Epoch 61 valid]: MRR: Tail : 0.41512, Head : 0.22818, Avg : 0.32165
+2026-01-07 18:07:52,268 - [INFO] - [Epoch 61]: Training Loss: 0.0015308, Valid MRR: 0.33793
+
+
+2026-01-07 18:07:52,728 - [INFO] - [E:62| 0]: Train Loss:0.0015432,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:08:13,100 - [INFO] - [E:62| 100]: Train Loss:0.0014413,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:08:33,553 - [INFO] - [E:62| 200]: Train Loss:0.0014891,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:08:54,795 - [INFO] - [E:62| 300]: Train Loss:0.0015012,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:09:15,615 - [INFO] - [E:62| 400]: Train Loss:0.0014955,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:09:36,049 - [INFO] - [E:62| 500]: Train Loss:0.0014899,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:09:56,832 - [INFO] - [E:62| 600]: Train Loss:0.0014958,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:10:17,166 - [INFO] - [E:62| 700]: Train Loss:0.0014962,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:10:37,351 - [INFO] - [E:62| 800]: Train Loss:0.0014969,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:10:58,122 - [INFO] - [E:62| 900]: Train Loss:0.0014918,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:11:18,834 - [INFO] - [E:62| 1000]: Train Loss:0.0014902,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:11:39,097 - [INFO] - [E:62| 1100]: Train Loss:0.0014952,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:11:53,479 - [INFO] - [Epoch:62]:  Training Loss:0.001497
+
+2026-01-07 18:11:53,801 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:12:02,622 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:12:06,236 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:12:15,138 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:12:18,415 - [INFO] - [Epoch 62 valid]: MRR: Tail : 0.42021, Head : 0.22429, Avg : 0.32225
+2026-01-07 18:12:18,416 - [INFO] - [Epoch 62]: Training Loss: 0.001497, Valid MRR: 0.33793
+
+
+2026-01-07 18:12:18,836 - [INFO] - [E:63| 0]: Train Loss:0.001357,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:12:39,332 - [INFO] - [E:63| 100]: Train Loss:0.0014988,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:12:59,909 - [INFO] - [E:63| 200]: Train Loss:0.0014778,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:13:20,645 - [INFO] - [E:63| 300]: Train Loss:0.0014864,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:13:41,726 - [INFO] - [E:63| 400]: Train Loss:0.0014788,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:14:03,007 - [INFO] - [E:63| 500]: Train Loss:0.0014806,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:14:24,570 - [INFO] - [E:63| 600]: Train Loss:0.0014956,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:14:45,218 - [INFO] - [E:63| 700]: Train Loss:0.0015027,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:15:06,317 - [INFO] - [E:63| 800]: Train Loss:0.0014943,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:15:26,603 - [INFO] - [E:63| 900]: Train Loss:0.0014847,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:15:47,325 - [INFO] - [E:63| 1000]: Train Loss:0.0014807,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:16:08,082 - [INFO] - [E:63| 1100]: Train Loss:0.0014886,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:16:22,358 - [INFO] - [Epoch:63]:  Training Loss:0.001489
+
+2026-01-07 18:16:22,637 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:16:31,553 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:16:35,126 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:16:44,047 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:16:47,254 - [INFO] - [Epoch 63 valid]: MRR: Tail : 0.42881, Head : 0.22421, Avg : 0.32651
+2026-01-07 18:16:47,255 - [INFO] - [Epoch 63]: Training Loss: 0.0014886, Valid MRR: 0.33793
+
+
+2026-01-07 18:16:47,840 - [INFO] - [E:64| 0]: Train Loss:0.0013292,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:17:08,283 - [INFO] - [E:64| 100]: Train Loss:0.0014333,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:17:28,878 - [INFO] - [E:64| 200]: Train Loss:0.0014948,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:17:49,321 - [INFO] - [E:64| 300]: Train Loss:0.0014828,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:18:10,223 - [INFO] - [E:64| 400]: Train Loss:0.0014933,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:18:31,107 - [INFO] - [E:64| 500]: Train Loss:0.0015028,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:18:51,648 - [INFO] - [E:64| 600]: Train Loss:0.0015091,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:19:12,230 - [INFO] - [E:64| 700]: Train Loss:0.0015031,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:19:32,580 - [INFO] - [E:64| 800]: Train Loss:0.0014937,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:19:53,227 - [INFO] - [E:64| 900]: Train Loss:0.0014887,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:20:13,596 - [INFO] - [E:64| 1000]: Train Loss:0.0014868,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:20:34,122 - [INFO] - [E:64| 1100]: Train Loss:0.0014849,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:20:48,179 - [INFO] - [Epoch:64]:  Training Loss:0.001482
+
+2026-01-07 18:20:48,471 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:20:57,436 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:21:01,048 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:21:09,946 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:21:13,210 - [INFO] - [Epoch 64 valid]: MRR: Tail : 0.43082, Head : 0.22374, Avg : 0.32728
+2026-01-07 18:21:13,211 - [INFO] - [Epoch 64]: Training Loss: 0.0014824, Valid MRR: 0.33793
+
+
+2026-01-07 18:21:13,655 - [INFO] - [E:65| 0]: Train Loss:0.0015172,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:21:34,240 - [INFO] - [E:65| 100]: Train Loss:0.0014339,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:21:54,860 - [INFO] - [E:65| 200]: Train Loss:0.0014522,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:22:15,553 - [INFO] - [E:65| 300]: Train Loss:0.0014804,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:22:36,386 - [INFO] - [E:65| 400]: Train Loss:0.0014702,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:22:56,938 - [INFO] - [E:65| 500]: Train Loss:0.0014652,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:23:17,268 - [INFO] - [E:65| 600]: Train Loss:0.0014619,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:23:37,940 - [INFO] - [E:65| 700]: Train Loss:0.0014656,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:23:58,721 - [INFO] - [E:65| 800]: Train Loss:0.0014602,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:24:19,380 - [INFO] - [E:65| 900]: Train Loss:0.0014609,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:24:40,737 - [INFO] - [E:65| 1000]: Train Loss:0.0014667,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:25:01,745 - [INFO] - [E:65| 1100]: Train Loss:0.0014766,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:25:16,122 - [INFO] - [Epoch:65]:  Training Loss:0.001484
+
+2026-01-07 18:25:16,376 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:25:25,236 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:25:28,806 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:25:37,698 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:25:40,973 - [INFO] - [Epoch 65 valid]: MRR: Tail : 0.4021, Head : 0.21855, Avg : 0.31033
+2026-01-07 18:25:40,974 - [INFO] - [Epoch 65]: Training Loss: 0.0014839, Valid MRR: 0.33793
+
+
+2026-01-07 18:25:41,427 - [INFO] - [E:66| 0]: Train Loss:0.0013511,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:26:01,752 - [INFO] - [E:66| 100]: Train Loss:0.0015534,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:26:22,308 - [INFO] - [E:66| 200]: Train Loss:0.001541,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:26:42,900 - [INFO] - [E:66| 300]: Train Loss:0.0015115,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:27:03,670 - [INFO] - [E:66| 400]: Train Loss:0.001502,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:27:24,591 - [INFO] - [E:66| 500]: Train Loss:0.001493,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:27:45,189 - [INFO] - [E:66| 600]: Train Loss:0.0014867,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:28:05,890 - [INFO] - [E:66| 700]: Train Loss:0.0014866,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:28:26,617 - [INFO] - [E:66| 800]: Train Loss:0.0014878,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:28:47,262 - [INFO] - [E:66| 900]: Train Loss:0.0014962,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:29:08,169 - [INFO] - [E:66| 1000]: Train Loss:0.0014915,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:29:28,840 - [INFO] - [E:66| 1100]: Train Loss:0.0014875,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:29:42,989 - [INFO] - [Epoch:66]:  Training Loss:0.001484
+
+2026-01-07 18:29:43,299 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:29:52,382 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:29:55,871 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:30:04,807 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:30:08,040 - [INFO] - [Epoch 66 valid]: MRR: Tail : 0.42894, Head : 0.2229, Avg : 0.32592
+2026-01-07 18:30:08,041 - [INFO] - [Epoch 66]: Training Loss: 0.0014844, Valid MRR: 0.33793
+
+
+2026-01-07 18:30:08,449 - [INFO] - [E:67| 0]: Train Loss:0.0012812,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:30:29,242 - [INFO] - [E:67| 100]: Train Loss:0.0014969,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:30:50,056 - [INFO] - [E:67| 200]: Train Loss:0.0014707,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:31:10,466 - [INFO] - [E:67| 300]: Train Loss:0.0015007,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:31:30,944 - [INFO] - [E:67| 400]: Train Loss:0.0015042,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:31:51,895 - [INFO] - [E:67| 500]: Train Loss:0.0014991,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:32:12,814 - [INFO] - [E:67| 600]: Train Loss:0.0014951,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:32:33,571 - [INFO] - [E:67| 700]: Train Loss:0.001489,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:32:54,414 - [INFO] - [E:67| 800]: Train Loss:0.0014798,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:33:15,214 - [INFO] - [E:67| 900]: Train Loss:0.0014753,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:33:36,104 - [INFO] - [E:67| 1000]: Train Loss:0.001473,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:33:57,212 - [INFO] - [E:67| 1100]: Train Loss:0.0014746,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:34:11,960 - [INFO] - [Epoch:67]:  Training Loss:0.001482
+
+2026-01-07 18:34:12,432 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:34:21,670 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:34:25,262 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:34:34,253 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:34:37,524 - [INFO] - [Epoch 67 valid]: MRR: Tail : 0.40664, Head : 0.22094, Avg : 0.31379
+2026-01-07 18:34:37,525 - [INFO] - [Epoch 67]: Training Loss: 0.001482, Valid MRR: 0.33793
+
+
+2026-01-07 18:34:37,939 - [INFO] - [E:68| 0]: Train Loss:0.0015195,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:34:58,751 - [INFO] - [E:68| 100]: Train Loss:0.0014711,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:35:19,317 - [INFO] - [E:68| 200]: Train Loss:0.0014891,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:35:39,763 - [INFO] - [E:68| 300]: Train Loss:0.0014831,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:36:00,728 - [INFO] - [E:68| 400]: Train Loss:0.0014807,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:36:21,639 - [INFO] - [E:68| 500]: Train Loss:0.0014761,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:36:42,400 - [INFO] - [E:68| 600]: Train Loss:0.0014857,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:37:03,380 - [INFO] - [E:68| 700]: Train Loss:0.001481,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:37:24,112 - [INFO] - [E:68| 800]: Train Loss:0.0014827,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:37:44,730 - [INFO] - [E:68| 900]: Train Loss:0.0014843,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:38:05,684 - [INFO] - [E:68| 1000]: Train Loss:0.0014786,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:38:26,413 - [INFO] - [E:68| 1100]: Train Loss:0.0014805,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:38:40,591 - [INFO] - [Epoch:68]:  Training Loss:0.001478
+
+2026-01-07 18:38:40,908 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:38:49,919 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:38:53,429 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:39:02,401 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:39:05,639 - [INFO] - [Epoch 68 valid]: MRR: Tail : 0.427, Head : 0.22461, Avg : 0.32581
+2026-01-07 18:39:05,639 - [INFO] - [Epoch 68]: Training Loss: 0.0014775, Valid MRR: 0.33793
+
+
+2026-01-07 18:39:06,027 - [INFO] - [E:69| 0]: Train Loss:0.0015329,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:39:26,627 - [INFO] - [E:69| 100]: Train Loss:0.0014036,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:39:46,931 - [INFO] - [E:69| 200]: Train Loss:0.0014504,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:40:07,572 - [INFO] - [E:69| 300]: Train Loss:0.0015115,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:40:28,284 - [INFO] - [E:69| 400]: Train Loss:0.0015156,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:40:49,012 - [INFO] - [E:69| 500]: Train Loss:0.0015154,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:41:10,022 - [INFO] - [E:69| 600]: Train Loss:0.0015045,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:41:30,568 - [INFO] - [E:69| 700]: Train Loss:0.0014927,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:41:50,949 - [INFO] - [E:69| 800]: Train Loss:0.0014899,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:42:11,658 - [INFO] - [E:69| 900]: Train Loss:0.0014831,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:42:32,400 - [INFO] - [E:69| 1000]: Train Loss:0.0014777,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:42:52,992 - [INFO] - [E:69| 1100]: Train Loss:0.0014742,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:43:07,025 - [INFO] - [Epoch:69]:  Training Loss:0.001476
+
+2026-01-07 18:43:07,401 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:43:16,256 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:43:19,907 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:43:28,851 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:43:32,095 - [INFO] - [Epoch 69 valid]: MRR: Tail : 0.42887, Head : 0.22452, Avg : 0.32669
+2026-01-07 18:43:32,097 - [INFO] - [Epoch 69]: Training Loss: 0.0014756, Valid MRR: 0.33793
+
+
+2026-01-07 18:43:32,596 - [INFO] - [E:70| 0]: Train Loss:0.0013243,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:43:53,595 - [INFO] - [E:70| 100]: Train Loss:0.0014342,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:44:14,987 - [INFO] - [E:70| 200]: Train Loss:0.0014548,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:44:35,986 - [INFO] - [E:70| 300]: Train Loss:0.001457,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:44:56,192 - [INFO] - [E:70| 400]: Train Loss:0.0014689,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:45:17,025 - [INFO] - [E:70| 500]: Train Loss:0.0014642,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:45:37,551 - [INFO] - [E:70| 600]: Train Loss:0.0014616,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:45:58,069 - [INFO] - [E:70| 700]: Train Loss:0.001459,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:46:18,787 - [INFO] - [E:70| 800]: Train Loss:0.0014652,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:46:39,509 - [INFO] - [E:70| 900]: Train Loss:0.0014747,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:47:00,334 - [INFO] - [E:70| 1000]: Train Loss:0.0014745,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:47:20,619 - [INFO] - [E:70| 1100]: Train Loss:0.0014804,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:47:34,907 - [INFO] - [Epoch:70]:  Training Loss:0.001482
+
+2026-01-07 18:47:35,196 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:47:44,219 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:47:47,736 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:47:56,828 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:48:00,060 - [INFO] - [Epoch 70 valid]: MRR: Tail : 0.42361, Head : 0.22354, Avg : 0.32357
+2026-01-07 18:48:00,061 - [INFO] - [Epoch 70]: Training Loss: 0.0014825, Valid MRR: 0.33793
+
+
+2026-01-07 18:48:00,451 - [INFO] - [E:71| 0]: Train Loss:0.001407,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:48:21,215 - [INFO] - [E:71| 100]: Train Loss:0.001465,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:48:41,879 - [INFO] - [E:71| 200]: Train Loss:0.0014572,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:49:02,884 - [INFO] - [E:71| 300]: Train Loss:0.0014671,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:49:23,615 - [INFO] - [E:71| 400]: Train Loss:0.0014692,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:49:43,966 - [INFO] - [E:71| 500]: Train Loss:0.0014706,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:50:04,735 - [INFO] - [E:71| 600]: Train Loss:0.0014669,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:50:25,653 - [INFO] - [E:71| 700]: Train Loss:0.0014785,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:50:46,128 - [INFO] - [E:71| 800]: Train Loss:0.0014798,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:51:06,770 - [INFO] - [E:71| 900]: Train Loss:0.0014771,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:51:27,642 - [INFO] - [E:71| 1000]: Train Loss:0.0014738,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:51:48,432 - [INFO] - [E:71| 1100]: Train Loss:0.0014792,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:52:02,791 - [INFO] - [Epoch:71]:  Training Loss:0.001477
+
+2026-01-07 18:52:03,045 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:52:11,980 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:52:15,463 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:52:24,409 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:52:27,608 - [INFO] - [Epoch 71 valid]: MRR: Tail : 0.4231, Head : 0.22332, Avg : 0.32321
+2026-01-07 18:52:27,609 - [INFO] - [Epoch 71]: Training Loss: 0.0014767, Valid MRR: 0.33793
+
+
+2026-01-07 18:52:28,047 - [INFO] - [E:72| 0]: Train Loss:0.0012494,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:52:48,824 - [INFO] - [E:72| 100]: Train Loss:0.0013936,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:53:09,473 - [INFO] - [E:72| 200]: Train Loss:0.001467,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:53:30,337 - [INFO] - [E:72| 300]: Train Loss:0.0014681,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:53:51,579 - [INFO] - [E:72| 400]: Train Loss:0.0014713,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:54:12,919 - [INFO] - [E:72| 500]: Train Loss:0.0014654,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:54:34,059 - [INFO] - [E:72| 600]: Train Loss:0.0014682,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:54:55,000 - [INFO] - [E:72| 700]: Train Loss:0.0014684,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:55:15,167 - [INFO] - [E:72| 800]: Train Loss:0.0014665,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:55:35,501 - [INFO] - [E:72| 900]: Train Loss:0.0014681,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:55:55,554 - [INFO] - [E:72| 1000]: Train Loss:0.0014672,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:56:15,753 - [INFO] - [E:72| 1100]: Train Loss:0.0014731,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:56:29,764 - [INFO] - [Epoch:72]:  Training Loss:0.001472
+
+2026-01-07 18:56:30,042 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:56:38,842 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:56:42,336 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:56:51,157 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:56:54,356 - [INFO] - [Epoch 72 valid]: MRR: Tail : 0.42758, Head : 0.2216, Avg : 0.32459
+2026-01-07 18:56:54,356 - [INFO] - [Epoch 72]: Training Loss: 0.0014719, Valid MRR: 0.33793
+
+
+2026-01-07 18:56:54,741 - [INFO] - [E:73| 0]: Train Loss:0.0015395,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:57:14,647 - [INFO] - [E:73| 100]: Train Loss:0.0015695,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:57:34,305 - [INFO] - [E:73| 200]: Train Loss:0.0015163,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:57:54,552 - [INFO] - [E:73| 300]: Train Loss:0.0014968,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:58:14,696 - [INFO] - [E:73| 400]: Train Loss:0.0014895,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:58:35,125 - [INFO] - [E:73| 500]: Train Loss:0.0014902,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:58:55,629 - [INFO] - [E:73| 600]: Train Loss:0.0014858,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:59:15,688 - [INFO] - [E:73| 700]: Train Loss:0.0014829,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:59:35,542 - [INFO] - [E:73| 800]: Train Loss:0.0014772,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 18:59:55,826 - [INFO] - [E:73| 900]: Train Loss:0.0014754,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:00:15,574 - [INFO] - [E:73| 1000]: Train Loss:0.0014769,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:00:34,528 - [INFO] - [E:73| 1100]: Train Loss:0.0014737,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:00:47,972 - [INFO] - [Epoch:73]:  Training Loss:0.001472
+
+2026-01-07 19:00:48,232 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:00:57,148 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:01:00,588 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:01:09,429 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:01:12,637 - [INFO] - [Epoch 73 valid]: MRR: Tail : 0.42511, Head : 0.21851, Avg : 0.32181
+2026-01-07 19:01:12,638 - [INFO] - [Epoch 73]: Training Loss: 0.0014724, Valid MRR: 0.33793
+
+
+2026-01-07 19:01:13,055 - [INFO] - [E:74| 0]: Train Loss:0.0016841,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:01:32,438 - [INFO] - [E:74| 100]: Train Loss:0.0014266,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:01:52,274 - [INFO] - [E:74| 200]: Train Loss:0.0014217,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:02:12,432 - [INFO] - [E:74| 300]: Train Loss:0.001451,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:02:32,665 - [INFO] - [E:74| 400]: Train Loss:0.0014534,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:02:52,609 - [INFO] - [E:74| 500]: Train Loss:0.001453,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:03:13,002 - [INFO] - [E:74| 600]: Train Loss:0.0014558,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:03:33,524 - [INFO] - [E:74| 700]: Train Loss:0.0014744,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:03:54,078 - [INFO] - [E:74| 800]: Train Loss:0.0014693,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:04:15,293 - [INFO] - [E:74| 900]: Train Loss:0.0014717,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:04:36,049 - [INFO] - [E:74| 1000]: Train Loss:0.0014694,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:04:56,610 - [INFO] - [E:74| 1100]: Train Loss:0.0014738,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:05:10,360 - [INFO] - [Epoch:74]:  Training Loss:0.001471
+
+2026-01-07 19:05:10,598 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:05:19,366 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:05:22,813 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:05:31,592 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:05:34,786 - [INFO] - [Epoch 74 valid]: MRR: Tail : 0.42473, Head : 0.22065, Avg : 0.32269
+2026-01-07 19:05:34,787 - [INFO] - [Epoch 74]: Training Loss: 0.0014713, Valid MRR: 0.33793
+
+
+2026-01-07 19:05:35,203 - [INFO] - [E:75| 0]: Train Loss:0.0013273,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:05:55,580 - [INFO] - [E:75| 100]: Train Loss:0.0014418,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:06:15,559 - [INFO] - [E:75| 200]: Train Loss:0.0014369,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:06:35,017 - [INFO] - [E:75| 300]: Train Loss:0.0014412,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:06:54,960 - [INFO] - [E:75| 400]: Train Loss:0.0014413,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:07:15,467 - [INFO] - [E:75| 500]: Train Loss:0.001444,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:07:36,190 - [INFO] - [E:75| 600]: Train Loss:0.0014648,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:07:56,874 - [INFO] - [E:75| 700]: Train Loss:0.0014668,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:08:17,557 - [INFO] - [E:75| 800]: Train Loss:0.0014638,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:08:38,287 - [INFO] - [E:75| 900]: Train Loss:0.0014653,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:08:59,101 - [INFO] - [E:75| 1000]: Train Loss:0.0014633,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:09:19,562 - [INFO] - [E:75| 1100]: Train Loss:0.0014671,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:09:33,786 - [INFO] - [Epoch:75]:  Training Loss:0.001471
+
+2026-01-07 19:09:34,126 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:09:42,995 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:09:46,606 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:09:55,530 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:09:58,777 - [INFO] - [Epoch 75 valid]: MRR: Tail : 0.39796, Head : 0.21857, Avg : 0.30826
+2026-01-07 19:09:58,782 - [INFO] - [Epoch 75]: Training Loss: 0.0014713, Valid MRR: 0.33793
+
+
+2026-01-07 19:09:59,303 - [INFO] - [E:76| 0]: Train Loss:0.001328,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:10:19,496 - [INFO] - [E:76| 100]: Train Loss:0.0014145,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:10:39,789 - [INFO] - [E:76| 200]: Train Loss:0.0014414,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:11:00,283 - [INFO] - [E:76| 300]: Train Loss:0.0014595,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:11:20,727 - [INFO] - [E:76| 400]: Train Loss:0.0014816,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:11:41,172 - [INFO] - [E:76| 500]: Train Loss:0.0014892,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:12:01,688 - [INFO] - [E:76| 600]: Train Loss:0.0014776,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:12:22,062 - [INFO] - [E:76| 700]: Train Loss:0.0014786,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:12:42,503 - [INFO] - [E:76| 800]: Train Loss:0.0014797,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:13:03,137 - [INFO] - [E:76| 900]: Train Loss:0.0014839,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:13:24,047 - [INFO] - [E:76| 1000]: Train Loss:0.0014821,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:13:44,670 - [INFO] - [E:76| 1100]: Train Loss:0.001478,  Val MRR:0.33793	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:13:59,271 - [INFO] - [Epoch:76]:  Training Loss:0.001473
+
+2026-01-07 19:13:59,640 - [INFO] - [Valid, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:14:08,969 - [INFO] - [Valid, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:14:12,581 - [INFO] - [Valid, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:14:21,735 - [INFO] - [Valid, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:14:25,064 - [INFO] - [Epoch 76 valid]: MRR: Tail : 0.42497, Head : 0.22303, Avg : 0.324
+2026-01-07 19:14:25,065 - [INFO] - Early Stopping!!
+2026-01-07 19:14:25,066 - [INFO] - Loading best model, Evaluating on Test data
+2026-01-07 19:14:25,715 - [INFO] - [Test, Tail_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:14:34,685 - [INFO] - [Test, Tail_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:14:40,312 - [INFO] - [Test, Head_Batch Step 0]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:14:49,274 - [INFO] - [Test, Head_Batch Step 100]	fb_transe_sub_07_01_2026_13_37_18
+2026-01-07 19:14:54,627 - [INFO] - [Epoch 76 test]: MRR: Tail : 0.43566, Head : 0.23374, Avg : 0.3347

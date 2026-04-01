@@ -1,0 +1,2 @@
+[DRY RUN] cwd=/app
+cmd=python run.py -name transe_mult -score_func transe -opn mult -gamma 9 -hid_drop 0.2 -init_dim 200

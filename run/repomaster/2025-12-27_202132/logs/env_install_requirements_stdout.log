@@ -1,0 +1,769 @@
+Looking in indexes: https://pypi.tuna.tsinghua.edu.cn/simple
+
+Collecting pandas~=2.2.2 (from -r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 2))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/ed/8c/87ddf1fcb55d11f9f847e3c69bb1c6f8e46e2f40ab1a2d2abadb2401b007/pandas-2.2.3-cp311-cp311-win_amd64.whl (11.6 MB)
+
+Collecting typing_extensions (from -r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 5))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/18/67/36e9267722cc04a6b9f15c7f3441c2363321a3ea07da7ae0c0707beb2a9c/typing_extensions-4.15.0-py3-none-any.whl (44 kB)
+
+Collecting requests~=2.32.3 (from -r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 6))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/1e/db/4254e3eabe8020b458f1a747140d32277ec7a271daf1d235b70dc0b4e6e3/requests-2.32.5-py3-none-any.whl (64 kB)
+
+Collecting tiktoken~=0.7.0 (from -r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 7))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/b1/10/c04b4ff592a5f46b28ebf4c2353f735c02ae7f0ce1b165d00748ced6467e/tiktoken-0.7.0-cp311-cp311-win_amd64.whl (799 kB)
+
+Collecting streamlit (from -r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 10))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/c0/95/6b7873f0267973ebd55ba9cd33a690b35a116f2779901ef6185a0e21864d/streamlit-1.52.2-py3-none-any.whl (9.0 MB)
+
+Collecting streamlit_extras (from -r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/0c/be/db83a8ca4f88b7d46ed4fc6752d075e3c562e65c66f0b10f109fa58ae53e/streamlit_extras-0.7.8-py3-none-any.whl (88 kB)
+
+Collecting python-dotenv~=1.0.1 (from -r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 14))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/6a/3e/b68c118422ec867fa7ab88444e1274aa40681c606d59ac27de5a5588f082/python_dotenv-1.0.1-py3-none-any.whl (19 kB)
+
+Collecting beautifulsoup4~=4.12.3 (from -r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 15))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/b1/fe/e8c672695b37eecc5cbf43e1d0638d88d66ba3a44c4d321c796f4e59167f/beautifulsoup4-4.12.3-py3-none-any.whl (147 kB)
+
+Collecting pillow (from -r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 16))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/4d/42/aaca386de5cc8bd8a0254516957c1f265e3521c91515b16e286c662854c4/pillow-12.0.0-cp311-cp311-win_amd64.whl (7.0 MB)
+
+Collecting autogen-agentchat~=0.6.1 (from -r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 18))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/92/bc/3cc970d370d3dff4e83cf4008062e129c997b879cf721efce5a381cbb953/autogen_agentchat-0.6.4-py3-none-any.whl (114 kB)
+
+Collecting autogen-core~=0.6.1 (from -r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 19))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/75/40/7621973ad47912186f165ad02290d446b0e1a001ea79b5d3874eef8486cf/autogen_core-0.6.4-py3-none-any.whl (101 kB)
+
+Collecting pyautogen~=0.7.6 (from -r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 20))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/60/57/627ff378d00cb94e60437e5a3d4b99574f1a642aefb87a06acabc60bf819/pyautogen-0.7.6-py3-none-any.whl (630 kB)
+
+Collecting serpapi~=0.1.5 (from -r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 23))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/df/6a/21deade04100d64844e494353a5d65e7971fbdfddf78eb1f248423593ad0/serpapi-0.1.5-py2.py3-none-any.whl (10 kB)
+
+Collecting search-engine-parser (from -r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 24))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/e1/ba/34658d7432fe8d7b87eeeaea92cd853c962305876e9139c8e8f9e173f29c/search_engine_parser-0.6.8-py3-none-any.whl (37 kB)
+
+Collecting langchain (from -r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 27))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/23/00/4e3fa0d90f5a5c376ccb8ca983d0f0f7287783dfac48702e18f01d24673b/langchain-1.2.0-py3-none-any.whl (102 kB)
+
+Collecting langchain-community (from -r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 28))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/f0/a4/c4fde67f193401512337456cabc2148f2c43316e445f5decd9f8806e2992/langchain_community-0.4.1-py3-none-any.whl (2.5 MB)
+
+Collecting PyMuPDF (from -r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 31))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/dd/c3/d0047678146c294469c33bae167c8ace337deafb736b0bf97b9bc481aa65/pymupdf-1.26.7-cp310-abi3-win_amd64.whl (18.4 MB)
+
+Collecting pdf2image (from -r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 32))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/62/33/61766ae033518957f877ab246f87ca30a85b778ebaad65b7f74fa7e52988/pdf2image-1.17.0-py3-none-any.whl (11 kB)
+
+Collecting gradio (from -r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 33))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/24/c4/4813d4fe00298c55b355b232ca6420827c82939906aff7c396f4ac8d635c/gradio-6.2.0-py3-none-any.whl (23.0 MB)
+
+Collecting plotly (from -r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 36))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/e7/c3/3031c931098de393393e1f93a38dc9ed6805d86bb801acc3cf2d5bd1e6b7/plotly-6.5.0-py3-none-any.whl (9.9 MB)
+
+Requirement already satisfied: tqdm in c:\users\kabada\appdata\roaming\python\python311\site-packages (from -r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 39)) (4.67.1)
+
+Collecting joblib (from -r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 41))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/7b/91/984aca2ec129e2757d1e4e3c81c3fcda9d0f85b74670a094cc443d9ee949/joblib-1.5.3-py3-none-any.whl (309 kB)
+
+Collecting grep_ast (from -r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 42))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/40/79/29f1373b2ce1eec37c03aefbc17194c2470d8b61ede288e5043231825999/grep_ast-0.9.0-py3-none-any.whl (13 kB)
+
+Requirement already satisfied: networkx in c:\users\kabada\appdata\roaming\python\python311\site-packages (from -r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 43)) (3.4.2)
+
+Collecting humanize (from -r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 44))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/c5/7b/bca5613a0c3b542420cf92bd5e5fb8ebd5435ce1011a091f66bb7693285e/humanize-4.15.0-py3-none-any.whl (132 kB)
+
+Collecting genson (from -r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 45))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/f8/5c/e226de133afd8bb267ec27eead9ae3d784b95b39a287ed404caab39a5f50/genson-1.3.0-py3-none-any.whl (21 kB)
+
+Collecting aiohttp~=3.8.0 (from -r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 46))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/2e/9f/9c37b01fc6a37c92f139a4cd937a92f03ebbd75379cfd55e85ca1e571643/aiohttp-3.8.6-cp311-cp311-win_amd64.whl (322 kB)
+
+Collecting openai~=1.68.0 (from -r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 47))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/fd/34/cebce15f64eb4a3d609a83ac3568d43005cc9a1cba9d7fde5590fd415423/openai-1.68.2-py3-none-any.whl (606 kB)
+
+Requirement already satisfied: numpy>=1.23.2 in c:\users\kabada\appdata\roaming\python\python311\site-packages (from pandas~=2.2.2->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 2)) (1.26.4)
+
+Collecting python-dateutil>=2.8.2 (from pandas~=2.2.2->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 2))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/ec/57/56b9bcc3c9c6a792fcbaf139543cee77261f3651ca9da0c93f5c1221264b/python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+
+Collecting pytz>=2020.1 (from pandas~=2.2.2->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 2))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/81/c4/34e93fe5f5429d7570ec1fa436f1986fb1f00c3e0f43a589fe2bbcd22c3f/pytz-2025.2-py2.py3-none-any.whl (509 kB)
+
+Collecting tzdata>=2022.7 (from pandas~=2.2.2->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 2))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/c7/b0/003792df09decd6849a5e39c28b513c06e84436a54440380862b5aeff25d/tzdata-2025.3-py2.py3-none-any.whl (348 kB)
+
+Collecting charset_normalizer<4,>=2 (from requests~=2.32.3->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 6))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/65/f6/62fdd5feb60530f50f7e38b4f6a1d5203f4d16ff4f9f0952962c044e919a/charset_normalizer-3.4.4-cp311-cp311-win_amd64.whl (106 kB)
+
+Requirement already satisfied: idna<4,>=2.5 in c:\users\kabada\appdata\roaming\python\python311\site-packages (from requests~=2.32.3->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 6)) (3.10)
+
+Collecting urllib3<3,>=1.21.1 (from requests~=2.32.3->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 6))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/6d/b9/4095b668ea3678bf6a0af005527f39de12fb026516fb3df17495a733b7f8/urllib3-2.6.2-py3-none-any.whl (131 kB)
+
+Collecting certifi>=2017.4.17 (from requests~=2.32.3->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 6))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/70/7d/9bc192684cea499815ff478dfcdc13835ddf401365057044fb721ec6bddb/certifi-2025.11.12-py3-none-any.whl (159 kB)
+
+Collecting regex>=2022.1.18 (from tiktoken~=0.7.0->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 7))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/50/1e/15f08b2f82a9bbb510621ec9042547b54d11e83cb620643ebb54e4eb7d71/regex-2025.11.3-cp311-cp311-win_amd64.whl (277 kB)
+
+Collecting soupsieve>1.2 (from beautifulsoup4~=4.12.3->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 15))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/48/f3/b67d6ea49ca9154453b6d70b34ea22f3996b9fa55da105a79d8732227adc/soupsieve-2.8.1-py3-none-any.whl (36 kB)
+
+Collecting jsonref~=1.1.0 (from autogen-core~=0.6.1->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 19))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/0c/ec/e1db9922bceb168197a558a2b8c03a7963f1afe93517ddd3cf99f202f996/jsonref-1.1.0-py3-none-any.whl (9.4 kB)
+
+Collecting opentelemetry-api>=1.34.1 (from autogen-core~=0.6.1->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 19))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/cf/df/d3f1ddf4bb4cb50ed9b1139cc7b1c54c34a1e7ce8fd1b9a37c0d1551a6bd/opentelemetry_api-1.39.1-py3-none-any.whl (66 kB)
+
+Collecting protobuf~=5.29.3 (from autogen-core~=0.6.1->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 19))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/81/7f/73cefb093e1a2a7c3ffd839e6f9fcafb7a427d300c7f8aef9c64405d8ac6/protobuf-5.29.5-cp310-abi3-win_amd64.whl (434 kB)
+
+Collecting pydantic<3.0.0,>=2.10.0 (from autogen-core~=0.6.1->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 19))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/5a/87/b70ad306ebb6f9b585f114d0ac2137d792b48be34d732d60e597c2f8465a/pydantic-2.12.5-py3-none-any.whl (463 kB)
+
+Collecting asyncer==0.0.8 (from pyautogen~=0.7.6->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 20))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/8a/04/15b6ca6b7842eda2748bda0a0af73f2d054e9344320f8bba01f994294bcb/asyncer-0.0.8-py3-none-any.whl (9.2 kB)
+
+Collecting diskcache (from pyautogen~=0.7.6->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 20))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/3f/27/4570e78fc0bf5ea0ca45eb1de3818a23787af9b390c0b0a0033a1b8236f9/diskcache-5.6.3-py3-none-any.whl (45 kB)
+
+Collecting docker (from pyautogen~=0.7.6->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 20))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/e3/26/57c6fb270950d476074c087527a558ccb6f4436657314bfb6cdf484114c4/docker-7.1.0-py3-none-any.whl (147 kB)
+
+Collecting fast-depends<3,>=2.4.12 (from pyautogen~=0.7.6->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 20))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/1d/08/4adb160d8394053289fdf3b276e93b53271fd463e54fff8911b23c1db4ed/fast_depends-2.4.12-py3-none-any.whl (17 kB)
+
+Collecting httpx<1,>=0.28.1 (from pyautogen~=0.7.6->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 20))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/2a/39/e50c7c3a983047577ee07d2a9e53faf5a69493943ec3f6a384bdc792deb2/httpx-0.28.1-py3-none-any.whl (73 kB)
+
+Collecting packaging (from pyautogen~=0.7.6->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 20))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/20/12/38679034af332785aac8774540895e234f4d07f7545804097de4b666afd8/packaging-25.0-py3-none-any.whl (66 kB)
+
+Collecting termcolor (from pyautogen~=0.7.6->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 20))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/f9/d5/141f53d7c1eb2a80e6d3e9a390228c3222c27705cbe7f048d3623053f3ca/termcolor-3.2.0-py3-none-any.whl (7.7 kB)
+
+Collecting anyio<5.0,>=3.4.0 (from asyncer==0.0.8->pyautogen~=0.7.6->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 20))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/7f/9c/36c5c37947ebfb8c7f22e0eb6e4d188ee2d53aa3880f3f2744fb894f0cb1/anyio-4.12.0-py3-none-any.whl (113 kB)
+
+Collecting attrs>=17.3.0 (from aiohttp~=3.8.0->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 46))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/3a/2a/7cc015f5b9f5db42b7d48157e23356022889fc354a2813c15934b7cb5c0e/attrs-25.4.0-py3-none-any.whl (67 kB)
+
+Collecting multidict<7.0,>=4.5 (from aiohttp~=3.8.0->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 46))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/32/0f/13228f26f8b882c34da36efa776c3b7348455ec383bab4a66390e42963ae/multidict-6.7.0-cp311-cp311-win_amd64.whl (46 kB)
+
+Collecting async-timeout<5.0,>=4.0.0a3 (from aiohttp~=3.8.0->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 46))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/a7/fa/e01228c2938de91d47b307831c62ab9e4001e747789d0b05baf779a6488c/async_timeout-4.0.3-py3-none-any.whl (5.7 kB)
+
+Collecting yarl<2.0,>=1.0 (from aiohttp~=3.8.0->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 46))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/b5/f7/149bb6f45f267cb5c074ac40c01c6b3ea6d8a620d34b337f6321928a1b4d/yarl-1.22.0-cp311-cp311-win_amd64.whl (86 kB)
+
+Collecting frozenlist>=1.1.1 (from aiohttp~=3.8.0->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 46))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/0a/f5/603d0d6a02cfd4c8f2a095a54672b3cf967ad688a60fb9faf04fc4887f65/frozenlist-1.8.0-cp311-cp311-win_amd64.whl (44 kB)
+
+Collecting aiosignal>=1.1.2 (from aiohttp~=3.8.0->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 46))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/fb/76/641ae371508676492379f16e2fa48f4e2c11741bd63c48be4b12a6b09cba/aiosignal-1.4.0-py3-none-any.whl (7.5 kB)
+
+Collecting distro<2,>=1.7.0 (from openai~=1.68.0->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 47))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/12/b3/231ffd4ab1fc9d679809f356cebee130ac7daa00d6d6f3206dd4fd137e9e/distro-1.9.0-py3-none-any.whl (20 kB)
+
+Collecting jiter<1,>=0.4.0 (from openai~=1.68.0->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 47))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/bb/60/1032b30ae0572196b0de0e87dce3b6c26a1eff71aad5fe43dee3082d32e0/jiter-0.12.0-cp311-cp311-win_amd64.whl (204 kB)
+
+Collecting sniffio (from openai~=1.68.0->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 47))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/e9/44/75a9c9421471a6c4805dbf2356f7c181a29c1879239abab1ea2cc8f38b40/sniffio-1.3.1-py3-none-any.whl (10 kB)
+
+Collecting httpcore==1.* (from httpx<1,>=0.28.1->pyautogen~=0.7.6->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 20))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/7e/f5/f66802a942d491edb555dd61e3a9961140fd64c90bce1eafd741609d334d/httpcore-1.0.9-py3-none-any.whl (78 kB)
+
+Collecting h11>=0.16 (from httpcore==1.*->httpx<1,>=0.28.1->pyautogen~=0.7.6->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 20))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/04/4b/29cac41a4d98d144bf5f6d33995617b185d14b22401f75ca86f384e87ff1/h11-0.16.0-py3-none-any.whl (37 kB)
+
+Collecting annotated-types>=0.6.0 (from pydantic<3.0.0,>=2.10.0->autogen-core~=0.6.1->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 19))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/78/b6/6307fbef88d9b5ee7421e68d78a9f162e0da4900bc5f5793f6d3d0e34fb8/annotated_types-0.7.0-py3-none-any.whl (13 kB)
+
+Collecting pydantic-core==2.41.5 (from pydantic<3.0.0,>=2.10.0->autogen-core~=0.6.1->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 19))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/11/66/f14d1d978ea94d1bc21fc98fcf570f9542fe55bfcc40269d4e1a21c19bf7/pydantic_core-2.41.5-cp311-cp311-win_amd64.whl (2.0 MB)
+
+Collecting typing-inspection>=0.4.2 (from pydantic<3.0.0,>=2.10.0->autogen-core~=0.6.1->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 19))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/dc/9b/47798a6c91d8bdb567fe2698fe81e0c6b7cb7ef4d13da4114b41d239f65d/typing_inspection-0.4.2-py3-none-any.whl (14 kB)
+
+Collecting propcache>=0.2.1 (from yarl<2.0,>=1.0->aiohttp~=3.8.0->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 46))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/f4/78/6cce448e2098e9f3bfc91bb877f06aa24b6ccace872e39c53b2f707c4648/propcache-0.4.1-cp311-cp311-win_amd64.whl (41 kB)
+
+Collecting altair!=5.4.0,!=5.4.1,<7,>=4.0 (from streamlit->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 10))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/db/33/ef2f2409450ef6daa61459d5de5c08128e7d3edb773fefd0a324d1310238/altair-6.0.0-py3-none-any.whl (795 kB)
+
+Collecting blinker<2,>=1.5.0 (from streamlit->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 10))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/10/cb/f2ad4230dc2eb1a74edf38f1a38b9b52277f75bef262d8908e60d957e13c/blinker-1.9.0-py3-none-any.whl (8.5 kB)
+
+Collecting cachetools<7,>=4.0 (from streamlit->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 10))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/2c/fc/1d7b80d0eb7b714984ce40efc78859c022cd930e402f599d8ca9e39c78a4/cachetools-6.2.4-py3-none-any.whl (11 kB)
+
+Collecting click<9,>=7.0 (from streamlit->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 10))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/98/78/01c019cdb5d6498122777c1a43056ebb3ebfeef2076d9d026bfe15583b2b/click-8.3.1-py3-none-any.whl (108 kB)
+
+Collecting pyarrow>=7.0 (from streamlit->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 10))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/ae/f3/cec89bd99fa3abf826f14d4e53d3d11340ce6f6af4d14bdcd54cd83b6576/pyarrow-22.0.0-cp311-cp311-win_amd64.whl (28.1 MB)
+
+Collecting tenacity<10,>=8.1.0 (from streamlit->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 10))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/e5/30/643397144bfbfec6f6ef821f36f33e57d35946c44a2352d3c9f0ae847619/tenacity-9.1.2-py3-none-any.whl (28 kB)
+
+Collecting toml<2,>=0.10.1 (from streamlit->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 10))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/44/6f/7120676b6d73228c96e17f1f794d8ab046fc910d781c8d151120c3f1569e/toml-0.10.2-py2.py3-none-any.whl (16 kB)
+
+Collecting watchdog<7,>=2.1.5 (from streamlit->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 10))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/db/d9/c495884c6e548fce18a8f40568ff120bc3a4b7b99813081c8ac0c936fa64/watchdog-6.0.0-py3-none-win_amd64.whl (79 kB)
+
+Collecting gitpython!=3.1.19,<4,>=3.0.7 (from streamlit->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 10))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/01/61/d4b89fec821f72385526e1b9d9a3a0385dda4a72b206d28049e2c7cd39b8/gitpython-3.1.45-py3-none-any.whl (208 kB)
+
+Collecting pydeck<1,>=0.8.0b4 (from streamlit->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 10))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/ab/4c/b888e6cf58bd9db9c93f40d1c6be8283ff49d88919231afe93a6bcf61626/pydeck-0.9.1-py2.py3-none-any.whl (6.9 MB)
+
+Collecting tornado!=6.5.0,<7,>=6.0.3 (from streamlit->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 10))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/d6/6d/c69be695a0a64fd37a97db12355a035a6d90f79067a3cf936ec2b1dc38cd/tornado-6.5.4-cp39-abi3-win_amd64.whl (446 kB)
+
+Collecting jinja2 (from altair!=5.4.0,!=5.4.1,<7,>=4.0->streamlit->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 10))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/62/a1/3d680cbfd5f4b8f15abc1d571870c5fc3e594bb582bc3b64ea099db13e56/jinja2-3.1.6-py3-none-any.whl (134 kB)
+
+Collecting jsonschema>=3.0 (from altair!=5.4.0,!=5.4.1,<7,>=4.0->streamlit->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 10))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/bf/9c/8c95d856233c1f82500c2450b8c68576b4cf1c871db3afac5c34ff84e6fd/jsonschema-4.25.1-py3-none-any.whl (90 kB)
+
+Collecting narwhals>=1.27.1 (from altair!=5.4.0,!=5.4.1,<7,>=4.0->streamlit->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 10))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/79/3e/b8ecc67e178919671695f64374a7ba916cf0adbf86efedc6054f38b5b8ae/narwhals-2.14.0-py3-none-any.whl (430 kB)
+
+Requirement already satisfied: colorama in c:\users\kabada\appdata\roaming\python\python311\site-packages (from click<9,>=7.0->streamlit->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 10)) (0.4.6)
+
+Collecting gitdb<5,>=4.0.1 (from gitpython!=3.1.19,<4,>=3.0.7->streamlit->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 10))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/a0/61/5c78b91c3143ed5c14207f463aecfc8f9dbb5092fb2869baf37c273b2705/gitdb-4.0.12-py3-none-any.whl (62 kB)
+
+Collecting smmap<6,>=3.0.1 (from gitdb<5,>=4.0.1->gitpython!=3.1.19,<4,>=3.0.7->streamlit->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 10))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/04/be/d09147ad1ec7934636ad912901c5fd7667e1c858e19d355237db0d0cd5e4/smmap-5.0.2-py3-none-any.whl (24 kB)
+
+Collecting altex>=0.2.0 (from streamlit_extras->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/84/ef/f94a52c48f8396f07411c8a0a244c4b551a6d57ecbcdc81d5d2345ebbd69/altex-0.2.0-py3-none-any.whl (25 kB)
+
+Collecting entrypoints>=0.4 (from streamlit_extras->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/35/a8/365059bbcd4572cbc41de17fd5b682be5868b218c3c5479071865cab9078/entrypoints-0.4-py3-none-any.whl (5.3 kB)
+
+Collecting htbuilder>=0.6.2 (from streamlit_extras->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11))
+
+  Using cached htbuilder-0.9.0-py3-none-any.whl
+
+Collecting markdownlit>=0.0.7 (from streamlit_extras->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/5a/95/07e666469473043e16f263592c42e966e8b9a61fcc785ed39f48751adeb0/markdownlit-0.0.7-py3-none-any.whl (15 kB)
+
+Collecting prometheus-client>=0.20.0 (from streamlit_extras->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/b8/db/14bafcb4af2139e046d03fd00dea7873e48eafe18b7d2797e73d6681f210/prometheus_client-0.23.1-py3-none-any.whl (61 kB)
+
+Collecting snowflake-snowpark-python>=1.30.0 (from snowflake-snowpark-python[pandas]>=1.30.0; sys_platform != "emscripten"->streamlit_extras->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/99/34/6fb36127af3307c5c403a19b11a40896bf4e7d81bc08e00be49237180946/snowflake_snowpark_python-1.44.0-py3-none-any.whl (1.8 MB)
+
+Collecting st-annotated-text>=4.0.1 (from streamlit_extras->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/d9/70/f29d4359ddfd1a0afa00065e4dac32bd4931f589185f5f0f499db9aee4fe/st_annotated_text-4.0.2-py3-none-any.whl (9.1 kB)
+
+Collecting st-theme>=1.2.3 (from streamlit_extras->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/30/09/cd7134f1ed5074a7d456640e7ba9a8c8e68a831837b4e7bfd9f29e5700a4/st_theme-1.2.3-py3-none-any.whl (75 kB)
+
+Collecting streamlit-avatar>=0.1.3 (from streamlit_extras->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/cf/77/4b82378aa4caf7ef7701841b25a5406b3a3bb6171c8b9eee540553843b7f/streamlit_avatar-0.1.3-py3-none-any.whl (779 kB)
+
+Collecting streamlit-camera-input-live>=0.2.0 (from streamlit_extras->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/23/9b/1c0ea2b4cc39ff1be6ad7171ac9455203d08e725a9e101cc3e7311589842/streamlit_camera_input_live-0.2.0-py3-none-any.whl (6.6 kB)
+
+Collecting streamlit-card>=1.0.2 (from streamlit_extras->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/05/22/1d81bd6b2552c67f50a19501c00c7ee08022eacffb21c6900929359f7ce5/streamlit_card-1.0.2-py3-none-any.whl (680 kB)
+
+Collecting streamlit-embedcode>=0.1.2 (from streamlit_extras->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/72/0b/5c68315b24d7565a1c51611c94124cafce5463ed869270c762552d74d96b/streamlit_embedcode-0.1.2-py3-none-any.whl (3.5 kB)
+
+Collecting streamlit-faker>=0.0.3 (from streamlit_extras->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/aa/52/19755b6a87750640a1f5232c8c80ad46df3c2afcaf25594a5884756d220c/streamlit_faker-0.0.4-py3-none-any.whl (14 kB)
+
+Collecting streamlit-image-coordinates>=0.1.9 (from streamlit_extras->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/1f/0c/29d4ddfde865ce480b8aacbb9a764e872dfd2e141c7e6c15f075436ea807/streamlit_image_coordinates-0.4.0-py3-none-any.whl (7.6 kB)
+
+Collecting streamlit-keyup>=0.2.4 (from streamlit_extras->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/14/ed/facce225c0d360b9bfa053c827029312e1b255e84d79320bda3539417b50/streamlit_keyup-0.3.0-py3-none-any.whl (7.5 kB)
+
+Collecting streamlit-notify>=0.3.1 (from streamlit_extras->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/bb/71/ce3b6c85a793f1ec2d4c4ea3b70ea5a86b7554003cc179a84fd105cc9f0f/streamlit_notify-0.3.1-py3-none-any.whl (9.9 kB)
+
+Collecting streamlit-toggle-switch>=1.0.2 (from streamlit_extras->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/7c/bc/f3ffd4143379756c494b8cb5faf1fffae48b722fe7b05794068d05bec965/streamlit_toggle_switch-1.0.2-py3-none-any.whl (635 kB)
+
+Collecting streamlit-vertical-slider>=2.5.5 (from streamlit_extras->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/4e/3f/f16875fa650cc6f6c1bc19ef9ccae5a1a7f434ec08747181743b48c31830/streamlit_vertical_slider-2.5.5-py3-none-any.whl (1.8 MB)
+
+Collecting validators>=0.33.0 (from streamlit_extras->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/fa/6e/3e955517e22cbdd565f2f8b2e73d52528b14b8bcfdb04f62466b071de847/validators-0.35.0-py3-none-any.whl (44 kB)
+
+Collecting lxml<5,>=4.6.5 (from search-engine-parser->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 24))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/00/c3/0e6e18ac7fbf9687440c7d54fb2f39055d61ade32545ab305e7e3186be73/lxml-4.9.4-cp311-cp311-win_amd64.whl (3.8 MB)
+
+Collecting fake-useragent<0.2,>=0.1.11 (from search-engine-parser->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 24))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/cb/31/1ac89e1e6cda98b1b214f029debec513a20ad49edc0920284cde9194931b/fake_useragent-0.1.14-py3-none-any.whl (13 kB)
+
+Collecting langchain-core<2.0.0,>=1.2.1 (from langchain->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 27))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/83/bd/9df897cbc98290bf71140104ee5b9777cf5291afb80333aa7da5a497339b/langchain_core-1.2.5-py3-none-any.whl (484 kB)
+
+Collecting langgraph<1.1.0,>=1.0.2 (from langchain->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 27))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/23/1b/e318ee76e42d28f515d87356ac5bd7a7acc8bad3b8f54ee377bef62e1cbf/langgraph-1.0.5-py3-none-any.whl (157 kB)
+
+Collecting jsonpatch<2.0.0,>=1.33.0 (from langchain-core<2.0.0,>=1.2.1->langchain->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 27))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/73/07/02e16ed01e04a374e644b575638ec7987ae846d25ad97bcc9945a3ee4b0e/jsonpatch-1.33-py2.py3-none-any.whl (12 kB)
+
+Collecting langsmith<1.0.0,>=0.3.45 (from langchain-core<2.0.0,>=1.2.1->langchain->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 27))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/19/67/1720b01e58d3487a44c780a86aabad95d9eaaf6b2fa8d0718c98f0eca18d/langsmith-0.5.1-py3-none-any.whl (275 kB)
+
+Collecting pyyaml<7.0.0,>=5.3.0 (from langchain-core<2.0.0,>=1.2.1->langchain->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 27))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/da/e3/ea007450a105ae919a72393cb06f122f288ef60bba2dc64b26e2646fa315/pyyaml-6.0.3-cp311-cp311-win_amd64.whl (158 kB)
+
+Collecting uuid-utils<1.0,>=0.12.0 (from langchain-core<2.0.0,>=1.2.1->langchain->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 27))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/38/92/41c8734dd97213ee1d5ae435cf4499705dc4f2751e3b957fd12376f61784/uuid_utils-0.12.0-cp39-abi3-win_amd64.whl (183 kB)
+
+Collecting jsonpointer>=1.9 (from jsonpatch<2.0.0,>=1.33.0->langchain-core<2.0.0,>=1.2.1->langchain->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 27))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/71/92/5e77f98553e9e75130c78900d000368476aed74276eb8ae8796f65f00918/jsonpointer-3.0.0-py2.py3-none-any.whl (7.6 kB)
+
+Collecting langgraph-checkpoint<4.0.0,>=2.1.0 (from langgraph<1.1.0,>=1.0.2->langchain->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 27))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/48/e3/616e3a7ff737d98c1bbb5700dd62278914e2a9ded09a79a1fa93cf24ce12/langgraph_checkpoint-3.0.1-py3-none-any.whl (46 kB)
+
+Collecting langgraph-prebuilt<1.1.0,>=1.0.2 (from langgraph<1.1.0,>=1.0.2->langchain->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 27))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/87/5e/aeba4a5b39fe6e874e0dd003a82da71c7153e671312671a8dacc5cb7c1af/langgraph_prebuilt-1.0.5-py3-none-any.whl (35 kB)
+
+Collecting langgraph-sdk<0.4.0,>=0.3.0 (from langgraph<1.1.0,>=1.0.2->langchain->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 27))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/ab/fe/0c1c9c01a154eba62b20b02fabe811fd94a2b810061ae9e4d8462b8cf85a/langgraph_sdk-0.3.1-py3-none-any.whl (66 kB)
+
+Collecting xxhash>=3.5.0 (from langgraph<1.1.0,>=1.0.2->langchain->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 27))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/65/79/9d24d7f53819fe301b231044ea362ce64e86c74f6e8c8e51320de248b3e5/xxhash-3.6.0-cp311-cp311-win_amd64.whl (31 kB)
+
+Collecting ormsgpack>=1.12.0 (from langgraph-checkpoint<4.0.0,>=2.1.0->langgraph<1.1.0,>=1.0.2->langchain->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 27))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/15/eb/86fbef1d605fa91ecef077f93f9d0e34fc39b23475dfe3ffb92f6c8db28d/ormsgpack-1.12.1-cp311-cp311-win_amd64.whl (115 kB)
+
+Collecting orjson>=3.10.1 (from langgraph-sdk<0.4.0,>=0.3.0->langgraph<1.1.0,>=1.0.2->langchain->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 27))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/a3/83/e0c5aa06ba73a6760134b169f11fb970caa1525fa4461f94d76e692299d9/orjson-3.11.5-cp311-cp311-win_amd64.whl (133 kB)
+
+Collecting requests-toolbelt>=1.0.0 (from langsmith<1.0.0,>=0.3.45->langchain-core<2.0.0,>=1.2.1->langchain->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 27))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/3f/51/d4db610ef29373b879047326cbf6fa98b6c1969d6f6dc423279de2b1be2c/requests_toolbelt-1.0.0-py2.py3-none-any.whl (54 kB)
+
+Collecting zstandard>=0.23.0 (from langsmith<1.0.0,>=0.3.45->langchain-core<2.0.0,>=1.2.1->langchain->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 27))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/43/a3/c6155f5c1cce691cb80dfd38627046e50af3ee9ddc5d0b45b9b063bfb8c9/zstandard-0.25.0-cp311-cp311-win_amd64.whl (506 kB)
+
+Collecting langchain-classic<2.0.0,>=1.0.0 (from langchain-community->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 28))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/83/0f/eab87f017d7fe28e8c11fff614f4cdbfae32baadb77d0f79e9f922af1df2/langchain_classic-1.0.1-py3-none-any.whl (1.0 MB)
+
+Collecting SQLAlchemy<3.0.0,>=1.4.0 (from langchain-community->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 28))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/bc/fa/09d0a11fe9f15c7fa5c7f0dd26be3d235b0c0cbf2f9544f43bc42efc8a24/sqlalchemy-2.0.45-cp311-cp311-win_amd64.whl (2.1 MB)
+
+Collecting dataclasses-json<0.7.0,>=0.6.7 (from langchain-community->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 28))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/c3/be/d0d44e092656fe7a06b55e6103cbce807cdbdee17884a5367c68c9860853/dataclasses_json-0.6.7-py3-none-any.whl (28 kB)
+
+Collecting pydantic-settings<3.0.0,>=2.10.1 (from langchain-community->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 28))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/c1/60/5d4751ba3f4a40a6891f24eec885f51afd78d208498268c734e256fb13c4/pydantic_settings-2.12.0-py3-none-any.whl (51 kB)
+
+Collecting httpx-sse<1.0.0,>=0.4.0 (from langchain-community->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 28))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/d2/fd/6668e5aec43ab844de6fc74927e155a3b37bf40d7c3790e49fc0406b6578/httpx_sse-0.4.3-py3-none-any.whl (9.0 kB)
+
+Collecting marshmallow<4.0.0,>=3.18.0 (from dataclasses-json<0.7.0,>=0.6.7->langchain-community->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 28))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/be/2f/5108cb3ee4ba6501748c4908b908e55f42a5b66245b4cfe0c99326e1ef6e/marshmallow-3.26.2-py3-none-any.whl (50 kB)
+
+Collecting typing-inspect<1,>=0.4.0 (from dataclasses-json<0.7.0,>=0.6.7->langchain-community->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 28))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/65/f3/107a22063bf27bdccf2024833d3445f4eea42b2e598abfbd46f6a63b6cb0/typing_inspect-0.9.0-py3-none-any.whl (8.8 kB)
+
+Collecting langchain-text-splitters<2.0.0,>=1.1.0 (from langchain-classic<2.0.0,>=1.0.0->langchain-community->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 28))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/d8/1a/a84ed1c046deecf271356b0179c1b9fba95bfdaa6f934e1849dee26fad7b/langchain_text_splitters-1.1.0-py3-none-any.whl (34 kB)
+
+Collecting greenlet>=1 (from SQLAlchemy<3.0.0,>=1.4.0->langchain-community->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 28))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/1d/d5/c339b3b4bc8198b7caa4f2bd9fd685ac9f29795816d8db112da3d04175bb/greenlet-3.3.0-cp311-cp311-win_amd64.whl (301 kB)
+
+Collecting mypy-extensions>=0.3.0 (from typing-inspect<1,>=0.4.0->dataclasses-json<0.7.0,>=0.6.7->langchain-community->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 28))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/79/7b/2c79738432f5c924bef5071f933bcc9efd0473bac3b4aa584a6f7c1c8df8/mypy_extensions-1.1.0-py3-none-any.whl (5.0 kB)
+
+Collecting aiofiles<25.0,>=22.0 (from gradio->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 33))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/a5/45/30bb92d442636f570cb5651bc661f52b610e2eec3f891a5dc3a4c3667db0/aiofiles-24.1.0-py3-none-any.whl (15 kB)
+
+Collecting brotli>=1.1.0 (from gradio->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 33))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/02/8b/ecb5761b989629a4758c394b9301607a5880de61ee2ee5fe104b87149ebc/brotli-1.2.0-cp311-cp311-win_amd64.whl (369 kB)
+
+Collecting fastapi<1.0,>=0.115.2 (from gradio->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 33))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/d2/f3/a6858d147ed2645c095d11dc2440f94a5f1cd8f4df888e3377e6b5281a0f/fastapi-0.127.1-py3-none-any.whl (112 kB)
+
+Collecting ffmpy (from gradio->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 33))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/55/56/dd3669eccebb6d8ac81e624542ebd53fe6f08e1b8f2f8d50aeb7e3b83f99/ffmpy-1.0.0-py3-none-any.whl (5.6 kB)
+
+Collecting gradio-client==2.0.2 (from gradio->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 33))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/a7/a2/a3497afea984202f481de3464b3bfbcb3de1cd83cbbf3714933d40dd7106/gradio_client-2.0.2-py3-none-any.whl (55 kB)
+
+Collecting groovy~=0.1 (from gradio->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 33))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/28/27/3d6dcadc8a3214d8522c1e7f6a19554e33659be44546d44a2f7572ac7d2a/groovy-0.1.2-py3-none-any.whl (14 kB)
+
+Collecting huggingface-hub<2.0,>=0.33.5 (from gradio->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 33))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/df/8d/7ca723a884d55751b70479b8710f06a317296b1fa1c1dec01d0420d13e43/huggingface_hub-1.2.3-py3-none-any.whl (520 kB)
+
+Collecting markupsafe<4.0,>=2.0 (from gradio->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 33))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/83/8a/4414c03d3f891739326e1783338e48fb49781cc915b2e0ee052aa490d586/markupsafe-3.0.3-cp311-cp311-win_amd64.whl (15 kB)
+
+Collecting pydub (from gradio->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 33))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/a6/53/d78dc063216e62fc55f6b2eebb447f6a4b0a59f55c8406376f76bf959b08/pydub-0.25.1-py2.py3-none-any.whl (32 kB)
+
+Collecting python-multipart>=0.0.18 (from gradio->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 33))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/aa/76/03af049af4dcee5d27442f71b6924f01f3efb5d2bd34f23fcd563f2cc5f5/python_multipart-0.0.21-py3-none-any.whl (24 kB)
+
+Collecting safehttpx<0.2.0,>=0.1.7 (from gradio->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 33))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/2e/a3/0f0b7d78e2f1eb9e8e1afbff1d2bff8d60144aee17aca51c065b516743dd/safehttpx-0.1.7-py3-none-any.whl (9.0 kB)
+
+Collecting semantic-version~=2.0 (from gradio->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 33))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/6a/23/8146aad7d88f4fcb3a6218f41a60f6c2d4e3a72de72da1825dc7c8f7877c/semantic_version-2.10.0-py2.py3-none-any.whl (15 kB)
+
+Collecting starlette<1.0,>=0.40.0 (from gradio->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 33))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/d9/52/1064f510b141bd54025f9b55105e26d1fa970b9be67ad766380a3c9b74b0/starlette-0.50.0-py3-none-any.whl (74 kB)
+
+Collecting tomlkit<0.14.0,>=0.12.0 (from gradio->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 33))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/bd/75/8539d011f6be8e29f339c42e633aae3cb73bffa95dd0f9adec09b9c58e85/tomlkit-0.13.3-py3-none-any.whl (38 kB)
+
+Collecting typer<1.0,>=0.12 (from gradio->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 33))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/e1/e4/5ebc1899d31d2b1601b32d21cfb4bba022ae6fce323d365f0448031b1660/typer-0.21.0-py3-none-any.whl (47 kB)
+
+Collecting uvicorn>=0.14.0 (from gradio->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 33))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/3d/d8/2083a1daa7439a66f3a48589a57d576aa117726762618f6bb09fe3798796/uvicorn-0.40.0-py3-none-any.whl (68 kB)
+
+Collecting fsspec (from gradio-client==2.0.2->gradio->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 33))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/51/c7/b64cae5dba3a1b138d7123ec36bb5ccd39d39939f18454407e5468f4763f/fsspec-2025.12.0-py3-none-any.whl (201 kB)
+
+Collecting annotated-doc>=0.0.2 (from fastapi<1.0,>=0.115.2->gradio->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 33))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/1e/d3/26bf1008eb3d2daa8ef4cacc7f3bfdc11818d111f7e2d0201bc6e3b49d45/annotated_doc-0.0.4-py3-none-any.whl (5.3 kB)
+
+Collecting filelock (from huggingface-hub<2.0,>=0.33.5->gradio->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 33))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/e3/7f/a1a97644e39e7316d850784c642093c99df1290a460df4ede27659056834/filelock-3.20.1-py3-none-any.whl (16 kB)
+
+Collecting hf-xet<2.0.0,>=1.2.0 (from huggingface-hub<2.0,>=0.33.5->gradio->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 33))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/cb/44/870d44b30e1dcfb6a65932e3e1506c103a8a5aea9103c337e7a53180322c/hf_xet-1.2.0-cp37-abi3-win_amd64.whl (2.9 MB)
+
+Collecting shellingham (from huggingface-hub<2.0,>=0.33.5->gradio->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 33))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/e0/f9/0595336914c5619e5f28a1fb793285925a8cd4b432c9da0a987836c7f822/shellingham-1.5.4-py2.py3-none-any.whl (9.8 kB)
+
+Collecting typer-slim (from huggingface-hub<2.0,>=0.33.5->gradio->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 33))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/b4/84/e97abf10e4a699194ff07fd586ec7f4cf867d9d04bead559a65f9e7aff84/typer_slim-0.21.0-py3-none-any.whl (47 kB)
+
+Collecting rich>=10.11.0 (from typer<1.0,>=0.12->gradio->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 33))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/25/7a/b0178788f8dc6cafce37a212c99565fa1fe7872c70c6c9c1e1a372d9d88f/rich-14.2.0-py3-none-any.whl (243 kB)
+
+Collecting tree-sitter-language-pack (from grep_ast->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 42))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/97/59/2287f07723c063475d6657babed0d5569f4b499e393ab51354d529c3e7b5/tree_sitter_language_pack-0.13.0-cp310-abi3-win_amd64.whl (16.9 MB)
+
+Collecting pathspec (from grep_ast->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 42))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/cc/20/ff623b09d963f88bfde16306a54e12ee5ea43e9b597108672ff3a408aad6/pathspec-0.12.1-py3-none-any.whl (31 kB)
+
+Collecting jsonschema-specifications>=2023.03.6 (from jsonschema>=3.0->altair!=5.4.0,!=5.4.1,<7,>=4.0->streamlit->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 10))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/41/45/1a4ed80516f02155c51f51e8cedb3c1902296743db0bbc66608a0db2814f/jsonschema_specifications-2025.9.1-py3-none-any.whl (18 kB)
+
+Collecting referencing>=0.28.4 (from jsonschema>=3.0->altair!=5.4.0,!=5.4.1,<7,>=4.0->streamlit->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 10))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/2c/58/ca301544e1fa93ed4f80d724bf5b194f6e4b945841c5bfd555878eea9fcb/referencing-0.37.0-py3-none-any.whl (26 kB)
+
+Collecting rpds-py>=0.7.1 (from jsonschema>=3.0->altair!=5.4.0,!=5.4.1,<7,>=4.0->streamlit->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 10))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/fa/5b/e7b7aa136f28462b344e652ee010d4de26ee9fd16f1bfd5811f5153ccf89/rpds_py-0.30.0-cp311-cp311-win_amd64.whl (236 kB)
+
+Collecting markdown (from markdownlit>=0.0.7->streamlit_extras->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/70/81/54e3ce63502cd085a0c556652a4e1b919c45a446bd1e5300e10c44c8c521/markdown-3.10-py3-none-any.whl (107 kB)
+
+Collecting favicon (from markdownlit>=0.0.7->streamlit_extras->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/93/4c/8baf94bb789972634d933152d27529f2bad4e5d2397b8da9c30f6f5342ce/favicon-0.7.0-py2.py3-none-any.whl (5.9 kB)
+
+Collecting pymdown-extensions (from markdownlit>=0.0.7->streamlit_extras->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/fb/35/b763e8fbcd51968329b9adc52d188fc97859f85f2ee15fe9f379987d99c5/pymdown_extensions-10.19.1-py3-none-any.whl (266 kB)
+
+Collecting importlib-metadata<8.8.0,>=6.0 (from opentelemetry-api>=1.34.1->autogen-core~=0.6.1->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 19))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/fa/5e/f8e9a1d23b9c20a551a8a02ea3637b4642e22c2626e3a13a9a29cdea99eb/importlib_metadata-8.7.1-py3-none-any.whl (27 kB)
+
+Collecting zipp>=3.20 (from importlib-metadata<8.8.0,>=6.0->opentelemetry-api>=1.34.1->autogen-core~=0.6.1->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 19))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/2e/54/647ade08bf0db230bfea292f893923872fd20be6ac6f53b2b936ba839d75/zipp-3.23.0-py3-none-any.whl (10 kB)
+
+Collecting six>=1.5 (from python-dateutil>=2.8.2->pandas~=2.2.2->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 2))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/b7/ce/149a00dd41f10bc29e5921b496af8b574d8413afcd5e30dfa0ed46c2cc5e/six-1.17.0-py2.py3-none-any.whl (11 kB)
+
+Collecting markdown-it-py>=2.2.0 (from rich>=10.11.0->typer<1.0,>=0.12->gradio->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 33))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/94/54/e7d793b573f298e1c9013b8c4dade17d481164aa517d1d7148619c2cedbf/markdown_it_py-4.0.0-py3-none-any.whl (87 kB)
+
+Collecting pygments<3.0.0,>=2.13.0 (from rich>=10.11.0->typer<1.0,>=0.12->gradio->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 33))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/c7/21/705964c7812476f378728bdf590ca4b771ec72385c533964653c68e86bdc/pygments-2.19.2-py3-none-any.whl (1.2 MB)
+
+Requirement already satisfied: mdurl~=0.1 in c:\users\kabada\appdata\roaming\python\python311\site-packages (from markdown-it-py>=2.2.0->rich>=10.11.0->typer<1.0,>=0.12->gradio->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 33)) (0.1.2)
+
+Requirement already satisfied: setuptools>=40.6.0 in e:\code\fastmcp\ai_review\code_evaluation\baseline\repomaster\env\conda\lib\site-packages (from snowflake-snowpark-python>=1.30.0->snowflake-snowpark-python[pandas]>=1.30.0; sys_platform != "emscripten"->streamlit_extras->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11)) (80.9.0)
+
+Requirement already satisfied: wheel in e:\code\fastmcp\ai_review\code_evaluation\baseline\repomaster\env\conda\lib\site-packages (from snowflake-snowpark-python>=1.30.0->snowflake-snowpark-python[pandas]>=1.30.0; sys_platform != "emscripten"->streamlit_extras->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11)) (0.45.1)
+
+Collecting snowflake-connector-python<5.0.0,>=3.17.0 (from snowflake-snowpark-python>=1.30.0->snowflake-snowpark-python[pandas]>=1.30.0; sys_platform != "emscripten"->streamlit_extras->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/cc/61/f08ba20fa1568dce9b585616899663fa555f0f348dd5701850d4a8bb12e6/snowflake_connector_python-4.1.1-cp311-cp311-win_amd64.whl (1.2 MB)
+
+Collecting cloudpickle!=2.1.0,!=2.2.0,<=3.1.1,>=1.6.0 (from snowflake-snowpark-python>=1.30.0->snowflake-snowpark-python[pandas]>=1.30.0; sys_platform != "emscripten"->streamlit_extras->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/7e/e8/64c37fadfc2816a7701fa8a6ed8d87327c7d54eacfbfb6edab14a2f2be75/cloudpickle-3.1.1-py3-none-any.whl (20 kB)
+
+Collecting tzlocal (from snowflake-snowpark-python>=1.30.0->snowflake-snowpark-python[pandas]>=1.30.0; sys_platform != "emscripten"->streamlit_extras->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/c2/14/e2a54fabd4f08cd7af1c07030603c3356b74da07f7cc056e600436edfa17/tzlocal-5.3.1-py3-none-any.whl (18 kB)
+
+Collecting asn1crypto<2.0.0,>0.24.0 (from snowflake-connector-python<5.0.0,>=3.17.0->snowflake-snowpark-python>=1.30.0->snowflake-snowpark-python[pandas]>=1.30.0; sys_platform != "emscripten"->streamlit_extras->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/c9/7f/09065fd9e27da0eda08b4d6897f1c13535066174cc023af248fc2a8d5e5a/asn1crypto-1.5.1-py2.py3-none-any.whl (105 kB)
+
+Collecting cryptography>=44.0.1 (from snowflake-connector-python<5.0.0,>=3.17.0->snowflake-snowpark-python>=1.30.0->snowflake-snowpark-python[pandas]>=1.30.0; sys_platform != "emscripten"->streamlit_extras->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/7e/bf/80fbf45253ea585a1e492a6a17efcb93467701fa79e71550a430c5e60df0/cryptography-46.0.3-cp311-abi3-win_amd64.whl (3.5 MB)
+
+Collecting pyOpenSSL<26.0.0,>=24.0.0 (from snowflake-connector-python<5.0.0,>=3.17.0->snowflake-snowpark-python>=1.30.0->snowflake-snowpark-python[pandas]>=1.30.0; sys_platform != "emscripten"->streamlit_extras->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/d1/81/ef2b1dfd1862567d573a4fdbc9f969067621764fbb74338496840a1d2977/pyopenssl-25.3.0-py3-none-any.whl (57 kB)
+
+Collecting pyjwt<3.0.0,>=2.10.1 (from snowflake-connector-python<5.0.0,>=3.17.0->snowflake-snowpark-python>=1.30.0->snowflake-snowpark-python[pandas]>=1.30.0; sys_platform != "emscripten"->streamlit_extras->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/61/ad/689f02752eeec26aed679477e80e632ef1b682313be70793d798c1d5fc8f/PyJWT-2.10.1-py3-none-any.whl (22 kB)
+
+Collecting sortedcontainers>=2.4.0 (from snowflake-connector-python<5.0.0,>=3.17.0->snowflake-snowpark-python>=1.30.0->snowflake-snowpark-python[pandas]>=1.30.0; sys_platform != "emscripten"->streamlit_extras->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/32/46/9cb0e58b2deb7f82b84065f37f3bffeb12413f947f9388e4cac22c4621ce/sortedcontainers-2.4.0-py2.py3-none-any.whl (29 kB)
+
+Collecting platformdirs<5.0.0,>=2.6.0 (from snowflake-connector-python<5.0.0,>=3.17.0->snowflake-snowpark-python>=1.30.0->snowflake-snowpark-python[pandas]>=1.30.0; sys_platform != "emscripten"->streamlit_extras->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/cb/28/3bfe2fa5a7b9c46fe7e13c97bda14c895fb10fa2ebf1d0abb90e0cea7ee1/platformdirs-4.5.1-py3-none-any.whl (18 kB)
+
+Collecting boto3>=1.24 (from snowflake-connector-python<5.0.0,>=3.17.0->snowflake-snowpark-python>=1.30.0->snowflake-snowpark-python[pandas]>=1.30.0; sys_platform != "emscripten"->streamlit_extras->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/6c/53/9f4241152eb1f5a57351232c14ef411ef35fbcc1d97a63873235d0503a8a/boto3-1.42.17-py3-none-any.whl (140 kB)
+
+Collecting botocore>=1.24 (from snowflake-connector-python<5.0.0,>=3.17.0->snowflake-snowpark-python>=1.30.0->snowflake-snowpark-python[pandas]>=1.30.0; sys_platform != "emscripten"->streamlit_extras->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/d1/47/cc00f2421f49784de8b9113c94b7b6580db989721f5109a24b9108308fe1/botocore-1.42.17-py3-none-any.whl (14.6 MB)
+
+Collecting cffi>=2.0.0 (from cryptography>=44.0.1->snowflake-connector-python<5.0.0,>=3.17.0->snowflake-snowpark-python>=1.30.0->snowflake-snowpark-python[pandas]>=1.30.0; sys_platform != "emscripten"->streamlit_extras->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/ae/8f/dc5531155e7070361eb1b7e4c1a9d896d0cb21c49f807a6c03fd63fc877e/cffi-2.0.0-cp311-cp311-win_amd64.whl (182 kB)
+
+Collecting jmespath<2.0.0,>=0.7.1 (from boto3>=1.24->snowflake-connector-python<5.0.0,>=3.17.0->snowflake-snowpark-python>=1.30.0->snowflake-snowpark-python[pandas]>=1.30.0; sys_platform != "emscripten"->streamlit_extras->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/31/b4/b9b800c45527aadd64d5b442f9b932b00648617eb5d63d2c7a6587b7cafc/jmespath-1.0.1-py3-none-any.whl (20 kB)
+
+Collecting s3transfer<0.17.0,>=0.16.0 (from boto3>=1.24->snowflake-connector-python<5.0.0,>=3.17.0->snowflake-snowpark-python>=1.30.0->snowflake-snowpark-python[pandas]>=1.30.0; sys_platform != "emscripten"->streamlit_extras->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/fc/51/727abb13f44c1fcf6d145979e1535a35794db0f6e450a0cb46aa24732fe2/s3transfer-0.16.0-py3-none-any.whl (86 kB)
+
+Collecting pycparser (from cffi>=2.0.0->cryptography>=44.0.1->snowflake-connector-python<5.0.0,>=3.17.0->snowflake-snowpark-python>=1.30.0->snowflake-snowpark-python[pandas]>=1.30.0; sys_platform != "emscripten"->streamlit_extras->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/a0/e3/59cd50310fc9b59512193629e1984c1f95e5c8ae6e5d8c69532ccc65a7fe/pycparser-2.23-py3-none-any.whl (118 kB)
+
+Collecting faker (from streamlit-faker>=0.0.3->streamlit_extras->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/eb/5a/26cdb1b10a55ac6eb11a738cea14865fa753606c4897d7be0f5dc230df00/faker-39.0.0-py3-none-any.whl (2.0 MB)
+
+Collecting matplotlib (from streamlit-faker>=0.0.3->streamlit_extras->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/6f/d3/a4bbc01c237ab710a1f22b4da72f4ff6d77eb4c7735ea9811a94ae239067/matplotlib-3.10.8-cp311-cp311-win_amd64.whl (8.1 MB)
+
+Collecting pywin32>=304 (from docker->pyautogen~=0.7.6->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 20))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/51/8f/9bb81dd5bb77d22243d33c8397f09377056d5c687aa6d4042bea7fbf8364/pywin32-311-cp311-cp311-win_amd64.whl (9.5 MB)
+
+Collecting contourpy>=1.0.1 (from matplotlib->streamlit-faker>=0.0.3->streamlit_extras->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/98/4b/9bd370b004b5c9d8045c6c33cf65bae018b27aca550a3f657cdc99acdbd8/contourpy-1.3.3-cp311-cp311-win_amd64.whl (225 kB)
+
+Collecting cycler>=0.10 (from matplotlib->streamlit-faker>=0.0.3->streamlit_extras->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/e7/05/c19819d5e3d95294a6f5947fb9b9629efb316b96de511b418c53d245aae6/cycler-0.12.1-py3-none-any.whl (8.3 kB)
+
+Collecting fonttools>=4.22.0 (from matplotlib->streamlit-faker>=0.0.3->streamlit_extras->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/07/ad/37dd1ae5fa6e01612a1fbb954f0927681f282925a86e86198ccd7b15d515/fonttools-4.61.1-cp311-cp311-win_amd64.whl (2.3 MB)
+
+Collecting kiwisolver>=1.3.1 (from matplotlib->streamlit-faker>=0.0.3->streamlit_extras->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/3b/c6/f8df8509fd1eee6c622febe54384a96cfaf4d43bf2ccec7a0cc17e4715c9/kiwisolver-1.4.9-cp311-cp311-win_amd64.whl (73 kB)
+
+Collecting pyparsing>=3 (from matplotlib->streamlit-faker>=0.0.3->streamlit_extras->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 11))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/8b/40/2614036cdd416452f5bf98ec037f38a1afb17f327cb8e6b652d4729e0af8/pyparsing-3.3.1-py3-none-any.whl (121 kB)
+
+Collecting tree-sitter>=0.25.2 (from tree-sitter-language-pack->grep_ast->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 42))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/f9/19/427e5943b276a0dd74c2a1f1d7a7393443f13d1ee47dedb3f8127903c080/tree_sitter-0.25.2-cp311-cp311-win_amd64.whl (127 kB)
+
+Collecting tree-sitter-c-sharp>=0.23.1 (from tree-sitter-language-pack->grep_ast->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 42))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/47/d2/4facaa34b40f8104d8751746d0e1cd2ddf0beb9f1404b736b97f372bd1f3/tree_sitter_c_sharp-0.23.1-cp39-abi3-win_amd64.whl (377 kB)
+
+Collecting tree-sitter-embedded-template>=0.25.0 (from tree-sitter-language-pack->grep_ast->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 42))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/5d/74/728355e594fca140f793f234fdfec195366b6956b35754d00ea97ca18b21/tree_sitter_embedded_template-0.25.0-cp310-abi3-win_amd64.whl (13 kB)
+
+Collecting tree-sitter-yaml>=0.7.2 (from tree-sitter-language-pack->grep_ast->-r E:\code\fastMCP\ai_review\code_evaluation\baseline\repomaster\source\requirements.txt (line 42))
+
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/4a/d6/8d1e1ace03db3b02e64e91daf21d1347941d1bbecc606a5473a1a605250d/tree_sitter_yaml-0.7.2-cp310-abi3-win_amd64.whl (45 kB)
+
+Installing collected packages: sortedcontainers, pywin32, pytz, pydub, genson, fake-useragent, brotli, asn1crypto, zstandard, zipp, xxhash, watchdog, validators, uuid-utils, urllib3, tzdata, typing_extensions, tree-sitter-yaml, tree-sitter-embedded-template, tree-sitter-c-sharp, tree-sitter, tornado, tomlkit, toml, termcolor, tenacity, soupsieve, sniffio, smmap, six, shellingham, semantic-version, rpds-py, regex, pyyaml, python-multipart, python-dotenv, pyparsing, PyMuPDF, pyjwt, pygments, pycparser, pyarrow, protobuf, propcache, prometheus-client, platformdirs, pillow, pathspec, packaging, ormsgpack, orjson, narwhals, mypy-extensions, multidict, markupsafe, markdown-it-py, markdown, lxml, kiwisolver, jsonref, jsonpointer, joblib, jmespath, jiter, humanize, httpx-sse, htbuilder, hf-xet, h11, groovy, greenlet, fsspec, frozenlist, fonttools, filelock, ffmpy, entrypoints, distro, diskcache, cycler, contourpy, cloudpickle, click, charset_normalizer, certifi, cachetools, blinker, attrs, async-timeout, annotated-types, annotated-doc, aiofiles, yarl, uvicorn, tzlocal, typing-inspection, typing-inspect, typer-slim, tree-sitter-language-pack, st-annotated-text, SQLAlchemy, rich, requests, referencing, python-dateutil, pymdown-extensions, pydantic-core, plotly, pdf2image, marshmallow, jsonpatch, jinja2, importlib-metadata, httpcore, gitdb, faker, cffi, beautifulsoup4, anyio, aiosignal, typer, tiktoken, starlette, serpapi, requests-toolbelt, pydeck, pydantic, pandas, opentelemetry-api, matplotlib, jsonschema-specifications, httpx, grep_ast, gitpython, favicon, docker, dataclasses-json, cryptography, botocore, asyncer, aiohttp, search-engine-parser, safehttpx, s3transfer, pyOpenSSL, pydantic-settings, openai, langsmith, langgraph-sdk, jsonschema, huggingface-hub, fastapi, fast-depends, autogen-core, pyautogen, langchain-core, gradio-client, boto3, autogen-agentchat, altair, streamlit, snowflake-connector-python, langgraph-checkpoint, langchain-text-splitters, gradio, streamlit-vertical-slider, streamlit-toggle-switch, streamlit-notify, streamlit-keyup, streamlit-image-coordinates, streamlit-embedcode, streamlit-card, streamlit-camera-input-live, streamlit-avatar, st-theme, snowflake-snowpark-python, langgraph-prebuilt, langchain-classic, altex, streamlit-faker, langgraph, langchain-community, langchain, markdownlit, streamlit_extras
+
+
+
+Successfully installed PyMuPDF-1.26.7 SQLAlchemy-2.0.45 aiofiles-24.1.0 aiohttp-3.8.6 aiosignal-1.4.0 altair-6.0.0 altex-0.2.0 annotated-doc-0.0.4 annotated-types-0.7.0 anyio-4.12.0 asn1crypto-1.5.1 async-timeout-4.0.3 asyncer-0.0.8 attrs-25.4.0 autogen-agentchat-0.6.4 autogen-core-0.6.4 beautifulsoup4-4.12.3 blinker-1.9.0 boto3-1.42.17 botocore-1.42.17 brotli-1.2.0 cachetools-6.2.4 certifi-2025.11.12 cffi-2.0.0 charset_normalizer-3.4.4 click-8.3.1 cloudpickle-3.1.1 contourpy-1.3.3 cryptography-46.0.3 cycler-0.12.1 dataclasses-json-0.6.7 diskcache-5.6.3 distro-1.9.0 docker-7.1.0 entrypoints-0.4 fake-useragent-0.1.14 faker-39.0.0 fast-depends-2.4.12 fastapi-0.127.1 favicon-0.7.0 ffmpy-1.0.0 filelock-3.20.1 fonttools-4.61.1 frozenlist-1.8.0 fsspec-2025.12.0 genson-1.3.0 gitdb-4.0.12 gitpython-3.1.45 gradio-6.2.0 gradio-client-2.0.2 greenlet-3.3.0 grep_ast-0.9.0 groovy-0.1.2 h11-0.16.0 hf-xet-1.2.0 htbuilder-0.9.0 httpcore-1.0.9 httpx-0.28.1 httpx-sse-0.4.3 huggingface-hub-1.2.3 humanize-4.15.0 importlib-metadata-8.7.1 jinja2-3.1.6 jiter-0.12.0 jmespath-1.0.1 joblib-1.5.3 jsonpatch-1.33 jsonpointer-3.0.0 jsonref-1.1.0 jsonschema-4.25.1 jsonschema-specifications-2025.9.1 kiwisolver-1.4.9 langchain-1.2.0 langchain-classic-1.0.1 langchain-community-0.4.1 langchain-core-1.2.5 langchain-text-splitters-1.1.0 langgraph-1.0.5 langgraph-checkpoint-3.0.1 langgraph-prebuilt-1.0.5 langgraph-sdk-0.3.1 langsmith-0.5.1 lxml-4.9.4 markdown-3.10 markdown-it-py-4.0.0 markdownlit-0.0.7 markupsafe-3.0.3 marshmallow-3.26.2 matplotlib-3.10.8 multidict-6.7.0 mypy-extensions-1.1.0 narwhals-2.14.0 openai-1.68.2 opentelemetry-api-1.39.1 orjson-3.11.5 ormsgpack-1.12.1 packaging-25.0 pandas-2.2.3 pathspec-0.12.1 pdf2image-1.17.0 pillow-12.0.0 platformdirs-4.5.1 plotly-6.5.0 prometheus-client-0.23.1 propcache-0.4.1 protobuf-5.29.5 pyOpenSSL-25.3.0 pyarrow-22.0.0 pyautogen-0.7.6 pycparser-2.23 pydantic-2.12.5 pydantic-core-2.41.5 pydantic-settings-2.12.0 pydeck-0.9.1 pydub-0.25.1 pygments-2.19.2 pyjwt-2.10.1 pymdown-extensions-10.19.1 pyparsing-3.3.1 python-dateutil-2.9.0.post0 python-dotenv-1.0.1 python-multipart-0.0.21 pytz-2025.2 pywin32-311 pyyaml-6.0.3 referencing-0.37.0 regex-2025.11.3 requests-2.32.5 requests-toolbelt-1.0.0 rich-14.2.0 rpds-py-0.30.0 s3transfer-0.16.0 safehttpx-0.1.7 search-engine-parser-0.6.8 semantic-version-2.10.0 serpapi-0.1.5 shellingham-1.5.4 six-1.17.0 smmap-5.0.2 sniffio-1.3.1 snowflake-connector-python-4.1.1 snowflake-snowpark-python-1.44.0 sortedcontainers-2.4.0 soupsieve-2.8.1 st-annotated-text-4.0.2 st-theme-1.2.3 starlette-0.50.0 streamlit-1.52.2 streamlit-avatar-0.1.3 streamlit-camera-input-live-0.2.0 streamlit-card-1.0.2 streamlit-embedcode-0.1.2 streamlit-faker-0.0.4 streamlit-image-coordinates-0.4.0 streamlit-keyup-0.3.0 streamlit-notify-0.3.1 streamlit-toggle-switch-1.0.2 streamlit-vertical-slider-2.5.5 streamlit_extras-0.7.8 tenacity-9.1.2 termcolor-3.2.0 tiktoken-0.7.0 toml-0.10.2 tomlkit-0.13.3 tornado-6.5.4 tree-sitter-0.25.2 tree-sitter-c-sharp-0.23.1 tree-sitter-embedded-template-0.25.0 tree-sitter-language-pack-0.13.0 tree-sitter-yaml-0.7.2 typer-0.21.0 typer-slim-0.21.0 typing-inspect-0.9.0 typing-inspection-0.4.2 typing_extensions-4.15.0 tzdata-2025.3 tzlocal-5.3.1 urllib3-2.6.2 uuid-utils-0.12.0 uvicorn-0.40.0 validators-0.35.0 watchdog-6.0.0 xxhash-3.6.0 yarl-1.22.0 zipp-3.23.0 zstandard-0.25.0
+
+

@@ -1,0 +1,65 @@
+[
+  {
+    "id": "table_001",
+    "caption": "Table 1: Comparison of our proposed method, COMPGCN with other Graph Convolutional methods. Here, $K$ denotes the number of layers in the model, $d$ is the embedding dimension, $\\boldsymbol { B }$ represents the number of bases and $| \\mathcal { R } |$ indicates the total number of relations in the graph. Overall, COMPGCN is most comprehensive and is more parameter efficient than methods which e",
+    "path_html": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\baseline\\compgcn\\paper_extracted\\tables\\html\\table_001.html",
+    "path_md": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\baseline\\compgcn\\paper_extracted\\tables\\md\\table_001.md",
+    "has_rowspan_colspan": false
+  },
+  {
+    "id": "table_002",
+    "caption": "Table 2: Reduction of COMPGCN to several existing Graph Convolutional methods. Here, $\\alpha _ { r } ^ { k }$ is a relation specific scalar, $\\boldsymbol { W } _ { r } ^ { k }$ denotes a separate weight for each relation, and $W _ { \\mathrm { d i r } ( r ) } ^ { k }$ r is as defined in Equation 3. Please refer to Proposition 4.1 for more details.",
+    "path_html": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\baseline\\compgcn\\paper_extracted\\tables\\html\\table_002.html",
+    "path_md": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\baseline\\compgcn\\paper_extracted\\tables\\md\\table_002.md",
+    "has_rowspan_colspan": false
+  },
+  {
+    "id": "table_003",
+    "caption": "Table 3: Link prediction performance of COMPGCN and several recent models on FB15k-237 and WN18RR datasets. The results of all the baseline methods are taken directly from the previous papers $\\because$ indicates missing values). We find that COMPGCN outperforms all the existing methods on 4 out of 5 metrics on FB15k-237 and 3 out of 5 metrics on WN18RR. Please refer to Section 6.1 for more deta",
+    "path_html": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\baseline\\compgcn\\paper_extracted\\tables\\html\\table_003.html",
+    "path_md": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\baseline\\compgcn\\paper_extracted\\tables\\md\\table_003.md",
+    "has_rowspan_colspan": true
+  },
+  {
+    "id": "table_004",
+    "caption": "Table 4: Performance on link prediction task evaluated on FB15k-237 dataset. $\\mathbf { \\boldsymbol { X } } + \\mathbf { \\boldsymbol { M } }$ (Y) denotes that method $\\mathbf { M }$ is used for obtaining entity (and relation) embeddings with $\\mathrm { X }$ as the scoring function. In the case of COMPGCN, Y denotes the composition operator used. $\\boldsymbol { B }$ indicates the number of relatio",
+    "path_html": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\baseline\\compgcn\\paper_extracted\\tables\\html\\table_004.html",
+    "path_md": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\baseline\\compgcn\\paper_extracted\\tables\\md\\table_004.md",
+    "has_rowspan_colspan": true
+  },
+  {
+    "id": "table_005",
+    "caption": "Table 5: Performance comparison on node classification (Left) and graph classification (Right) tasks. $^ *$ and $\\dagger$ indicate that results are directly taken from Schlichtkrull et al. (2017) and Xu et al. (2019) respectively. Overall, we find that COMPGCN either outperforms or performs comparably compared to the existing methods. Please refer to Section 6.4 for more details.",
+    "path_html": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\baseline\\compgcn\\paper_extracted\\tables\\html\\table_005.html",
+    "path_md": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\baseline\\compgcn\\paper_extracted\\tables\\md\\table_005.md",
+    "has_rowspan_colspan": false
+  },
+  {
+    "id": "table_006",
+    "caption": "Table 5: Performance comparison on node classification (Left) and graph classification (Right) tasks. $^ *$ and $\\dagger$ indicate that results are directly taken from Schlichtkrull et al. (2017) and Xu et al. (2019) respectively. Overall, we find that COMPGCN either outperforms or performs comparably compared to the existing methods. Please refer to Section 6.4 for more details.",
+    "path_html": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\baseline\\compgcn\\paper_extracted\\tables\\html\\table_006.html",
+    "path_md": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\baseline\\compgcn\\paper_extracted\\tables\\md\\table_006.md",
+    "has_rowspan_colspan": false
+  },
+  {
+    "id": "table_007",
+    "caption": "Table 6: Results on link prediction by relation category on FB15k-237 dataset. Following Wang et al. (2014a), the relations are divided into four categories: one-to-one (1-1), one-to-many (1-N), manyto-one (N-1), and many-to-many (N-N). We find that COMPGCN helps to improve performance on all types of relations compared to existing methods. Please refer to Section A.1 for more details.",
+    "path_html": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\baseline\\compgcn\\paper_extracted\\tables\\html\\table_007.html",
+    "path_md": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\baseline\\compgcn\\paper_extracted\\tables\\md\\table_007.md",
+    "has_rowspan_colspan": true
+  },
+  {
+    "id": "table_008",
+    "caption": "Table 7: The details of the datasets used for node classification, link prediction, and graph classification tasks. Please refer to Section 5.1 for more details.",
+    "path_html": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\baseline\\compgcn\\paper_extracted\\tables\\html\\table_008.html",
+    "path_md": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\baseline\\compgcn\\paper_extracted\\tables\\md\\table_008.md",
+    "has_rowspan_colspan": true
+  },
+  {
+    "id": "table_009",
+    "caption": "Table 8: Details of hyperparameters used for link prediction task. Please refer to Section A.3 for more details.",
+    "path_html": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\baseline\\compgcn\\paper_extracted\\tables\\html\\table_009.html",
+    "path_md": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\baseline\\compgcn\\paper_extracted\\tables\\md\\table_009.md",
+    "has_rowspan_colspan": false
+  }
+]

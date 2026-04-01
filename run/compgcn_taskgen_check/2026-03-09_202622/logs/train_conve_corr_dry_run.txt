@@ -1,0 +1,2 @@
+[DRY RUN] cwd=/app
+cmd=python run.py -name conve_corr -score_func conve -opn corr

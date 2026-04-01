@@ -1,0 +1,2 @@
+[DRY RUN] cwd=/app
+cmd=python run.py -name transe_corr -score_func transe -opn corr -gamma 40 -hid_drop 0.1 -init_dim 200

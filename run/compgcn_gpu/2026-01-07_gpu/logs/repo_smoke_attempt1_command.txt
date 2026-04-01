@@ -1,0 +1,4 @@
+cwd: E:\code\fastMCP\ai_review\code_evaluation\run\compgcn_gpu\2026-01-07_gpu
+cmd: docker run --rm --gpus all --shm-size 8g -v E:\code\fastMCP\ai_review\code_evaluation\baseline\compgcn\source_gpu:/app -v E:\code\fastMCP\ai_review\code_evaluation\run\compgcn_gpu\2026-01-07_gpu:/workspace/run_dir -w /app -e CODE_EVAL_RUN_DIR=/workspace/run_dir -e CODE_EVAL_ARTIFACT_DIR=/workspace/run_dir/artifacts -e CODE_EVAL_PAPER_DIR=/app -e CODE_EVAL_PAPER_ROOT=/app code-eval-paper:compgcn_gpu-db4e8c1254bf python run.py --help
+rc: 0
+sec: 2.978

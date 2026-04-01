@@ -1,0 +1,5 @@
+{"ts": 1767779008.0615273, "kind": "prepare_start", "data": {"paper_key": "compgcn", "paper_pdf": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\papers\\compgcn\\compgcn_Composition-based Multi-Relational Graph Convolutional Networks.pdf", "paper_root": ""}}
+{"ts": 1767779213.5833683, "kind": "pdf_extract_mineru", "data": {"success": true, "output_md": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\baseline\\compgcn\\paper_extracted\\paper.mineru.md", "note": ""}}
+{"ts": 1767779213.6082535, "kind": "tasks_patch_disable_install_deps", "data": {"path": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\baseline\\compgcn\\tasks.yaml"}}
+{"ts": 1767779213.6102564, "kind": "tasks_persist_run_dir", "data": {"path": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\run\\compgcn\\2026-01-07_174328\\tasks.yaml"}}
+{"ts": 1767779213.639733, "kind": "prepare_ok", "data": {"dry_run": true}}

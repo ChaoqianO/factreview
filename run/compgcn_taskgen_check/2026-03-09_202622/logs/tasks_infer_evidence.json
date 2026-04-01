@@ -1,0 +1,300 @@
+{
+  "mode": "full",
+  "llm_used": true,
+  "llm_provider": "openai-codex",
+  "llm_model": "gpt-5.3-codex",
+  "raw": {
+    "tasks": [
+      {
+        "id": "smoke_help",
+        "enabled": true,
+        "cwd": "{paper_root}",
+        "cmd": [
+          "python",
+          "run.py",
+          "-h"
+        ],
+        "timeout_sec": 300,
+        "use_conda": true,
+        "artifact_paths": []
+      },
+      {
+        "id": "install_deps",
+        "enabled": true,
+        "cwd": "{paper_root}",
+        "cmd": [
+          "python",
+          "-m",
+          "pip",
+          "install",
+          "-r",
+          "requirements.txt"
+        ],
+        "timeout_sec": 1200,
+        "use_conda": true,
+        "artifact_paths": []
+      },
+      {
+        "id": "setup_data",
+        "enabled": true,
+        "cwd": "{paper_root}",
+        "cmd": [
+          "bash",
+          "preprocess.sh"
+        ],
+        "timeout_sec": 1200,
+        "use_conda": true,
+        "artifact_paths": [
+          "data/**"
+        ]
+      },
+      {
+        "id": "train_transe_sub",
+        "enabled": true,
+        "cwd": "{paper_root}",
+        "cmd": [
+          "python",
+          "run.py",
+          "-name",
+          "transe_sub",
+          "-score_func",
+          "transe",
+          "-opn",
+          "sub",
+          "-gamma",
+          "9",
+          "-hid_drop",
+          "0.1",
+          "-init_dim",
+          "200"
+        ],
+        "timeout_sec": 86400,
+        "use_conda": true,
+        "artifact_paths": [
+          "checkpoints/**",
+          "log/**"
+        ]
+      },
+      {
+        "id": "train_transe_mult",
+        "enabled": true,
+        "cwd": "{paper_root}",
+        "cmd": [
+          "python",
+          "run.py",
+          "-name",
+          "transe_mult",
+          "-score_func",
+          "transe",
+          "-opn",
+          "mult",
+          "-gamma",
+          "9",
+          "-hid_drop",
+          "0.2",
+          "-init_dim",
+          "200"
+        ],
+        "timeout_sec": 86400,
+        "use_conda": true,
+        "artifact_paths": [
+          "checkpoints/**",
+          "log/**"
+        ]
+      },
+      {
+        "id": "train_transe_corr",
+        "enabled": true,
+        "cwd": "{paper_root}",
+        "cmd": [
+          "python",
+          "run.py",
+          "-name",
+          "transe_corr",
+          "-score_func",
+          "transe",
+          "-opn",
+          "corr",
+          "-gamma",
+          "40",
+          "-hid_drop",
+          "0.1",
+          "-init_dim",
+          "200"
+        ],
+        "timeout_sec": 86400,
+        "use_conda": true,
+        "artifact_paths": [
+          "checkpoints/**",
+          "log/**"
+        ]
+      },
+      {
+        "id": "train_distmult_sub",
+        "enabled": true,
+        "cwd": "{paper_root}",
+        "cmd": [
+          "python",
+          "run.py",
+          "-name",
+          "distmult_sub",
+          "-score_func",
+          "distmult",
+          "-opn",
+          "sub",
+          "-gcn_dim",
+          "150",
+          "-gcn_layer",
+          "2"
+        ],
+        "timeout_sec": 86400,
+        "use_conda": true,
+        "artifact_paths": [
+          "checkpoints/**",
+          "log/**"
+        ]
+      },
+      {
+        "id": "train_distmult_mult",
+        "enabled": true,
+        "cwd": "{paper_root}",
+        "cmd": [
+          "python",
+          "run.py",
+          "-name",
+          "distmult_mult",
+          "-score_func",
+          "distmult",
+          "-opn",
+          "mult",
+          "-gcn_dim",
+          "150",
+          "-gcn_layer",
+          "2"
+        ],
+        "timeout_sec": 86400,
+        "use_conda": true,
+        "artifact_paths": [
+          "checkpoints/**",
+          "log/**"
+        ]
+      },
+      {
+        "id": "train_distmult_corr",
+        "enabled": true,
+        "cwd": "{paper_root}",
+        "cmd": [
+          "python",
+          "run.py",
+          "-name",
+          "distmult_corr",
+          "-score_func",
+          "distmult",
+          "-opn",
+          "corr",
+          "-gcn_dim",
+          "150",
+          "-gcn_layer",
+          "2"
+        ],
+        "timeout_sec": 86400,
+        "use_conda": true,
+        "artifact_paths": [
+          "checkpoints/**",
+          "log/**"
+        ]
+      },
+      {
+        "id": "train_conve_sub",
+        "enabled": true,
+        "cwd": "{paper_root}",
+        "cmd": [
+          "python",
+          "run.py",
+          "-name",
+          "conve_sub",
+          "-score_func",
+          "conve",
+          "-opn",
+          "sub",
+          "-ker_sz",
+          "5"
+        ],
+        "timeout_sec": 86400,
+        "use_conda": true,
+        "artifact_paths": [
+          "checkpoints/**",
+          "log/**"
+        ]
+      },
+      {
+        "id": "train_conve_mult",
+        "enabled": true,
+        "cwd": "{paper_root}",
+        "cmd": [
+          "python",
+          "run.py",
+          "-name",
+          "conve_mult",
+          "-score_func",
+          "conve",
+          "-opn",
+          "mult"
+        ],
+        "timeout_sec": 86400,
+        "use_conda": true,
+        "artifact_paths": [
+          "checkpoints/**",
+          "log/**"
+        ]
+      },
+      {
+        "id": "train_conve_corr",
+        "enabled": true,
+        "cwd": "{paper_root}",
+        "cmd": [
+          "python",
+          "run.py",
+          "-name",
+          "conve_corr",
+          "-score_func",
+          "conve",
+          "-opn",
+          "corr"
+        ],
+        "timeout_sec": 86400,
+        "use_conda": true,
+        "artifact_paths": [
+          "checkpoints/**",
+          "log/**"
+        ]
+      },
+      {
+        "id": "train_best_model",
+        "enabled": true,
+        "cwd": "{paper_root}",
+        "cmd": [
+          "python",
+          "run.py",
+          "-name",
+          "best_model",
+          "-score_func",
+          "conve",
+          "-opn",
+          "corr"
+        ],
+        "timeout_sec": 86400,
+        "use_conda": true,
+        "artifact_paths": [
+          "checkpoints/**",
+          "log/**"
+        ]
+      }
+    ],
+    "notes": [
+      "Commands are taken directly from README and augmented with explicit -name where missing for deterministic artifact discovery.",
+      "preprocess.sh is included because README setup mentions dataset extraction/folder setup before training.",
+      "No separate eval/export task added because README does not provide a standalone eval command and training script typically reports validation/test metrics internally."
+    ]
+  }
+}

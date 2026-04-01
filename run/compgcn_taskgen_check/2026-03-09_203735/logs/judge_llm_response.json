@@ -1,0 +1,79 @@
+{
+  "verdict": "inconclusive",
+  "confidence": 0.09,
+  "why": [
+    "All listed tasks were executed in dry_run mode, so no actual training/evaluation metrics are available.",
+    "No paper PDF/content excerpt was provided, so claimed target numbers cannot be extracted or compared.",
+    "No artifacts were indexed (artifacts_index.files is empty), so there is no evidence of checkpoints, logs, or result tables."
+  ],
+  "suggested_artifacts": [
+    "artifacts/**/train*.log",
+    "artifacts/**/eval*.log",
+    "artifacts/**/results*.json",
+    "artifacts/**/metrics*.json",
+    "artifacts/**/scores*.csv",
+    "artifacts/**/checkpoints/best*.pt",
+    "artifacts/**/config*.json",
+    "artifacts/**/stdout*.txt"
+  ],
+  "suggested_baseline_checks": [
+    {
+      "type": "file_exists",
+      "path": "artifacts/results/fb15k_237/best_model_metrics.json"
+    },
+    {
+      "type": "file_exists",
+      "path": "artifacts/results/wn18rr/best_model_metrics.json"
+    },
+    {
+      "type": "json_value",
+      "path": "artifacts/results/fb15k_237/best_model_metrics.json",
+      "json_path": [
+        "MRR"
+      ],
+      "expected": 0.0,
+      "tolerance": 1.0
+    },
+    {
+      "type": "json_value",
+      "path": "artifacts/results/wn18rr/best_model_metrics.json",
+      "json_path": [
+        "MRR"
+      ],
+      "expected": 0.0,
+      "tolerance": 1.0
+    },
+    {
+      "type": "csv_agg",
+      "path": "artifacts/results/summary.csv",
+      "expr": {
+        "groupby": [
+          "dataset",
+          "model",
+          "opn"
+        ],
+        "agg": {
+          "MRR": "mean",
+          "Hits@10": "mean"
+        }
+      },
+      "expected": [
+        {
+          "dataset": "FB15k-237",
+          "model": "CompGCN",
+          "opn": "corr",
+          "MRR": 0.0,
+          "Hits@10": 0.0
+        },
+        {
+          "dataset": "WN18RR",
+          "model": "CompGCN",
+          "opn": "corr",
+          "MRR": 0.0,
+          "Hits@10": 0.0
+        }
+      ],
+      "tolerance": 1.0
+    }
+  ]
+}

@@ -1,0 +1,2 @@
+[DRY RUN] cwd=/app
+cmd=python run.py -name conve_sub -score_func conve -opn sub -ker_sz 5

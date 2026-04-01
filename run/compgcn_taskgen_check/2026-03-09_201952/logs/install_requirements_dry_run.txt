@@ -1,0 +1,2 @@
+[DRY RUN] cwd=/app
+cmd=python -m pip install -r requirements.txt
