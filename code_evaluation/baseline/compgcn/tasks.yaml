@@ -1,4 +1,9 @@
+# CompGCN reproduction tasks
+# Paper: "Composition-Based Multi-Relational Graph Convolutional Networks" (Vashishth et al., ICLR 2020)
+# Key claims from Table 3 and Table 4 of the paper.
+
 - id: install_deps
+  family: prepare
   cwd: '{paper_root}'
   cmd:
   - python
@@ -11,7 +16,11 @@
   use_conda: true
   enabled: false
 
+# ── FB15k-237 experiments ──
+
 - id: train_fb237_transe
+  family: train
+  dataset: FB15k-237
   cwd: '{paper_root}'
   cmd:
   - python
@@ -45,6 +54,10 @@
   - log/*
 
 - id: eval_fb237_transe
+  family: eval
+  dataset: FB15k-237
+  claims:
+  - "Table 4: TransE+CompGCN(Sub) on FB15k-237, MRR=0.335, MR=194, H@10=0.514"
   cwd: '{paper_root}'
   cmd:
   - python
@@ -63,6 +76,8 @@
   - metrics/fb237_transe_test.json
 
 - id: train_fb237_distmult
+  family: train
+  dataset: FB15k-237
   cwd: '{paper_root}'
   cmd:
   - python
@@ -94,6 +109,10 @@
   - log/*
 
 - id: eval_fb237_distmult
+  family: eval
+  dataset: FB15k-237
+  claims:
+  - "Table 4: DistMult+CompGCN(Sub) on FB15k-237, MRR=0.336, MR=231, H@10=0.513"
   cwd: '{paper_root}'
   cmd:
   - python
@@ -112,6 +131,8 @@
   - metrics/fb237_distmult_test.json
 
 - id: train_fb237_conve
+  family: train
+  dataset: FB15k-237
   cwd: '{paper_root}'
   cmd:
   - python
@@ -137,6 +158,11 @@
   - log/*
 
 - id: eval_fb237_conve
+  family: eval
+  dataset: FB15k-237
+  claims:
+  - "Table 3: CompGCN on FB15k-237, MRR=0.355, MR=197, H@10=0.535"
+  - "Table 4: ConvE+CompGCN(Corr) on FB15k-237, MRR=0.355, MR=197, H@10=0.535"
   cwd: '{paper_root}'
   cmd:
   - python
@@ -154,7 +180,11 @@
   artifact_paths:
   - metrics/fb237_conve_test.json
 
+# ── WN18RR experiments ──
+
 - id: train_wn18rr_transe
+  family: train
+  dataset: WN18RR
   cwd: '{paper_root}'
   cmd:
   - python
@@ -188,6 +218,10 @@
   - log/*
 
 - id: eval_wn18rr_transe
+  family: eval
+  dataset: WN18RR
+  claims:
+  - "Table 3: CompGCN on WN18RR (TransE), MRR~0.479"
   cwd: '{paper_root}'
   cmd:
   - python
@@ -206,6 +240,8 @@
   - metrics/wn18rr_transe_test.json
 
 - id: train_wn18rr_distmult
+  family: train
+  dataset: WN18RR
   cwd: '{paper_root}'
   cmd:
   - python
@@ -237,6 +273,10 @@
   - log/*
 
 - id: eval_wn18rr_distmult
+  family: eval
+  dataset: WN18RR
+  claims:
+  - "Table 3: CompGCN on WN18RR (DistMult), MRR~0.479"
   cwd: '{paper_root}'
   cmd:
   - python
@@ -255,6 +295,8 @@
   - metrics/wn18rr_distmult_test.json
 
 - id: train_wn18rr_conve
+  family: train
+  dataset: WN18RR
   cwd: '{paper_root}'
   cmd:
   - python
@@ -280,6 +322,10 @@
   - log/*
 
 - id: eval_wn18rr_conve
+  family: eval
+  dataset: WN18RR
+  claims:
+  - "Table 3: CompGCN on WN18RR, MRR=0.479, MR=3533, H@10=0.546"
   cwd: '{paper_root}'
   cmd:
   - python
