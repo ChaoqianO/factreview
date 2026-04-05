@@ -22,21 +22,21 @@ def _is_inconclusive_no_baseline(state: State) -> bool:
     return any(isinstance(r, dict) and r.get("type") == "inconclusive_no_baseline" for r in results)
 
 
-def _compute_success(state: State) -> bool:
+def _compute_exit_status(state: State) -> str:
     """
-    Success semantics:
-    - passed baseline checks => success
-    - OR: baseline missing but run succeeded => inconclusive (still treated as success for exit code)
-    - failed status => failure
+    Three-value exit status for clear reviewer semantics:
+    - "success"      : passed baseline checks deterministically  (exit code 0)
+    - "inconclusive" : run succeeded but no/insufficient baseline (exit code 2)
+    - "failed"       : execution failed or checks failed          (exit code 1)
     """
     if state.get("status") == "failed":
-        return False
+        return "failed"
     judge = state.get("judge", {}) or {}
     if judge.get("passed") is True:
-        return True
+        return "success"
     if _is_inconclusive_no_baseline(state) and bool((state.get("run_result", {}) or {}).get("success")):
-        return True
-    return False
+        return "inconclusive"
+    return "failed"
 
 
 def _route_after_prepare(state: State) -> str:
@@ -108,6 +108,8 @@ class CodeEvalOrchestrator:
         auto_tasks: bool = False,
         auto_tasks_mode: str = "smoke",
         auto_tasks_force: bool = False,
+        enable_refcheck: bool = False,
+        enable_bibtex: bool = False,
     ) -> None:
         self.run_root = run_root
         self.max_attempts = max_attempts
@@ -120,6 +122,8 @@ class CodeEvalOrchestrator:
         self.auto_tasks = auto_tasks
         self.auto_tasks_mode = auto_tasks_mode
         self.auto_tasks_force = auto_tasks_force
+        self.enable_refcheck = enable_refcheck
+        self.enable_bibtex = enable_bibtex
 
         self._workflow = self._build_workflow()
         self._app = self._workflow.compile()
@@ -174,12 +178,16 @@ class CodeEvalOrchestrator:
                 "auto_tasks": self.auto_tasks,
                 "auto_tasks_mode": self.auto_tasks_mode,
                 "auto_tasks_force": self.auto_tasks_force,
+                "enable_refcheck": self.enable_refcheck,
+                "enable_bibtex": self.enable_bibtex,
             },
             "history": [],
         }
         final_state: State = await self._app.ainvoke(initial, config={"configurable": {"thread_id": "code_evaluation"}})
+        exit_status = _compute_exit_status(final_state)
         return {
-            "success": _compute_success(final_state),
+            "success": exit_status == "success",
+            "exit_status": exit_status,  # "success" | "inconclusive" | "failed"
             "state": final_state,
         }
 

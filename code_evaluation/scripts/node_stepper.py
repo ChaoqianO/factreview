@@ -7,9 +7,10 @@ from pathlib import Path
 from typing import Any, Dict
 
 # Ensure the project root (code_evaluation/) is importable when running this script directly.
-_ROOT = Path(__file__).resolve().parents[1]
-if str(_ROOT) not in sys.path:
-    sys.path.insert(0, str(_ROOT))
+# scripts/ is at repo root; code_evaluation/ is a sibling directory.
+_CODE_EVAL = Path(__file__).resolve().parents[1] / "code_evaluation"
+if str(_CODE_EVAL) not in sys.path:
+    sys.path.insert(0, str(_CODE_EVAL))
 
 from src.nodes.finalize import finalize_node  # noqa: E402
 from src.nodes.fix import fix_node  # noqa: E402
@@ -41,7 +42,7 @@ def _build_initial_state(args: argparse.Namespace) -> State:
             "tasks_path": args.tasks or "",
             "baseline_path": args.baseline or "",
             "local_source_path": args.local_source or "",
-            "run_root": args.run_root or str(Path(__file__).resolve().parents[1] / "run"),
+            "run_root": args.run_root or str(_CODE_EVAL / "run"),
             "no_llm": bool(args.no_llm),
             "no_pdf_extract": bool(args.no_pdf_extract),
             "llm_provider": args.llm_provider or "",

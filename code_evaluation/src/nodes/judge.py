@@ -47,113 +47,13 @@ def judge_node(state: Dict[str, Any]) -> Dict[str, Any]:
     checks = baseline.checks
     results: List[Dict[str, Any]] = []
     passed = True
+    run_ok = bool(state.get("run_result", {}).get("success"))
+    cfg = state.get("config", {}) or {}
 
+    # ── Evidence source 1: Deterministic baseline checks ──
     if not checks:
-        # Without baseline checks, deterministic judgment is inconclusive.
-        run_ok = bool(state.get("run_result", {}).get("success"))
         passed = False
         results.append({"type": "inconclusive_no_baseline", "passed": False, "run_success": run_ok})
-
-        cfg = state.get("config", {}) or {}
-
-        # ------------------------------------------------------------
-        # Deterministic paper-table alignment (best-effort, no LLM).
-        # If paper_extracted tables exist, compute numeric diffs and store under artifacts/alignment/.
-        # ------------------------------------------------------------
-        try:
-            paper_key = str(cfg.get("paper_key") or "").strip() or "paper"
-            # code_evaluation/src/nodes/judge.py -> code_evaluation/
-            repo_root = Path(__file__).resolve().parents[2]
-            paper_tables_dir = repo_root / "baseline" / paper_key / "paper_extracted" / "tables"
-            if paper_tables_dir.exists():
-                ar = run_alignment(cfg=cfg, run_dir=run_dir, artifacts_dir=artifacts_dir, paper_extracted_tables_dir=paper_tables_dir)
-                results.append(
-                    {
-                        "type": "paper_table_alignment",
-                        "passed": bool(ar.matched > 0 and ar.failed == 0 and run_ok),
-                        "matched": ar.matched,
-                        "passed_n": ar.passed,
-                        "failed_n": ar.failed,
-                        "unmatched_run_metrics": ar.unmatched_run_metrics,
-                        "critiques_n": len(ar.critiques or []),
-                        "alignment_artifact": "alignment/alignment.json",
-                    }
-                )
-        except Exception as e:
-            results.append({"type": "paper_table_alignment", "passed": False, "error": f"{type(e).__name__}: {e}"})
-        llm_mode = _llm_judge_enabled(cfg)
-        if llm_mode != "off" and (not bool(cfg.get("no_llm"))):
-            # Build a bounded evidence pack for LLM.
-            extracted_md = str(cfg.get("paper_pdf_extracted_md") or "").strip()
-            evidence = {
-                "paper_key": str(cfg.get("paper_key") or ""),
-                "paper_pdf": str(cfg.get("paper_pdf") or ""),
-                "paper_root": str(cfg.get("paper_root") or ""),
-                "repo_url": str(cfg.get("paper_repo_url") or ""),
-                "run_id": str(run_info.get("id") or ""),
-                "run_success": run_ok,
-                "run_result": state.get("run_result") or {},
-                "artifacts_index": index_artifacts(artifacts_dir),
-                "paper_extracted_md_excerpt": _read_optional(extracted_md, max_chars=14000),
-                "baseline_current": baseline_raw if isinstance(baseline_raw, dict) else {},
-            }
-            system = (
-                "You are judging whether a paper reproduction run matches claimed results.\n"
-                "Return JSON only. Do not include prose outside JSON.\n"
-                "If evidence is insufficient, keep verdict as inconclusive and propose concrete baseline checks.\n"
-            )
-            prompt = json.dumps(
-                {
-                    "mode": llm_mode,
-                    "evidence": evidence,
-                    "output_schema": {
-                        "verdict": "pass|fail|inconclusive",
-                        "confidence": 0.0,
-                        "why": ["short strings"],
-                        "suggested_artifacts": ["paths or patterns to collect"],
-                        "suggested_baseline_checks": [
-                            {"type": "file_exists", "path": "relative/to/artifacts"},
-                            {
-                                "type": "json_value",
-                                "path": "relative/to/artifacts",
-                                "json_path": ["key", 0, "subkey"],
-                                "expected": 0.0,
-                                "tolerance": 0.0,
-                            },
-                            {
-                                "type": "csv_agg",
-                                "path": "relative/to/artifacts",
-                                "expr": {"groupby": ["col"], "agg": {"metric": "mean"}},
-                                "expected": [{"col": "x", "metric": 0.0}],
-                                "tolerance": 0.0,
-                            },
-                        ],
-                    },
-                },
-                ensure_ascii=False,
-            )
-            llm_cfg = resolve_llm_config(str(cfg.get("llm_provider") or ""), str(cfg.get("llm_model") or ""), str(cfg.get("llm_base_url") or ""))
-            resp = llm_json(prompt=prompt, system=system, cfg=llm_cfg)
-            try:
-                write_text(logs_dir / "judge_llm_prompt.json", prompt + "\n")
-                write_text(logs_dir / "judge_llm_response.json", json.dumps(resp, ensure_ascii=False, indent=2) + "\n")
-            except Exception:
-                pass
-
-            verdict = str(resp.get("verdict") or "").strip().lower() if isinstance(resp, dict) else ""
-            conf = resp.get("confidence") if isinstance(resp, dict) else None
-            results.append(
-                {
-                    "type": "llm_judge",
-                    "mode": llm_mode,
-                    "passed": (verdict == "pass") if llm_mode == "verdict" else False,
-                    "verdict": verdict or "inconclusive",
-                    "confidence": conf,
-                    "response": resp,
-                }
-            )
-            if llm_mode == "verdict" and verdict in {"pass", "fail"}:
-                passed = verdict == "pass"
     else:
         for chk in checks:
             r = compute_check(str(artifacts_dir), chk)
@@ -161,17 +61,134 @@ def judge_node(state: Dict[str, Any]) -> Dict[str, Any]:
             if not r.get("passed"):
                 passed = False
 
+    # ── Evidence source 2: Paper-table alignment (always, independent of baseline) ──
+    try:
+        paper_key = str(cfg.get("paper_key") or "").strip() or "paper"
+        repo_root = Path(__file__).resolve().parents[2]
+        paper_tables_dir = repo_root / "baseline" / paper_key / "paper_extracted" / "tables"
+        if paper_tables_dir.exists():
+            ar = run_alignment(cfg=cfg, run_dir=run_dir, artifacts_dir=artifacts_dir, paper_extracted_tables_dir=paper_tables_dir)
+            results.append(
+                {
+                    "type": "paper_table_alignment",
+                    "passed": bool(ar.matched > 0 and ar.failed == 0 and run_ok),
+                    "matched": ar.matched,
+                    "passed_n": ar.passed,
+                    "failed_n": ar.failed,
+                    "unmatched_run_metrics": ar.unmatched_run_metrics,
+                    "critiques_n": len(ar.critiques or []),
+                    "alignment_artifact": "alignment/alignment.json",
+                }
+            )
+    except Exception as e:
+        results.append({"type": "paper_table_alignment", "passed": False, "error": f"{type(e).__name__}: {e}"})
+
+    # ── Evidence source 3: LLM judge (advisory by default) ──
+    llm_mode = _llm_judge_enabled(cfg)
+    if llm_mode != "off" and (not bool(cfg.get("no_llm"))):
+        extracted_md = str(cfg.get("paper_pdf_extracted_md") or "").strip()
+        evidence = {
+            "paper_key": str(cfg.get("paper_key") or ""),
+            "paper_pdf": str(cfg.get("paper_pdf") or ""),
+            "paper_root": str(cfg.get("paper_root") or ""),
+            "repo_url": str(cfg.get("paper_repo_url") or ""),
+            "run_id": str(run_info.get("id") or ""),
+            "run_success": run_ok,
+            "run_result": state.get("run_result") or {},
+            "artifacts_index": index_artifacts(artifacts_dir),
+            "paper_extracted_md_excerpt": _read_optional(extracted_md, max_chars=14000),
+            "baseline_current": baseline_raw if isinstance(baseline_raw, dict) else {},
+        }
+        system = (
+            "You are judging whether a paper reproduction run matches claimed results.\n"
+            "Return JSON only. Do not include prose outside JSON.\n"
+            "If evidence is insufficient, keep verdict as inconclusive and propose concrete baseline checks.\n"
+        )
+        prompt = json.dumps(
+            {
+                "mode": llm_mode,
+                "evidence": evidence,
+                "output_schema": {
+                    "verdict": "pass|fail|inconclusive",
+                    "confidence": 0.0,
+                    "why": ["short strings"],
+                    "suggested_artifacts": ["paths or patterns to collect"],
+                    "suggested_baseline_checks": [
+                        {"type": "file_exists", "path": "relative/to/artifacts"},
+                        {
+                            "type": "json_value",
+                            "path": "relative/to/artifacts",
+                            "json_path": ["key", 0, "subkey"],
+                            "expected": 0.0,
+                            "tolerance": 0.0,
+                        },
+                        {
+                            "type": "csv_agg",
+                            "path": "relative/to/artifacts",
+                            "expr": {"groupby": ["col"], "agg": {"metric": "mean"}},
+                            "expected": [{"col": "x", "metric": 0.0}],
+                            "tolerance": 0.0,
+                        },
+                    ],
+                },
+            },
+            ensure_ascii=False,
+        )
+        llm_cfg = resolve_llm_config(str(cfg.get("llm_provider") or ""), str(cfg.get("llm_model") or ""), str(cfg.get("llm_base_url") or ""))
+        resp = llm_json(prompt=prompt, system=system, cfg=llm_cfg)
+        try:
+            write_text(logs_dir / "judge_llm_prompt.json", prompt + "\n")
+            write_text(logs_dir / "judge_llm_response.json", json.dumps(resp, ensure_ascii=False, indent=2) + "\n")
+        except Exception:
+            pass
+
+        verdict = str(resp.get("verdict") or "").strip().lower() if isinstance(resp, dict) else ""
+        conf = resp.get("confidence") if isinstance(resp, dict) else None
+        results.append(
+            {
+                "type": "llm_judge",
+                "mode": llm_mode,
+                "passed": (verdict == "pass") if llm_mode == "verdict" else False,
+                "verdict": verdict or "inconclusive",
+                "confidence": conf,
+                "response": resp,
+            }
+        )
+        if llm_mode == "verdict" and verdict in {"pass", "fail"}:
+            passed = verdict == "pass"
+
+    # ── Evidence source 4: Reference accuracy check (optional, --enable-refcheck) ──
+    if cfg.get("enable_refcheck"):
+        paper_pdf = str(cfg.get("paper_pdf") or "").strip()
+        if paper_pdf and Path(paper_pdf).exists():
+            try:
+                from ..tools.refcheck import check_references
+                rc = check_references(paper=paper_pdf, debug=False)
+                results.append({
+                    "type": "reference_check",
+                    "passed": rc.get("ok", False) and rc.get("errors", 0) == 0,
+                    "total_refs": rc.get("total_refs", 0),
+                    "errors": rc.get("errors", 0),
+                    "warnings": rc.get("warnings", 0),
+                    "unverified": rc.get("unverified", 0),
+                    "error_message": rc.get("error_message", ""),
+                })
+            except Exception as e:
+                results.append({
+                    "type": "reference_check",
+                    "passed": False,
+                    "error": f"{type(e).__name__}: {e}",
+                })
+
     judge = {"passed": passed, "results": results}
     state["judge"] = judge
 
     append_event(run_dir, "judge", {"passed": passed, "results": results})
     state.setdefault("history", []).append({"kind": "judge", "data": {"passed": passed, "results": results}})
 
-    # keep status as failed if already failed; otherwise continue
-    if passed:
+    # Preserve failed status from earlier nodes; do not overwrite with "running"
+    if state.get("status") != "failed":
         state["status"] = "running"
-    else:
-        state["status"] = state.get("status") or "running"
     return state
 
 

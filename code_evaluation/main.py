@@ -90,6 +90,17 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Overwrite existing tasks.yaml when using --auto-tasks.",
     )
+    # Integrated capabilities (optional, off by default)
+    p.add_argument(
+        "--enable-refcheck",
+        action="store_true",
+        help="Run reference-accuracy checking on the paper PDF (requires refchecker deps).",
+    )
+    p.add_argument(
+        "--enable-bibtex",
+        action="store_true",
+        help="Enrich facts.json with BibTeX for paper claims via Semantic Scholar.",
+    )
     # Default: verbose console logs ON (users asked for flow-level tracing).
     # Use --quiet to disable. --verbose kept for backwards compatibility.
     p.add_argument("--quiet", action="store_true", help="Disable verbose console logs (still writes run/* logs)")
@@ -126,6 +137,8 @@ async def _amain() -> int:
         auto_tasks=args.auto_tasks,
         auto_tasks_mode=args.auto_tasks_mode,
         auto_tasks_force=args.auto_tasks_force,
+        enable_refcheck=args.enable_refcheck,
+        enable_bibtex=args.enable_bibtex,
     )
     result = await orchestrator.run(
         paper_root=args.paper_root,
@@ -136,7 +149,14 @@ async def _amain() -> int:
         local_source_path=args.local_repo_pos,
         no_pdf_extract=args.no_pdf_extract,
     )
-    # Minimal console output (so users don't think "nothing happened")
+    # Three-value exit semantics:
+    #   0 = verified success (baseline checks passed)
+    #   1 = failed (execution error or check failure)
+    #   2 = inconclusive (ran OK but insufficient baseline to verify)
+    exit_status = str(result.get("exit_status") or "failed")
+    exit_code_map = {"success": 0, "failed": 1, "inconclusive": 2}
+    exit_code = exit_code_map.get(exit_status, 1)
+
     try:
         st = result.get("state") or {}
         run_id = (st.get("run") or {}).get("id")
@@ -146,17 +166,16 @@ async def _amain() -> int:
         report = None
         if run_id:
             report = Path(__file__).parent / "compare" / str(paper_key or "paper") / "reports" / f"{run_id}.md"
-        # If config.paper_key wasn't persisted for some reason, infer from run_dir.
         run_dir = (st.get("run") or {}).get("dir")
         if not paper_key and run_dir:
             try:
                 paper_key = Path(run_dir).parent.name
             except Exception:
                 pass
-        status = str(st.get("status") or ("success" if bool(result.get("success")) else "failed"))
         print("")
         print("=== Code Evaluation Summary ===")
-        print(f"status   : {status}")
+        print(f"status   : {exit_status}")
+        print(f"exit code: {exit_code}  (0=verified, 1=failed, 2=inconclusive)")
         print(f"paper    : {paper_key}")
         print(f"run id   : {run_id}")
         if repo_url:
@@ -167,11 +186,11 @@ async def _amain() -> int:
             print(f"report   : {report}")
         if run_dir:
             print(f"run dir  : {run_dir}")
-            if not bool(result.get("success")):
+            if exit_code != 0:
                 print(f"see      : {Path(run_dir) / 'issues.md'}")
     except Exception:
         pass
-    return 0 if result.get("success") else 1
+    return exit_code
 
 
 def main() -> None:
