@@ -21,8 +21,7 @@ def _run(cmd: list[str], cwd: Path | None = None, timeout_sec: int = 3600) -> su
 
 
 def repo_root() -> Path:
-    """Return code_evaluation/ directory (the main package root)."""
-    return Path(__file__).resolve().parents[1] / "code_evaluation"
+    return Path(__file__).resolve().parents[1]
 
 
 def main() -> int:

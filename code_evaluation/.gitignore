@@ -1,10 +1,12 @@
+# Runtime output (generated during runs)
+/run/*/
+!/run/.gitkeep
+/compare/*/
+!/compare/.gitkeep
+/review/*/
+!/review/.gitkeep
 
+# Local secrets
 /.env
 /auth.json
 /auth-profiles.json
-/.git.inner.bak/
-
-
-
-
-

@@ -7,8 +7,8 @@ from pathlib import Path
 from typing import Any, Dict
 
 # Ensure the project root (code_evaluation/) is importable when running this script directly.
-# scripts/ is at repo root; code_evaluation/ is a sibling directory.
-_CODE_EVAL = Path(__file__).resolve().parents[1] / "code_evaluation"
+# scripts/ lives inside code_evaluation/; parents[1] == code_evaluation/.
+_CODE_EVAL = Path(__file__).resolve().parents[1]
 if str(_CODE_EVAL) not in sys.path:
     sys.path.insert(0, str(_CODE_EVAL))
 

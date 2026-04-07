@@ -1,5 +1,0 @@
-torch
-transformers
-vllm
-requests
-magic-pdf[full]
