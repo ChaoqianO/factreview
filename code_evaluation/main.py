@@ -90,6 +90,17 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Overwrite existing tasks.yaml when using --auto-tasks.",
     )
+    # Integrated capabilities (optional, off by default)
+    p.add_argument(
+        "--enable-refcheck",
+        action="store_true",
+        help="Run reference-accuracy checking on the paper PDF (requires refchecker deps).",
+    )
+    p.add_argument(
+        "--enable-bibtex",
+        action="store_true",
+        help="Enrich facts.json with BibTeX for paper claims via Semantic Scholar.",
+    )
     # Default: verbose console logs ON (users asked for flow-level tracing).
     # Use --quiet to disable. --verbose kept for backwards compatibility.
     p.add_argument("--quiet", action="store_true", help="Disable verbose console logs (still writes run/* logs)")
@@ -126,6 +137,8 @@ async def _amain() -> int:
         auto_tasks=args.auto_tasks,
         auto_tasks_mode=args.auto_tasks_mode,
         auto_tasks_force=args.auto_tasks_force,
+        enable_refcheck=args.enable_refcheck,
+        enable_bibtex=args.enable_bibtex,
     )
     result = await orchestrator.run(
         paper_root=args.paper_root,

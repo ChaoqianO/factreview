@@ -157,6 +157,29 @@ def judge_node(state: Dict[str, Any]) -> Dict[str, Any]:
         if llm_mode == "verdict" and verdict in {"pass", "fail"}:
             passed = verdict == "pass"
 
+    # ── Evidence source 4: Reference accuracy check (optional, --enable-refcheck) ──
+    if cfg.get("enable_refcheck"):
+        paper_pdf = str(cfg.get("paper_pdf") or "").strip()
+        if paper_pdf and Path(paper_pdf).exists():
+            try:
+                from ..tools.refcheck import check_references
+                rc = check_references(paper=paper_pdf, debug=False)
+                results.append({
+                    "type": "reference_check",
+                    "passed": rc.get("ok", False) and rc.get("errors", 0) == 0,
+                    "total_refs": rc.get("total_refs", 0),
+                    "errors": rc.get("errors", 0),
+                    "warnings": rc.get("warnings", 0),
+                    "unverified": rc.get("unverified", 0),
+                    "error_message": rc.get("error_message", ""),
+                })
+            except Exception as e:
+                results.append({
+                    "type": "reference_check",
+                    "passed": False,
+                    "error": f"{type(e).__name__}: {e}",
+                })
+
     judge = {"passed": passed, "results": results}
     state["judge"] = judge
 

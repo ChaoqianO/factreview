@@ -8,9 +8,10 @@ from pathlib import Path
 from typing import Any, Dict
 
 # Ensure imports like `from src...` work when executing this script directly.
-_REPO_ROOT = Path(__file__).resolve().parents[1]
-if str(_REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(_REPO_ROOT))
+# scripts/ lives inside code_evaluation/; parents[1] == code_evaluation/.
+_CODE_EVAL = Path(__file__).resolve().parents[1]
+if str(_CODE_EVAL) not in sys.path:
+    sys.path.insert(0, str(_CODE_EVAL))
 
 from src.nodes.finalize import finalize_node
 from src.nodes.fix import fix_node
@@ -50,7 +51,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(description="Node-by-node debug runner for code_evaluation")
     ap.add_argument("--paper-pdf", required=True)
     ap.add_argument("--paper-key", default="")
-    ap.add_argument("--run-root", default=str(Path(__file__).resolve().parents[1] / "run"))
+    ap.add_argument("--run-root", default=str(_CODE_EVAL / "run"))
     ap.add_argument("--no-pdf-extract", action="store_true")
     ap.add_argument("--dry-run", action="store_true", help="Run tasks in dry-run mode (no docker/paper execution).")
     ap.add_argument("--no-llm", action="store_true")
