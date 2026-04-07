@@ -152,6 +152,13 @@ def _judge_highlights(judge: Dict[str, Any], run_result: Dict[str, Any]) -> Tupl
             matched = int(r.get("matched") or 0)
             failed_n = int(r.get("failed_n") or 0)
             notes.append(f"Deterministic paper-table alignment matched {matched} targets with {failed_n} mismatches.")
+        elif r.get("type") == "reference_check":
+            errs = int(r.get("errors") or 0)
+            total = int(r.get("total_refs") or 0)
+            if errs:
+                notes.append(f"Reference check found {errs} error(s) across {total} references.")
+            elif total:
+                notes.append(f"Reference check: all {total} references verified.")
         elif r.get("passed") is False and r.get("type") not in {"inconclusive_no_baseline", "llm_judge"}:
             notes.append(f"Check `{r.get('type')}` on `{r.get('path', '')}`: expected={r.get('expected')}, observed={r.get('observed')}.")
 
@@ -475,6 +482,15 @@ def finalize_node(state: Dict[str, Any]) -> Dict[str, Any]:
                 "observed": r.get("observed"),
                 "tolerance": r.get("tolerance"),
             })
+        elif rtype == "reference_check":
+            checks_summary.append({
+                "type": rtype,
+                "passed": r.get("passed"),
+                "total_refs": r.get("total_refs", 0),
+                "errors": r.get("errors", 0),
+                "warnings": r.get("warnings", 0),
+                "unverified": r.get("unverified", 0),
+            })
         elif rtype == "paper_table_alignment":
             alignment_summary = {
                 "matched": r.get("matched", 0),
@@ -496,6 +512,36 @@ def finalize_node(state: Dict[str, Any]) -> Dict[str, Any]:
     eval_tasks = [t for t in tasks if _task_family(t) == "eval"]
     if not eval_tasks:
         coverage_gaps.append("No evaluation tasks were defined or executed; only smoke/prepare tasks ran.")
+
+    # ── Optional: BibTeX enrichment for paper claims (--enable-bibtex) ──
+    bibtex_entries: List[Dict[str, Any]] = []
+    if cfg.get("enable_bibtex"):
+        try:
+            from ..tools.bibtex import lookup_bibtex
+            # Collect unique claim titles from tasks
+            seen_titles: set = set()
+            for t in tasks:
+                for claim in (t.get("claims") or []):
+                    # Claims look like "Table 4: TransE+CompGCN(...) on FB15k-237, MRR=0.335"
+                    # Try to extract a paper title from the paper_key or config
+                    pass
+            # Use the paper's own title if available from extracted metadata
+            paper_title = str(cfg.get("paper_title") or "").strip()
+            if not paper_title:
+                # Try to derive from paper_key
+                paper_title = paper_key.replace("_", " ").replace("-", " ").strip()
+            if paper_title and paper_title not in seen_titles:
+                seen_titles.add(paper_title)
+                r = lookup_bibtex(paper_title)
+                if r.get("bibtex"):
+                    bibtex_entries.append({
+                        "query_title": paper_title,
+                        "matched_title": r["matched_title"],
+                        "bibtex": r["bibtex"],
+                        "exact": r["exact"],
+                    })
+        except Exception:
+            pass  # bibtex enrichment is best-effort
 
     facts = {
         "paper_key": paper_key,
@@ -525,6 +571,7 @@ def finalize_node(state: Dict[str, Any]) -> Dict[str, Any]:
             "compare_diff_dir": str(diffs_dir),
         },
         "suggestions": suggestions,
+        "bibtex": bibtex_entries if bibtex_entries else [],
     }
     write_text(review_root / "facts.json", json.dumps(facts, ensure_ascii=False, indent=2) + "\n")
     write_text(
