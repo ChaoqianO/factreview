@@ -49,6 +49,6 @@ def test_orchestrator_accepts_new_flags():
 
 def test_refchecker_package_lazy():
     """refchecker package loads without triggering heavy deps at import time."""
-    import refchecker
+    import src.refchecker as refchecker
     assert refchecker.__version__
-    # Accessing ArxivReferenceChecker would trigger heavy imports; skip that.
+    # Accessing ReferenceChecker would trigger heavy imports; skip that.
