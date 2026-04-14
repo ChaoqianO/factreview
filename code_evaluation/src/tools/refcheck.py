@@ -1,7 +1,4 @@
-"""Reference-checking adapter for the refchecker package.
-
-Wraps the refchecker.ArxivReferenceChecker into a simpler API that
-code_evaluation nodes can call without knowing refchecker internals.
+"""Reference-checking adapter – wraps src.refchecker into a simple API.
 
 Usage (library)::
 
@@ -30,11 +27,6 @@ from typing import Any, Dict, Optional
 
 logger = logging.getLogger(__name__)
 
-# Ensure the refchecker package (sibling of src/) is importable.
-_CODE_EVAL_ROOT = Path(__file__).resolve().parents[2]  # code_evaluation/
-if str(_CODE_EVAL_ROOT) not in sys.path:
-    sys.path.insert(0, str(_CODE_EVAL_ROOT))
-
 
 def _build_checker(
     *,
@@ -47,8 +39,8 @@ def _build_checker(
     enable_parallel: bool = True,
     max_workers: int = 4,
 ):
-    """Construct an ArxivReferenceChecker with the given options."""
-    from refchecker import ArxivReferenceChecker
+    """Construct a ReferenceChecker with the given options."""
+    from src.refchecker import ReferenceChecker
 
     llm_config = None
     if llm_provider:
@@ -59,7 +51,7 @@ def _build_checker(
 
     ss_key = api_key or os.environ.get("SEMANTIC_SCHOLAR_API_KEY") or os.environ.get("S2_API_KEY")
 
-    return ArxivReferenceChecker(
+    return ReferenceChecker(
         semantic_scholar_api_key=ss_key,
         db_path=db_path,
         output_file=output_file,
@@ -84,29 +76,9 @@ def check_references(
 ) -> Dict[str, Any]:
     """Run reference checking on *paper* and return a summary dict.
 
-    Parameters
-    ----------
-    paper : str
-        ArXiv ID (e.g. ``"2401.12345"``), arXiv URL, or local file path
-        (``.pdf`` / ``.tex`` / ``.bib``).
-    api_key : str, optional
-        Semantic Scholar API key. Falls back to env vars.
-    db_path : str, optional
-        Path to a local Semantic Scholar SQLite database.
-    output_file : str, optional
-        If given, write the error report to this path.
-    debug : bool
-        Enable verbose logging.
-
     Returns
     -------
-    dict with keys:
-        ok              – True if the run completed (even if errors found)
-        total_refs      – number of references processed
-        errors          – number of errors found
-        warnings        – number of warnings found
-        unverified      – number of unverifiable references
-        error_message   – non-empty string if the run itself failed
+    dict with keys: ok, total_refs, errors, warnings, unverified, error_message
     """
     checker = _build_checker(
         api_key=api_key,
@@ -119,7 +91,6 @@ def check_references(
         max_workers=max_workers,
     )
 
-    # Determine whether paper is a local file or an arXiv specifier.
     paper_path = Path(paper)
     is_local = paper_path.exists() and paper_path.is_file()
 
@@ -131,10 +102,10 @@ def check_references(
 
         return {
             "ok": True,
-            "total_refs": getattr(checker, "total_references_processed", 0),
-            "errors": getattr(checker, "total_errors_found", 0),
-            "warnings": getattr(checker, "total_warnings_found", 0),
-            "unverified": getattr(checker, "total_unverified_refs", 0),
+            "total_refs": checker.total_references_processed,
+            "errors": checker.total_errors_found,
+            "warnings": checker.total_warnings_found,
+            "unverified": checker.total_unverified_refs,
             "error_message": "",
         }
     except Exception as exc:
@@ -156,7 +127,7 @@ def check_references(
 def _cli_main() -> int:
     p = argparse.ArgumentParser(
         prog="refcheck",
-        description="Check references in an academic paper (adapter for refchecker).",
+        description="Check references in an academic paper.",
     )
     p.add_argument("--paper", required=True, help="ArXiv ID, URL, or local PDF/TeX path")
     p.add_argument("--db-path", default=None, help="Local Semantic Scholar DB path")
