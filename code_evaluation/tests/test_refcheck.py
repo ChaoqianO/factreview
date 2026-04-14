@@ -25,14 +25,16 @@ def test_refcheck_nonexistent_paper():
 
     from src.tools.refcheck import check_references
     result = check_references(paper="/nonexistent/paper.pdf")
-    # The adapter calls refchecker which will fail; should not raise.
     assert isinstance(result, dict)
     assert "ok" in result
     assert "error_message" in result
 
 
 def test_refchecker_package_importable():
-    """The refchecker package should be importable (lazy init, no heavy deps needed)."""
-    import refchecker
-    assert hasattr(refchecker, "__version__")
-    assert refchecker.__version__
+    """The refchecker package should be importable."""
+    from src.refchecker import ReferenceChecker
+    assert ReferenceChecker is not None
+
+    import src.refchecker
+    assert hasattr(src.refchecker, "__version__")
+    assert src.refchecker.__version__ == "3.0.0"
