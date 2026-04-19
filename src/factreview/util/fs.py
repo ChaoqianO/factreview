@@ -3,8 +3,8 @@ from __future__ import annotations
 import hashlib
 import os
 import shutil
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable
 
 
 def ensure_dir(path: str | Path) -> Path:
@@ -62,8 +62,3 @@ def copy_into(src: str | Path, dst_dir: str | Path, ignore_globs: Iterable[str] 
     else:
         shutil.copy2(src_p, dst_p)
     return dst_p
-
-
-
-
-

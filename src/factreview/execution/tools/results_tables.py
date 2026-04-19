@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 from factreview.util.fs import ensure_dir, write_text
 
 
-def _load_json(p: Path) -> Dict[str, Any]:
+def _load_json(p: Path) -> dict[str, Any]:
     try:
         return json.loads(p.read_text(encoding="utf-8", errors="ignore"))
     except Exception:
@@ -21,8 +21,8 @@ def _fmt(x: Any) -> str:
         return ""
 
 
-def _md_table(rows: List[Dict[str, Any]], *, caption: str, columns: List[Tuple[str, str]]) -> str:
-    lines: List[str] = []
+def _md_table(rows: list[dict[str, Any]], *, caption: str, columns: list[tuple[str, str]]) -> str:
+    lines: list[str] = []
     if caption:
         lines.append(f"**{caption}**")
         lines.append("")
@@ -40,7 +40,7 @@ def _md_table(rows: List[Dict[str, Any]], *, caption: str, columns: List[Tuple[s
     return "\n".join(lines)
 
 
-def _html_table(rows: List[Dict[str, Any]], *, caption: str, columns: List[Tuple[str, str]]) -> str:
+def _html_table(rows: list[dict[str, Any]], *, caption: str, columns: list[tuple[str, str]]) -> str:
     cap = f"<caption>{caption}</caption>" if caption else ""
     head = "<tr>" + "".join([f"<th>{c[0]}</th>" for c in columns]) + "</tr>"
     body_rows = []
@@ -50,7 +50,7 @@ def _html_table(rows: List[Dict[str, Any]], *, caption: str, columns: List[Tuple
             if key in {"mrr", "mr"} or key.startswith("hits@"):
                 tds.append(f"<td>{_fmt(r.get(key))}</td>")
             else:
-                tds.append(f"<td>{str(r.get(key) or '')}</td>")
+                tds.append(f"<td>{r.get(key) or ''!s}</td>")
         body_rows.append("<tr>" + "".join(tds) + "</tr>")
     return (
         "<table>\n"
@@ -58,14 +58,12 @@ def _html_table(rows: List[Dict[str, Any]], *, caption: str, columns: List[Tuple
         "<thead>\n"
         f"{head}\n"
         "</thead>\n"
-        "<tbody>\n"
-        + "\n".join(body_rows)
-        + "\n</tbody>\n"
+        "<tbody>\n" + "\n".join(body_rows) + "\n</tbody>\n"
         "</table>\n"
     )
 
 
-def _group_key(r: Dict[str, Any]) -> Tuple[str, str]:
+def _group_key(r: dict[str, Any]) -> tuple[str, str]:
     # dataset + split are common across papers; if absent, collapse into one table.
     return (str(r.get("dataset") or ""), str(r.get("split") or ""))
 
@@ -83,7 +81,7 @@ def maybe_summarize_metrics_tables(*, cfg: dict, run_dir: Path, artifacts_dir: P
     if not metrics_dir.exists():
         return
 
-    rows: List[Dict[str, Any]] = []
+    rows: list[dict[str, Any]] = []
     for p in sorted(metrics_dir.glob("*.json")):
         d = _load_json(p)
         if not d:
@@ -95,7 +93,7 @@ def maybe_summarize_metrics_tables(*, cfg: dict, run_dir: Path, artifacts_dir: P
         return
 
     paper_key = str(cfg.get("paper_key") or "paper").strip()
-    by_group: Dict[Tuple[str, str], List[Dict[str, Any]]] = {}
+    by_group: dict[tuple[str, str], list[dict[str, Any]]] = {}
     for r in rows:
         by_group.setdefault(_group_key(r), []).append(r)
 
@@ -106,7 +104,7 @@ def maybe_summarize_metrics_tables(*, cfg: dict, run_dir: Path, artifacts_dir: P
     ensure_dir(html_dir)
 
     # Prefer common metric columns if present.
-    columns: List[Tuple[str, str]] = [
+    columns: list[tuple[str, str]] = [
         ("variant", "variant"),
         ("mrr", "mrr"),
         ("mr", "mr"),
@@ -115,11 +113,11 @@ def maybe_summarize_metrics_tables(*, cfg: dict, run_dir: Path, artifacts_dir: P
         ("hits@10", "hits@10"),
     ]
 
-    index: List[Dict[str, Any]] = []
+    index: list[dict[str, Any]] = []
     table_idx = 1
     for (dataset, split), grp in sorted(by_group.items()):
         # Best-effort variant label: score_func/opn or model/seed, etc.
-        normalized: List[Dict[str, Any]] = []
+        normalized: list[dict[str, Any]] = []
         for r in grp:
             rr = dict(r)
             if not rr.get("variant"):
@@ -160,10 +158,10 @@ def maybe_summarize_metrics_tables(*, cfg: dict, run_dir: Path, artifacts_dir: P
         )
         table_idx += 1
 
-    (tables_dir / "index.json").write_text(json.dumps(index, ensure_ascii=False, indent=2), encoding="utf-8", errors="ignore")
+    (tables_dir / "index.json").write_text(
+        json.dumps(index, ensure_ascii=False, indent=2), encoding="utf-8", errors="ignore"
+    )
     write_text(
         artifacts_dir / "tables" / "README.md",
         "This folder is auto-generated from artifacts/metrics/*.json to make run outputs easy to compare against paper_extracted tables.\n",
     )
-
-

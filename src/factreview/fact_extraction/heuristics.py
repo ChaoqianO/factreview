@@ -18,7 +18,6 @@ from dataclasses import dataclass
 from factreview.schemas.claim import Claim, ClaimLocation, ClaimType
 from factreview.schemas.paper import Paper, Section
 
-
 # ---------------------------------------------------------------------------
 # Trigger phrases, mapped to a :class:`ClaimType`
 # ---------------------------------------------------------------------------
@@ -153,6 +152,7 @@ def _scan_section(section: Section) -> list[_Mention]:
 # Public API
 # ---------------------------------------------------------------------------
 
+
 def _is_body_section(section: Section) -> bool:
     """Skip acknowledgement / references / appendix-only sections."""
     title = (section.title or "").strip().lower()
@@ -210,6 +210,7 @@ def extract_claims_heuristic(paper: Paper, *, max_claims: int = 60) -> list[Clai
 # Helpers exposed for the decomposer / tests
 # ---------------------------------------------------------------------------
 
+
 def _infer_scope(sentence: str, ctype: ClaimType) -> str:
     """Mark claims that span multiple tasks/datasets as ``broad``."""
     # A claim is broad when it lists ≥2 datasets/tasks or uses an enumeration
@@ -228,15 +229,34 @@ def _infer_scope(sentence: str, ctype: ClaimType) -> str:
 # generic (uppercase tokens + digits); this list only boosts recall on
 # well-known corpora.
 _KNOWN_BENCHMARKS = (
-    "FB15k-237", "FB15k", "WN18RR", "WN18", "YAGO3-10", "NELL-995",
-    "ImageNet", "CIFAR-10", "CIFAR-100", "MNIST", "MS-COCO", "COCO",
-    "MUTAG", "PTC", "PROTEINS", "NCI1", "IMDB", "Cora", "Citeseer", "Pubmed",
-    "GLUE", "SuperGLUE", "SQuAD", "WMT", "CoNLL",
+    "FB15k-237",
+    "FB15k",
+    "WN18RR",
+    "WN18",
+    "YAGO3-10",
+    "NELL-995",
+    "ImageNet",
+    "CIFAR-10",
+    "CIFAR-100",
+    "MNIST",
+    "MS-COCO",
+    "COCO",
+    "MUTAG",
+    "PTC",
+    "PROTEINS",
+    "NCI1",
+    "IMDB",
+    "Cora",
+    "Citeseer",
+    "Pubmed",
+    "GLUE",
+    "SuperGLUE",
+    "SQuAD",
+    "WMT",
+    "CoNLL",
 )
 
-_DATASET_RE = re.compile(
-    r"\b(?:" + "|".join(re.escape(d) for d in _KNOWN_BENCHMARKS) + r")\b"
-)
+_DATASET_RE = re.compile(r"\b(?:" + "|".join(re.escape(d) for d in _KNOWN_BENCHMARKS) + r")\b")
 # Fallback: uppercase token with digits (e.g. "WN18", "FB15k-237") or
 # hyphenated capitalised benchmark names.
 _DATASET_FALLBACK_RE = re.compile(r"\b[A-Z][A-Za-z]*\d+[A-Za-z0-9\-]*\b")

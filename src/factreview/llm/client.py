@@ -4,7 +4,7 @@ import json
 import os
 import re
 from dataclasses import dataclass
-from typing import Any, Dict
+from typing import Any
 
 from .codex_auth import get_codex_auth
 from .codex_client import invoke_codex
@@ -76,7 +76,7 @@ def resolve_llm_config(provider: str = "", model: str = "", base_url: str = "") 
     )
 
 
-def _parse_json_response(text: str) -> Dict[str, Any]:
+def _parse_json_response(text: str) -> dict[str, Any]:
     try:
         return json.loads(text)
     except Exception:
@@ -93,7 +93,7 @@ def llm_json(
     prompt: str,
     system: str,
     cfg: LLMConfig,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Minimal JSON response helper for the providers used in code_evaluation.
     """
@@ -148,5 +148,3 @@ def llm_json(
         }
 
     return _parse_json_response(text)
-
-

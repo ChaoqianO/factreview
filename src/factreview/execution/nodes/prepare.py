@@ -6,7 +6,7 @@ import re
 import shutil
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 from factreview.ingestion.mineru import extract_with_mineru, mineru_available
 from factreview.util.fs import ensure_dir, write_text
@@ -40,7 +40,7 @@ def _write_yaml_or_json(path: Path, data: Any) -> None:
     write_text(path, json.dumps(data, ensure_ascii=False, indent=2) + "\n")
 
 
-def _task_risk_level(task: Dict[str, Any]) -> str:
+def _task_risk_level(task: dict[str, Any]) -> str:
     """
     Heuristic task risk classification for auditability.
     - smoke: fast, no real training/data downloads
@@ -52,7 +52,7 @@ def _task_risk_level(task: Dict[str, Any]) -> str:
         return "unknown"
     s = " ".join([str(x) for x in cmd]).lower()
     timeout = int(task.get("timeout_sec") or 0)
-    if "--help" in s or " -h" in s or "print('ok')" in s or "print(\"ok\")" in s:
+    if "--help" in s or " -h" in s or "print('ok')" in s or 'print("ok")' in s:
         return "smoke"
     heavy_tokens = [
         "train",
@@ -93,13 +93,15 @@ def _write_tasks_risk_report(tasks_path: Path, logs_dir: Path) -> None:
                     "cmd": t.get("cmd"),
                 }
             )
-        write_text(logs_dir / "tasks_risk_report.json", json.dumps(report, ensure_ascii=False, indent=2) + "\n")
+        write_text(
+            logs_dir / "tasks_risk_report.json", json.dumps(report, ensure_ascii=False, indent=2) + "\n"
+        )
     except Exception:
         return
 
 
-def _parse_requirements_pins(req_text: str) -> Dict[str, str]:
-    pins: Dict[str, str] = {}
+def _parse_requirements_pins(req_text: str) -> dict[str, str]:
+    pins: dict[str, str] = {}
     for line in (req_text or "").splitlines():
         s = (line or "").strip()
         if not s or s.startswith("#"):
@@ -127,7 +129,7 @@ def _infer_python_spec_from_requirements(req_path: Path) -> str:
     return "3.11"
 
 
-def _extract_repo_urls_from_pdf(pdf_path: Path, max_pages: int = 8) -> List[str]:
+def _extract_repo_urls_from_pdf(pdf_path: Path, max_pages: int = 8) -> list[str]:
     """
     Extract GitHub repository URLs from a PDF using text extraction.
     Best-effort: returns candidates ordered by first appearance.
@@ -136,7 +138,7 @@ def _extract_repo_urls_from_pdf(pdf_path: Path, max_pages: int = 8) -> List[str]
         from pypdf import PdfReader  # type: ignore
 
         reader = PdfReader(str(pdf_path))
-        texts: List[str] = []
+        texts: list[str] = []
         for page in reader.pages[: max_pages or 1]:
             try:
                 texts.append(page.extract_text() or "")
@@ -151,7 +153,7 @@ def _extract_repo_urls_from_pdf(pdf_path: Path, max_pages: int = 8) -> List[str]
 
     pat = re.compile(r"(https?://)?github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", flags=re.IGNORECASE)
     seen = set()
-    out: List[str] = []
+    out: list[str] = []
     for m in pat.finditer(text):
         raw = (m.group(0) or "").strip()
         raw = raw.rstrip(").,;:]}'\"")
@@ -233,7 +235,7 @@ def _git_head_sha(repo_root: Path) -> str:
         return ""
 
 
-def _write_run_manifest(*, run_dir: Path, cfg: Dict[str, Any], baseline_dir: Path) -> None:
+def _write_run_manifest(*, run_dir: Path, cfg: dict[str, Any], baseline_dir: Path) -> None:
     """
     Write a compact, deterministic manifest for auditability and cross-run comparison.
     This intentionally duplicates some fields from meta.json, but adds paper/baseline pointers.
@@ -261,7 +263,9 @@ def _write_run_manifest(*, run_dir: Path, cfg: Dict[str, Any], baseline_dir: Pat
                 "python_spec": str(cfg.get("python_spec") or ""),
                 "paper_image": str(cfg.get("docker_paper_image") or ""),
                 "gpus": str(cfg.get("docker_gpus") or os.environ.get("CODE_EVAL_DOCKER_GPUS") or ""),
-                "shm_size": str(cfg.get("docker_shm_size") or os.environ.get("CODE_EVAL_DOCKER_SHM_SIZE") or ""),
+                "shm_size": str(
+                    cfg.get("docker_shm_size") or os.environ.get("CODE_EVAL_DOCKER_SHM_SIZE") or ""
+                ),
                 "ipc": str(cfg.get("docker_ipc") or os.environ.get("CODE_EVAL_DOCKER_IPC") or ""),
             },
             "llm": {
@@ -277,8 +281,8 @@ def _write_run_manifest(*, run_dir: Path, cfg: Dict[str, Any], baseline_dir: Pat
         return
 
 
-def prepare_node(state: Dict[str, Any]) -> Dict[str, Any]:
-    cfg: Dict[str, Any] = state.get("config", {}) or {}
+def prepare_node(state: dict[str, Any]) -> dict[str, Any]:
+    cfg: dict[str, Any] = state.get("config", {}) or {}
     run_root = str(cfg.get("run_root") or (_repo_root() / "run"))
 
     paper_pdf = str(cfg.get("paper_pdf") or "").strip()
@@ -313,8 +317,14 @@ def prepare_node(state: Dict[str, Any]) -> Dict[str, Any]:
         "fixes_dir": str(fixes_dir),
     }
 
-    append_event(run_dir, "prepare_start", {"paper_key": paper_key, "paper_pdf": paper_pdf, "paper_root": paper_root_in})
-    state.setdefault("history", []).append({"kind": "prepare_start", "data": {"paper_key": paper_key, "paper_pdf": paper_pdf}})
+    append_event(
+        run_dir,
+        "prepare_start",
+        {"paper_key": paper_key, "paper_pdf": paper_pdf, "paper_root": paper_root_in},
+    )
+    state.setdefault("history", []).append(
+        {"kind": "prepare_start", "data": {"paper_key": paper_key, "paper_pdf": paper_pdf}}
+    )
 
     baseline_dir = _repo_root() / "baseline" / paper_key
     source_dir = baseline_dir / "source"
@@ -352,22 +362,28 @@ def prepare_node(state: Dict[str, Any]) -> Dict[str, Any]:
             state["status"] = "failed"
             return state
         append_event(run_dir, "prepare_use_local_source", {"path": str(paper_root)})
-        state.setdefault("history", []).append({"kind": "prepare_use_local_source", "data": {"path": str(paper_root)}})
+        state.setdefault("history", []).append(
+            {"kind": "prepare_use_local_source", "data": {"path": str(paper_root)}}
+        )
     elif not paper_root_in:
         # PDF-driven mode: clone repo into baseline/<paper_key>/source if missing.
         need_clone = (not source_dir.exists()) or (not any(source_dir.iterdir()))
         if need_clone:
             repo_url = str(cfg.get("paper_repo_url") or "").strip()
-            candidates: List[str] = []
+            candidates: list[str] = []
             if not repo_url and pdf_path and pdf_path.exists():
                 candidates = _extract_repo_urls_from_pdf(pdf_path)
-                write_text(logs_dir / "repo_url_candidates.txt", "\n".join(candidates) + ("\n" if candidates else ""))
+                write_text(
+                    logs_dir / "repo_url_candidates.txt", "\n".join(candidates) + ("\n" if candidates else "")
+                )
                 repo_url = candidates[0] if candidates else ""
 
             if not repo_url:
                 msg = "repo_url_not_found"
                 append_event(run_dir, "prepare_error", {"error": msg})
-                state.setdefault("history", []).append({"kind": "prepare_error", "data": {"error": msg, "candidates": candidates}})
+                state.setdefault("history", []).append(
+                    {"kind": "prepare_error", "data": {"error": msg, "candidates": candidates}}
+                )
                 state["status"] = "failed"
                 return state
 
@@ -379,8 +395,12 @@ def prepare_node(state: Dict[str, Any]) -> Dict[str, Any]:
             persist_command_result(res, logs_dir, prefix="clone")
             if res.returncode != 0:
                 msg = "git_clone_failed"
-                append_event(run_dir, "prepare_error", {"error": msg, "repo_url": repo_url, "rc": res.returncode})
-                state.setdefault("history", []).append({"kind": "prepare_error", "data": {"error": msg, "repo_url": repo_url}})
+                append_event(
+                    run_dir, "prepare_error", {"error": msg, "repo_url": repo_url, "rc": res.returncode}
+                )
+                state.setdefault("history", []).append(
+                    {"kind": "prepare_error", "data": {"error": msg, "repo_url": repo_url}}
+                )
                 state["status"] = "failed"
                 return state
             cfg["paper_repo_url"] = repo_url
@@ -420,8 +440,14 @@ def prepare_node(state: Dict[str, Any]) -> Dict[str, Any]:
         # Keep extraction outputs in a single stable folder per paper.
         # User preference: no nested `paper_extracted/mineru/` directory.
         if "paper_pdf_extracted_md" not in cfg:
-            r = extract_with_mineru(pdf_path=str(pdf_path), out_dir=out_dir, logs_dir=logs_dir, timeout_sec=1800)
-            append_event(run_dir, "pdf_extract_mineru", {"success": r.success, "output_md": r.output_md, "note": r.note})
+            r = extract_with_mineru(
+                pdf_path=str(pdf_path), out_dir=out_dir, logs_dir=logs_dir, timeout_sec=1800
+            )
+            append_event(
+                run_dir,
+                "pdf_extract_mineru",
+                {"success": r.success, "output_md": r.output_md, "note": r.note},
+            )
             if not r.success:
                 msg = "pdf_extract_failed"
                 append_event(
@@ -435,7 +461,9 @@ def prepare_node(state: Dict[str, Any]) -> Dict[str, Any]:
                         "command_log": r.command_log,
                     },
                 )
-                state.setdefault("history", []).append({"kind": "prepare_error", "data": {"error": msg, "note": r.note}})
+                state.setdefault("history", []).append(
+                    {"kind": "prepare_error", "data": {"error": msg, "note": r.note}}
+                )
                 state["status"] = "failed"
                 return state
             cfg["paper_pdf_extracted_md"] = r.output_md
@@ -480,13 +508,16 @@ def prepare_node(state: Dict[str, Any]) -> Dict[str, Any]:
         if not ok_img:
             err = "docker_paper_image_build_failed"
             append_event(run_dir, "prepare_error", {"error": err, "detail": img_or_msg})
-            state.setdefault("history", []).append({"kind": "prepare_error", "data": {"error": err, "detail": img_or_msg}})
+            state.setdefault("history", []).append(
+                {"kind": "prepare_error", "data": {"error": err, "detail": img_or_msg}}
+            )
             state["status"] = "failed"
             return state
         cfg["docker_paper_image"] = img_or_msg
 
     append_event(run_dir, "prepare_ok", {"paper_root": str(paper_root), "python_spec": python_spec})
-    state.setdefault("history", []).append({"kind": "prepare_ok", "data": {"paper_root": str(paper_root), "python_spec": python_spec}})
+    state.setdefault("history", []).append(
+        {"kind": "prepare_ok", "data": {"paper_root": str(paper_root), "python_spec": python_spec}}
+    )
     state["status"] = "running"
     return state
-

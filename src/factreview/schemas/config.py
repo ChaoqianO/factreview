@@ -28,7 +28,7 @@ class IngestionCfg(BaseModel):
 
 
 class FactExtractionCfg(BaseModel):
-    mode: str = "auto"                       # auto | llm | heuristic
+    mode: str = "auto"  # auto | llm | heuristic
     decompose_broad_claims: bool = True
 
 
@@ -93,13 +93,13 @@ class RunConfig(BaseModel):
 
     # ---- Loaders ------------------------------------------------------------
     @classmethod
-    def from_yaml(cls, path: Path | str) -> "RunConfig":
+    def from_yaml(cls, path: Path | str) -> RunConfig:
         p = Path(path)
         raw: dict[str, Any] = yaml.safe_load(p.read_text(encoding="utf-8")) or {}
         return cls.model_validate(raw)
 
     @classmethod
-    def layered(cls, *paths: Path | str) -> "RunConfig":
+    def layered(cls, *paths: Path | str) -> RunConfig:
         """Later paths override earlier ones. Missing files are skipped."""
         merged: dict[str, Any] = {}
         for p in paths:

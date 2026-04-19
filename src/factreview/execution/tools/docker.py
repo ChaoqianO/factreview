@@ -2,15 +2,13 @@ from __future__ import annotations
 
 import hashlib
 import os
-from pathlib import Path
-from typing import List, Optional, Tuple
-
 import re
+from pathlib import Path
 
 from factreview.util.runner import run_command
 
 
-def docker_cmd(args: List[str]) -> List[str]:
+def docker_cmd(args: list[str]) -> list[str]:
     # `docker` works with shell=False on Windows and non-Windows.
     return ["docker", *args]
 
@@ -27,11 +25,18 @@ def docker_strategy(cfg: dict) -> str:
     """
     # Always force per-paper image mode.
     # If an old env var/config sets something else, silently ignore and use paper_image.
-    v = str(cfg.get("docker_strategy") or os.environ.get("CODE_EVAL_DOCKER_STRATEGY") or "paper_image").strip()
+    v = str(
+        cfg.get("docker_strategy") or os.environ.get("CODE_EVAL_DOCKER_STRATEGY") or "paper_image"
+    ).strip()
     return "paper_image" if v != "paper_image" else v
 
+
 def _paper_image_prefix(cfg: dict) -> str:
-    return str(cfg.get("docker_paper_image_prefix") or os.environ.get("CODE_EVAL_DOCKER_PAPER_IMAGE_PREFIX") or "code-eval-paper").strip()
+    return str(
+        cfg.get("docker_paper_image_prefix")
+        or os.environ.get("CODE_EVAL_DOCKER_PAPER_IMAGE_PREFIX")
+        or "code-eval-paper"
+    ).strip()
 
 
 def _normalize_python_spec_for_image(python_spec: str) -> str:
@@ -58,7 +63,7 @@ def _paper_dockerfile_text(*, python_image: str) -> str:
         "\n"
         "RUN useradd -m -u 1000 user && python -m pip install --upgrade pip\n"
         "USER user\n"
-        "ENV PATH=\"/home/user/.local/bin:$PATH\"\n"
+        'ENV PATH="/home/user/.local/bin:$PATH"\n'
         "\n"
         "WORKDIR /app\n"
         "\n"
@@ -124,51 +129,51 @@ def _paper_install_deps_py_text() -> str:
         "        pkg = Path(sp) / 'torch_scatter'\n"
         "        pkg.mkdir(parents=True, exist_ok=True)\n"
         "        (pkg / '__init__.py').write_text(\n"
-        "            \"import torch\\n\\n\"\n"
-        "            \"def _expand_index(index, src, dim):\\n\"\n"
-        "            \"    if index.dtype != torch.long: index = index.long()\\n\"\n"
-        "            \"    if dim < 0: dim = src.dim() + dim\\n\"\n"
-        "            \"    if index.dim() == 1 and src.dim() > 1:\\n\"\n"
-        "            \"        shape = [1] * src.dim()\\n\"\n"
-        "            \"        shape[dim] = index.numel()\\n\"\n"
-        "            \"        index = index.view(*shape)\\n\"\n"
-        "            \"    return index.expand_as(src)\\n\\n\"\n"
-        "            \"def scatter_add(src, index, dim=0, out=None, dim_size=None):\\n\"\n"
-        "            \"    if out is None:\\n\"\n"
-        "            \"        if dim_size is None: dim_size = int(index.max().item()) + 1 if index.numel() else 0\\n\"\n"
-        "            \"        out_shape = list(src.shape); out_shape[dim] = dim_size\\n\"\n"
-        "            \"        out = torch.zeros(*out_shape, dtype=src.dtype, device=src.device)\\n\"\n"
-        "            \"    idx = _expand_index(index, src, dim)\\n\"\n"
-        "            \"    return out.scatter_add(dim, idx, src)\\n\\n\"\n"
-        "            \"def scatter_max(src, index, dim=0, out=None, dim_size=None):\\n\"\n"
-        "            \"    if index.dtype != torch.long: index = index.long()\\n\"\n"
-        "            \"    if dim < 0: dim = src.dim() + dim\\n\"\n"
-        "            \"    if dim_size is None: dim_size = int(index.max().item()) + 1 if index.numel() else 0\\n\"\n"
-        "            \"    if src.dim() == 1:\\n\"\n"
+        '            "import torch\\n\\n"\n'
+        '            "def _expand_index(index, src, dim):\\n"\n'
+        '            "    if index.dtype != torch.long: index = index.long()\\n"\n'
+        '            "    if dim < 0: dim = src.dim() + dim\\n"\n'
+        '            "    if index.dim() == 1 and src.dim() > 1:\\n"\n'
+        '            "        shape = [1] * src.dim()\\n"\n'
+        '            "        shape[dim] = index.numel()\\n"\n'
+        '            "        index = index.view(*shape)\\n"\n'
+        '            "    return index.expand_as(src)\\n\\n"\n'
+        '            "def scatter_add(src, index, dim=0, out=None, dim_size=None):\\n"\n'
+        '            "    if out is None:\\n"\n'
+        '            "        if dim_size is None: dim_size = int(index.max().item()) + 1 if index.numel() else 0\\n"\n'
+        '            "        out_shape = list(src.shape); out_shape[dim] = dim_size\\n"\n'
+        '            "        out = torch.zeros(*out_shape, dtype=src.dtype, device=src.device)\\n"\n'
+        '            "    idx = _expand_index(index, src, dim)\\n"\n'
+        '            "    return out.scatter_add(dim, idx, src)\\n\\n"\n'
+        '            "def scatter_max(src, index, dim=0, out=None, dim_size=None):\\n"\n'
+        '            "    if index.dtype != torch.long: index = index.long()\\n"\n'
+        '            "    if dim < 0: dim = src.dim() + dim\\n"\n'
+        '            "    if dim_size is None: dim_size = int(index.max().item()) + 1 if index.numel() else 0\\n"\n'
+        '            "    if src.dim() == 1:\\n"\n'
         "            \"        outv = torch.full((dim_size,), -float('inf'), dtype=src.dtype, device=src.device)\\n\"\n"
-        "            \"        arg = torch.full((dim_size,), -1, dtype=torch.long, device=src.device)\\n\"\n"
-        "            \"        for i in range(src.numel()):\\n\"\n"
-        "            \"            j = int(index[i].item()); v = src[i]\\n\"\n"
-        "            \"            if v > outv[j]: outv[j] = v; arg[j] = i\\n\"\n"
-        "            \"        return outv, arg\\n\"\n"
-        "            \"    dims = list(range(src.dim())); dims[0], dims[dim] = dims[dim], dims[0]\\n\"\n"
-        "            \"    inv = [0] * len(dims)\\n\"\n"
-        "            \"    for i, d in enumerate(dims): inv[d] = i\\n\"\n"
-        "            \"    srcp = src.permute(dims)\\n\"\n"
+        '            "        arg = torch.full((dim_size,), -1, dtype=torch.long, device=src.device)\\n"\n'
+        '            "        for i in range(src.numel()):\\n"\n'
+        '            "            j = int(index[i].item()); v = src[i]\\n"\n'
+        '            "            if v > outv[j]: outv[j] = v; arg[j] = i\\n"\n'
+        '            "        return outv, arg\\n"\n'
+        '            "    dims = list(range(src.dim())); dims[0], dims[dim] = dims[dim], dims[0]\\n"\n'
+        '            "    inv = [0] * len(dims)\\n"\n'
+        '            "    for i, d in enumerate(dims): inv[d] = i\\n"\n'
+        '            "    srcp = src.permute(dims)\\n"\n'
         "            \"    outp = torch.full((dim_size, *srcp.shape[1:]), -float('inf'), dtype=src.dtype, device=src.device)\\n\"\n"
-        "            \"    argp = torch.full((dim_size, *srcp.shape[1:]), -1, dtype=torch.long, device=src.device)\\n\"\n"
-        "            \"    for i in range(srcp.shape[0]):\\n\"\n"
-        "            \"        j = int(index[i].item()); v = srcp[i]\\n\"\n"
-        "            \"        better = v > outp[j]\\n\"\n"
-        "            \"        outp[j] = torch.where(better, v, outp[j])\\n\"\n"
-        "            \"        argp[j] = torch.where(better, torch.full_like(argp[j], i), argp[j])\\n\"\n"
-        "            \"    return outp.permute(inv), argp.permute(inv)\\n\\n\"\n"
+        '            "    argp = torch.full((dim_size, *srcp.shape[1:]), -1, dtype=torch.long, device=src.device)\\n"\n'
+        '            "    for i in range(srcp.shape[0]):\\n"\n'
+        '            "        j = int(index[i].item()); v = srcp[i]\\n"\n'
+        '            "        better = v > outp[j]\\n"\n'
+        '            "        outp[j] = torch.where(better, v, outp[j])\\n"\n'
+        '            "        argp[j] = torch.where(better, torch.full_like(argp[j], i), argp[j])\\n"\n'
+        '            "    return outp.permute(inv), argp.permute(inv)\\n\\n"\n'
         "            \"def scatter(src, index, dim=0, out=None, dim_size=None, reduce='sum'):\\n\"\n"
         "            \"    if reduce in {'sum', 'add'}: return scatter_add(src, index, dim=dim, out=out, dim_size=dim_size)\\n\"\n"
         "            \"    if reduce == 'mean':\\n\"\n"
-        "            \"        outv = scatter_add(src, index, dim=dim, out=out, dim_size=dim_size)\\n\"\n"
-        "            \"        cnt = scatter_add(torch.ones_like(src), index, dim=dim, out=None, dim_size=dim_size).clamp(min=1)\\n\"\n"
-        "            \"        return outv / cnt\\n\"\n"
+        '            "        outv = scatter_add(src, index, dim=dim, out=out, dim_size=dim_size)\\n"\n'
+        '            "        cnt = scatter_add(torch.ones_like(src), index, dim=dim, out=None, dim_size=dim_size).clamp(min=1)\\n"\n'
+        '            "        return outv / cnt\\n"\n'
         "            \"    if reduce == 'max': return scatter_max(src, index, dim=dim, out=out, dim_size=dim_size)\\n\"\n"
         "            \"    raise ValueError('unsupported reduce')\\n\"\n"
         "        )\n"
@@ -302,12 +307,15 @@ def _paper_install_deps_py_text() -> str:
         "    raise SystemExit(main())\n"
     )
 
+
 def _paper_image_tag(*, cfg: dict, paper_key: str, payload: str) -> str:
     h = hashlib.sha256(payload.encode("utf-8", errors="ignore")).hexdigest()[:12]
     return f"{_paper_image_prefix(cfg)}:{paper_key}-{h}"
 
 
-def docker_ensure_paper_image(cfg: dict, *, paper_key: str, paper_root_host: str, python_spec: str, timeout_sec: int = 3600) -> Tuple[bool, str]:
+def docker_ensure_paper_image(
+    cfg: dict, *, paper_key: str, paper_root_host: str, python_spec: str, timeout_sec: int = 3600
+) -> tuple[bool, str]:
     """
     Build a per-paper image using the paper repo as build context.
     The generated Dockerfile is stored under <paper_root>/deployment/Dockerfile (inside build context).
@@ -325,7 +333,11 @@ def docker_ensure_paper_image(cfg: dict, *, paper_key: str, paper_root_host: str
     except Exception:
         req_bytes = b""
     py_tag = _normalize_python_spec_for_image(python_spec)
-    python_image = str(cfg.get("docker_paper_python_image") or os.environ.get("CODE_EVAL_DOCKER_PAPER_PYTHON_IMAGE") or f"python:{py_tag}").strip()
+    python_image = str(
+        cfg.get("docker_paper_python_image")
+        or os.environ.get("CODE_EVAL_DOCKER_PAPER_PYTHON_IMAGE")
+        or f"python:{py_tag}"
+    ).strip()
     dockerfile_text = _paper_dockerfile_text(python_image=python_image)
     install_deps_text = _paper_install_deps_py_text()
     payload = (
@@ -347,11 +359,15 @@ def docker_ensure_paper_image(cfg: dict, *, paper_key: str, paper_root_host: str
     try:
         deployment_dir.mkdir(parents=True, exist_ok=True)
         dockerfile_path.write_text(dockerfile_text, encoding="utf-8", errors="ignore")
-        (deployment_dir / "install_deps.py").write_text(_paper_install_deps_py_text(), encoding="utf-8", errors="ignore")
+        (deployment_dir / "install_deps.py").write_text(
+            _paper_install_deps_py_text(), encoding="utf-8", errors="ignore"
+        )
         # Best-effort: keep legacy location in sync for old runs/logs.
         try:
             legacy_deployment_dir.mkdir(parents=True, exist_ok=True)
-            (legacy_deployment_dir / "Dockerfile").write_text(dockerfile_text, encoding="utf-8", errors="ignore")
+            (legacy_deployment_dir / "Dockerfile").write_text(
+                dockerfile_text, encoding="utf-8", errors="ignore"
+            )
         except Exception:
             pass
     except Exception:
@@ -374,12 +390,12 @@ def docker_run_paper_image(
     paper_root_host: str,
     run_dir_host: str,
     cwd_container: str,
-    cmd: List[str],
-    env: Optional[dict[str, str]] = None,
+    cmd: list[str],
+    env: dict[str, str] | None = None,
     gpus: str | None = None,
     shm_size: str | None = None,
     ipc: str | None = None,
-) -> List[str]:
+) -> list[str]:
     """
     Run a command inside a per-paper image.
     Commands execute using the image's default python environment.
@@ -389,7 +405,7 @@ def docker_run_paper_image(
     paper_root_host = str(Path(paper_root_host).resolve())
     run_dir_container = "/workspace/run_dir"
     paper_root_container = "/app"
-    args: List[str] = [
+    args: list[str] = [
         "run",
         "--rm",
     ]
@@ -404,20 +420,20 @@ def docker_run_paper_image(
         args.extend(["--ipc", str(ipc)])
     args.extend(
         [
-        "-v",
-        f"{paper_root_host}:{paper_root_container}",
-        "-v",
-        f"{run_dir_host}:{run_dir_container}",
-        "-w",
-        cwd_container,
-        "-e",
-        f"CODE_EVAL_RUN_DIR={run_dir_container}",
-        "-e",
-        f"CODE_EVAL_ARTIFACT_DIR={run_dir_container}/artifacts",
-        "-e",
-        f"CODE_EVAL_PAPER_DIR={paper_root_container}",
-        "-e",
-        f"CODE_EVAL_PAPER_ROOT={paper_root_container}",
+            "-v",
+            f"{paper_root_host}:{paper_root_container}",
+            "-v",
+            f"{run_dir_host}:{run_dir_container}",
+            "-w",
+            cwd_container,
+            "-e",
+            f"CODE_EVAL_RUN_DIR={run_dir_container}",
+            "-e",
+            f"CODE_EVAL_ARTIFACT_DIR={run_dir_container}/artifacts",
+            "-e",
+            f"CODE_EVAL_PAPER_DIR={paper_root_container}",
+            "-e",
+            f"CODE_EVAL_PAPER_ROOT={paper_root_container}",
         ]
     )
     for k, v in env.items():
@@ -426,5 +442,3 @@ def docker_run_paper_image(
         args.extend(["-e", f"{k}={v}"])
     args.extend([image, *cmd])
     return docker_cmd(args)
-
-

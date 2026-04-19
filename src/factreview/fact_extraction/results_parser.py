@@ -20,7 +20,6 @@ from factreview.schemas.paper import Paper, ReportedResult, Table
 
 from .heuristics import _DATASET_RE, _extract_datasets, _extract_metrics
 
-
 _NUMBER_RE = re.compile(r"[+-]?\d+(?:\.\d+)?")
 _METRIC_HEADER_RE = re.compile(
     r"MRR|MR|Hits?@\d+|Accuracy|Acc\.?|F1|BLEU|ROUGE|AUC|AUROC|AUPRC|"

@@ -4,7 +4,6 @@ import json
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 
 @dataclass(frozen=True)
@@ -21,7 +20,7 @@ class PaperMetricTarget:
     dataset: str
     scoring_function: str  # e.g. "TransE"
     method: str  # e.g. "X + CoMPGCN (Sub)"
-    metrics: Dict[str, float]  # e.g. {"mrr":0.335, "mr":194, "hits@10":0.514}
+    metrics: dict[str, float]  # e.g. {"mrr":0.335, "mr":194, "hits@10":0.514}
 
 
 def _read_text(p: Path) -> str:
@@ -43,7 +42,7 @@ def _strip_md(s: str) -> str:
     return _norm_space(t)
 
 
-def _split_md_row(line: str) -> List[str]:
+def _split_md_row(line: str) -> list[str]:
     # Markdown tables: | a | b | c |
     s = (line or "").strip()
     if not s.startswith("|"):
@@ -53,14 +52,14 @@ def _split_md_row(line: str) -> List[str]:
     return [_strip_md(x) for x in s.split("|")]
 
 
-def _is_sep_row(cells: List[str]) -> bool:
+def _is_sep_row(cells: list[str]) -> bool:
     if not cells:
         return False
     # e.g. ["---", "---:", "---"]
     return all(re.fullmatch(r":?-{3,}:?", (c or "").strip()) for c in cells)
 
 
-def _to_float(s: str) -> Optional[float]:
+def _to_float(s: str) -> float | None:
     t = (s or "").strip()
     if not t:
         return None
@@ -91,7 +90,9 @@ def _metric_key(cell: str) -> str:
     return c
 
 
-def _extract_compgcn_table_004(md_text: str, *, paper_table_id: str, paper_table_md_path: str) -> List[PaperMetricTarget]:
+def _extract_compgcn_table_004(
+    md_text: str, *, paper_table_id: str, paper_table_md_path: str
+) -> list[PaperMetricTarget]:
     """
     Extract targets from COMPGCN Table 4-like markdown (multi-header layout).
 
@@ -111,7 +112,7 @@ def _extract_compgcn_table_004(md_text: str, *, paper_table_id: str, paper_table
         return []
 
     # Collect contiguous table lines.
-    block: List[str] = []
+    block: list[str] = []
     for ln in lines[start:]:
         if not ln.strip().startswith("|"):
             break
@@ -146,7 +147,7 @@ def _extract_compgcn_table_004(md_text: str, *, paper_table_id: str, paper_table
     group_size = 3
     max_cols = min(len(scoring_funcs) * group_size, len(metrics))
 
-    targets: List[PaperMetricTarget] = []
+    targets: list[PaperMetricTarget] = []
     for ln in block:
         row = _split_md_row(ln)
         if not row or _is_sep_row(row):
@@ -169,7 +170,7 @@ def _extract_compgcn_table_004(md_text: str, *, paper_table_id: str, paper_table
             sf = scoring_funcs[sf_idx] if sf_idx < len(scoring_funcs) else ""
             if not sf:
                 continue
-            m: Dict[str, float] = {}
+            m: dict[str, float] = {}
             for k in range(group_size):
                 key = metrics[j + k] if (j + k) < len(metrics) else ""
                 v = _to_float(vals[j + k])
@@ -190,7 +191,7 @@ def _extract_compgcn_table_004(md_text: str, *, paper_table_id: str, paper_table
     return targets
 
 
-def extract_paper_metric_targets(paper_extracted_tables_dir: Path) -> List[PaperMetricTarget]:
+def extract_paper_metric_targets(paper_extracted_tables_dir: Path) -> list[PaperMetricTarget]:
     """
     Best-effort extraction of numeric targets from paper_extracted tables.
 
@@ -210,7 +211,7 @@ def extract_paper_metric_targets(paper_extracted_tables_dir: Path) -> List[Paper
     if not isinstance(items, list):
         return []
 
-    out: List[PaperMetricTarget] = []
+    out: list[PaperMetricTarget] = []
     for it in items:
         if not isinstance(it, dict):
             continue
@@ -230,9 +231,10 @@ def extract_paper_metric_targets(paper_extracted_tables_dir: Path) -> List[Paper
         # This still improves the framework because it demonstrates how to do
         # deterministic, auditable alignment; other table types can be added later.
         if "Scoring Function" in md_text and "CoMPGCN" in md_text:
-            out.extend(_extract_compgcn_table_004(md_text, paper_table_id=table_id or p.stem, paper_table_md_path=str(p)))
+            out.extend(
+                _extract_compgcn_table_004(
+                    md_text, paper_table_id=table_id or p.stem, paper_table_md_path=str(p)
+                )
+            )
 
     return out
-
-
-

@@ -18,7 +18,9 @@ def _load_env_file(env_path: Path) -> None:
 
 
 def parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser("code_evaluation", description="Paper code evaluation runner (LangGraph-based)")
+    p = argparse.ArgumentParser(
+        "code_evaluation", description="Paper code evaluation runner (LangGraph-based)"
+    )
     p.add_argument(
         "paper_pdf_pos",
         nargs="?",
@@ -43,7 +45,9 @@ def parse_args() -> argparse.Namespace:
         default="",
         help="Folder name under papers/ to store this paper (optional; auto-derived from pdf name if omitted).",
     )
-    p.add_argument("--paper-root", type=str, default="", help="Path to the paper/code repository root (optional)")
+    p.add_argument(
+        "--paper-root", type=str, default="", help="Path to the paper/code repository root (optional)"
+    )
     p.add_argument(
         "--tasks",
         type=str,
@@ -68,11 +72,20 @@ def parse_args() -> argparse.Namespace:
         help="Where to store run/<timestamp>/... artifacts",
     )
     p.add_argument("--max-attempts", type=int, default=5, help="Max fix loop attempts per run")
-    p.add_argument("--no-llm", action="store_true", help="Disable all LLM usage (triage only deterministic fixes)")
+    p.add_argument(
+        "--no-llm", action="store_true", help="Disable all LLM usage (triage only deterministic fixes)"
+    )
     p.add_argument("--llm-model", type=str, default="", help="LLM model id (optional, depends on provider)")
-    p.add_argument("--llm-provider", type=str, default="", help="LLM provider: openai/deepseek/qwen/claude/ollama (optional)")
+    p.add_argument(
+        "--llm-provider",
+        type=str,
+        default="",
+        help="LLM provider: openai/deepseek/qwen/claude/ollama (optional)",
+    )
     p.add_argument("--llm-base-url", type=str, default="", help="LLM base url (optional)")
-    p.add_argument("--dry-run", action="store_true", help="Do not execute commands; just plan and write run skeleton")
+    p.add_argument(
+        "--dry-run", action="store_true", help="Do not execute commands; just plan and write run skeleton"
+    )
     p.add_argument(
         "--auto-tasks",
         action="store_true",
@@ -103,8 +116,12 @@ def parse_args() -> argparse.Namespace:
     )
     # Default: verbose console logs ON (users asked for flow-level tracing).
     # Use --quiet to disable. --verbose kept for backwards compatibility.
-    p.add_argument("--quiet", action="store_true", help="Disable verbose console logs (still writes run/* logs)")
-    p.add_argument("--verbose", action="store_true", help="(Deprecated) Print step-by-step workflow logs to console")
+    p.add_argument(
+        "--quiet", action="store_true", help="Disable verbose console logs (still writes run/* logs)"
+    )
+    p.add_argument(
+        "--verbose", action="store_true", help="(Deprecated) Print step-by-step workflow logs to console"
+    )
     return p.parse_args()
 
 
@@ -165,7 +182,9 @@ async def _amain() -> int:
         repo_url = (st.get("config") or {}).get("paper_repo_url")
         report = None
         if run_id:
-            report = Path(__file__).parent / "compare" / str(paper_key or "paper") / "reports" / f"{run_id}.md"
+            report = (
+                Path(__file__).parent / "compare" / str(paper_key or "paper") / "reports" / f"{run_id}.md"
+            )
         run_dir = (st.get("run") or {}).get("dir")
         if not paper_key and run_dir:
             try:
@@ -199,5 +218,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-

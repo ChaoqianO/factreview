@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 from factreview.util.fs import write_text
 from factreview.util.meta import collect_meta, write_meta
@@ -19,8 +19,8 @@ from .prepare import (
 )
 
 
-def plan_node(state: Dict[str, Any]) -> Dict[str, Any]:
-    cfg: Dict[str, Any] = state.get("config", {}) or {}
+def plan_node(state: dict[str, Any]) -> dict[str, Any]:
+    cfg: dict[str, Any] = state.get("config", {}) or {}
     run_info = state.get("run", {})
     run_dir = Path(run_info.get("dir") or "")
     logs_dir = Path(run_info.get("logs_dir") or (run_dir / "logs"))
@@ -31,7 +31,9 @@ def plan_node(state: Dict[str, Any]) -> Dict[str, Any]:
     run_id = str(run_info.get("id") or "")
 
     append_event(run_dir, "plan_start", {"paper_key": paper_key, "paper_root": str(paper_root)})
-    state.setdefault("history", []).append({"kind": "plan_start", "data": {"paper_key": paper_key, "paper_root": str(paper_root)}})
+    state.setdefault("history", []).append(
+        {"kind": "plan_start", "data": {"paper_key": paper_key, "paper_root": str(paper_root)}}
+    )
 
     baseline_dir = _repo_root() / "baseline" / paper_key
     tasks_path = str(cfg.get("tasks_path") or "").strip()
@@ -72,10 +74,15 @@ def plan_node(state: Dict[str, Any]) -> Dict[str, Any]:
                     paper_md_excerpt=paper_md_excerpt,
                 )
             else:
-                ir = infer_tasks_heuristic(str(paper_root), mode=mode if bool(cfg.get("auto_tasks")) else "smoke")
+                ir = infer_tasks_heuristic(
+                    str(paper_root), mode=mode if bool(cfg.get("auto_tasks")) else "smoke"
+                )
 
             _write_yaml_or_json(tasks_p, ir.tasks)
-            write_text(logs_dir / "tasks_infer_evidence.json", json.dumps(ir.evidence, ensure_ascii=False, indent=2) + "\n")
+            write_text(
+                logs_dir / "tasks_infer_evidence.json",
+                json.dumps(ir.evidence, ensure_ascii=False, indent=2) + "\n",
+            )
             _write_tasks_risk_report(tasks_p, logs_dir)
             append_event(run_dir, "tasks_written", {"path": str(tasks_p), "count": len(ir.tasks)})
 
@@ -94,11 +101,19 @@ def plan_node(state: Dict[str, Any]) -> Dict[str, Any]:
                     if not isinstance(t, dict):
                         continue
                     cmd = t.get("cmd")
-                    if isinstance(cmd, list) and cmd[:4] == ["python", "-m", "pip", "install"] and "-r" in cmd:
+                    if (
+                        isinstance(cmd, list)
+                        and cmd[:4] == ["python", "-m", "pip", "install"]
+                        and "-r" in cmd
+                    ):
                         t["enabled"] = False
                         changed = True
                 if changed:
-                    tasks_p.write_text(yaml.safe_dump(data, allow_unicode=True, sort_keys=False), encoding="utf-8", errors="ignore")
+                    tasks_p.write_text(
+                        yaml.safe_dump(data, allow_unicode=True, sort_keys=False),
+                        encoding="utf-8",
+                        errors="ignore",
+                    )
                     append_event(run_dir, "tasks_patch_disable_install_deps", {"path": str(tasks_p)})
         except Exception:
             pass
@@ -147,12 +162,18 @@ def plan_node(state: Dict[str, Any]) -> Dict[str, Any]:
     append_event(
         run_dir,
         "plan_ok",
-        {"tasks_path": str(cfg.get("tasks_path") or ""), "baseline_path": str(cfg.get("baseline_path") or "")},
+        {
+            "tasks_path": str(cfg.get("tasks_path") or ""),
+            "baseline_path": str(cfg.get("baseline_path") or ""),
+        },
     )
     state.setdefault("history", []).append(
         {
             "kind": "plan_ok",
-            "data": {"tasks_path": str(cfg.get("tasks_path") or ""), "baseline_path": str(cfg.get("baseline_path") or "")},
+            "data": {
+                "tasks_path": str(cfg.get("tasks_path") or ""),
+                "baseline_path": str(cfg.get("baseline_path") or ""),
+            },
         }
     )
     state["status"] = "running"

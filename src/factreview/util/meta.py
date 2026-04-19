@@ -6,7 +6,7 @@ import platform
 import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 from .fs import ensure_dir, sha256_file, write_text
 
@@ -20,7 +20,7 @@ class Meta:
     paper_root: str
     tasks_path: str
     baseline_path: str
-    llm: Dict[str, Any]
+    llm: dict[str, Any]
 
 
 def collect_meta(
@@ -28,7 +28,7 @@ def collect_meta(
     paper_root: str,
     tasks_path: str,
     baseline_path: str,
-    llm_cfg: Dict[str, Any],
+    llm_cfg: dict[str, Any],
 ) -> Meta:
     return Meta(
         run_id=run_id,
@@ -49,9 +49,9 @@ def write_meta(meta: Meta, run_dir: str | Path) -> Path:
     return p
 
 
-def index_artifacts(run_artifacts_dir: str | Path) -> Dict[str, Any]:
+def index_artifacts(run_artifacts_dir: str | Path) -> dict[str, Any]:
     root = Path(run_artifacts_dir)
-    out: Dict[str, Any] = {"files": []}
+    out: dict[str, Any] = {"files": []}
     if not root.exists():
         return out
     for f in sorted(root.rglob("*")):
@@ -68,8 +68,3 @@ def index_artifacts(run_artifacts_dir: str | Path) -> Dict[str, Any]:
         except Exception:
             continue
     return out
-
-
-
-
-

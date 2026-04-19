@@ -3,14 +3,14 @@ from __future__ import annotations
 import os
 import re
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 from factreview.llm.client import llm_json, resolve_llm_config
 from factreview.util.fs import ensure_dir, write_text
 from factreview.util.recorder import append_event
 from factreview.util.runner import persist_command_result, run_command
 
-from ..tools.docker import docker_ensure_paper_image, docker_run_paper_image, docker_strategy
+from ..tools.docker import docker_ensure_paper_image, docker_run_paper_image
 
 
 def _extract_missing_module(stderr: str) -> str | None:
@@ -20,6 +20,7 @@ def _extract_missing_module(stderr: str) -> str | None:
         return m.group(1)
     return None
 
+
 _MODULE_TO_PIP = {
     # common mismatches
     "sklearn": "scikit-learn",
@@ -27,6 +28,7 @@ _MODULE_TO_PIP = {
     "PIL": "pillow",
     "yaml": "pyyaml",
 }
+
 
 def _extract_missing_file(stderr: str) -> str | None:
     # Windows python: can't open file 'C:\\path\\to\\x.py': [Errno 2] No such file or directory
@@ -98,51 +100,51 @@ def _torch_scatter_fallback_in_container_shell() -> str:
         "pkg = pathlib.Path(sp) / 'torch_scatter'\n"
         "pkg.mkdir(parents=True, exist_ok=True)\n"
         "(pkg / '__init__.py').write_text(\n"
-        "    \"import torch\\n\\n\"\n"
-        "    \"def _expand_index(index, src, dim):\\n\"\n"
-        "    \"    if index.dtype != torch.long: index = index.long()\\n\"\n"
-        "    \"    if dim < 0: dim = src.dim() + dim\\n\"\n"
-        "    \"    if index.dim() == 1 and src.dim() > 1:\\n\"\n"
-        "    \"        shape = [1] * src.dim()\\n\"\n"
-        "    \"        shape[dim] = index.numel()\\n\"\n"
-        "    \"        index = index.view(*shape)\\n\"\n"
-        "    \"    return index.expand_as(src)\\n\\n\"\n"
-        "    \"def scatter_add(src, index, dim=0, out=None, dim_size=None):\\n\"\n"
-        "    \"    if out is None:\\n\"\n"
-        "    \"        if dim_size is None: dim_size = int(index.max().item()) + 1 if index.numel() else 0\\n\"\n"
-        "    \"        out_shape = list(src.shape); out_shape[dim] = dim_size\\n\"\n"
-        "    \"        out = torch.zeros(*out_shape, dtype=src.dtype, device=src.device)\\n\"\n"
-        "    \"    idx = _expand_index(index, src, dim)\\n\"\n"
-        "    \"    return out.scatter_add(dim, idx, src)\\n\\n\"\n"
-        "    \"def scatter_max(src, index, dim=0, out=None, dim_size=None):\\n\"\n"
-        "    \"    if index.dtype != torch.long: index = index.long()\\n\"\n"
-        "    \"    if dim < 0: dim = src.dim() + dim\\n\"\n"
-        "    \"    if dim_size is None: dim_size = int(index.max().item()) + 1 if index.numel() else 0\\n\"\n"
-        "    \"    if src.dim() == 1:\\n\"\n"
+        '    "import torch\\n\\n"\n'
+        '    "def _expand_index(index, src, dim):\\n"\n'
+        '    "    if index.dtype != torch.long: index = index.long()\\n"\n'
+        '    "    if dim < 0: dim = src.dim() + dim\\n"\n'
+        '    "    if index.dim() == 1 and src.dim() > 1:\\n"\n'
+        '    "        shape = [1] * src.dim()\\n"\n'
+        '    "        shape[dim] = index.numel()\\n"\n'
+        '    "        index = index.view(*shape)\\n"\n'
+        '    "    return index.expand_as(src)\\n\\n"\n'
+        '    "def scatter_add(src, index, dim=0, out=None, dim_size=None):\\n"\n'
+        '    "    if out is None:\\n"\n'
+        '    "        if dim_size is None: dim_size = int(index.max().item()) + 1 if index.numel() else 0\\n"\n'
+        '    "        out_shape = list(src.shape); out_shape[dim] = dim_size\\n"\n'
+        '    "        out = torch.zeros(*out_shape, dtype=src.dtype, device=src.device)\\n"\n'
+        '    "    idx = _expand_index(index, src, dim)\\n"\n'
+        '    "    return out.scatter_add(dim, idx, src)\\n\\n"\n'
+        '    "def scatter_max(src, index, dim=0, out=None, dim_size=None):\\n"\n'
+        '    "    if index.dtype != torch.long: index = index.long()\\n"\n'
+        '    "    if dim < 0: dim = src.dim() + dim\\n"\n'
+        '    "    if dim_size is None: dim_size = int(index.max().item()) + 1 if index.numel() else 0\\n"\n'
+        '    "    if src.dim() == 1:\\n"\n'
         "    \"        outv = torch.full((dim_size,), -float('inf'), dtype=src.dtype, device=src.device)\\n\"\n"
-        "    \"        arg = torch.full((dim_size,), -1, dtype=torch.long, device=src.device)\\n\"\n"
-        "    \"        for i in range(src.numel()):\\n\"\n"
-        "    \"            j = int(index[i].item()); v = src[i]\\n\"\n"
-        "    \"            if v > outv[j]: outv[j] = v; arg[j] = i\\n\"\n"
-        "    \"        return outv, arg\\n\"\n"
-        "    \"    dims = list(range(src.dim())); dims[0], dims[dim] = dims[dim], dims[0]\\n\"\n"
-        "    \"    inv = [0]*len(dims)\\n\"\n"
-        "    \"    for i,d in enumerate(dims): inv[d]=i\\n\"\n"
-        "    \"    srcp = src.permute(dims)\\n\"\n"
+        '    "        arg = torch.full((dim_size,), -1, dtype=torch.long, device=src.device)\\n"\n'
+        '    "        for i in range(src.numel()):\\n"\n'
+        '    "            j = int(index[i].item()); v = src[i]\\n"\n'
+        '    "            if v > outv[j]: outv[j] = v; arg[j] = i\\n"\n'
+        '    "        return outv, arg\\n"\n'
+        '    "    dims = list(range(src.dim())); dims[0], dims[dim] = dims[dim], dims[0]\\n"\n'
+        '    "    inv = [0]*len(dims)\\n"\n'
+        '    "    for i,d in enumerate(dims): inv[d]=i\\n"\n'
+        '    "    srcp = src.permute(dims)\\n"\n'
         "    \"    outp = torch.full((dim_size, *srcp.shape[1:]), -float('inf'), dtype=src.dtype, device=src.device)\\n\"\n"
-        "    \"    argp = torch.full((dim_size, *srcp.shape[1:]), -1, dtype=torch.long, device=src.device)\\n\"\n"
-        "    \"    for i in range(srcp.shape[0]):\\n\"\n"
-        "    \"        j = int(index[i].item()); v = srcp[i]\\n\"\n"
-        "    \"        better = v > outp[j]\\n\"\n"
-        "    \"        outp[j] = torch.where(better, v, outp[j])\\n\"\n"
-        "    \"        argp[j] = torch.where(better, torch.full_like(argp[j], i), argp[j])\\n\"\n"
-        "    \"    return outp.permute(inv), argp.permute(inv)\\n\\n\"\n"
+        '    "    argp = torch.full((dim_size, *srcp.shape[1:]), -1, dtype=torch.long, device=src.device)\\n"\n'
+        '    "    for i in range(srcp.shape[0]):\\n"\n'
+        '    "        j = int(index[i].item()); v = srcp[i]\\n"\n'
+        '    "        better = v > outp[j]\\n"\n'
+        '    "        outp[j] = torch.where(better, v, outp[j])\\n"\n'
+        '    "        argp[j] = torch.where(better, torch.full_like(argp[j], i), argp[j])\\n"\n'
+        '    "    return outp.permute(inv), argp.permute(inv)\\n\\n"\n'
         "    \"def scatter(src, index, dim=0, out=None, dim_size=None, reduce='sum'):\\n\"\n"
         "    \"    if reduce in {'sum','add'}: return scatter_add(src,index,dim=dim,out=out,dim_size=dim_size)\\n\"\n"
         "    \"    if reduce=='mean':\\n\"\n"
-        "    \"        outv = scatter_add(src,index,dim=dim,out=out,dim_size=dim_size)\\n\"\n"
-        "    \"        cnt = scatter_add(torch.ones_like(src),index,dim=dim,out=None,dim_size=dim_size).clamp(min=1)\\n\"\n"
-        "    \"        return outv/cnt\\n\"\n"
+        '    "        outv = scatter_add(src,index,dim=dim,out=out,dim_size=dim_size)\\n"\n'
+        '    "        cnt = scatter_add(torch.ones_like(src),index,dim=dim,out=None,dim_size=dim_size).clamp(min=1)\\n"\n'
+        '    "        return outv/cnt\\n"\n'
         "    \"    if reduce=='max': return scatter_max(src,index,dim=dim,out=out,dim_size=dim_size)\\n\"\n"
         "    \"    raise ValueError('unsupported reduce')\\n\"\n"
         ")\n"
@@ -151,7 +153,7 @@ def _torch_scatter_fallback_in_container_shell() -> str:
     )
 
 
-def fix_node(state: Dict[str, Any]) -> Dict[str, Any]:
+def fix_node(state: dict[str, Any]) -> dict[str, Any]:
     cfg = state.get("config", {})
     run_info = state.get("run", {})
     run_dir = Path(run_info.get("dir") or "")
@@ -165,8 +167,14 @@ def fix_node(state: Dict[str, Any]) -> Dict[str, Any]:
     # Stop condition
     if attempt > max_attempts:
         state["status"] = "failed"
-        append_event(run_dir, "fix_stop", {"reason": "max_attempts_exceeded", "attempt": attempt, "max_attempts": max_attempts})
-        state.setdefault("history", []).append({"kind": "fix_stop", "data": {"attempt": attempt, "max_attempts": max_attempts}})
+        append_event(
+            run_dir,
+            "fix_stop",
+            {"reason": "max_attempts_exceeded", "attempt": attempt, "max_attempts": max_attempts},
+        )
+        state.setdefault("history", []).append(
+            {"kind": "fix_stop", "data": {"attempt": attempt, "max_attempts": max_attempts}}
+        )
         return state
 
     run_result = state.get("run_result") or {}
@@ -177,10 +185,11 @@ def fix_node(state: Dict[str, Any]) -> Dict[str, Any]:
     paper_root = (cfg.get("paper_root") or ".").strip() or "."
     docker_enabled = bool(cfg.get("docker_enabled", True))
     python_spec = str(cfg.get("python_spec") or "3.11").strip()
-    strategy = docker_strategy(cfg) if docker_enabled else ""
 
     append_event(run_dir, "fix_start", {"attempt": attempt, "failed_task": failed_task})
-    state.setdefault("history", []).append({"kind": "fix_start", "data": {"attempt": attempt, "failed_task": failed_task}})
+    state.setdefault("history", []).append(
+        {"kind": "fix_start", "data": {"attempt": attempt, "failed_task": failed_task}}
+    )
 
     missing = _extract_missing_module(stderr_tail)
 
@@ -211,7 +220,10 @@ def fix_node(state: Dict[str, Any]) -> Dict[str, Any]:
                                 {"path": tasks_path, "ok": True, "missing": missing_name, "using": entry},
                             )
                             state.setdefault("history", []).append(
-                                {"kind": "fix_edit_tasks_deterministic", "data": {"path": tasks_path, "missing": missing_name, "using": entry}}
+                                {
+                                    "kind": "fix_edit_tasks_deterministic",
+                                    "data": {"path": tasks_path, "missing": missing_name, "using": entry},
+                                }
                             )
                             state["status"] = "running"
                             return state
@@ -228,12 +240,17 @@ def fix_node(state: Dict[str, Any]) -> Dict[str, Any]:
         shell = (
             "set -e\n"
             "TV=$(python -c \"import torch; print((torch.__version__ or '').split('+')[0])\" 2>/dev/null || true)\n"
-            "if [ -n \"$TV\" ]; then\n"
+            'if [ -n "$TV" ]; then\n'
             "  python -m pip install --no-cache-dir torch-scatter -f https://data.pyg.org/whl/torch-${TV}+cpu.html -f https://data.pyg.org/whl/torch-${TV}.html || true\n"
             "fi\n"
             "python -c \"import torch_scatter; print('torch_scatter_ok')\" || true\n"
         )
-        shell = shell + "\n" + _torch_scatter_fallback_in_container_shell() + "\npython -c \"import torch_scatter; print('torch_scatter_ok_after_fallback')\""
+        shell = (
+            shell
+            + "\n"
+            + _torch_scatter_fallback_in_container_shell()
+            + "\npython -c \"import torch_scatter; print('torch_scatter_ok_after_fallback')\""
+        )
         ok_img, img_or_msg = docker_ensure_paper_image(
             cfg,
             paper_key=str(cfg.get("paper_key") or "paper"),
@@ -254,7 +271,9 @@ def fix_node(state: Dict[str, Any]) -> Dict[str, Any]:
             persist_command_result(res, logs_dir, prefix=f"fix_torch_scatter_{attempt}")
             if res.returncode == 0:
                 append_event(run_dir, "fix_install_torch_scatter", {"ok": True, "strategy": "paper_image"})
-                state.setdefault("history", []).append({"kind": "fix_install_torch_scatter", "data": {"ok": True, "strategy": "paper_image"}})
+                state.setdefault("history", []).append(
+                    {"kind": "fix_install_torch_scatter", "data": {"ok": True, "strategy": "paper_image"}}
+                )
                 state["status"] = "running"
                 return state
 
@@ -262,10 +281,14 @@ def fix_node(state: Dict[str, Any]) -> Dict[str, Any]:
     if bool(cfg.get("no_llm")):
         state["status"] = "failed"
         append_event(run_dir, "fix_no_llm", {"reason": "no_deterministic_fix_matched"})
-        state.setdefault("history", []).append({"kind": "fix_no_llm", "data": {"reason": "no_deterministic_fix_matched"}})
+        state.setdefault("history", []).append(
+            {"kind": "fix_no_llm", "data": {"reason": "no_deterministic_fix_matched"}}
+        )
         return state
 
-    llm_cfg = resolve_llm_config(cfg.get("llm_provider") or "", cfg.get("llm_model") or "", cfg.get("llm_base_url") or "")
+    llm_cfg = resolve_llm_config(
+        cfg.get("llm_provider") or "", cfg.get("llm_model") or "", cfg.get("llm_base_url") or ""
+    )
     system = (
         "You are a senior engineer doing rigorous paper-code reproduction.\n"
         "Produce a fix plan ONLY in JSON. Do not include prose outside JSON.\n"
@@ -293,16 +316,30 @@ def fix_node(state: Dict[str, Any]) -> Dict[str, Any]:
         },
     }
     plan = llm_json(prompt=str(prompt), system=system, cfg=llm_cfg)
-    write_text(fixes_dir / f"fix_{attempt:03d}_plan.json", __import__("json").dumps(plan, ensure_ascii=False, indent=2) + "\n")
+    write_text(
+        fixes_dir / f"fix_{attempt:03d}_plan.json",
+        __import__("json").dumps(plan, ensure_ascii=False, indent=2) + "\n",
+    )
     append_event(run_dir, "fix_plan", {"plan": plan})
     state.setdefault("history", []).append({"kind": "fix_plan", "data": {"plan": plan}})
 
     # If LLM call failed, stop gracefully with a helpful record.
     if isinstance(plan, dict) and plan.get("status") == "error":
         state["status"] = "failed"
-        append_event(run_dir, "fix_llm_error", {"error": plan.get("error"), "provider": plan.get("provider"), "model": plan.get("model")})
+        append_event(
+            run_dir,
+            "fix_llm_error",
+            {"error": plan.get("error"), "provider": plan.get("provider"), "model": plan.get("model")},
+        )
         state.setdefault("history", []).append(
-            {"kind": "fix_llm_error", "data": {"error": plan.get("error"), "provider": plan.get("provider"), "model": plan.get("model")}}
+            {
+                "kind": "fix_llm_error",
+                "data": {
+                    "error": plan.get("error"),
+                    "provider": plan.get("provider"),
+                    "model": plan.get("model"),
+                },
+            }
         )
         write_text(
             fixes_dir / f"fix_{attempt:03d}_llm_error.txt",
@@ -361,7 +398,9 @@ def fix_node(state: Dict[str, Any]) -> Dict[str, Any]:
                 persist_command_result(res, logs_dir, prefix=f"fix_cmd_{attempt}_{j}")
                 ok = res.returncode == 0
                 append_event(run_dir, "fix_command", {"cmd": cmd, "cwd": cwd, "ok": ok, "rc": res.returncode})
-                state.setdefault("history", []).append({"kind": "fix_command", "data": {"cmd": cmd, "cwd": cwd, "ok": ok, "rc": res.returncode}})
+                state.setdefault("history", []).append(
+                    {"kind": "fix_command", "data": {"cmd": cmd, "cwd": cwd, "ok": ok, "rc": res.returncode}}
+                )
                 applied_any = applied_any or ok
             elif act.get("type") == "edit":
                 # Safety: only allow editing the tasks file (wrapper config), not paper code.
@@ -378,9 +417,13 @@ def fix_node(state: Dict[str, Any]) -> Dict[str, Any]:
                     if str(target.resolve()).lower() != str(Path(tasks_path).resolve()).lower():
                         continue
                     write_text(target, content)
-                    write_text(fixes_dir / f"fix_{attempt:03d}_edit_tasks.txt", f"Edited tasks file: {tasks_path}\n")
+                    write_text(
+                        fixes_dir / f"fix_{attempt:03d}_edit_tasks.txt", f"Edited tasks file: {tasks_path}\n"
+                    )
                     append_event(run_dir, "fix_edit_tasks", {"path": tasks_path, "ok": True})
-                    state.setdefault("history", []).append({"kind": "fix_edit_tasks", "data": {"path": tasks_path}})
+                    state.setdefault("history", []).append(
+                        {"kind": "fix_edit_tasks", "data": {"path": tasks_path}}
+                    )
                     applied_any = True
                 except Exception:
                     continue
@@ -389,10 +432,10 @@ def fix_node(state: Dict[str, Any]) -> Dict[str, Any]:
     if not applied_any:
         state["status"] = "failed"
         append_event(run_dir, "fix_not_applied", {"reason": "no_applicable_actions"})
-        state.setdefault("history", []).append({"kind": "fix_not_applied", "data": {"reason": "no_applicable_actions"}})
+        state.setdefault("history", []).append(
+            {"kind": "fix_not_applied", "data": {"reason": "no_applicable_actions"}}
+        )
         return state
 
     state["status"] = "running"
     return state
-
-

@@ -49,7 +49,7 @@ class SubClaim(BaseModel):
     :class:`SubClaim` entries, one per task.
     """
 
-    id: str                                 # stable id, e.g. "claim_01.sub_02"
+    id: str  # stable id, e.g. "claim_01.sub_02"
     text: str
     task: str | None = None
     dataset: str | None = None
@@ -63,10 +63,10 @@ class Claim(BaseModel):
 
     model_config = ConfigDict(extra="ignore")
 
-    id: str                                 # stable within one paper, e.g. "claim_01"
-    text: str                               # natural-language statement
+    id: str  # stable within one paper, e.g. "claim_01"
+    text: str  # natural-language statement
     type: ClaimType
-    scope: str = ""                         # "broad" / "local" / free-form
+    scope: str = ""  # "broad" / "local" / free-form
     datasets: list[str] = Field(default_factory=list)
     baselines: list[str] = Field(default_factory=list)
     metrics: list[str] = Field(default_factory=list)

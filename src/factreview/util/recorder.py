@@ -5,7 +5,7 @@ import os
 import time
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 from .fs import ensure_dir, write_text
 
@@ -14,7 +14,7 @@ from .fs import ensure_dir, write_text
 class Event:
     ts: float
     kind: str
-    data: Dict[str, Any]
+    data: dict[str, Any]
 
 
 def _is_verbose() -> bool:
@@ -57,7 +57,7 @@ def _format_duration(sec: Any) -> str:
     return f"{mins}m {rem}s"
 
 
-def _task_progress(data: Dict[str, Any]) -> str:
+def _task_progress(data: dict[str, Any]) -> str:
     idx = data.get("task_index")
     total = data.get("task_total")
     if isinstance(idx, int) and isinstance(total, int) and total > 0:
@@ -65,7 +65,7 @@ def _task_progress(data: Dict[str, Any]) -> str:
     return "?"
 
 
-def _run_summary(results: List[Dict[str, Any]]) -> str:
+def _run_summary(results: list[dict[str, Any]]) -> str:
     total = len(results)
     ok = sum(1 for r in results if r.get("success") and not r.get("skipped"))
     skipped = sum(1 for r in results if r.get("skipped"))
@@ -73,16 +73,18 @@ def _run_summary(results: List[Dict[str, Any]]) -> str:
     return f"{ok} passed, {skipped} skipped, {failed} failed, {total} total"
 
 
-def _judge_label(data: Dict[str, Any]) -> str:
+def _judge_label(data: dict[str, Any]) -> str:
     results = data.get("results") or []
     if bool(data.get("passed")):
         return "passed"
-    if isinstance(results, list) and any(isinstance(r, dict) and r.get("type") == "inconclusive_no_baseline" for r in results):
+    if isinstance(results, list) and any(
+        isinstance(r, dict) and r.get("type") == "inconclusive_no_baseline" for r in results
+    ):
         return "inconclusive"
     return "failed"
 
 
-def _console_event_line(kind: str, data: Dict[str, Any], run_dir: Path) -> str:
+def _console_event_line(kind: str, data: dict[str, Any], run_dir: Path) -> str:
     """
     Human-friendly event summary for console tracing.
     Keep it short; detailed stdout/stderr remains in logs/ files.
@@ -96,13 +98,15 @@ def _console_event_line(kind: str, data: Dict[str, Any], run_dir: Path) -> str:
         py = str(data.get("python_spec") or "")
         return f"[OK] Prepare complete | paper_root={paper_root} | python={py}"
     if kind == "prepare_error":
-        return f"[FAIL] Prepare failed | {str(data.get('error') or 'unknown error')}"
+        return f"[FAIL] Prepare failed | {data.get('error') or 'unknown error'!s}"
     if kind == "plan_start":
-        return f"[START] Planning execution tasks"
+        return "[START] Planning execution tasks"
     if kind == "tasks_keep_existing":
         return f"[OK] Keeping existing tasks file | {_short_path(str(data.get('path') or ''))}"
     if kind == "tasks_written":
-        return f"[OK] Generated {int(data.get('count') or 0)} tasks | {_short_path(str(data.get('path') or ''))}"
+        return (
+            f"[OK] Generated {int(data.get('count') or 0)} tasks | {_short_path(str(data.get('path') or ''))}"
+        )
     if kind == "tasks_patch_disable_install_deps":
         return "[OK] Disabled runtime pip install tasks for Docker image mode"
     if kind == "tasks_persist_run_dir":
@@ -168,7 +172,7 @@ def _console_event_line(kind: str, data: Dict[str, Any], run_dir: Path) -> str:
     return f"[INFO] {kind} | {payload}"
 
 
-def append_event(run_dir: str | Path, kind: str, data: Dict[str, Any]) -> None:
+def append_event(run_dir: str | Path, kind: str, data: dict[str, Any]) -> None:
     d = ensure_dir(run_dir)
     ev = Event(ts=time.time(), kind=kind, data=data)
     path = d / "issues.jsonl"
@@ -183,19 +187,19 @@ def append_event(run_dir: str | Path, kind: str, data: Dict[str, Any]) -> None:
             pass
 
 
-def write_issues_md(run_dir: str | Path, history: List[Dict[str, Any]]) -> None:
+def write_issues_md(run_dir: str | Path, history: list[dict[str, Any]]) -> None:
     """
     Human-readable issue narrative. The 'history' is state-managed so it is always reproducible.
     """
     d = Path(run_dir)
-    lines: List[str] = []
+    lines: list[str] = []
     lines.append("# Run Issues & Fix Log")
     lines.append("")
 
     # Prefer the event stream (issues.jsonl) because it provides a step-by-step timeline
     # including prepare sub-steps (clone/env) and detailed errors.
     events_path = d / "issues.jsonl"
-    events: List[Dict[str, Any]] = []
+    events: list[dict[str, Any]] = []
     if events_path.exists():
         try:
             for raw in events_path.read_text(encoding="utf-8", errors="ignore").splitlines():
@@ -233,7 +237,7 @@ def write_issues_md(run_dir: str | Path, history: List[Dict[str, Any]]) -> None:
     # Timeline
     if events:
         for i, ev in enumerate(events, 1):
-            lines.append(f"## Step {i}: {ev.get('kind','event')}")
+            lines.append(f"## Step {i}: {ev.get('kind', 'event')}")
             lines.append("")
             payload = ev.get("data", {})
             lines.append("```json")
@@ -243,7 +247,7 @@ def write_issues_md(run_dir: str | Path, history: List[Dict[str, Any]]) -> None:
     else:
         # Fallback: state history (older runs / tests)
         for i, step in enumerate(history, 1):
-            lines.append(f"## Step {i}: {step.get('kind','event')}")
+            lines.append(f"## Step {i}: {step.get('kind', 'event')}")
             lines.append("")
             payload = step.get("data", {})
             lines.append("```json")
@@ -252,5 +256,3 @@ def write_issues_md(run_dir: str | Path, history: List[Dict[str, Any]]) -> None:
             lines.append("")
 
     write_text(d / "issues.md", "\n".join(lines) + "\n")
-
-

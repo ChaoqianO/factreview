@@ -8,10 +8,7 @@ from typing import Any
 
 from .codex_auth import CodexAuth
 
-
-_DEFAULT_INSTRUCTIONS = (
-    Path(__file__).resolve().parents[1] / "prompts" / "codex_instructions.txt"
-)
+_DEFAULT_INSTRUCTIONS = Path(__file__).resolve().parents[1] / "prompts" / "codex_instructions.txt"
 
 
 def load_codex_instructions() -> str:
@@ -122,7 +119,11 @@ def invoke_codex(prompt: str, system: str, *, auth: CodexAuth, model: str, base_
         if event_type == "response.output_text.delta" and isinstance(payload_item.get("delta"), str):
             chunks.append(payload_item["delta"])
             continue
-        if event_type == "response.output_text.done" and isinstance(payload_item.get("text"), str) and not chunks:
+        if (
+            event_type == "response.output_text.done"
+            and isinstance(payload_item.get("text"), str)
+            and not chunks
+        ):
             chunks.append(payload_item["text"])
             continue
 

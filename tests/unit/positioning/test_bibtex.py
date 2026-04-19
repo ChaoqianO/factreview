@@ -6,8 +6,8 @@ import pytest
 
 from factreview.positioning.bibtex import _norm_title, lookup_bibtex, title_similarity
 
-
 # ── Unit: normalisation ──
+
 
 def test_norm_title_basic():
     assert _norm_title("  Attention-Is All You Need! ") == "attention is all you need"
@@ -18,6 +18,7 @@ def test_norm_title_unicode_dashes():
 
 
 # ── Unit: similarity ──
+
 
 def test_similarity_identical():
     assert title_similarity("Attention Is All You Need", "Attention Is All You Need") == 1.0
@@ -34,6 +35,7 @@ def test_similarity_prefers_close():
 
 # ── Unit: lookup with mock ──
 
+
 def test_lookup_empty_title():
     result = lookup_bibtex("")
     assert result["bibtex"] == ""
@@ -45,7 +47,11 @@ def test_lookup_exact_match(monkeypatch):
         if "/paper/search" in url:
             return {"data": [{"title": "Attention Is All You Need", "paperId": "PID1"}]}
         if "/paper/PID1" in url:
-            return {"citationStyles": {"bibtex": "@article{vaswani2017,\n  title={Attention Is All You Need}\n}\n"}}
+            return {
+                "citationStyles": {
+                    "bibtex": "@article{vaswani2017,\n  title={Attention Is All You Need}\n}\n"
+                }
+            }
         raise AssertionError(f"unexpected url: {url}")
 
     monkeypatch.setattr("factreview.positioning.bibtex._http_get_json", fake_http_get_json)
@@ -60,10 +66,12 @@ def test_lookup_exact_match(monkeypatch):
 def test_lookup_fuzzy_fallback(monkeypatch):
     def fake_http_get_json(url, headers, timeout_s=20, retries=4):
         if "/paper/search" in url:
-            return {"data": [
-                {"title": "Attention Is All You Need", "paperId": "PID1"},
-                {"title": "Other Paper", "paperId": "PID2"},
-            ]}
+            return {
+                "data": [
+                    {"title": "Attention Is All You Need", "paperId": "PID1"},
+                    {"title": "Other Paper", "paperId": "PID2"},
+                ]
+            }
         if "/paper/PID1" in url:
             return {"citationStyles": {"bibtex": "@article{vaswani2017}\n"}}
         if "/paper/PID2" in url:

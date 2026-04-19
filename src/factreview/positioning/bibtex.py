@@ -32,12 +32,11 @@ import time
 import urllib.parse
 import urllib.request
 from difflib import SequenceMatcher
-from typing import Dict, List, Optional
-
 
 # ---------------------------------------------------------------------------
 # Text normalisation helpers
 # ---------------------------------------------------------------------------
+
 
 def _norm_title(s: str) -> str:
     s = (s or "").strip().lower()
@@ -69,8 +68,8 @@ def title_similarity(a: str, b: str) -> float:
 # HTTP helpers
 # ---------------------------------------------------------------------------
 
-def _http_get_json(url: str, headers: dict[str, str],
-                   timeout_s: int = 20, retries: int = 4) -> dict:
+
+def _http_get_json(url: str, headers: dict[str, str], timeout_s: int = 20, retries: int = 4) -> dict:
     last_err: Exception | None = None
     for i in range(retries):
         try:
@@ -80,7 +79,7 @@ def _http_get_json(url: str, headers: dict[str, str],
             return json.loads(body)
         except Exception as e:
             last_err = e
-            time.sleep(0.4 * (2 ** i))
+            time.sleep(0.4 * (2**i))
     if last_err:
         raise last_err
     raise RuntimeError("request failed")
@@ -94,12 +93,11 @@ def _make_headers(api_key: str) -> dict[str, str]:
     }
 
 
-def _resolve_api_key(api_key: Optional[str] = None) -> str:
+def _resolve_api_key(api_key: str | None = None) -> str:
     key = api_key or os.environ.get("SEMANTIC_SCHOLAR_API_KEY") or os.environ.get("S2_API_KEY") or ""
     if not key:
-        raise EnvironmentError(
-            "Semantic Scholar API key not found. "
-            "Set SEMANTIC_SCHOLAR_API_KEY or pass api_key= explicitly."
+        raise OSError(
+            "Semantic Scholar API key not found. Set SEMANTIC_SCHOLAR_API_KEY or pass api_key= explicitly."
         )
     return key
 
@@ -107,6 +105,7 @@ def _resolve_api_key(api_key: Optional[str] = None) -> str:
 # ---------------------------------------------------------------------------
 # Core lookup
 # ---------------------------------------------------------------------------
+
 
 def _fetch_bibtex_by_paper_id(paper_id: str, headers: dict[str, str]) -> str:
     fields = urllib.parse.quote("citationStyles")
@@ -118,7 +117,7 @@ def _fetch_bibtex_by_paper_id(paper_id: str, headers: dict[str, str]) -> str:
     return (((paper.get("citationStyles") or {}).get("bibtex")) or "").strip()
 
 
-def lookup_bibtex(title: str, *, api_key: Optional[str] = None) -> Dict[str, str]:
+def lookup_bibtex(title: str, *, api_key: str | None = None) -> dict[str, str]:
     """Look up a single title and return its BibTeX from Semantic Scholar.
 
     Returns a dict with keys:
@@ -135,10 +134,7 @@ def lookup_bibtex(title: str, *, api_key: Optional[str] = None) -> Dict[str, str
 
     q = urllib.parse.quote(title)
     fields = urllib.parse.quote("title,paperId")
-    search_url = (
-        "https://api.semanticscholar.org/graph/v1/paper/search"
-        f"?query={q}&limit=25&fields={fields}"
-    )
+    search_url = f"https://api.semanticscholar.org/graph/v1/paper/search?query={q}&limit=25&fields={fields}"
 
     try:
         search = _http_get_json(search_url, headers=headers)
@@ -185,8 +181,7 @@ def lookup_bibtex(title: str, *, api_key: Optional[str] = None) -> Dict[str, str
     return {"matched_title": matched_title, "bibtex": bib, "exact": False}
 
 
-def lookup_bibtex_batch(titles: List[str], *,
-                        api_key: Optional[str] = None) -> List[Dict[str, str]]:
+def lookup_bibtex_batch(titles: list[str], *, api_key: str | None = None) -> list[dict[str, str]]:
     """Look up multiple titles.  Returns a list aligned with *titles*."""
     return [lookup_bibtex(t, api_key=api_key) for t in titles]
 
@@ -194,6 +189,7 @@ def lookup_bibtex_batch(titles: List[str], *,
 # ---------------------------------------------------------------------------
 # CLI entry-point  (python -m src.tools.bibtex ...)
 # ---------------------------------------------------------------------------
+
 
 def _cli_main(argv: list[str]) -> int:
     mode = "single"
@@ -209,7 +205,7 @@ def _cli_main(argv: list[str]) -> int:
 
     try:
         api_key = _resolve_api_key()
-    except EnvironmentError:
+    except OSError:
         print("ERROR: SEMANTIC_SCHOLAR_API_KEY not set", file=sys.stderr)
         return 2
 
@@ -218,7 +214,7 @@ def _cli_main(argv: list[str]) -> int:
         titles = [ln.strip() for ln in sys.stdin.read().splitlines() if ln.strip()]
     elif mode == "file":
         try:
-            with open(file_path, "r", encoding="utf-8") as f:
+            with open(file_path, encoding="utf-8") as f:
                 titles = [ln.strip() for ln in f.read().splitlines() if ln.strip()]
         except Exception:
             return 0
@@ -230,7 +226,7 @@ def _cli_main(argv: list[str]) -> int:
             return 0
         titles = [title_in]
 
-    emit_not_found = (mode != "single")
+    emit_not_found = mode != "single"
     first = True
     for t in titles:
         r = lookup_bibtex(t, api_key=api_key)

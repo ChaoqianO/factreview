@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 
 def _as_float(x: Any) -> float | None:
@@ -12,7 +12,7 @@ def _as_float(x: Any) -> float | None:
         return None
 
 
-def compute_check(run_artifacts_dir: str, check: Dict[str, Any]) -> Dict[str, Any]:
+def compute_check(run_artifacts_dir: str, check: dict[str, Any]) -> dict[str, Any]:
     """
     Deterministic check runner. Supported check types:
     - file_exists: expects { "type":"file_exists", "path":"relative/to/artifacts" }
@@ -50,7 +50,14 @@ def compute_check(run_artifacts_dir: str, check: Dict[str, Any]) -> Dict[str, An
                 passed = cur == expected
             else:
                 passed = abs(obs_f - exp_f) <= tol
-            return {"type": ctype, "path": rel, "passed": passed, "observed": cur, "expected": expected, "tolerance": tol}
+            return {
+                "type": ctype,
+                "path": rel,
+                "passed": passed,
+                "observed": cur,
+                "expected": expected,
+                "tolerance": tol,
+            }
         except Exception as e:
             return {"type": ctype, "path": rel, "passed": False, "error": str(e)}
 
@@ -61,7 +68,12 @@ def compute_check(run_artifacts_dir: str, check: Dict[str, Any]) -> Dict[str, An
             import pandas as pd  # type: ignore
         except Exception as e:
             # Avoid making the whole framework unusable due to pandas/numpy issues when csv_agg isn't needed.
-            return {"type": ctype, "path": rel, "passed": False, "error": f"pandas_unavailable: {type(e).__name__}: {e}"}
+            return {
+                "type": ctype,
+                "path": rel,
+                "passed": False,
+                "error": f"pandas_unavailable: {type(e).__name__}: {e}",
+            }
         df = pd.read_csv(artifact_path)
         expr = check.get("expr") or {}
         groupby = expr.get("groupby") or []
@@ -78,7 +90,7 @@ def compute_check(run_artifacts_dir: str, check: Dict[str, Any]) -> Dict[str, An
                 if len(expected) != len(observed):
                     passed = False
                 else:
-                    for exp_row, obs_row in zip(expected, observed):
+                    for exp_row, obs_row in zip(expected, observed, strict=False):
                         for k, exp_v in exp_row.items():
                             obs_v = obs_row.get(k)
                             exp_f = _as_float(exp_v)
@@ -104,7 +116,3 @@ def compute_check(run_artifacts_dir: str, check: Dict[str, Any]) -> Dict[str, An
             return {"type": ctype, "path": rel, "passed": False, "error": str(e)}
 
     return {"type": ctype or "unknown", "passed": False, "error": "unsupported_check_type"}
-
-
-
-
