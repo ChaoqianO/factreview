@@ -1,0 +1,166 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "factreview"
+version = "0.1.0"
+description = "Evidence-grounded AI reviewing system with literature positioning and execution-based claim verification."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Apache-2.0" }
+authors = [{ name = "FactReview authors" }]
+keywords = ["peer-review", "claim-verification", "reproducibility", "langgraph", "llm"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering",
+]
+
+# Core dependencies — always required for the package to import and for the
+# orchestrator / schemas / CLI to run. Stage-specific heavy deps are in extras.
+dependencies = [
+  "pydantic>=2.5",
+  "pyyaml>=6.0",
+  "langgraph>=0.2.0",
+  "pandas>=2.0.0",
+  "pypdf>=4.0.0",
+  "numpy<2",
+  "requests>=2.25.0",
+  "tqdm>=4.60.0",
+  "python-dateutil>=2.8.0",
+  "rich>=13.0",
+]
+
+[project.optional-dependencies]
+# ── LLM providers ────────────────────────────────────────────────────────────
+llm = [
+  "openai>=1.0.0",
+  "anthropic>=0.45.0",
+]
+
+# ── Ingestion backends (§3.1a — PDF → structured representation) ─────────────
+ingestion-mineru = [
+  "magic-pdf",
+  "ultralytics",
+  "doclayout-yolo",
+  "rapid-table",
+]
+ingestion-grobid = ["lxml>=4.9"]
+ingestion-nougat = ["nougat-ocr"]
+ingestion-scienceparse = []          # external JAR; no python dep
+ingestion-llama = ["llama-index>=0.10"]
+ingestion = [
+  "factreview[ingestion-grobid]",
+  "factreview[ingestion-nougat]",
+  "factreview[ingestion-llama]",
+]
+
+# ── Literature positioning (§3.2) ────────────────────────────────────────────
+positioning = [
+  "bibtexparser>=1.4.0",
+  "arxiv>=1.4.0",
+  "pdfplumber>=0.6.0",
+  "beautifulsoup4>=4.9.0",
+  "fuzzywuzzy>=0.18.0",
+  "python-Levenshtein>=0.12.0",
+  "colorama>=0.4.4",
+  "semanticscholar>=0.8",
+]
+
+# ── Execution-based verification (§3.3) ──────────────────────────────────────
+execution = [
+  "docker>=7.0",
+]
+
+# ── Development / testing ────────────────────────────────────────────────────
+dev = [
+  "pytest>=8.0",
+  "pytest-cov>=4.1",
+  "pytest-asyncio>=0.23",
+  "ruff>=0.6",
+  "mypy>=1.10",
+  "pre-commit>=3.6",
+  "types-PyYAML",
+  "types-requests",
+]
+
+# ── Meta ─────────────────────────────────────────────────────────────────────
+all = [
+  "factreview[llm]",
+  "factreview[ingestion]",
+  "factreview[positioning]",
+  "factreview[execution]",
+]
+
+[project.scripts]
+factreview = "factreview.cli:main"
+
+[project.urls]
+Homepage = "https://anonymous.4open.science/r/factreview-E55F"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/factreview"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/factreview", "configs", "docs", "README.md", "LICENSE"]
+
+# ── Ruff ──────────────────────────────────────────────────────────────────────
+[tool.ruff]
+line-length = 110
+target-version = "py311"
+src = ["src", "tests"]
+extend-exclude = [
+  "src/factreview/positioning/refchecker",   # vendored third-party subtree
+  "src/factreview/positioning/s2_title_to_bibtex",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]
+ignore = [
+  "E501",   # line length handled by formatter
+  "B008",   # allow function calls as default args (FastAPI/typer style)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["B", "SIM"]
+"scripts/**" = ["B", "SIM"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+# ── Mypy ──────────────────────────────────────────────────────────────────────
+[tool.mypy]
+python_version = "3.11"
+packages = ["factreview"]
+mypy_path = "src"
+strict_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+disallow_untyped_defs = false        # incremental typing; tighten per-module
+ignore_missing_imports = true
+exclude = [
+  "src/factreview/positioning/refchecker/",
+  "src/factreview/positioning/s2_title_to_bibtex/",
+]
+
+# ── Pytest ────────────────────────────────────────────────────────────────────
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+addopts = [
+  "-ra",
+  "--strict-markers",
+  "--strict-config",
+]
+markers = [
+  "slow: marks slow tests (>10s); deselect with '-m \"not slow\"'",
+  "e2e: end-to-end tests that run the full pipeline; require fixtures + network",
+  "requires_docker: test needs docker daemon",
+  "requires_llm: test needs a live LLM API key",
+  "requires_mineru: test needs the `mineru` CLI on PATH",
+]
+asyncio_mode = "auto"

@@ -1,2 +1,0 @@
-[DRY RUN] cwd=/app
-cmd=python run.py -name transe_sub_fb15k237 -data FB15k-237 -score_func transe -opn sub -gamma 9 -hid_drop 0.1 -init_dim 200
