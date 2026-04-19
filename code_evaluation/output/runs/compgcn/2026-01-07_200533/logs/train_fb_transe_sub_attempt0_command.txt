@@ -1,4 +1,0 @@
-cwd: E:\code\fastMCP\ai_review\code_evaluation\run\compgcn\2026-01-07_200533
-cmd: docker run --rm -v E:\code\fastMCP\ai_review\code_evaluation\baseline\compgcn\source:/app -v E:\code\fastMCP\ai_review\code_evaluation\run\compgcn\2026-01-07_200533:/workspace/run_dir -w /app -e CODE_EVAL_RUN_DIR=/workspace/run_dir -e CODE_EVAL_ARTIFACT_DIR=/workspace/run_dir/artifacts -e CODE_EVAL_PAPER_DIR=/app -e CODE_EVAL_PAPER_ROOT=/app code-eval-paper:compgcn-48b44b291763 python run.py -name fb_transe_sub -data FB15k-237 -score_func transe -opn sub -gamma 9 -hid_drop 0.1 -init_dim 200 -gpu -1 -num_workers 0
-rc: 127
-sec: 21600.035

@@ -1,9 +1,0 @@
-cwd: E:\code\fastMCP\ai_review\code_evaluation\run\compgcn\2026-01-07_200533
-cmd: docker run --rm -v E:\code\fastMCP\ai_review\code_evaluation\baseline\compgcn\source:/app -v E:\code\fastMCP\ai_review\code_evaluation\run\compgcn\2026-01-07_200533:/workspace/run_dir -w /app -e CODE_EVAL_RUN_DIR=/workspace/run_dir -e CODE_EVAL_ARTIFACT_DIR=/workspace/run_dir/artifacts -e CODE_EVAL_PAPER_DIR=/app -e CODE_EVAL_PAPER_ROOT=/app code-eval-paper:compgcn-48b44b291763 python -c import zipfile; from pathlib import Path; p=Path('.'); (p/'data').mkdir(parents=True, exist_ok=True);
-for z in ['FB15k-237.zip','WN18RR.zip']:
-  zp=p/'data_compressed'/z
-  with zipfile.ZipFile(str(zp),'r') as f: f.extractall(str(p/'data'))
-print('extracted')
-
-rc: 0
-sec: 1.513

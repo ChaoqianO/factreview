@@ -1,0 +1,57 @@
+# FactReview default runtime configuration.
+#
+# Every field here is optional — defaults live in `factreview.schemas.config.RunConfig`.
+# CLI flags and environment variables override these values. See docs/adr/0006-config-layering.md.
+
+run:
+  root: "runs"                    # where per-run artefacts land: runs/<paper_key>/<run_id>/
+  report_root: "reports"          # where user-facing reports land: reports/<paper_key>/<run_id>/
+  max_attempts: 5                 # fix loop cap
+  dry_run: false
+
+stages:                           # toggle whole stages on/off (defaults: all on)
+  ingestion: true
+  fact_extraction: true           # §3.1b — claim/fact extraction (NOT PDF parsing)
+  positioning: true
+  execution: true
+  synthesis: true
+
+ingestion:
+  backend: mineru                 # one of: mineru | grobid | nougat | science-parse | llama-index
+  fallback_chain: [grobid, nougat]
+  timeout_sec: 1800
+
+fact_extraction:
+  mode: auto                      # auto = LLM when available else heuristic; llm / heuristic force
+  decompose_broad_claims: true    # split claims by (task, dataset, metric)
+
+positioning:
+  enable_refcheck: false          # 4th evidence source in judge
+  enable_bibtex: false            # enrich facts.json with BibTeX via Semantic Scholar
+  max_neighbors: 12
+
+execution:
+  docker_enabled: true
+  auto_tasks: false
+  auto_tasks_mode: smoke          # smoke | full
+  python_spec: ""                 # auto-infer from requirements when empty
+
+synthesis:
+  labels:                         # the 5 labels from paper §3.4
+    - supported
+    - supported_by_paper
+    - partially_supported
+    - in_conflict
+    - inconclusive
+
+llm:
+  provider: openai                # openai | openai-codex | deepseek | qwen | claude | ollama
+  model: ""                       # empty → provider default
+  base_url: ""
+  route:                          # optional per-stage model routing (see paper §4.3)
+    extraction: ""
+    synthesis: ""
+
+logging:
+  level: INFO
+  verbose_console: true           # step-by-step workflow trace on stdout

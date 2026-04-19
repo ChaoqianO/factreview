@@ -1,2 +1,0 @@
-[DRY RUN] cwd=/app
-cmd=bash -lc if [ -f setup.sh ]; then bash setup.sh; elif [ -f preprocess.sh ]; then bash preprocess.sh; else echo 'No setup/preprocess script found; assuming data is already prepared.'; fi

@@ -1,4 +1,0 @@
-cwd: E:\code\fastMCP\ai_review\code_evaluation\baseline\compgcn
-cmd: git clone --depth 1 https://github.com/malllabiisc/CompGCN E:\code\fastMCP\ai_review\code_evaluation\baseline\compgcn\source
-rc: 0
-sec: 2.999
