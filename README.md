@@ -1,10 +1,14 @@
 # FactReview
 
-Evidence-grounded AI reviewing system. Given a paper PDF (and optionally the
-paper's code repository), FactReview ingests the paper, decomposes it into
-checkable claims, positions them against the literature, executes the code
-inside Docker, and produces a reviewer-ready report whose verdicts are
-grounded in deterministic verification.
+Evidence-grounded AI reviewing for empirical ML papers. Given a paper PDF
+(and optionally its released repository), FactReview extracts the major
+claims, positions the paper against nearby literature, executes the
+repository under bounded budgets to test the central empirical claims, and
+writes a concise review linked to an evidence report.
+
+Every judgment is tagged with one of five labels: **Supported**,
+**Supported by the paper**, **Partially supported**, **In conflict**, or
+**Inconclusive**.
 
 ## Pipeline
 
@@ -12,73 +16,39 @@ grounded in deterministic verification.
 ingestion → fact_extraction → positioning → execution → synthesis
 ```
 
-The execution stage is a **6-node LangGraph self-feedback loop**:
+The `execution/` stage is a LangGraph workflow:
+`prepare → plan → run → judge → fix → finalize`.
 
-```
-prepare → plan → run → judge → fix → finalize
-```
+## Installation
 
-| Node | Responsibility |
-|------|----------------|
-| **prepare** | Extract PDF structure (MinerU), locate/clone the code repo, build a Docker image |
-| **plan** | Infer runnable tasks from README / entrypoints (LLM or heuristic) and load baseline checks |
-| **run** | Execute tasks inside Docker and collect metric artifacts |
-| **judge** | Deterministic checks + paper-table alignment + optional LLM judge + optional reference checking |
-| **fix** | Automated recovery loop (missing deps, path errors, …) |
-| **finalize** | Emit reproduction report, evidence table, and `facts.json` |
-
-The CLI returns three exit codes: `0` verified, `1` failed, `2` inconclusive.
-
-## Repository layout
-
-```
-factreview/
-├── pyproject.toml              # package metadata, deps, script entry
-├── README.md
-├── .env.example                # LLM provider credentials template
-├── configs/
-│   ├── default.yaml            # default RunConfig
-│   └── baselines/              # per-paper baseline configs
-├── src/                        # flat src layout, top-level packages
-│   ├── cli.py                  # `factreview` CLI entry (re-exports main)
-│   ├── cli_legacy.py           # argparse + orchestrator wiring
-│   ├── ingestion/              # PDF → structured representation
-│   ├── fact_extraction/        # claim decomposition + heuristics
-│   ├── positioning/            # literature positioning (bibtex, refcheck, …)
-│   ├── execution/              # LangGraph pipeline (nodes/, tools/, graph.py)
-│   ├── synthesis/              # final review synthesis
-│   ├── schemas/                # cross-stage Pydantic contracts
-│   ├── llm/                    # LLM client + provider resolution
-│   └── util/                   # fs / runner / recorder helpers
-├── tools/                      # vendored third-party checkers
-│   ├── refchecker/
-│   └── s2_title_to_bibtex/
-├── tests/
-│   └── unit/
-└── scripts/                    # developer utilities
-```
-
-## Install
-
-Requires Python `>=3.11`.
+**Requirements:** Python 3.11+, Docker (only for the `execution` stage).
 
 ```bash
-pip install -e ".[dev,llm,positioning,execution]"
+git clone https://github.com/ChaoqianO/factreview.git
+cd factreview
+
+python -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
+
+pip install -e ".[all,dev]"
+cp .env.example .env
 ```
 
-Extras:
+Then edit `.env` and set `MODEL_PROVIDER` plus the matching API key
+(`OPENAI_API_KEY`, `DEEPSEEK_API_KEY`, `QWEN_API_KEY`, or `CLAUDE_API_KEY`).
+Leave `MODEL_PROVIDER=openai` with an empty `OPENAI_API_KEY` to auto-fall
+back to a cached ChatGPT browser login. Pass `--no-llm` at run time to skip
+LLM calls entirely.
 
-| Extra | Use it when you need |
-|-------|----------------------|
-| `llm` | OpenAI / Anthropic clients |
-| `positioning` | BibTeX lookup + reference checking |
-| `execution` | Docker-based task execution |
-| `ingestion-mineru` | MinerU PDF layout extraction |
-| `ingestion-grobid` / `ingestion-nougat` / `ingestion-llama` | alternative PDF backends |
-| `dev` | test + lint toolchain |
-| `all` | everything above |
+The default PDF ingestion backend (MinerU) and the vendored reference
+checker are installed separately only when needed:
 
-## Quick start
+```bash
+pip install -e ".[ingestion-mineru]"   # for the default PDF backend
+pip install -e tools/refchecker        # for --enable-refcheck
+```
+
+## Usage
 
 ```bash
 factreview path/to/paper.pdf
@@ -87,75 +57,44 @@ factreview path/to/paper.pdf
 With optional integrations:
 
 ```bash
-factreview path/to/paper.pdf \
-    --enable-refcheck \
-    --enable-bibtex
+factreview path/to/paper.pdf --enable-refcheck --enable-bibtex
 ```
 
-Full flag reference:
+Useful flags:
 
-```bash
-factreview --help
+- `--tasks PATH` — tasks YAML/JSON for execution
+- `--baseline PATH` — baseline JSON for deterministic comparison
+- `--auto-tasks [--auto-tasks-mode smoke|full]` — infer tasks from README / entrypoints
+- `--max-attempts N` — cap the bounded repair loop (default `5`)
+- `--no-pdf-extract` — skip MinerU; use raw PDF text only
+- `--dry-run` — plan only; do not execute
+- `--no-llm` — deterministic only
+- `--llm-provider / --llm-model / --llm-base-url` — override LLM routing
+
+Full flag list: `factreview --help`.
+
+Exit codes: `0` verified, `1` failed, `2` inconclusive.
+
+## Project layout
+
 ```
-
-Commonly used flags:
-
-| Flag | Purpose |
-|------|---------|
-| `--paper-pdf PATH` | paper PDF (also accepted as positional) |
-| `--paper-key NAME` | folder name under `papers/` (auto-derived if omitted) |
-| `--tasks PATH` | tasks YAML/JSON for execution |
-| `--baseline PATH` | baseline JSON for deterministic comparison |
-| `--auto-tasks [--auto-tasks-mode smoke\|full]` | infer tasks from README/entrypoints |
-| `--no-pdf-extract` | skip MinerU; use raw PDF text only |
-| `--max-attempts N` | cap the fix loop (default `5`) |
-| `--no-llm` | deterministic-only (no LLM calls) |
-| `--llm-provider / --llm-model / --llm-base-url` | override LLM routing |
-| `--dry-run` | plan only; do not execute |
-| `--enable-refcheck` | add reference-accuracy checking as a 4th judge source |
-| `--enable-bibtex` | enrich `facts.json` with Semantic-Scholar BibTeX |
-| `--quiet` / `--verbose` | toggle step-by-step console tracing |
-
-## LLM credentials
-
-Copy `.env.example` to `.env` and fill what you need. Supported providers
-(set `MODEL_PROVIDER`):
-
-| Provider | Key env var |
-|----------|-------------|
-| `openai` (default) | `OPENAI_API_KEY` |
-| `openai-codex` | ChatGPT subscription (browser / cached login) |
-| `deepseek` | `DEEPSEEK_API_KEY` |
-| `qwen` | `QWEN_API_KEY` |
-| `claude` | `CLAUDE_API_KEY` |
-
-If `MODEL_PROVIDER=openai` and `OPENAI_API_KEY` is empty, the workflow falls
-back to the OpenAI Codex subscription backend automatically.
-
-## Optional capabilities
-
-### Reference checking — `--enable-refcheck`
-
-Invokes the vendored `tools/refchecker/` package to verify that citations in
-the paper resolve to the correct works. Results appear as a 4th evidence
-source in `judge` and are summarised in `facts.json`.
-
-### BibTeX enrichment — `--enable-bibtex`
-
-After `finalize`, looks up BibTeX entries for the paper's claims via
-Semantic Scholar and appends them to `facts.json["bibtex"]`. Backed by
-`tools/s2_title_to_bibtex/`.
-
-### Auto task inference — `--auto-tasks`
-
-Let the pipeline synthesise a `tasks.yaml` from the cloned repo:
-
-```bash
-factreview --auto-tasks --auto-tasks-mode smoke path/to/paper.pdf
+factreview/
+├── configs/                # default.yaml, per-paper baselines/
+├── src/
+│   ├── cli.py              # `factreview` CLI entry
+│   ├── cli_legacy.py
+│   ├── ingestion/          # PDF → structured representation
+│   ├── fact_extraction/    # claim decomposition
+│   ├── positioning/        # literature positioning
+│   ├── execution/          # LangGraph workflow + tools
+│   ├── synthesis/          # review + evidence report
+│   ├── schemas/            # cross-stage Pydantic contracts
+│   ├── llm/                # provider-agnostic LLM client
+│   └── util/
+├── tools/                  # vendored checkers (refchecker, s2_title_to_bibtex)
+├── tests/unit/
+└── scripts/
 ```
-
-- `smoke` — safe, fast checks (e.g. `python run.py --help`)
-- `full`  — heavier tasks, emitted with `enabled: false` for manual review
 
 ## Development
 
@@ -164,7 +103,7 @@ pip install -e ".[dev]"
 
 ruff check .
 ruff format --check .
-mypy src/schemas src/util        # incremental, warn-only in CI
+mypy src/schemas src/util
 pytest tests/unit -m "not slow and not e2e and not requires_docker and not requires_llm and not requires_mineru"
 ```
 
