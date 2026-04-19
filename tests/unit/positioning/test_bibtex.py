@@ -1,16 +1,10 @@
-"""Minimal tests for src.tools.bibtex (title-to-BibTeX capability)."""
+"""Minimal tests for the BibTeX lookup helper."""
 
 from __future__ import annotations
 
-import sys
-from pathlib import Path
-
 import pytest
 
-# Ensure code_evaluation/ is importable
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-
-from src.tools.bibtex import _norm_title, title_similarity, lookup_bibtex, _http_get_json
+from factreview.positioning.bibtex import _norm_title, lookup_bibtex, title_similarity
 
 
 # ── Unit: normalisation ──
@@ -54,7 +48,7 @@ def test_lookup_exact_match(monkeypatch):
             return {"citationStyles": {"bibtex": "@article{vaswani2017,\n  title={Attention Is All You Need}\n}\n"}}
         raise AssertionError(f"unexpected url: {url}")
 
-    monkeypatch.setattr("src.tools.bibtex._http_get_json", fake_http_get_json)
+    monkeypatch.setattr("factreview.positioning.bibtex._http_get_json", fake_http_get_json)
     monkeypatch.setenv("SEMANTIC_SCHOLAR_API_KEY", "test-key")
 
     result = lookup_bibtex("Attention Is All You Need")
@@ -76,7 +70,7 @@ def test_lookup_fuzzy_fallback(monkeypatch):
             return {"citationStyles": {"bibtex": "@article{other}\n"}}
         raise AssertionError(f"unexpected url: {url}")
 
-    monkeypatch.setattr("src.tools.bibtex._http_get_json", fake_http_get_json)
+    monkeypatch.setattr("factreview.positioning.bibtex._http_get_json", fake_http_get_json)
     monkeypatch.setenv("SEMANTIC_SCHOLAR_API_KEY", "test-key")
 
     result = lookup_bibtex("Attention Is All U Need")  # typo triggers fuzzy
