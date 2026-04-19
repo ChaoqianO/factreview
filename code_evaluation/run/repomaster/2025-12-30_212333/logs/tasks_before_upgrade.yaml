@@ -1,4 +1,0 @@
-- id: smoke
-  cwd: "{paper_root}"
-  cmd: ["python", "-c", "import os; print('paper_root=', os.getcwd()); print('CODE_EVAL_ARTIFACT_DIR=', os.getenv('CODE_EVAL_ARTIFACT_DIR')); print('ok')"]
-  timeout_sec: 60

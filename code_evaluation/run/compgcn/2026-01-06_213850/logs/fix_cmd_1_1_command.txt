@@ -1,4 +1,0 @@
-cwd: E:\code\fastMCP\ai_review\code_evaluation\run\compgcn\2026-01-06_213850
-cmd: docker run --rm -v E:\code\fastMCP\ai_review\code_evaluation\baseline\compgcn:/workspace/paper_dir -v E:\code\fastMCP\ai_review\code_evaluation\run\compgcn\2026-01-06_213850:/workspace/run_dir -e CODE_EVAL_RUN_DIR=/workspace/run_dir -e CODE_EVAL_ARTIFACT_DIR=/workspace/run_dir/artifacts -e CODE_EVAL_PAPER_DIR=/workspace/paper_dir -e CODE_EVAL_PAPER_ROOT=/workspace/paper_dir/source -e CODE_EVAL_PYTHON_SPEC=3.7 code-evaluation:latest --mode run --paper-dir /workspace/paper_dir --paper-root /workspace/paper_dir/source --cwd /workspace/paper_dir/source --timeout-sec 600 -- bash -lc python -m venv .venv
-rc: 1
-sec: 0.651
