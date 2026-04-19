@@ -1,2 +1,0 @@
-[DRY RUN] cwd=/app
-cmd=python run.py -name conve_mult -score_func conve -opn mult

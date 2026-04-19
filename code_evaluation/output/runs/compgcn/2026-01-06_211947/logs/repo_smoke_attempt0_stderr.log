@@ -1,8 +1,0 @@
-Traceback (most recent call last):
-  File "run.py", line 1, in <module>
-    from helper import *
-  File "/app/helper.py", line 13, in <module>
-    from torch_scatter import scatter_add
-  File "/home/user/.local/lib/python3.7/site-packages/torch_scatter/__init__.py", line 64, in <module>
-    f'Detected that PyTorch and torch_scatter were compiled with '
-RuntimeError: Detected that PyTorch and torch_scatter were compiled with different CUDA versions. PyTorch has CUDA version 10.1 and torch_scatter has CUDA version 0.0. Please reinstall the torch_scatter that matches your PyTorch install.

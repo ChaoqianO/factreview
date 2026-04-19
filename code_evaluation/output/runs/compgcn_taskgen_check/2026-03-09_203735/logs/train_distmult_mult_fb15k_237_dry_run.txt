@@ -1,2 +1,0 @@
-[DRY RUN] cwd=/app
-cmd=python run.py -name distmult_mult_fb15k_237 -data FB15k-237 -score_func distmult -opn mult -gcn_dim 150 -gcn_layer 2

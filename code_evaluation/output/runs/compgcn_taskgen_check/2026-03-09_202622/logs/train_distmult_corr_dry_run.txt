@@ -1,2 +1,0 @@
-[DRY RUN] cwd=/app
-cmd=python run.py -name distmult_corr -score_func distmult -opn corr -gcn_dim 150 -gcn_layer 2

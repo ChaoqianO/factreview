@@ -1,3 +1,0 @@
-{"ts": 1768903845.8831074, "kind": "prepare_start", "data": {"paper_key": "compgcn", "paper_pdf": "papers\\compgcn\\compgcn_Composition-based Multi-Relational Graph Convolutional Networks.pdf", "paper_root": ""}}
-{"ts": 1768903845.9120493, "kind": "prepare_error", "data": {"error": "copy_source_failed: FileExistsError: [WinError 183] 当文件已存在时，无法创建该文件。: 'E:\\\\code\\\\fastMCP\\\\ai_review\\\\code_evaluation\\\\baseline\\\\compgcn\\\\source'"}}
-{"ts": 1768903845.9205573, "kind": "finalize", "data": {"report": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\compare\\paper\\reports\\2026-01-20_181045.md", "diff_dir": "E:\\code\\fastMCP\\ai_review\\code_evaluation\\compare\\paper\\diffs\\2026-01-20_181045"}}
