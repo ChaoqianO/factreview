@@ -1,6 +1,6 @@
 # FactReview default runtime configuration.
 #
-# Every field here is optional — defaults live in `factreview.schemas.config.RunConfig`.
+# Every field here is optional — defaults live in `schemas.config.RunConfig`.
 # CLI flags and environment variables override these values. See docs/adr/0006-config-layering.md.
 
 run:

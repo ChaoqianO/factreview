@@ -27,7 +27,7 @@ jobs:
       - name: Ruff format (check)
         run: ruff format --check .
       - name: Mypy (core modules)
-        run: mypy src/factreview/schemas src/factreview/util || true   # incremental; warn only
+        run: mypy src/schemas src/util || true
 
   test-unit:
     runs-on: ubuntu-latest
@@ -45,4 +45,4 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e ".[dev,llm,positioning,execution]"
       - name: Pytest (unit, fast)
-        run: pytest tests/unit -m "not slow and not e2e and not requires_docker and not requires_llm and not requires_mineru" --cov=factreview --cov-report=term-missing
+        run: pytest tests/unit -m "not slow and not e2e and not requires_docker and not requires_llm and not requires_mineru" --cov=src --cov-report=term-missing

@@ -1,15 +1,15 @@
-"""Unit tests for :mod:`factreview.fact_extraction.decomposer`."""
+"""Unit tests for :mod:`fact_extraction.decomposer`."""
 
 from __future__ import annotations
 
-from factreview.fact_extraction.decomposer import (
+from fact_extraction.decomposer import (
     _detect_tasks,
     _own_method_name,
     decompose_claim,
     decompose_claims,
 )
-from factreview.schemas.claim import Claim, ClaimLocation, ClaimType
-from factreview.schemas.paper import ReportedResult
+from schemas.claim import Claim, ClaimLocation, ClaimType
+from schemas.paper import ReportedResult
 
 
 def _broad_empirical_claim() -> Claim:

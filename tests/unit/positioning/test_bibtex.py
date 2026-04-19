@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from factreview.positioning.bibtex import _norm_title, lookup_bibtex, title_similarity
+from positioning.bibtex import _norm_title, lookup_bibtex, title_similarity
 
 # ── Unit: normalisation ──
 
@@ -54,7 +54,7 @@ def test_lookup_exact_match(monkeypatch):
             }
         raise AssertionError(f"unexpected url: {url}")
 
-    monkeypatch.setattr("factreview.positioning.bibtex._http_get_json", fake_http_get_json)
+    monkeypatch.setattr("positioning.bibtex._http_get_json", fake_http_get_json)
     monkeypatch.setenv("SEMANTIC_SCHOLAR_API_KEY", "test-key")
 
     result = lookup_bibtex("Attention Is All You Need")
@@ -78,7 +78,7 @@ def test_lookup_fuzzy_fallback(monkeypatch):
             return {"citationStyles": {"bibtex": "@article{other}\n"}}
         raise AssertionError(f"unexpected url: {url}")
 
-    monkeypatch.setattr("factreview.positioning.bibtex._http_get_json", fake_http_get_json)
+    monkeypatch.setattr("positioning.bibtex._http_get_json", fake_http_get_json)
     monkeypatch.setenv("SEMANTIC_SCHOLAR_API_KEY", "test-key")
 
     result = lookup_bibtex("Attention Is All U Need")  # typo triggers fuzzy
