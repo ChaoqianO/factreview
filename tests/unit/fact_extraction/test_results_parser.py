@@ -1,14 +1,14 @@
-"""Unit tests for :mod:`factreview.fact_extraction.results_parser`."""
+"""Unit tests for :mod:`fact_extraction.results_parser`."""
 
 from __future__ import annotations
 
 from pathlib import Path
 
-from factreview.fact_extraction.results_parser import (
+from fact_extraction.results_parser import (
     _parse_number,
     extract_reported_results,
 )
-from factreview.schemas.paper import Paper, PaperMetadata, Table
+from schemas.paper import Paper, PaperMetadata, Table
 
 
 def _paper_with_tables(tables: list[Table]) -> Paper:

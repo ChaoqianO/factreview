@@ -7,7 +7,7 @@ import pytest
 
 def test_refcheck_adapter_importable():
     """The adapter module must be importable without heavy refchecker deps."""
-    from factreview.positioning.refcheck import check_references
+    from positioning.refcheck import check_references
 
     assert callable(check_references)
 
@@ -19,7 +19,7 @@ def test_refcheck_nonexistent_paper():
     except ImportError:
         pytest.skip("refchecker deps (arxiv) not installed")
 
-    from factreview.positioning.refcheck import check_references
+    from positioning.refcheck import check_references
 
     result = check_references(paper="/nonexistent/paper.pdf")
     # The adapter calls refchecker which will fail; should not raise.

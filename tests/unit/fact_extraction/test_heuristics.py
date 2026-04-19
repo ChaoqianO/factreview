@@ -1,4 +1,4 @@
-"""Unit tests for :mod:`factreview.fact_extraction.heuristics`.
+"""Unit tests for :mod:`fact_extraction.heuristics`.
 
 Uses synthetic :class:`Paper` objects rather than CompGCN — these tests
 must stay generic and remain meaningful even if the CompGCN fixture is
@@ -11,15 +11,15 @@ from pathlib import Path
 
 import pytest
 
-from factreview.fact_extraction.heuristics import (
+from fact_extraction.heuristics import (
     _classify_sentence,
     _extract_datasets,
     _extract_metrics,
     _infer_scope,
     extract_claims_heuristic,
 )
-from factreview.schemas.claim import ClaimType
-from factreview.schemas.paper import Paper, PaperMetadata, Section
+from schemas.claim import ClaimType
+from schemas.paper import Paper, PaperMetadata, Section
 
 
 def _paper_with(sections: list[Section]) -> Paper:

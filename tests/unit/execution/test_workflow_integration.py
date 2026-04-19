@@ -4,29 +4,29 @@ from __future__ import annotations
 
 
 def test_workflow_importable():
-    from factreview.execution.graph import CodeEvalOrchestrator
+    from execution.graph import CodeEvalOrchestrator
 
     assert callable(CodeEvalOrchestrator)
 
 
 def test_all_nodes_importable():
-    from factreview.execution.nodes.finalize import finalize_node
-    from factreview.execution.nodes.fix import fix_node
-    from factreview.execution.nodes.judge import judge_node
-    from factreview.execution.nodes.plan import plan_node
-    from factreview.execution.nodes.prepare import prepare_node
-    from factreview.execution.nodes.run import run_node
+    from execution.nodes.finalize import finalize_node
+    from execution.nodes.fix import fix_node
+    from execution.nodes.judge import judge_node
+    from execution.nodes.plan import plan_node
+    from execution.nodes.prepare import prepare_node
+    from execution.nodes.run import run_node
 
     for fn in [prepare_node, plan_node, run_node, judge_node, fix_node, finalize_node]:
         assert callable(fn)
 
 
 def test_tools_importable():
-    from factreview.execution.tools.alignment import run_alignment
-    from factreview.execution.tools.baseline_checks import Baseline
-    from factreview.execution.tools.metrics import compute_check
-    from factreview.positioning.bibtex import lookup_bibtex
-    from factreview.positioning.refcheck import check_references
+    from execution.tools.alignment import run_alignment
+    from execution.tools.baseline_checks import Baseline
+    from execution.tools.metrics import compute_check
+    from positioning.bibtex import lookup_bibtex
+    from positioning.refcheck import check_references
 
     assert callable(lookup_bibtex)
     assert callable(check_references)
@@ -37,7 +37,7 @@ def test_tools_importable():
 
 def test_orchestrator_accepts_new_flags():
     """The orchestrator must accept enable_refcheck and enable_bibtex."""
-    from factreview.execution.graph import CodeEvalOrchestrator
+    from execution.graph import CodeEvalOrchestrator
 
     o = CodeEvalOrchestrator(
         run_root="/tmp/test_run",

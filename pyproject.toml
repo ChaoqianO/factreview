@@ -59,6 +59,7 @@ ingestion = [
   "factreview[ingestion-llama]",
 ]
 
+
 # ── Literature positioning (§3.2) ────────────────────────────────────────────
 positioning = [
   "bibtexparser>=1.4.0",
@@ -97,16 +98,29 @@ all = [
 ]
 
 [project.scripts]
-factreview = "factreview.cli:main"
+factreview = "cli:main"
 
 [project.urls]
 Homepage = "https://anonymous.4open.science/r/factreview-E55F"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/factreview"]
+packages = [
+  "src/execution",
+  "src/fact_extraction",
+  "src/ingestion",
+  "src/llm",
+  "src/positioning",
+  "src/schemas",
+  "src/synthesis",
+  "src/util",
+]
+
+[tool.hatch.build.targets.wheel.force-include]
+"src/cli.py" = "cli.py"
+"src/cli_legacy.py" = "cli_legacy.py"
 
 [tool.hatch.build.targets.sdist]
-include = ["src/factreview", "configs", "docs", "README.md", "LICENSE"]
+include = ["src", "configs", "README.md"]
 
 # ── Ruff ──────────────────────────────────────────────────────────────────────
 [tool.ruff]
@@ -114,10 +128,8 @@ line-length = 110
 target-version = "py311"
 src = ["src", "tests"]
 extend-exclude = [
-  "src/factreview/positioning/refchecker",
-  "src/factreview/positioning/s2_title_to_bibtex",
   "configs/baselines",
-  "third_party",
+  "tools",
 ]
 
 [tool.ruff.lint]
@@ -143,16 +155,24 @@ quote-style = "double"
 # ── Mypy ──────────────────────────────────────────────────────────────────────
 [tool.mypy]
 python_version = "3.11"
-packages = ["factreview"]
+packages = [
+  "execution",
+  "fact_extraction",
+  "ingestion",
+  "llm",
+  "positioning",
+  "schemas",
+  "synthesis",
+  "util",
+]
 mypy_path = "src"
 strict_optional = true
 warn_redundant_casts = true
 warn_unused_ignores = true
-disallow_untyped_defs = false        # incremental typing; tighten per-module
+disallow_untyped_defs = false
 ignore_missing_imports = true
 exclude = [
-  "src/factreview/positioning/refchecker/",
-  "src/factreview/positioning/s2_title_to_bibtex/",
+  "tools/",
 ]
 
 # ── Pytest ────────────────────────────────────────────────────────────────────

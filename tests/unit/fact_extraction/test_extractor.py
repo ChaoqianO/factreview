@@ -1,4 +1,4 @@
-"""Unit tests for :mod:`factreview.fact_extraction.extractor`."""
+"""Unit tests for :mod:`fact_extraction.extractor`."""
 
 from __future__ import annotations
 
@@ -7,14 +7,14 @@ from unittest.mock import patch
 
 import pytest
 
-from factreview.fact_extraction.extractor import (
+from fact_extraction.extractor import (
     _merge_claims,
     _parse_llm_claims,
     extract_facts,
 )
-from factreview.schemas.claim import Claim, ClaimLocation, ClaimType
-from factreview.schemas.config import FactExtractionCfg, LLMCfg
-from factreview.schemas.paper import Paper, PaperMetadata, Section, Table
+from schemas.claim import Claim, ClaimLocation, ClaimType
+from schemas.config import FactExtractionCfg, LLMCfg
+from schemas.paper import Paper, PaperMetadata, Section, Table
 
 
 def _synthetic_paper() -> Paper:
@@ -181,7 +181,7 @@ class TestExtractFacts:
             )
         ]
         with patch(
-            "factreview.fact_extraction.extractor._call_llm_for_claims",
+            "fact_extraction.extractor._call_llm_for_claims",
             return_value=fake_llm_claims,
         ):
             result = extract_facts(
@@ -195,7 +195,7 @@ class TestExtractFacts:
     def test_llm_mode_returns_empty_if_llm_fails(self) -> None:
         paper = _synthetic_paper()
         with patch(
-            "factreview.fact_extraction.extractor._call_llm_for_claims",
+            "fact_extraction.extractor._call_llm_for_claims",
             return_value=None,
         ):
             result = extract_facts(
@@ -218,7 +218,7 @@ class TestExtractFacts:
             location=ClaimLocation(section_id="sec_1"),
         )
         with patch(
-            "factreview.fact_extraction.extractor._call_llm_for_claims",
+            "fact_extraction.extractor._call_llm_for_claims",
             return_value=[broad],
         ):
             result = extract_facts(
@@ -240,7 +240,7 @@ class TestExtractFacts:
             location=ClaimLocation(),
         )
         with patch(
-            "factreview.fact_extraction.extractor._call_llm_for_claims",
+            "fact_extraction.extractor._call_llm_for_claims",
             return_value=[broad],
         ):
             result = extract_facts(
@@ -257,7 +257,7 @@ class TestExtractFacts:
 
 
 def test_prompt_template_loads_and_formats() -> None:
-    from factreview.fact_extraction.extractor import _load_prompt_template
+    from fact_extraction.extractor import _load_prompt_template
 
     tmpl = _load_prompt_template()
     assert "{title}" in tmpl
