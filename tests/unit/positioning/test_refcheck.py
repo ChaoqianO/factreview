@@ -31,5 +31,6 @@ def test_refcheck_nonexistent_paper():
 def test_refchecker_package_importable():
     """The refchecker package should be importable (lazy init, no heavy deps needed)."""
     import refchecker
+
     assert hasattr(refchecker, "__version__")
     assert refchecker.__version__

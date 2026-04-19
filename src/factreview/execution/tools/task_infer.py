@@ -6,16 +6,15 @@ import re
 import shlex
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 from factreview.llm.client import llm_json, resolve_llm_config
-from factreview.util.fs import read_text
 
 
 @dataclass(frozen=True)
 class InferResult:
-    tasks: List[Dict[str, Any]]
-    evidence: Dict[str, Any]
+    tasks: list[dict[str, Any]]
+    evidence: dict[str, Any]
 
 
 def _read_optional(path: Path, max_chars: int = 12000) -> str:
@@ -30,23 +29,23 @@ def _read_optional(path: Path, max_chars: int = 12000) -> str:
         return ""
 
 
-def _guess_entrypoints(repo_root: Path) -> List[str]:
+def _guess_entrypoints(repo_root: Path) -> list[str]:
     # Conservative: only look for common top-level scripts.
     cands = ["launcher.py", "run.py", "eval.py", "main.py", "app.py"]
-    out: List[str] = []
+    out: list[str] = []
     for c in cands:
         if (repo_root / c).exists():
             out.append(c)
     return out
 
 
-def _extract_example_commands_from_readme(readme_text: str) -> List[str]:
+def _extract_example_commands_from_readme(readme_text: str) -> list[str]:
     """
     Extract a few likely shell commands from README code fences.
     Keep it best-effort and small; this is only used as hinting.
     """
     txt = readme_text or ""
-    cmds: List[str] = []
+    cmds: list[str] = []
     # Grab fenced blocks ```bash ... ```
     for m in re.finditer(r"```(?:bash|sh|shell)\s+([\s\S]*?)```", txt, flags=re.IGNORECASE):
         block = (m.group(1) or "").strip()
@@ -60,11 +59,11 @@ def _extract_example_commands_from_readme(readme_text: str) -> List[str]:
     return cmds
 
 
-def _detect_benchmark_datasets(repo_root: Path) -> List[str]:
+def _detect_benchmark_datasets(repo_root: Path) -> list[str]:
     data_dir = repo_root / "data"
     if not data_dir.exists() or not data_dir.is_dir():
         return []
-    out: List[str] = []
+    out: list[str] = []
     for p in sorted(data_dir.iterdir()):
         if not p.is_dir():
             continue
@@ -77,13 +76,13 @@ def _detect_benchmark_datasets(repo_root: Path) -> List[str]:
     return out
 
 
-def _entrypoint_arg_hints(repo_root: Path, entrypoints: List[str], max_chars: int = 4000) -> Dict[str, str]:
-    hints: Dict[str, str] = {}
+def _entrypoint_arg_hints(repo_root: Path, entrypoints: list[str], max_chars: int = 4000) -> dict[str, str]:
+    hints: dict[str, str] = {}
     for ep in entrypoints[:5]:
         txt = _read_optional(repo_root / ep, max_chars=max_chars)
         if not txt.strip():
             continue
-        lines: List[str] = []
+        lines: list[str] = []
         for ln in txt.splitlines():
             s = ln.strip()
             if "add_argument(" in s or "ArgumentParser(" in s:
@@ -95,15 +94,15 @@ def _entrypoint_arg_hints(repo_root: Path, entrypoints: List[str], max_chars: in
     return hints
 
 
-def _cmd_flag_value(cmd: List[str], *flags: str) -> str:
+def _cmd_flag_value(cmd: list[str], *flags: str) -> str:
     for i, tok in enumerate(cmd[:-1]):
         if tok in flags:
             return str(cmd[i + 1])
     return ""
 
 
-def _strip_flag(cmd: List[str], *flags: str) -> List[str]:
-    out: List[str] = []
+def _strip_flag(cmd: list[str], *flags: str) -> list[str]:
+    out: list[str] = []
     skip_next = False
     for i, tok in enumerate(cmd):
         if skip_next:
@@ -124,8 +123,10 @@ def _safe_id_part(raw: str) -> str:
     return s or "task"
 
 
-def _build_readme_matrix_tasks(readme_example_cmds: List[str], datasets: List[str], mode: str) -> List[Dict[str, Any]]:
-    parsed_runs: List[List[str]] = []
+def _build_readme_matrix_tasks(
+    readme_example_cmds: list[str], datasets: list[str], mode: str
+) -> list[dict[str, Any]]:
+    parsed_runs: list[list[str]] = []
     for raw in readme_example_cmds:
         s = (raw or "").strip()
         if not s.startswith("python run.py "):
@@ -142,7 +143,7 @@ def _build_readme_matrix_tasks(readme_example_cmds: List[str], datasets: List[st
 
     multi_dataset = len(datasets) > 1
     expanded_datasets = datasets if datasets else [""]
-    out: List[Dict[str, Any]] = []
+    out: list[dict[str, Any]] = []
     seen_ids: set[str] = set()
 
     for parts in parsed_runs:
@@ -183,7 +184,7 @@ def _build_readme_matrix_tasks(readme_example_cmds: List[str], datasets: List[st
     return out
 
 
-def _is_training_task(task: Dict[str, Any]) -> bool:
+def _is_training_task(task: dict[str, Any]) -> bool:
     cmd = task.get("cmd")
     if not isinstance(cmd, list) or len(cmd) < 2:
         return False
@@ -194,17 +195,13 @@ def _is_training_task(task: Dict[str, Any]) -> bool:
     return "-h" not in cmd and "--help" not in cmd
 
 
-def _append_eval_export_tasks(repo_root: Path, tasks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+def _append_eval_export_tasks(repo_root: Path, tasks: list[dict[str, Any]]) -> list[dict[str, Any]]:
     evaluator = repo_root / "codeeval_eval_ckpt.py"
     if not evaluator.exists():
         return tasks
 
-    existing_ids = {
-        str(t.get("id") or "").strip()
-        for t in tasks
-        if isinstance(t, dict)
-    }
-    out: List[Dict[str, Any]] = list(tasks)
+    existing_ids = {str(t.get("id") or "").strip() for t in tasks if isinstance(t, dict)}
+    out: list[dict[str, Any]] = list(tasks)
     for task in tasks:
         if not isinstance(task, dict) or not _is_training_task(task):
             continue
@@ -249,11 +246,11 @@ def _append_eval_export_tasks(repo_root: Path, tasks: List[Dict[str, Any]]) -> L
 def _finalize_tasks(
     *,
     repo_root: Path,
-    tasks: List[Dict[str, Any]],
-    readme_example_cmds: List[str],
-    datasets: List[str],
+    tasks: list[dict[str, Any]],
+    readme_example_cmds: list[str],
+    datasets: list[str],
     mode: str,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     matrix_tasks = _build_readme_matrix_tasks(readme_example_cmds, datasets, mode=mode)
     if matrix_tasks:
         non_train = [t for t in tasks if isinstance(t, dict) and not _is_training_task(t)]
@@ -270,7 +267,7 @@ def infer_tasks_heuristic(repo_root: str, mode: str = "smoke") -> InferResult:
     datasets = _detect_benchmark_datasets(root)
 
     # Default install step. We keep it lightweight and let the framework's prepare/fix deal with stdlib-in-req.
-    tasks: List[Dict[str, Any]] = [
+    tasks: list[dict[str, Any]] = [
         {
             "id": "install_deps",
             "cwd": "{paper_root}",
@@ -436,7 +433,7 @@ def infer_tasks_llm(
         ev["llm_bad_shape"] = resp
         return InferResult(tasks=hr.tasks, evidence=ev)
 
-    cleaned: List[Dict[str, Any]] = []
+    cleaned: list[dict[str, Any]] = []
     for t in tasks:
         if not isinstance(t, dict):
             continue
@@ -454,9 +451,11 @@ def infer_tasks_llm(
         datasets=datasets,
         mode=mode,
     )
-    evidence = {"mode": mode, "llm_used": True, "llm_provider": llm_cfg.provider, "llm_model": llm_cfg.model, "raw": resp}
+    evidence = {
+        "mode": mode,
+        "llm_used": True,
+        "llm_provider": llm_cfg.provider,
+        "llm_model": llm_cfg.model,
+        "raw": resp,
+    }
     return InferResult(tasks=finalized, evidence=evidence)
-
-
-
-

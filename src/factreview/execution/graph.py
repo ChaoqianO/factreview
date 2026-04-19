@@ -1,19 +1,19 @@
 from __future__ import annotations
 
 import os
-from typing import Any, Dict
+from typing import Any
 
-from langgraph.graph import StateGraph, START, END
+from langgraph.graph import END, START, StateGraph
 
-from .nodes.prepare import prepare_node
-from .nodes.plan import plan_node
-from .nodes.run import run_node
-from .nodes.judge import judge_node
-from .nodes.fix import fix_node
 from .nodes.finalize import finalize_node
+from .nodes.fix import fix_node
+from .nodes.judge import judge_node
+from .nodes.plan import plan_node
+from .nodes.prepare import prepare_node
+from .nodes.run import run_node
 
+State = dict[str, Any]
 
-State = Dict[str, Any]
 
 def _is_inconclusive_no_baseline(state: State) -> bool:
     results = (state.get("judge", {}) or {}).get("results") or []
@@ -82,7 +82,9 @@ def _route_after_judge(state: State) -> str:
         return "finalize"
     # If judge is inconclusive, do not enter fix loop.
     results = (state.get("judge", {}) or {}).get("results") or []
-    if isinstance(results, list) and any(isinstance(r, dict) and r.get("type") == "inconclusive_no_baseline" for r in results):
+    if isinstance(results, list) and any(
+        isinstance(r, dict) and r.get("type") == "inconclusive_no_baseline" for r in results
+    ):
         return "finalize"
     return "fix"
 
@@ -155,7 +157,7 @@ class CodeEvalOrchestrator:
         baseline_path: str,
         local_source_path: str = "",
         no_pdf_extract: bool = False,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         initial: State = {
             "status": "running",
             "attempt": 0,
@@ -183,12 +185,12 @@ class CodeEvalOrchestrator:
             },
             "history": [],
         }
-        final_state: State = await self._app.ainvoke(initial, config={"configurable": {"thread_id": "code_evaluation"}})
+        final_state: State = await self._app.ainvoke(
+            initial, config={"configurable": {"thread_id": "code_evaluation"}}
+        )
         exit_status = _compute_exit_status(final_state)
         return {
             "success": exit_status == "success",
             "exit_status": exit_status,  # "success" | "inconclusive" | "failed"
             "state": final_state,
         }
-
-

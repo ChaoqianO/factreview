@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 from factreview.llm.client import llm_json, resolve_llm_config
 from factreview.util.fs import write_text
@@ -29,14 +29,14 @@ def _read_optional(path: str, max_chars: int = 14000) -> str:
         return ""
 
 
-def _llm_judge_enabled(cfg: Dict[str, Any]) -> str:
+def _llm_judge_enabled(cfg: dict[str, Any]) -> str:
     mode = str(cfg.get("llm_judge_mode") or "").strip().lower()
     if mode in {"assist", "verdict"}:
         return mode
     return "off"
 
 
-def judge_node(state: Dict[str, Any]) -> Dict[str, Any]:
+def judge_node(state: dict[str, Any]) -> dict[str, Any]:
     run_info = state.get("run", {})
     run_dir = Path(run_info.get("dir") or "")
     artifacts_dir = Path(run_info.get("artifacts_dir") or (run_dir / "artifacts"))
@@ -46,7 +46,7 @@ def judge_node(state: Dict[str, Any]) -> Dict[str, Any]:
     baseline = Baseline(raw=baseline_raw if isinstance(baseline_raw, dict) else {})
 
     checks = baseline.checks
-    results: List[Dict[str, Any]] = []
+    results: list[dict[str, Any]] = []
     passed = True
     run_ok = bool(state.get("run_result", {}).get("success"))
     cfg = state.get("config", {}) or {}
@@ -68,7 +68,12 @@ def judge_node(state: Dict[str, Any]) -> Dict[str, Any]:
         repo_root = Path(__file__).resolve().parents[2]
         paper_tables_dir = repo_root / "baseline" / paper_key / "paper_extracted" / "tables"
         if paper_tables_dir.exists():
-            ar = run_alignment(cfg=cfg, run_dir=run_dir, artifacts_dir=artifacts_dir, paper_extracted_tables_dir=paper_tables_dir)
+            ar = run_alignment(
+                cfg=cfg,
+                run_dir=run_dir,
+                artifacts_dir=artifacts_dir,
+                paper_extracted_tables_dir=paper_tables_dir,
+            )
             results.append(
                 {
                     "type": "paper_table_alignment",
@@ -82,7 +87,9 @@ def judge_node(state: Dict[str, Any]) -> Dict[str, Any]:
                 }
             )
     except Exception as e:
-        results.append({"type": "paper_table_alignment", "passed": False, "error": f"{type(e).__name__}: {e}"})
+        results.append(
+            {"type": "paper_table_alignment", "passed": False, "error": f"{type(e).__name__}: {e}"}
+        )
 
     # ── Evidence source 3: LLM judge (advisory by default) ──
     llm_mode = _llm_judge_enabled(cfg)
@@ -135,11 +142,17 @@ def judge_node(state: Dict[str, Any]) -> Dict[str, Any]:
             },
             ensure_ascii=False,
         )
-        llm_cfg = resolve_llm_config(str(cfg.get("llm_provider") or ""), str(cfg.get("llm_model") or ""), str(cfg.get("llm_base_url") or ""))
+        llm_cfg = resolve_llm_config(
+            str(cfg.get("llm_provider") or ""),
+            str(cfg.get("llm_model") or ""),
+            str(cfg.get("llm_base_url") or ""),
+        )
         resp = llm_json(prompt=prompt, system=system, cfg=llm_cfg)
         try:
             write_text(logs_dir / "judge_llm_prompt.json", prompt + "\n")
-            write_text(logs_dir / "judge_llm_response.json", json.dumps(resp, ensure_ascii=False, indent=2) + "\n")
+            write_text(
+                logs_dir / "judge_llm_response.json", json.dumps(resp, ensure_ascii=False, indent=2) + "\n"
+            )
         except Exception:
             pass
 
@@ -164,22 +177,27 @@ def judge_node(state: Dict[str, Any]) -> Dict[str, Any]:
         if paper_pdf and Path(paper_pdf).exists():
             try:
                 from ..tools.refcheck import check_references
+
                 rc = check_references(paper=paper_pdf, debug=False)
-                results.append({
-                    "type": "reference_check",
-                    "passed": rc.get("ok", False) and rc.get("errors", 0) == 0,
-                    "total_refs": rc.get("total_refs", 0),
-                    "errors": rc.get("errors", 0),
-                    "warnings": rc.get("warnings", 0),
-                    "unverified": rc.get("unverified", 0),
-                    "error_message": rc.get("error_message", ""),
-                })
+                results.append(
+                    {
+                        "type": "reference_check",
+                        "passed": rc.get("ok", False) and rc.get("errors", 0) == 0,
+                        "total_refs": rc.get("total_refs", 0),
+                        "errors": rc.get("errors", 0),
+                        "warnings": rc.get("warnings", 0),
+                        "unverified": rc.get("unverified", 0),
+                        "error_message": rc.get("error_message", ""),
+                    }
+                )
             except Exception as e:
-                results.append({
-                    "type": "reference_check",
-                    "passed": False,
-                    "error": f"{type(e).__name__}: {e}",
-                })
+                results.append(
+                    {
+                        "type": "reference_check",
+                        "passed": False,
+                        "error": f"{type(e).__name__}: {e}",
+                    }
+                )
 
     judge = {"passed": passed, "results": results}
     state["judge"] = judge
@@ -191,5 +209,3 @@ def judge_node(state: Dict[str, Any]) -> Dict[str, Any]:
     if state.get("status") != "failed":
         state["status"] = "running"
     return state
-
-

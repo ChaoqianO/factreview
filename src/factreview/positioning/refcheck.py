@@ -26,7 +26,7 @@ import logging
 import os
 import sys
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -40,11 +40,11 @@ if _REFCHECKER_SRC.exists() and str(_REFCHECKER_SRC) not in sys.path:
 
 def _build_checker(
     *,
-    api_key: Optional[str] = None,
-    db_path: Optional[str] = None,
-    output_file: Optional[str] = None,
-    llm_provider: Optional[str] = None,
-    llm_model: Optional[str] = None,
+    api_key: str | None = None,
+    db_path: str | None = None,
+    output_file: str | None = None,
+    llm_provider: str | None = None,
+    llm_model: str | None = None,
     debug: bool = False,
     enable_parallel: bool = True,
     max_workers: int = 4,
@@ -75,15 +75,15 @@ def _build_checker(
 def check_references(
     paper: str,
     *,
-    api_key: Optional[str] = None,
-    db_path: Optional[str] = None,
-    output_file: Optional[str] = None,
-    llm_provider: Optional[str] = None,
-    llm_model: Optional[str] = None,
+    api_key: str | None = None,
+    db_path: str | None = None,
+    output_file: str | None = None,
+    llm_provider: str | None = None,
+    llm_model: str | None = None,
     debug: bool = False,
     enable_parallel: bool = True,
     max_workers: int = 4,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Run reference checking on *paper* and return a summary dict.
 
     Parameters
@@ -155,6 +155,7 @@ def check_references(
 # CLI entry-point
 # ---------------------------------------------------------------------------
 
+
 def _cli_main() -> int:
     p = argparse.ArgumentParser(
         prog="refcheck",
@@ -181,7 +182,9 @@ def _cli_main() -> int:
 
     if result["ok"]:
         print(f"References processed: {result['total_refs']}")
-        print(f"Errors: {result['errors']}, Warnings: {result['warnings']}, Unverified: {result['unverified']}")
+        print(
+            f"Errors: {result['errors']}, Warnings: {result['warnings']}, Unverified: {result['unverified']}"
+        )
         return 0
     else:
         print(f"ERROR: {result['error_message']}", file=sys.stderr)

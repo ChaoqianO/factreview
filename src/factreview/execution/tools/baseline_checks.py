@@ -3,15 +3,15 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 
 @dataclass(frozen=True)
 class Baseline:
-    raw: Dict[str, Any]
+    raw: dict[str, Any]
 
     @property
-    def checks(self) -> List[Dict[str, Any]]:
+    def checks(self) -> list[dict[str, Any]]:
         checks = self.raw.get("checks")
         return checks if isinstance(checks, list) else []
 
@@ -29,8 +29,3 @@ def load_baseline(path: str) -> Baseline:
         return Baseline(raw=raw)
     except Exception:
         return Baseline(raw={})
-
-
-
-
-

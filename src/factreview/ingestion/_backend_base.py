@@ -1,22 +1,22 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import List
+
 
 class BasePDFConverter(ABC):
-    """PDF转换器基类"""
+    """Base class for PDF converters."""
 
     @abstractmethod
     def __init__(self, **kwargs):
         self.name = "Base Converter"
 
     @abstractmethod
-    def convert_single(self, pdf_path: Path) -> List[str]:
-        """转换单个PDF文件"""
+    def convert_single(self, pdf_path: Path) -> list[str]:
+        """Convert a single PDF file."""
         pass
 
     @staticmethod
-    def discover_pdfs(input_root: Path) -> List[Path]:
-        """扫描输入路径并返回 PDF 列表。"""
+    def discover_pdfs(input_root: Path) -> list[Path]:
+        """Scan the input path and return a list of PDFs."""
         if input_root.is_file() and input_root.suffix.lower() == ".pdf":
             return [input_root]
         if input_root.is_dir():
@@ -30,7 +30,7 @@ class BasePDFConverter(ABC):
         pdf_path: Path,
         extension: str,
     ) -> Path:
-        """根据输入目录结构构造输出路径。"""
+        """Build an output path that mirrors the input directory structure."""
         if not extension.startswith("."):
             extension = f".{extension}"
         if input_root.is_dir():
@@ -45,18 +45,18 @@ class BasePDFConverter(ABC):
         return dest_dir / f"{pdf_path.stem}{extension}"
 
     @staticmethod
-    def write_text_list(output_file: Path, chunks: List[str], separator: str = "\n") -> None:
-        """将文本块写入目标文件。"""
+    def write_text_list(output_file: Path, chunks: list[str], separator: str = "\n") -> None:
+        """Write text chunks to the target file."""
         output_file.parent.mkdir(parents=True, exist_ok=True)
         with open(output_file, "w", encoding="utf-8") as file_obj:
             file_obj.write(separator.join(chunks))
 
     @staticmethod
-    def summarize_batch(total: int, success: int, failed: List[str], title: str) -> None:
+    def summarize_batch(total: int, success: int, failed: list[str], title: str) -> None:
         print(f"\n{'=' * 40}")
-        print(f"{title} 完成! 成功: {success}/{total}")
+        print(f"{title} done! success: {success}/{total}")
         if failed:
-            print(f"失败列表: {failed}")
+            print(f"Failed list: {failed}")
 
     def get_info(self) -> dict:
         return {"name": self.name}

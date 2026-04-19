@@ -32,29 +32,30 @@ def _paper_with(sections: list[Section]) -> Paper:
 
 class TestClassifySentence:
     def test_empirical_trigger(self) -> None:
-        assert _classify_sentence(
-            "Our method outperforms prior work on link prediction."
-        ) == ClaimType.EMPIRICAL
+        assert (
+            _classify_sentence("Our method outperforms prior work on link prediction.") == ClaimType.EMPIRICAL
+        )
 
     def test_numeric_claim_is_empirical(self) -> None:
-        assert _classify_sentence(
-            "The model achieves an MRR of 0.355 on FB15k-237."
-        ) == ClaimType.EMPIRICAL
+        assert _classify_sentence("The model achieves an MRR of 0.355 on FB15k-237.") == ClaimType.EMPIRICAL
 
     def test_methodological_trigger(self) -> None:
-        assert _classify_sentence(
-            "We propose a novel framework for multi-relational graphs."
-        ) == ClaimType.METHODOLOGICAL
+        assert (
+            _classify_sentence("We propose a novel framework for multi-relational graphs.")
+            == ClaimType.METHODOLOGICAL
+        )
 
     def test_theoretical_trigger(self) -> None:
-        assert _classify_sentence(
-            "We prove that our method generalizes prior work (Proposition 4.1)."
-        ) == ClaimType.THEORETICAL
+        assert (
+            _classify_sentence("We prove that our method generalizes prior work (Proposition 4.1).")
+            == ClaimType.THEORETICAL
+        )
 
     def test_reproducibility_trigger(self) -> None:
-        assert _classify_sentence(
-            "Source code is available at http://github.com/example/repo."
-        ) == ClaimType.REPRODUCIBILITY
+        assert (
+            _classify_sentence("Source code is available at http://github.com/example/repo.")
+            == ClaimType.REPRODUCIBILITY
+        )
 
     def test_non_claim_returns_none(self) -> None:
         assert _classify_sentence("Figure 1 depicts the architecture.") is None

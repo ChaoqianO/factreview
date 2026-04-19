@@ -10,10 +10,11 @@ import threading
 import time
 import urllib.parse
 import urllib.request
+from collections.abc import Iterable
 from dataclasses import dataclass
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
-from typing import Any, Iterable, Optional
+from typing import Any
 
 
 def _is_truthy(value: str) -> bool:
@@ -42,7 +43,7 @@ def _decode_jwt_payload(token: str) -> dict[str, Any]:
         return {}
 
 
-def _pick_account_id(data: dict[str, Any], token: str) -> Optional[str]:
+def _pick_account_id(data: dict[str, Any], token: str) -> str | None:
     for key in ("account_id", "accountId", "aid"):
         value = data.get(key)
         if isinstance(value, str) and value.strip():
@@ -111,7 +112,7 @@ def _candidate_cache_files() -> list[Path]:
     return unique
 
 
-def _extract_from_auth_json(path: Path) -> Optional[CodexAuth]:
+def _extract_from_auth_json(path: Path) -> CodexAuth | None:
     data = _safe_json_load(path)
     if not isinstance(data, dict):
         return None
@@ -121,7 +122,9 @@ def _extract_from_auth_json(path: Path) -> Optional[CodexAuth]:
         data.get("token"),
         (data.get("auth") or {}).get("access_token") if isinstance(data.get("auth"), dict) else None,
         (data.get("auth") or {}).get("token") if isinstance(data.get("auth"), dict) else None,
-        (data.get("credentials") or {}).get("access_token") if isinstance(data.get("credentials"), dict) else None,
+        (data.get("credentials") or {}).get("access_token")
+        if isinstance(data.get("credentials"), dict)
+        else None,
         (data.get("credentials") or {}).get("token") if isinstance(data.get("credentials"), dict) else None,
         (data.get("session") or {}).get("access_token") if isinstance(data.get("session"), dict) else None,
         (data.get("session") or {}).get("token") if isinstance(data.get("session"), dict) else None,
@@ -160,7 +163,7 @@ def _iter_dicts(obj: Any) -> Iterable[dict[str, Any]]:
             yield from _iter_dicts(value)
 
 
-def _extract_from_profiles(path: Path) -> Optional[CodexAuth]:
+def _extract_from_profiles(path: Path) -> CodexAuth | None:
     data = _safe_json_load(path)
     if not isinstance(data, dict):
         return None
@@ -196,7 +199,7 @@ def _extract_from_profiles(path: Path) -> Optional[CodexAuth]:
     return None
 
 
-def load_cached_codex_auth() -> Optional[CodexAuth]:
+def load_cached_codex_auth() -> CodexAuth | None:
     env_token = (os.getenv("OPENAI_CODEX_ACCESS_TOKEN") or os.getenv("OPENAI_CODEX_TOKEN") or "").strip()
     if env_token:
         return CodexAuth(
@@ -264,7 +267,7 @@ def _wait_for_loopback_code(redirect_uri: str, expected_state: str, timeout_sec:
     done = threading.Event()
 
     class Handler(BaseHTTPRequestHandler):
-        def do_GET(self):  # noqa: N802
+        def do_GET(self):
             if not (self.path or "").startswith(path):
                 self.send_response(404)
                 self.end_headers()
@@ -280,12 +283,12 @@ def _wait_for_loopback_code(redirect_uri: str, expected_state: str, timeout_sec:
             self.send_header("Content-Type", "text/plain; charset=utf-8")
             self.end_headers()
             if result["error"]:
-                self.wfile.write(f"OpenAI Codex login failed: {result['error']}\n".encode("utf-8"))
+                self.wfile.write(f"OpenAI Codex login failed: {result['error']}\n".encode())
             else:
                 self.wfile.write(b"OpenAI Codex login succeeded. You can close this tab.\n")
             done.set()
 
-        def log_message(self, format, *args):  # noqa: A002
+        def log_message(self, format, *args):
             return
 
     server = HTTPServer((host, port), Handler)
@@ -342,7 +345,9 @@ def persist_codex_auth(
     refresh_token: str = "",
     target_path: Path | None = None,
 ) -> Path:
-    path = target_path or (Path((os.getenv("CODEX_HOME") or "").strip() or (Path.home() / ".codex")) / "auth.json")
+    path = target_path or (
+        Path((os.getenv("CODEX_HOME") or "").strip() or (Path.home() / ".codex")) / "auth.json"
+    )
     path.parent.mkdir(parents=True, exist_ok=True)
     data = {
         "access_token": auth.access_token,
@@ -394,7 +399,9 @@ def login_with_browser(timeout_sec: int = 180) -> CodexAuth:
     )
     access_token = str(token_data.get("access_token") or "").strip()
     if not access_token:
-        raise RuntimeError(f"Codex login did not return access_token. Response keys: {sorted(token_data.keys())}")
+        raise RuntimeError(
+            f"Codex login did not return access_token. Response keys: {sorted(token_data.keys())}"
+        )
 
     auth = CodexAuth(
         access_token=access_token,

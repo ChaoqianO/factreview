@@ -5,14 +5,13 @@ import subprocess
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List
 
 from .fs import ensure_dir, write_text
 
 
 @dataclass(frozen=True)
 class CommandResult:
-    cmd: List[str]
+    cmd: list[str]
     cwd: str
     returncode: int
     stdout: str
@@ -33,15 +32,17 @@ def _tail(text: str, n: int = 2000) -> str:
 
 
 def run_command(
-    cmd: List[str],
+    cmd: list[str],
     cwd: str,
     timeout_sec: int = 3600,
-    env: Dict[str, str] | None = None,
+    env: dict[str, str] | None = None,
 ) -> CommandResult:
     start = time.time()
     if _is_verbose():
         try:
-            print(f"[code_evaluation][exec] cwd={cwd} timeout_sec={timeout_sec} cmd={' '.join(cmd)}", flush=True)
+            print(
+                f"[code_evaluation][exec] cwd={cwd} timeout_sec={timeout_sec} cmd={' '.join(cmd)}", flush=True
+            )
         except Exception:
             pass
     try:
@@ -94,7 +95,10 @@ def persist_command_result(
     cmd_path = logs / f"{prefix}_command.txt"
     out_path = logs / f"{prefix}_stdout.log"
     err_path = logs / f"{prefix}_stderr.log"
-    write_text(cmd_path, f"cwd: {result.cwd}\ncmd: {' '.join(result.cmd)}\nrc: {result.returncode}\nsec: {result.duration_sec:.3f}\n")
+    write_text(
+        cmd_path,
+        f"cwd: {result.cwd}\ncmd: {' '.join(result.cmd)}\nrc: {result.returncode}\nsec: {result.duration_sec:.3f}\n",
+    )
     write_text(out_path, result.stdout)
     write_text(err_path, result.stderr)
     if _is_verbose():
@@ -105,5 +109,3 @@ def persist_command_result(
             )
         except Exception:
             pass
-
-

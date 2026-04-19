@@ -7,7 +7,9 @@ import sys
 from pathlib import Path
 
 
-def _run(cmd: list[str], cwd: Path | None = None, timeout_sec: int = 3600) -> subprocess.CompletedProcess[str]:
+def _run(
+    cmd: list[str], cwd: Path | None = None, timeout_sec: int = 3600
+) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         cmd,
         cwd=str(cwd) if cwd else None,
@@ -27,7 +29,9 @@ def repo_root() -> Path:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--paper-key", default="verify_paper_image")
-    ap.add_argument("--python", dest="python_tag", default="3.7", help="python docker image tag, used as python:<tag>")
+    ap.add_argument(
+        "--python", dest="python_tag", default="3.7", help="python docker image tag, used as python:<tag>"
+    )
     ap.add_argument("--rebuild", action="store_true")
     ap.add_argument("--keep", action="store_true")
     args = ap.parse_args()
@@ -43,8 +47,12 @@ def main() -> int:
     run_dir.mkdir(parents=True, exist_ok=True)
 
     # Minimal repo with pinned deps similar to old-paper scenarios.
-    (repo_dir / "requirements.txt").write_text("torch==1.4.0\nnumpy==1.16.2\n", encoding="utf-8", errors="ignore")
-    (repo_dir / "smoke.py").write_text("import torch\nprint(torch.__version__)\n", encoding="utf-8", errors="ignore")
+    (repo_dir / "requirements.txt").write_text(
+        "torch==1.4.0\nnumpy==1.16.2\n", encoding="utf-8", errors="ignore"
+    )
+    (repo_dir / "smoke.py").write_text(
+        "import torch\nprint(torch.__version__)\n", encoding="utf-8", errors="ignore"
+    )
 
     # mcp-repo-output style Dockerfile
     deployment = repo_dir / "deployment"
@@ -54,7 +62,7 @@ def main() -> int:
         f"FROM python:{args.python_tag}\n\n"
         "RUN useradd -m -u 1000 user && python -m pip install --upgrade pip\n"
         "USER user\n"
-        "ENV PATH=\"/home/user/.local/bin:$PATH\"\n\n"
+        'ENV PATH="/home/user/.local/bin:$PATH"\n\n'
         "WORKDIR /app\n\n"
         "COPY --chown=user ./requirements.txt requirements.txt\n"
         "RUN pip install --no-cache-dir --upgrade -r requirements.txt\n\n"
@@ -75,7 +83,11 @@ def main() -> int:
         return b.returncode
 
     print("[verify_paper_image] run import torch")
-    r = _run(["docker", "run", "--rm", "-v", f"{run_dir}:/workspace/run_dir", image, "python", "smoke.py"], cwd=root, timeout_sec=1200)
+    r = _run(
+        ["docker", "run", "--rm", "-v", f"{run_dir}:/workspace/run_dir", image, "python", "smoke.py"],
+        cwd=root,
+        timeout_sec=1200,
+    )
     sys.stdout.write(r.stdout)
     sys.stderr.write(r.stderr)
     if r.returncode != 0:
@@ -89,6 +101,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
-
-

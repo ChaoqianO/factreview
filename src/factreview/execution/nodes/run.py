@@ -1,20 +1,20 @@
 from __future__ import annotations
 
+import glob
 import json
 import os
-import glob
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
-from factreview.util.fs import copy_into, ensure_dir, safe_relpath, write_text
+from factreview.util.fs import ensure_dir, safe_relpath, write_text
 from factreview.util.recorder import append_event
 from factreview.util.runner import persist_command_result, run_command
 
-from ..tools.docker import docker_ensure_paper_image, docker_run_paper_image, docker_strategy
+from ..tools.docker import docker_ensure_paper_image, docker_run_paper_image
 from ..tools.results_tables import maybe_summarize_metrics_tables
 
 
-def _load_tasks(tasks_path: str) -> List[Dict[str, Any]]:
+def _load_tasks(tasks_path: str) -> list[dict[str, Any]]:
     """
     Tasks format (minimal):
     [
@@ -42,8 +42,9 @@ def _load_tasks(tasks_path: str) -> List[Dict[str, Any]]:
     except Exception:
         return []
 
-def _expand_artifact_paths(cwd: str, paper_root: str, items: List[str]) -> List[Path]:
-    out: List[Path] = []
+
+def _expand_artifact_paths(cwd: str, paper_root: str, items: list[str]) -> list[Path]:
+    out: list[Path] = []
     for raw in items:
         if not raw:
             continue
@@ -59,7 +60,7 @@ def _expand_artifact_paths(cwd: str, paper_root: str, items: List[str]) -> List[
             if p.exists():
                 out.append(p)
     # de-dup
-    uniq: List[Path] = []
+    uniq: list[Path] = []
     seen = set()
     for p in out:
         key = str(p.resolve()).lower()
@@ -70,7 +71,7 @@ def _expand_artifact_paths(cwd: str, paper_root: str, items: List[str]) -> List[
     return uniq
 
 
-def run_node(state: Dict[str, Any]) -> Dict[str, Any]:
+def run_node(state: dict[str, Any]) -> dict[str, Any]:
     cfg = state.get("config", {})
     run_info = state.get("run", {})
     run_dir = Path(run_info.get("dir") or "")
@@ -92,7 +93,6 @@ def run_node(state: Dict[str, Any]) -> Dict[str, Any]:
     attempt = int(state.get("attempt") or 0)
     docker_enabled = bool(cfg.get("docker_enabled", True))
     python_spec = str(cfg.get("python_spec") or "3.11").strip()
-    strategy = docker_strategy(cfg) if docker_enabled else ""
 
     tasks = _load_tasks(tasks_path)
     if not tasks:
@@ -129,7 +129,10 @@ def run_node(state: Dict[str, Any]) -> Dict[str, Any]:
         cmd_raw = task.get("cmd")
         cmd = None
         if isinstance(cmd_raw, list) and all(isinstance(x, str) for x in cmd_raw):
-            cmd = [str(x).replace("{paper_root}", pr).replace("{paper_dir}", pd).replace("{run_dir}", rd) for x in cmd_raw]
+            cmd = [
+                str(x).replace("{paper_root}", pr).replace("{paper_dir}", pd).replace("{run_dir}", rd)
+                for x in cmd_raw
+            ]
         timeout_sec = int(task.get("timeout_sec") or 3600)
         if not isinstance(cmd, list) or not all(isinstance(x, str) for x in cmd):
             results.append({"id": task_id, "success": False, "error": "invalid_cmd"})
@@ -203,7 +206,11 @@ def run_node(state: Dict[str, Any]) -> Dict[str, Any]:
             )
             if not ok_img:
                 state["status"] = "failed"
-                state["run_result"] = {"success": False, "error": "docker_paper_image_build_failed", "detail": img_or_msg}
+                state["run_result"] = {
+                    "success": False,
+                    "error": "docker_paper_image_build_failed",
+                    "detail": img_or_msg,
+                }
                 return state
             docker_cmd = docker_run_paper_image(
                 image=img_or_msg,
@@ -212,9 +219,14 @@ def run_node(state: Dict[str, Any]) -> Dict[str, Any]:
                 cwd_container=cwd,
                 cmd=cmd,
                 env={},
-                gpus=str(cfg.get("docker_gpus") or os.environ.get("CODE_EVAL_DOCKER_GPUS") or "").strip() or None,
-                shm_size=str(cfg.get("docker_shm_size") or os.environ.get("CODE_EVAL_DOCKER_SHM_SIZE") or "").strip() or None,
-                ipc=str(cfg.get("docker_ipc") or os.environ.get("CODE_EVAL_DOCKER_IPC") or "").strip() or None,
+                gpus=str(cfg.get("docker_gpus") or os.environ.get("CODE_EVAL_DOCKER_GPUS") or "").strip()
+                or None,
+                shm_size=str(
+                    cfg.get("docker_shm_size") or os.environ.get("CODE_EVAL_DOCKER_SHM_SIZE") or ""
+                ).strip()
+                or None,
+                ipc=str(cfg.get("docker_ipc") or os.environ.get("CODE_EVAL_DOCKER_IPC") or "").strip()
+                or None,
             )
             res = run_command(cmd=docker_cmd, cwd=str(run_dir), timeout_sec=timeout_sec, env=env)
         else:
@@ -283,7 +295,7 @@ def run_node(state: Dict[str, Any]) -> Dict[str, Any]:
                     .replace("{paper_dir}", (pd_h if docker_enabled else pd))
                     .replace("{run_dir}", str(run_dir))
                     for x in artifact_paths
-                    if isinstance(x, (str, int, float))
+                    if isinstance(x, str | int | float)
                 ],
             )
             copied = []
@@ -292,7 +304,11 @@ def run_node(state: Dict[str, Any]) -> Dict[str, Any]:
                     # preserve relative path under paper_root if possible, otherwise under cwd
                     rel = None
                     try:
-                        if pr and Path(pr).exists() and str(p).lower().startswith(str(Path(pr).resolve()).lower()):
+                        if (
+                            pr
+                            and Path(pr).exists()
+                            and str(p).lower().startswith(str(Path(pr).resolve()).lower())
+                        ):
                             rel = safe_relpath(p, Path(pr).resolve())
                         else:
                             rel = safe_relpath(p, Path(cwd).resolve())
@@ -304,11 +320,14 @@ def run_node(state: Dict[str, Any]) -> Dict[str, Any]:
                         # copy tree into destination parent with the folder name
                         if dest.exists():
                             import shutil
+
                             shutil.rmtree(dest, ignore_errors=True)
                         import shutil
+
                         shutil.copytree(p, dest, ignore=shutil.ignore_patterns(".git", "__pycache__"))
                     else:
                         import shutil
+
                         shutil.copy2(p, dest)
                     copied.append(str(rel).replace("\\", "/"))
                 except Exception:
@@ -337,5 +356,3 @@ def run_node(state: Dict[str, Any]) -> Dict[str, Any]:
     append_event(run_dir, "run_ok", {"tasks": results, "task_total": total_tasks})
     state.setdefault("history", []).append({"kind": "run_ok", "data": {"tasks": results}})
     return state
-
-

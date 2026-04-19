@@ -5,7 +5,7 @@ import copy
 import json
 import sys
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 # Ensure imports like `from src...` work when executing this script directly.
 # scripts/ lives inside code_evaluation/; parents[1] == code_evaluation/.
@@ -24,7 +24,7 @@ def _pp(obj: Any) -> str:
     return json.dumps(obj, ensure_ascii=False, indent=2)
 
 
-def _print_step(name: str, state: Dict[str, Any]) -> None:
+def _print_step(name: str, state: dict[str, Any]) -> None:
     cfg = state.get("config") or {}
     run = state.get("run") or {}
     print(f"\n=== {name} ===")
@@ -53,13 +53,19 @@ def main() -> int:
     ap.add_argument("--paper-key", default="")
     ap.add_argument("--run-root", default=str(_CODE_EVAL / "run"))
     ap.add_argument("--no-pdf-extract", action="store_true")
-    ap.add_argument("--dry-run", action="store_true", help="Run tasks in dry-run mode (no docker/paper execution).")
+    ap.add_argument(
+        "--dry-run", action="store_true", help="Run tasks in dry-run mode (no docker/paper execution)."
+    )
     ap.add_argument("--no-llm", action="store_true")
     ap.add_argument("--llm-judge-mode", default="off", choices=["off", "assist", "verdict"])
-    ap.add_argument("--docker-strategy", default="", help="Docker strategy (only 'paper_image' is supported). Empty uses default.")
+    ap.add_argument(
+        "--docker-strategy",
+        default="",
+        help="Docker strategy (only 'paper_image' is supported). Empty uses default.",
+    )
     args = ap.parse_args()
 
-    state: Dict[str, Any] = {
+    state: dict[str, Any] = {
         "status": "running",
         "attempt": 0,
         "max_attempts": 2,
@@ -124,5 +130,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
-

@@ -22,8 +22,8 @@ class NeighborMethod(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
     name: str
-    family: str | None = None               # "knowledge-graph-embedding", "relational-gcn", …
-    citation_key: str | None = None         # BibTeX key when known
+    family: str | None = None  # "knowledge-graph-embedding", "relational-gcn", …
+    citation_key: str | None = None  # BibTeX key when known
     arxiv_id: str | None = None
     doi: str | None = None
     semantic_scholar_id: str | None = None

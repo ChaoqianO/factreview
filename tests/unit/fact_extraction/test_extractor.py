@@ -52,6 +52,7 @@ def _synthetic_paper() -> Paper:
 # _parse_llm_claims
 # ---------------------------------------------------------------------------
 
+
 class TestParseLLMClaims:
     def test_happy_path(self) -> None:
         raw = [
@@ -90,6 +91,7 @@ class TestParseLLMClaims:
 # ---------------------------------------------------------------------------
 # _merge_claims
 # ---------------------------------------------------------------------------
+
 
 class TestMergeClaims:
     def test_empty_heuristic_passes_through(self) -> None:
@@ -144,6 +146,7 @@ class TestMergeClaims:
 # ---------------------------------------------------------------------------
 # extract_facts (integration with all sub-modules, but LLM patched)
 # ---------------------------------------------------------------------------
+
 
 class TestExtractFacts:
     def test_heuristic_mode_no_llm_call(self) -> None:
@@ -251,6 +254,7 @@ class TestExtractFacts:
 # ---------------------------------------------------------------------------
 # Prompt template loading (package-data integrity check)
 # ---------------------------------------------------------------------------
+
 
 def test_prompt_template_loads_and_formats() -> None:
     from factreview.fact_extraction.extractor import _load_prompt_template

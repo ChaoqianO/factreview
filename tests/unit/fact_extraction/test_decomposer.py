@@ -29,9 +29,7 @@ def _broad_empirical_claim() -> Claim:
 
 
 def test_detect_tasks_multiple() -> None:
-    tasks = _detect_tasks(
-        "Evaluated on link prediction, node classification, and graph classification."
-    )
+    tasks = _detect_tasks("Evaluated on link prediction, node classification, and graph classification.")
     assert tasks == ["link_prediction", "node_classification", "graph_classification"]
 
 
@@ -141,19 +139,30 @@ def test_decompose_method_name_tiebreak() -> None:
     # Two rows at the same (metric, dataset); method match wins.
     reported = [
         ReportedResult(
-            id="t.1", metric="MRR", value=0.300, dataset="FB15k-237",
-            task="link_prediction", method="TransE", table_id="t",
-            row_index=1, col_index=0,
+            id="t.1",
+            metric="MRR",
+            value=0.300,
+            dataset="FB15k-237",
+            task="link_prediction",
+            method="TransE",
+            table_id="t",
+            row_index=1,
+            col_index=0,
         ),
         ReportedResult(
-            id="t.2", metric="MRR", value=0.355, dataset="FB15k-237",
-            task="link_prediction", method="COMPGCN", table_id="t",
-            row_index=2, col_index=0,
+            id="t.2",
+            metric="MRR",
+            value=0.355,
+            dataset="FB15k-237",
+            task="link_prediction",
+            method="COMPGCN",
+            table_id="t",
+            row_index=2,
+            col_index=0,
         ),
     ]
     out = decompose_claim(claim, reported=reported)
-    match = next(s for s in out.subclaims
-                 if s.task == "link_prediction" and s.dataset == "FB15k-237")
+    match = next(s for s in out.subclaims if s.task == "link_prediction" and s.dataset == "FB15k-237")
     assert match.expected_value == 0.355
 
 
@@ -170,5 +179,5 @@ def test_decompose_claims_preserves_order() -> None:
     ]
     out = decompose_claims(claims, reported=[])
     assert [c.id for c in out] == ["claim_01", "claim_02"]
-    assert out[0].subclaims          # broad claim decomposed
-    assert out[1].subclaims == []    # local claim untouched
+    assert out[0].subclaims  # broad claim decomposed
+    assert out[1].subclaims == []  # local claim untouched

@@ -20,7 +20,6 @@ from itertools import product
 from factreview.schemas.claim import Claim, SubClaim
 from factreview.schemas.paper import ReportedResult
 
-
 _TASK_PATTERNS: list[tuple[str, re.Pattern[str]]] = [
     ("link_prediction", re.compile(r"\blink\s+prediction\b", re.IGNORECASE)),
     ("node_classification", re.compile(r"\bnode\s+classification\b", re.IGNORECASE)),

@@ -10,10 +10,10 @@ from factreview.schemas.claim import ClaimLabel
 class EvidenceLink(BaseModel):
     """A pointer back to the evidence that justifies an assessment."""
 
-    kind: str                               # "paper" | "literature" | "execution"
-    locator: str                            # section_id / neighbor.name / task_id…
-    snippet: str = ""                       # short human-readable excerpt
-    score: float | None = None              # optional confidence / similarity
+    kind: str  # "paper" | "literature" | "execution"
+    locator: str  # section_id / neighbor.name / task_id…
+    snippet: str = ""  # short human-readable excerpt
+    score: float | None = None  # optional confidence / similarity
 
 
 class ClaimAssessment(BaseModel):
@@ -25,7 +25,7 @@ class ClaimAssessment(BaseModel):
     label: ClaimLabel
     rationale: str
     evidence: list[EvidenceLink] = Field(default_factory=list)
-    confidence: float | None = None         # 0..1 when available
+    confidence: float | None = None  # 0..1 when available
     subclaim_labels: dict[str, ClaimLabel] = Field(default_factory=dict)
 
 
@@ -36,7 +36,7 @@ class FinalReview(BaseModel):
 
     paper_key: str
     run_id: str
-    review_markdown: str                    # the concise review text
-    evidence_markdown: str                  # the linked evidence report
+    review_markdown: str  # the concise review text
+    evidence_markdown: str  # the linked evidence report
     assessments: list[ClaimAssessment] = Field(default_factory=list)
     summary_counts: dict[ClaimLabel, int] = Field(default_factory=dict)

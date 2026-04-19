@@ -25,7 +25,7 @@ def test_tools_importable():
     from factreview.execution.tools.alignment import run_alignment
     from factreview.execution.tools.baseline_checks import Baseline
     from factreview.execution.tools.metrics import compute_check
-    from factreview.positioning.bibtex import lookup_bibtex, title_similarity
+    from factreview.positioning.bibtex import lookup_bibtex
     from factreview.positioning.refcheck import check_references
 
     assert callable(lookup_bibtex)
@@ -51,5 +51,6 @@ def test_orchestrator_accepts_new_flags():
 def test_refchecker_package_lazy():
     """refchecker package loads without triggering heavy deps at import time."""
     import refchecker
+
     assert refchecker.__version__
     # Accessing ArxivReferenceChecker would trigger heavy imports; skip that.

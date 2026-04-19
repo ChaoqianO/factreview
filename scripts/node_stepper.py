@@ -4,7 +4,7 @@ import argparse
 import json
 import sys
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 # Ensure the project root (code_evaluation/) is importable when running this script directly.
 # scripts/ lives inside code_evaluation/; parents[1] == code_evaluation/.
@@ -12,13 +12,13 @@ _CODE_EVAL = Path(__file__).resolve().parents[1]
 if str(_CODE_EVAL) not in sys.path:
     sys.path.insert(0, str(_CODE_EVAL))
 
-from src.nodes.finalize import finalize_node  # noqa: E402
-from src.nodes.fix import fix_node  # noqa: E402
-from src.nodes.judge import judge_node  # noqa: E402
-from src.nodes.prepare import prepare_node  # noqa: E402
-from src.nodes.run import run_node  # noqa: E402
+from src.nodes.finalize import finalize_node
+from src.nodes.fix import fix_node
+from src.nodes.judge import judge_node
+from src.nodes.prepare import prepare_node
+from src.nodes.run import run_node
 
-State = Dict[str, Any]
+State = dict[str, Any]
 
 
 def _read_json(path: Path) -> Any:
@@ -90,7 +90,9 @@ def _print_summary(st: State) -> None:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Step through code_evaluation nodes using a persisted state.json")
+    ap = argparse.ArgumentParser(
+        description="Step through code_evaluation nodes using a persisted state.json"
+    )
     sub = ap.add_subparsers(dest="cmd", required=True)
 
     p_init = sub.add_parser("init", help="Run prepare node and persist state.json into run_dir")
@@ -156,5 +158,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
-

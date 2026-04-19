@@ -18,7 +18,6 @@ returned list is guaranteed to be in its final §3.1b form.
 from __future__ import annotations
 
 import importlib.resources as ir
-import json
 import logging
 from dataclasses import dataclass
 
@@ -37,13 +36,14 @@ logger = logging.getLogger(__name__)
 # Public result type
 # ---------------------------------------------------------------------------
 
+
 @dataclass(frozen=True)
 class ExtractionResult:
     """Bundle returned by :func:`extract_facts`."""
 
     claims: list[Claim]
     reported_results: list[ReportedResult]
-    backend: str                                # "llm" | "heuristic" | "auto:llm+heuristic"
+    backend: str  # "llm" | "heuristic" | "auto:llm+heuristic"
 
 
 # ---------------------------------------------------------------------------
@@ -55,8 +55,10 @@ _PROMPT_TEMPLATE_NAME = "extract_claims.txt"
 
 def _load_prompt_template() -> str:
     """Load the extraction prompt from the prompts/ package data dir."""
-    return ir.files("factreview.fact_extraction.prompts").joinpath(_PROMPT_TEMPLATE_NAME).read_text(
-        encoding="utf-8"
+    return (
+        ir.files("factreview.fact_extraction.prompts")
+        .joinpath(_PROMPT_TEMPLATE_NAME)
+        .read_text(encoding="utf-8")
     )
 
 
@@ -172,6 +174,7 @@ def _parse_llm_claims(raw: list[dict]) -> list[Claim]:
 # Merge logic (for mode="auto")
 # ---------------------------------------------------------------------------
 
+
 def _merge_claims(llm_claims: list[Claim], heuristic_claims: list[Claim]) -> list[Claim]:
     """Keep all LLM claims, append heuristic claims that add new information.
 
@@ -192,8 +195,7 @@ def _merge_claims(llm_claims: list[Claim], heuristic_claims: list[Claim]) -> lis
         if any(_jaccard(ht, kt) >= 0.6 for kt in known_texts):
             continue
         if hc.type == ClaimType.REPRODUCIBILITY or not any(
-            c.type == hc.type and hc.location.section_id == c.location.section_id
-            for c in llm_claims
+            c.type == hc.type and hc.location.section_id == c.location.section_id for c in llm_claims
         ):
             out.append(hc)
     # Re-number so ids stay stable & dense.
@@ -214,6 +216,7 @@ def _jaccard(a: str, b: str) -> float:
 # ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------
+
 
 def extract_facts(
     paper: Paper,

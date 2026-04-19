@@ -3,14 +3,14 @@ from __future__ import annotations
 import json
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from factreview.util.fs import ensure_dir, write_text
 
 from .paper_tables import PaperMetricTarget, extract_paper_metric_targets
 
 
-def _read_json(p: Path) -> Dict[str, Any]:
+def _read_json(p: Path) -> dict[str, Any]:
     try:
         return json.loads(p.read_text(encoding="utf-8", errors="ignore") or "{}")
     except Exception:
@@ -37,7 +37,7 @@ def _opn_display(opn: str) -> str:
     return m.get(_norm(opn), opn)
 
 
-def _as_float(x: Any) -> Optional[float]:
+def _as_float(x: Any) -> float | None:
     try:
         return float(x)
     except Exception:
@@ -58,10 +58,10 @@ class AlignmentMatch:
     split: str
     score_func: str
     opn: str
-    expected: Dict[str, float]
-    observed: Dict[str, float]
-    delta: Dict[str, float]
-    within_tolerance: Dict[str, bool]
+    expected: dict[str, float]
+    observed: dict[str, float]
+    delta: dict[str, float]
+    within_tolerance: dict[str, bool]
     passed: bool
     paper_table_id: str
     paper_table_md_path: str
@@ -75,15 +75,15 @@ class AlignmentResult:
     matched: int
     passed: int
     failed: int
-    unmatched_run_metrics: List[str]
-    critiques: List[Dict[str, Any]]
-    matches: List[Dict[str, Any]]
-    notes: List[str]
+    unmatched_run_metrics: list[str]
+    critiques: list[dict[str, Any]]
+    matches: list[dict[str, Any]]
+    notes: list[str]
 
 
 def _pick_target(
-    targets: List[PaperMetricTarget], *, dataset: str, score_func: str, opn: str
-) -> Optional[PaperMetricTarget]:
+    targets: list[PaperMetricTarget], *, dataset: str, score_func: str, opn: str
+) -> PaperMetricTarget | None:
     ds = _norm(dataset)
     sf = _score_func_display(score_func)
     op = _opn_display(opn)
@@ -106,8 +106,8 @@ def _pick_target(
     return cand[0] if cand else None
 
 
-def _calc_delta(obs: Dict[str, float], exp: Dict[str, float]) -> Dict[str, float]:
-    out: Dict[str, float] = {}
+def _calc_delta(obs: dict[str, float], exp: dict[str, float]) -> dict[str, float]:
+    out: dict[str, float] = {}
     for k, exp_v in exp.items():
         obs_v = obs.get(k)
         if obs_v is None:
@@ -116,8 +116,8 @@ def _calc_delta(obs: Dict[str, float], exp: Dict[str, float]) -> Dict[str, float
     return out
 
 
-def _within_tol(delta: Dict[str, float], tol: AlignmentTolerance) -> Dict[str, bool]:
-    out: Dict[str, bool] = {}
+def _within_tol(delta: dict[str, float], tol: AlignmentTolerance) -> dict[str, bool]:
+    out: dict[str, bool] = {}
     for k, d in delta.items():
         if k == "mrr":
             out[k] = abs(d) <= float(tol.mrr)
@@ -131,12 +131,12 @@ def _within_tol(delta: Dict[str, float], tol: AlignmentTolerance) -> Dict[str, b
     return out
 
 
-def _extract_run_metrics_row(d: Dict[str, Any]) -> Tuple[str, str, str, str, Dict[str, float]]:
+def _extract_run_metrics_row(d: dict[str, Any]) -> tuple[str, str, str, str, dict[str, float]]:
     dataset = str(d.get("dataset") or "").strip()
     split = str(d.get("split") or "").strip()
     score_func = str(d.get("score_func") or d.get("scoring_function") or "").strip()
     opn = str(d.get("opn") or "").strip()
-    metrics: Dict[str, float] = {}
+    metrics: dict[str, float] = {}
     for k in ["mrr", "mr", "hits@10", "hits@3", "hits@1"]:
         v = _as_float(d.get(k))
         if v is not None:
@@ -146,7 +146,7 @@ def _extract_run_metrics_row(d: Dict[str, Any]) -> Tuple[str, str, str, str, Dic
 
 def run_alignment(
     *,
-    cfg: Dict[str, Any],
+    cfg: dict[str, Any],
     run_dir: Path,
     artifacts_dir: Path,
     paper_extracted_tables_dir: Path,
@@ -173,13 +173,15 @@ def run_alignment(
     metrics_dir = Path(artifacts_dir) / "metrics"
     metrics_files = sorted(metrics_dir.glob("*.json")) if metrics_dir.exists() else []
 
-    matches: List[AlignmentMatch] = []
-    unmatched: List[str] = []
-    notes: List[str] = []
-    critiques: List[Dict[str, Any]] = []
+    matches: list[AlignmentMatch] = []
+    unmatched: list[str] = []
+    notes: list[str] = []
+    critiques: list[dict[str, Any]] = []
 
     if not targets:
-        notes.append("No parseable paper targets found in paper_extracted tables (deterministic alignment skipped).")
+        notes.append(
+            "No parseable paper targets found in paper_extracted tables (deterministic alignment skipped)."
+        )
 
     for mf in metrics_files:
         d = _read_json(mf)
@@ -236,7 +238,9 @@ def run_alignment(
             dmr = abs(delta.get("mr", 0.0)) if "mr" in delta else 0.0
             if (dmrr > 0.05) or (dh10 > 0.06) or (dmr > 200):
                 sev = "high"
-            elif (dmrr > float(tol.mrr) * 2) or (dh10 > float(tol.hits_at_10) * 2) or (dmr > float(tol.mr) * 2):
+            elif (
+                (dmrr > float(tol.mrr) * 2) or (dh10 > float(tol.hits_at_10) * 2) or (dmr > float(tol.mr) * 2)
+            ):
                 sev = "medium"
             critiques.append(
                 {
@@ -275,7 +279,7 @@ def run_alignment(
     write_text(out_dir / "alignment.json", json.dumps(asdict(result), ensure_ascii=False, indent=2) + "\n")
 
     # Human-readable snippet (used by finalize report)
-    md_lines: List[str] = []
+    md_lines: list[str] = []
     md_lines.append("# Paper alignment (deterministic)")
     md_lines.append("")
     md_lines.append(f"- extracted_targets: {result.extracted_targets}")
@@ -314,5 +318,3 @@ def run_alignment(
     write_text(out_dir / "alignment.md", "\n".join(md_lines) + "\n")
 
     return result
-
-

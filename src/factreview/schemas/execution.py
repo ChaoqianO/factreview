@@ -10,22 +10,22 @@ class Task(BaseModel):
 
     model_config = ConfigDict(extra="ignore")
 
-    id: str                                 # e.g. "eval_fb237_conve"
+    id: str  # e.g. "eval_fb237_conve"
     name: str
     command: list[str] = Field(default_factory=list)
     workdir: str = "."
     timeout_sec: int = 3600
     expects_metrics: list[str] = Field(default_factory=list)
     enabled: bool = True
-    claim_ids: list[str] = Field(default_factory=list)      # which Claims this task serves
+    claim_ids: list[str] = Field(default_factory=list)  # which Claims this task serves
     description: str = ""
 
 
 class RunArtifact(BaseModel):
     """A file/folder produced by executing a task."""
 
-    path: str                               # relative to run directory
-    kind: str                               # "log", "metric", "checkpoint", "image", …
+    path: str  # relative to run directory
+    kind: str  # "log", "metric", "checkpoint", "image", …
     size_bytes: int | None = None
 
 

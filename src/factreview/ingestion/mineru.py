@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import glob
 import html
 import json
 import os
@@ -7,8 +8,6 @@ import re
 import shutil
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
-import glob
 
 from factreview.util.fs import ensure_dir, write_text
 from factreview.util.runner import CommandResult, persist_command_result, run_command
@@ -123,6 +122,7 @@ def extract_with_mineru(
     cands = [p for p in cands if p.resolve() != preferred_out_md.resolve()]
     auto_dir: Path | None = None
     if cands:
+
         def _score(p: Path) -> tuple[int, int, int]:
             # is_auto: prioritize files under an "auto" directory
             parts = [x.lower() for x in p.parts]
@@ -142,7 +142,9 @@ def extract_with_mineru(
         auto_dir = out_md_path.parent
         # Always copy the main md to our stable path.
         try:
-            preferred_out_md.write_text(out_md_path.read_text(encoding="utf-8", errors="ignore"), encoding="utf-8", errors="ignore")
+            preferred_out_md.write_text(
+                out_md_path.read_text(encoding="utf-8", errors="ignore"), encoding="utf-8", errors="ignore"
+            )
             out_md_path = preferred_out_md
         except Exception:
             pass
@@ -195,7 +197,10 @@ def extract_with_mineru(
             # Typically: <out_dir>/<pdf_stem>/auto. Remove <out_dir>/<pdf_stem>.
             root_candidate = auto_dir.parent if auto_dir.name.lower() == "auto" else auto_dir
             if root_candidate.exists() and root_candidate.is_dir():
-                if str(root_candidate.resolve()).lower().startswith(str(outd.resolve()).lower()) and root_candidate.resolve() != outd.resolve():
+                if (
+                    str(root_candidate.resolve()).lower().startswith(str(outd.resolve()).lower())
+                    and root_candidate.resolve() != outd.resolve()
+                ):
                     shutil.rmtree(root_candidate, ignore_errors=True)
         except Exception:
             pass
@@ -285,8 +290,10 @@ def extract_with_mineru(
             norm = [r + [""] * (w - len(r)) for r in rows]
             header = norm[0]
             body = norm[1:] if len(norm) > 1 else []
+
             def esc(x: str) -> str:
                 return (x or "").replace("\n", " ").replace("|", "\\|").strip()
+
             lines = []
             lines.append("| " + " | ".join(esc(x) for x in header) + " |")
             lines.append("| " + " | ".join("---" for _ in header) + " |")
@@ -327,7 +334,11 @@ def extract_with_mineru(
                 out_md_path.write_text(
                     f"# {table_id}\n\n"
                     + (f"**Caption**: {caption}\n\n" if caption else "")
-                    + ("(Note: rowspan/colspan may not be represented perfectly in this Markdown view.)\n\n" if ("rowspan" in table_html or "colspan" in table_html) else "")
+                    + (
+                        "(Note: rowspan/colspan may not be represented perfectly in this Markdown view.)\n\n"
+                        if ("rowspan" in table_html or "colspan" in table_html)
+                        else ""
+                    )
                     + (md_table if md_table.strip() else "(empty table)\n"),
                     encoding="utf-8",
                     errors="ignore",
@@ -346,7 +357,9 @@ def extract_with_mineru(
             )
 
         try:
-            (tables_root / "index.json").write_text(json.dumps(index, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", errors="ignore")
+            (tables_root / "index.json").write_text(
+                json.dumps(index, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", errors="ignore"
+            )
         except Exception:
             pass
 
@@ -359,9 +372,17 @@ def extract_with_mineru(
     # Some versions may print a fatal exception but still exit 0. Treat that as failure.
     stderr_txt = (res.stderr or "") if res else ""
     stdout_txt = (res.stdout or "") if res else ""
-    has_traceback = ("Traceback (most recent call last)" in stderr_txt) or ("Traceback (most recent call last)" in stdout_txt)
+    has_traceback = ("Traceback (most recent call last)" in stderr_txt) or (
+        "Traceback (most recent call last)" in stdout_txt
+    )
     has_fatal_error = ("FileNotFoundError" in stderr_txt) or ("FileNotFoundError" in stdout_txt)
-    ok = (res is not None) and (res.returncode == 0) and (not has_traceback) and (not has_fatal_error) and out_md_path.exists()
+    ok = (
+        (res is not None)
+        and (res.returncode == 0)
+        and (not has_traceback)
+        and (not has_fatal_error)
+        and out_md_path.exists()
+    )
     note = ""
     if res is not None and res.returncode == 0 and (has_traceback or has_fatal_error):
         note = "mineru_printed_error_but_exit_0"
@@ -379,6 +400,3 @@ def extract_with_mineru(
         command_log=cmd_log,
         note=note,
     )
-
-
-
