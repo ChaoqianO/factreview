@@ -3,7 +3,7 @@ import asyncio
 import os
 from pathlib import Path
 
-from src.workflow import CodeEvalOrchestrator
+from factreview.execution.graph import CodeEvalOrchestrator
 
 
 def _load_env_file(env_path: Path) -> None:

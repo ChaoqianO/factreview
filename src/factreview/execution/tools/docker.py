@@ -7,7 +7,7 @@ from typing import List, Optional, Tuple
 
 import re
 
-from .runner import run_command
+from factreview.util.runner import run_command
 
 
 def docker_cmd(args: List[str]) -> List[str]:

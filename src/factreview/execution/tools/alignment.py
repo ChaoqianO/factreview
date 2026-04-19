@@ -5,7 +5,8 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-from .fs import ensure_dir, write_text
+from factreview.util.fs import ensure_dir, write_text
+
 from .paper_tables import PaperMetricTarget, extract_paper_metric_targets
 
 

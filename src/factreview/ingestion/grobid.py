@@ -1,7 +1,7 @@
 """
 Grobid 转换器 - 全栈封装版 (含服务检查与批量逻辑)
 """
-from .base import BasePDFConverter
+from ._backend_base import BasePDFConverter
 from pathlib import Path
 from typing import List
 import requests

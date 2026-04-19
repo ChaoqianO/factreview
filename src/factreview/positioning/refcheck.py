@@ -30,10 +30,12 @@ from typing import Any, Dict, Optional
 
 logger = logging.getLogger(__name__)
 
-# Ensure the refchecker package (sibling of src/) is importable.
-_CODE_EVAL_ROOT = Path(__file__).resolve().parents[2]  # code_evaluation/
-if str(_CODE_EVAL_ROOT) not in sys.path:
-    sys.path.insert(0, str(_CODE_EVAL_ROOT))
+# Ensure the vendored refchecker package (under third_party/) is importable.
+# src/factreview/positioning/refcheck.py -> repo_root/third_party/refchecker/src
+_REPO_ROOT = Path(__file__).resolve().parents[3]
+_REFCHECKER_SRC = _REPO_ROOT / "third_party" / "refchecker" / "src"
+if _REFCHECKER_SRC.exists() and str(_REFCHECKER_SRC) not in sys.path:
+    sys.path.insert(0, str(_REFCHECKER_SRC))
 
 
 def _build_checker(

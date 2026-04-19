@@ -6,9 +6,10 @@ import glob
 from pathlib import Path
 from typing import Any, Dict, List
 
-from ..tools.fs import copy_into, ensure_dir, safe_relpath, write_text
-from ..tools.recorder import append_event
-from ..tools.runner import persist_command_result, run_command
+from factreview.util.fs import copy_into, ensure_dir, safe_relpath, write_text
+from factreview.util.recorder import append_event
+from factreview.util.runner import persist_command_result, run_command
+
 from ..tools.docker import docker_ensure_paper_image, docker_run_paper_image, docker_strategy
 from ..tools.results_tables import maybe_summarize_metrics_tables
 

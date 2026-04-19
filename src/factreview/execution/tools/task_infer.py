@@ -8,8 +8,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
-from .fs import read_text
-from .llm import llm_json, resolve_llm_config
+from factreview.llm.client import llm_json, resolve_llm_config
+from factreview.util.fs import read_text
 
 
 @dataclass(frozen=True)

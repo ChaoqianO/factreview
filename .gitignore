@@ -23,3 +23,18 @@ __pycache__/
 .idea/
 .DS_Store
 
+# Build / package artefacts
+build/
+dist/
+*.egg-info/
+.coverage
+coverage.xml
+htmlcov/
+
+# Runtime data (not committed)
+runs/
+reports/
+papers/
+
+# Local uv state (prefer committing uv.lock instead)
+.uv/

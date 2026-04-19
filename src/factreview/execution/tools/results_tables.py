@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
-from .fs import ensure_dir, write_text
+from factreview.util.fs import ensure_dir, write_text
 
 
 def _load_json(p: Path) -> Dict[str, Any]:

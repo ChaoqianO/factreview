@@ -10,8 +10,8 @@ from pathlib import Path
 from typing import Optional
 import glob
 
-from .fs import ensure_dir, write_text
-from .runner import CommandResult, persist_command_result, run_command
+from factreview.util.fs import ensure_dir, write_text
+from factreview.util.runner import CommandResult, persist_command_result, run_command
 
 
 @dataclass(frozen=True)

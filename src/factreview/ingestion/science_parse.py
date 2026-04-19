@@ -2,7 +2,7 @@
 Science-Parse 转换器 (极速批量版)
 针对 32GB 内存机器优化的专用版本。
 """
-from .base import BasePDFConverter
+from ._backend_base import BasePDFConverter
 from pathlib import Path
 import subprocess
 import os

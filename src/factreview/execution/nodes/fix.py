@@ -5,10 +5,11 @@ import re
 from pathlib import Path
 from typing import Any, Dict, List
 
-from ..tools.llm import llm_json, resolve_llm_config
-from ..tools.recorder import append_event
-from ..tools.runner import persist_command_result, run_command
-from ..tools.fs import ensure_dir, write_text
+from factreview.llm.client import llm_json, resolve_llm_config
+from factreview.util.fs import ensure_dir, write_text
+from factreview.util.recorder import append_event
+from factreview.util.runner import persist_command_result, run_command
+
 from ..tools.docker import docker_ensure_paper_image, docker_run_paper_image, docker_strategy
 
 
