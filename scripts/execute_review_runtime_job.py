@@ -14,7 +14,7 @@ if str(SRC) not in sys.path:
 
 
 def parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser("run_fx_runtime_job")
+    p = argparse.ArgumentParser("execute_review_runtime_job")
     p.add_argument("--paper-pdf", required=True)
     p.add_argument("--title", default="factreview-job")
     return p.parse_args()

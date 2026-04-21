@@ -99,4 +99,4 @@ def run_synthesis_stage(
 
 
 if __name__ == "__main__":
-    raise SystemExit("Internal stage module. Use scripts/run_full_pipeline.py.")
+    raise SystemExit("Internal stage module. Use scripts/execute_review_pipeline.py.")

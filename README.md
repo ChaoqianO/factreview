@@ -57,7 +57,7 @@ factreview path/to/paper.pdf
 Run the merged full pipeline (ingestion → fact_extraction → positioning → synthesis):
 
 ```bash
-python scripts/run_full_pipeline.py path/to/paper.pdf
+python scripts/execute_review_pipeline.py path/to/paper.pdf
 ```
 
 Outputs are written to:

@@ -8,12 +8,12 @@ from pathlib import Path
 from typing import Any
 
 
-_BRIDGE_FILE = "_fx_bridge.json"
+_BRIDGE_FILE = "_runtime_bridge.json"
 _PIPELINE_CONTEXT_FILE = "_full_pipeline_context.json"
 
 
 @dataclass(frozen=True)
-class FXBridgeState:
+class RuntimeBridgeState:
     paper_pdf: Path
     paper_key: str
     job_id: str
@@ -42,7 +42,7 @@ def ensure_full_pipeline_context(*, run_dir: Path) -> None:
     if str(payload.get("runner") or "").strip() != "full_pipeline":
         raise RuntimeError(
             "Invalid pipeline context marker. "
-            "Please run through scripts/run_full_pipeline.py."
+            "Please run through scripts/execute_review_pipeline.py."
         )
 
 
@@ -95,9 +95,9 @@ def _pick_python_executable(repo_root: Path) -> Path:
     return Path("python3")
 
 
-def _run_fx_runtime(*, repo_root: Path, paper_pdf: Path, title: str) -> dict[str, Any]:
+def _run_review_runtime(*, repo_root: Path, paper_pdf: Path, title: str) -> dict[str, Any]:
     py_exec = _pick_python_executable(repo_root)
-    script = repo_root / "scripts" / "run_fx_runtime_job.py"
+    script = repo_root / "scripts" / "execute_review_runtime_job.py"
 
     env = os.environ.copy()
     # Keep parity with legacy integration behavior: execution is handled as external stage.
@@ -140,7 +140,7 @@ def _bridge_path(run_dir: Path) -> Path:
     return run_dir / "stages" / "ingestion" / _BRIDGE_FILE
 
 
-def load_bridge_state(run_dir: Path) -> FXBridgeState | None:
+def load_bridge_state(run_dir: Path) -> RuntimeBridgeState | None:
     payload = read_json_file(_bridge_path(run_dir))
     if not payload:
         return None
@@ -156,7 +156,7 @@ def load_bridge_state(run_dir: Path) -> FXBridgeState | None:
     if not (paper_pdf.exists() and job_id and job_json_path.exists()):
         return None
 
-    return FXBridgeState(
+    return RuntimeBridgeState(
         paper_pdf=paper_pdf,
         paper_key=paper_key,
         job_id=job_id,
@@ -172,7 +172,7 @@ def save_bridge_state(
     paper_pdf: Path,
     paper_key: str,
     own_payload: dict[str, Any],
-) -> FXBridgeState:
+) -> RuntimeBridgeState:
     job_id = str(own_payload.get("job_id") or "").strip()
     job_dir = Path(str(own_payload.get("job_dir") or "")).resolve()
     job_json_path = Path(str(own_payload.get("job_json_path") or "")).resolve()
@@ -189,7 +189,7 @@ def save_bridge_state(
     }
     write_json_file(_bridge_path(run_dir), bridge_payload)
 
-    return FXBridgeState(
+    return RuntimeBridgeState(
         paper_pdf=paper_pdf.resolve(),
         paper_key=paper_key,
         job_id=job_id,
@@ -202,7 +202,7 @@ def save_bridge_state(
 def require_bridge_state(
     *,
     run_dir: Path,
-) -> FXBridgeState:
+) -> RuntimeBridgeState:
     existing = load_bridge_state(run_dir)
     if existing is not None:
         return existing
@@ -219,7 +219,7 @@ def bootstrap_bridge_state(
     paper_pdf: Path,
     paper_key: str,
     reuse_job_id: str = "",
-) -> FXBridgeState:
+) -> RuntimeBridgeState:
     existing = load_bridge_state(run_dir)
     if existing is not None:
         return existing
@@ -267,7 +267,7 @@ def bootstrap_bridge_state(
         raise FileNotFoundError(f"paper pdf not found: {resolved_pdf}")
 
     key = str(paper_key or "").strip() or resolved_pdf.parent.name or "paper"
-    own_payload = _run_fx_runtime(repo_root=repo_root, paper_pdf=resolved_pdf, title=key)
+    own_payload = _run_review_runtime(repo_root=repo_root, paper_pdf=resolved_pdf, title=key)
     return save_bridge_state(
         run_dir=run_dir,
         paper_pdf=resolved_pdf,
@@ -328,4 +328,4 @@ def run_ingestion_stage(
 
 
 if __name__ == "__main__":
-    raise SystemExit("Internal stage module. Use scripts/run_full_pipeline.py.")
+    raise SystemExit("Internal stage module. Use scripts/execute_review_pipeline.py.")

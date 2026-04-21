@@ -124,29 +124,29 @@ def build_reasonability_judgement(*, code_eval_summary: dict[str, Any], alignmen
 
 def generate_compare_report(
     *,
-    fx_runtime_md_path: Path,
+    review_runtime_md_path: Path,
     code_eval_root: Path,
     paper_key: str,
     out_dir: Path,
 ) -> dict[str, Any]:
-    fx_runtime_text = _read_text(fx_runtime_md_path)
-    experiments = extract_experiment_tables_from_report(fx_runtime_text)
+    review_runtime_text = _read_text(review_runtime_md_path)
+    experiments = extract_experiment_tables_from_report(review_runtime_text)
 
     latest_run = find_latest_code_eval_run(code_eval_root=code_eval_root, paper_key=paper_key)
     if latest_run is None:
         payload = {
             'paper_key': paper_key,
-            'fx_runtime_markdown': str(fx_runtime_md_path),
+            'review_runtime_markdown': str(review_runtime_md_path),
             'code_eval_latest_run': None,
             'error': f'No code_evaluation run found under {code_eval_root / "run" / paper_key}',
-            'fx_runtime_experiment': experiments,
+            'review_runtime_experiment': experiments,
         }
         out_dir.mkdir(parents=True, exist_ok=True)
         (out_dir / 'latest_compare.json').write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding='utf-8')
         (out_dir / 'latest_compare.md').write_text(
             '# Code Eval Compare\n\n'
             f'- paper_key: `{paper_key}`\n'
-            f'- fx_runtime_markdown: `{fx_runtime_md_path}`\n'
+            f'- review_runtime_markdown: `{review_runtime_md_path}`\n'
             f'- error: {payload["error"]}\n',
             encoding='utf-8',
         )
@@ -158,9 +158,9 @@ def generate_compare_report(
 
     payload = {
         'paper_key': paper_key,
-        'fx_runtime_markdown': str(fx_runtime_md_path),
+        'review_runtime_markdown': str(review_runtime_md_path),
         'code_eval_latest_run': str(latest_run),
-        'fx_runtime_experiment': experiments,
+        'review_runtime_experiment': experiments,
         'code_eval_summary': {
             'status': summary.get('status'),
             'attempts': summary.get('attempts'),
@@ -184,7 +184,7 @@ def generate_compare_report(
         '# Code Eval Compare',
         '',
         f'- paper_key: `{paper_key}`',
-        f'- fx_runtime_markdown: `{fx_runtime_md_path}`',
+        f'- review_runtime_markdown: `{review_runtime_md_path}`',
         f'- code_eval_latest_run: `{latest_run}`',
         '',
         '## FactExtraction Experiment Extraction',
@@ -208,4 +208,3 @@ def generate_compare_report(
     ]
     (out_dir / 'latest_compare.md').write_text('\n'.join(md), encoding='utf-8')
     return payload
-
