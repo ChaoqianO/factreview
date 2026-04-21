@@ -10,7 +10,7 @@ from typing import Any
 
 import httpx
 
-from fx_runtime.adapters.markdown_parser import MarkdownParseResult, parse_pdf_locally
+from ingestion.runtime.adapters.markdown_parser import MarkdownParseResult, parse_pdf_locally
 
 
 @dataclass

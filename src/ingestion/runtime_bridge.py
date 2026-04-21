@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import argparse
 import json
 import os
 import subprocess
@@ -10,6 +9,7 @@ from typing import Any
 
 
 _BRIDGE_FILE = "_fx_bridge.json"
+_PIPELINE_CONTEXT_FILE = "_full_pipeline_context.json"
 
 
 @dataclass(frozen=True)
@@ -20,6 +20,30 @@ class FXBridgeState:
     job_dir: Path
     job_json_path: Path
     own_payload: dict[str, Any]
+
+
+def init_full_pipeline_context(*, run_dir: Path) -> Path:
+    """Mark a run directory as managed by src.pipeline_full."""
+    payload = {"runner": "full_pipeline", "version": 1}
+    path = run_dir / _PIPELINE_CONTEXT_FILE
+    write_json_file(path, payload)
+    return path
+
+
+def ensure_full_pipeline_context(*, run_dir: Path) -> None:
+    """Enforce stage execution through full_pipeline only."""
+    marker = run_dir / _PIPELINE_CONTEXT_FILE
+    payload = read_json_file(marker)
+    if not payload:
+        raise RuntimeError(
+            "Stage modules are internal-only and must be run via full_pipeline. "
+            f"Missing pipeline context marker: {marker}"
+        )
+    if str(payload.get("runner") or "").strip() != "full_pipeline":
+        raise RuntimeError(
+            "Invalid pipeline context marker. "
+            "Please run through scripts/run_full_pipeline.py."
+        )
 
 
 def read_json_file(path: Path) -> dict[str, Any]:
@@ -175,20 +199,67 @@ def save_bridge_state(
     )
 
 
-def ensure_bridge_state(
+def require_bridge_state(
+    *,
+    run_dir: Path,
+) -> FXBridgeState:
+    existing = load_bridge_state(run_dir)
+    if existing is not None:
+        return existing
+    raise FileNotFoundError(
+        f"Bridge state missing at {_bridge_path(run_dir)}. "
+        "Ensure ingestion stage has been completed by full_pipeline."
+    )
+
+
+def bootstrap_bridge_state(
     *,
     repo_root: Path,
     run_dir: Path,
-    paper_pdf: Path | None,
-    paper_key: str | None,
+    paper_pdf: Path,
+    paper_key: str,
+    reuse_job_id: str = "",
 ) -> FXBridgeState:
     existing = load_bridge_state(run_dir)
     if existing is not None:
         return existing
 
-    if paper_pdf is None:
-        raise FileNotFoundError(
-            f"Bridge state missing at {_bridge_path(run_dir)} and no paper_pdf was provided to bootstrap ingestion."
+    job_id = str(reuse_job_id or "").strip()
+    if job_id:
+        job_dir = (repo_root / "data" / "jobs" / job_id).resolve()
+        job_json_path = job_dir / "job.json"
+        if not job_json_path.exists():
+            raise FileNotFoundError(f"reused job.json not found: {job_json_path}")
+        job_state = read_json_file(job_json_path)
+        if not job_state:
+            raise RuntimeError(f"reused job state is empty/invalid: {job_json_path}")
+
+        artifacts = job_state.get("artifacts") if isinstance(job_state.get("artifacts"), dict) else {}
+        source_pdf = resolve_artifact_path(repo_root, artifacts.get("source_pdf_path"))
+        resolved_pdf = source_pdf if (source_pdf is not None and source_pdf.exists()) else paper_pdf.resolve()
+        key = str(paper_key or "").strip() or resolved_pdf.parent.name or "paper"
+
+        own_payload = {
+            "job_id": job_id,
+            "status": job_state.get("status"),
+            "message": job_state.get("message"),
+            "error": job_state.get("error"),
+            "artifacts": artifacts,
+            "usage": job_state.get("usage") or {},
+            "metadata": job_state.get("metadata") or {},
+            "annotation_count": int(job_state.get("annotation_count") or 0),
+            "final_report_ready": bool(job_state.get("final_report_ready")),
+            "pdf_ready": bool(job_state.get("pdf_ready")),
+            "job_json_path": str(job_json_path),
+            "job_dir": str(job_dir),
+            "latest_output_md": str((repo_root / "output" / "latest_extraction.md").resolve()),
+            "latest_output_pdf": str((repo_root / "output" / "latest_extraction.pdf").resolve()),
+        }
+        return save_bridge_state(
+            run_dir=run_dir,
+            paper_pdf=resolved_pdf,
+            paper_key=key,
+            own_payload=own_payload,
         )
 
     resolved_pdf = paper_pdf.resolve()
@@ -211,27 +282,32 @@ def run_ingestion_stage(
     run_dir: Path,
     paper_pdf: Path,
     paper_key: str,
+    reuse_job_id: str = "",
 ) -> dict[str, Any]:
-    state = ensure_bridge_state(
+    ensure_full_pipeline_context(run_dir=run_dir)
+    state = bootstrap_bridge_state(
         repo_root=repo_root,
         run_dir=run_dir,
         paper_pdf=paper_pdf,
         paper_key=paper_key,
+        reuse_job_id=reuse_job_id,
     )
     job_state = read_json_file(state.job_json_path)
     artifacts = job_state.get("artifacts") if isinstance(job_state.get("artifacts"), dict) else {}
     metadata = job_state.get("metadata") if isinstance(job_state.get("metadata"), dict) else {}
+    mineru_md_raw = str(artifacts.get("mineru_markdown_path") or "").strip()
+    mineru_content_raw = str(artifacts.get("mineru_content_list_path") or "").strip()
 
-    mineru_md = resolve_artifact_path(repo_root, artifacts.get("mineru_markdown_path"))
-    mineru_content = resolve_artifact_path(repo_root, artifacts.get("mineru_content_list_path"))
+    mineru_md = resolve_artifact_path(repo_root, mineru_md_raw)
+    mineru_content = resolve_artifact_path(repo_root, mineru_content_raw)
 
     ingestion_out = run_dir / "stages" / "ingestion" / "paper.json"
     write_json_file(
         ingestion_out,
         {
             "source_pdf": str(state.paper_pdf),
-            "mineru_markdown_path": str(mineru_md) if (mineru_md is not None and mineru_md.exists()) else "",
-            "mineru_content_list_path": str(mineru_content)
+            "mineru_markdown_path": mineru_md_raw if (mineru_md is not None and mineru_md.exists()) else "",
+            "mineru_content_list_path": mineru_content_raw
             if (mineru_content is not None and mineru_content.exists())
             else "",
             "markdown_provider": metadata.get("markdown_provider"),
@@ -251,28 +327,5 @@ def run_ingestion_stage(
     }
 
 
-def _parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser("run_ingestion_fx_stage")
-    p.add_argument("paper_pdf", type=str)
-    p.add_argument("--paper-key", type=str, default="")
-    p.add_argument("--run-dir", type=str, required=True)
-    return p.parse_args()
-
-
-def main() -> None:
-    args = _parse_args()
-    repo_root = Path(__file__).resolve().parents[2]
-    paper_pdf = Path(args.paper_pdf).resolve()
-    paper_key = (args.paper_key or "").strip() or paper_pdf.parent.name or "paper"
-    run_dir = Path(args.run_dir).resolve()
-    payload = run_ingestion_stage(
-        repo_root=repo_root,
-        run_dir=run_dir,
-        paper_pdf=paper_pdf,
-        paper_key=paper_key,
-    )
-    print(json.dumps(payload, ensure_ascii=False, indent=2))
-
-
 if __name__ == "__main__":
-    main()
+    raise SystemExit("Internal stage module. Use scripts/run_full_pipeline.py.")

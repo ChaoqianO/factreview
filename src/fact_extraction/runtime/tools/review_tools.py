@@ -8,12 +8,12 @@ from uuid import uuid4
 
 from agents import RunContextWrapper, function_tool
 
-from fx_runtime.adapters.paper_search import PaperSearchAdapter, normalize_question_list
-from fx_runtime.config import Settings
-from fx_runtime.report.final_report import validate_final_report
-from fx_runtime.state import mutate_job_state
-from fx_runtime.storage import annotations_path, append_event, write_json_atomic, write_text_atomic
-from fx_runtime.types import AnnotationItem, PaperSearchUsage
+from positioning.runtime.adapters.paper_search import PaperSearchAdapter, normalize_question_list
+from common.runtime_shared.config import Settings
+from synthesis.runtime.report.final_report import validate_final_report
+from common.runtime_shared.state import mutate_job_state
+from common.runtime_shared.storage import annotations_path, append_event, write_json_atomic, write_text_atomic
+from common.runtime_shared.types import AnnotationItem, PaperSearchUsage
 
 
 def _normalize_signature(text: str) -> str:

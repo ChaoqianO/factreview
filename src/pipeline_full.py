@@ -6,11 +6,11 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from execution.fx_stage_runner import run_execution_stage
-from fact_extraction.fx_stage_runner import run_fact_extraction_stage
-from ingestion.fx_stage_runner import run_ingestion_stage
-from positioning.fx_stage_runner import run_positioning_stage
-from synthesis.fx_stage_runner import run_synthesis_stage
+from execution.stage_runner import run_execution_stage
+from fact_extraction.stage_runner import run_fact_extraction_stage
+from ingestion.runtime_bridge import init_full_pipeline_context, run_ingestion_stage
+from positioning.stage_runner import run_positioning_stage
+from synthesis.stage_runner import run_synthesis_stage
 
 
 def _now_run_id() -> str:
@@ -32,12 +32,14 @@ def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
     run_id = _now_run_id()
     run_dir = Path(args.run_root).resolve() / paper_key / run_id
     run_dir.mkdir(parents=True, exist_ok=True)
+    init_full_pipeline_context(run_dir=run_dir)
 
     ingestion_result = run_ingestion_stage(
         repo_root=repo_root,
         run_dir=run_dir,
         paper_pdf=paper_pdf,
         paper_key=paper_key,
+        reuse_job_id=str(args.reuse_job_id or "").strip(),
     )
     fact_result = run_fact_extraction_stage(
         repo_root=repo_root,
@@ -47,13 +49,32 @@ def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
         repo_root=repo_root,
         run_dir=run_dir,
     )
-    execution_result = run_execution_stage(
-        run_dir=run_dir,
-        paper_pdf=paper_pdf,
-        paper_key=paper_key,
-        max_attempts=int(args.max_attempts),
-        no_pdf_extract=bool(args.no_pdf_extract),
-    )
+    if bool(args.skip_execution):
+        execution_payload = {
+            "paper_key": paper_key,
+            "paper_pdf": str(paper_pdf),
+            "status": "skipped",
+            "success": False,
+            "exit_status": "skipped",
+            "run_dir": "",
+            "summary": {},
+            "alignment": {},
+        }
+        execution_out = run_dir / "stages" / "execution" / "execution.json"
+        _write_json(execution_out, execution_payload)
+        execution_result = {
+            "status": "skipped",
+            "output": str(execution_out),
+            "run_dir": "",
+        }
+    else:
+        execution_result = run_execution_stage(
+            run_dir=run_dir,
+            paper_pdf=paper_pdf,
+            paper_key=paper_key,
+            max_attempts=int(args.max_attempts),
+            no_pdf_extract=bool(args.no_pdf_extract),
+        )
     synthesis_result = run_synthesis_stage(
         repo_root=repo_root,
         run_dir=run_dir,
@@ -107,6 +128,8 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("paper_pdf", type=str, help="Path to paper PDF")
     p.add_argument("--paper-key", type=str, default="")
     p.add_argument("--run-root", type=str, default="runs")
+    p.add_argument("--reuse-job-id", type=str, default="", help="Reuse existing data/jobs/<job_id>/job.json")
+    p.add_argument("--skip-execution", action="store_true", help="Skip execution stage and continue to synthesis")
     p.add_argument("--max-attempts", type=int, default=5, help="Execution-stage max fix loop attempts")
     p.add_argument(
         "--no-pdf-extract",

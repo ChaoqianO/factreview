@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from fx_runtime.types import AnnotationItem
+from common.runtime_shared.types import AnnotationItem
 
 
 @dataclass

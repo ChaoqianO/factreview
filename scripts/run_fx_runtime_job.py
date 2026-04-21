@@ -21,9 +21,9 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
-    from fx_runtime.runner import run_job
-    from fx_runtime.state import ensure_artifact_paths, load_job_state, mutate_job_state, save_job_state
-    from fx_runtime.types import JobState
+    from common.runtime_shared.runner import run_job
+    from common.runtime_shared.state import ensure_artifact_paths, load_job_state, mutate_job_state, save_job_state
+    from common.runtime_shared.types import JobState
 
     args = parse_args()
     source_pdf = Path(args.paper_pdf).resolve()

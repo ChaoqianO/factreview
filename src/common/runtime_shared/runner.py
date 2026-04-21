@@ -21,22 +21,22 @@ from agents.models.openai_responses import OpenAIResponsesModel
 from openai import AsyncOpenAI
 from openai.types.shared import Reasoning
 
-from fx_runtime.adapters.markdown_parser import build_page_index
-from fx_runtime.adapters.mineru import MineruAdapter, MineruConfig
-from fx_runtime.adapters.paper_search import (
+from ingestion.runtime.adapters.markdown_parser import build_page_index
+from ingestion.runtime.adapters.mineru import MineruAdapter, MineruConfig
+from positioning.runtime.adapters.paper_search import (
     PaperReadConfig,
     PaperSearchAdapter,
     PaperSearchConfig,
 )
-from fx_runtime.adapters.semantic_scholar import SemanticScholarAdapter, SemanticScholarConfig
-from fx_runtime.config import get_settings
-from fx_runtime.prompts.review_agent_prompt import build_review_agent_system_prompt
-from fx_runtime.report.review_report_pdf import build_review_report_pdf
-from fx_runtime.report.source_annotations import build_source_annotations_for_export
-from fx_runtime.state import ensure_artifact_paths, fail_job, load_job_state, mutate_job_state, set_status
-from fx_runtime.storage import append_event, read_json, write_json_atomic, write_text_atomic
-from fx_runtime.tools.review_tools import ReviewRuntimeContext, build_review_tools
-from fx_runtime.types import AnnotationItem, JobStatus
+from positioning.runtime.adapters.semantic_scholar import SemanticScholarAdapter, SemanticScholarConfig
+from common.runtime_shared.config import get_settings
+from fact_extraction.runtime.prompts.review_agent_prompt import build_review_agent_system_prompt
+from synthesis.runtime.report.review_report_pdf import build_review_report_pdf
+from synthesis.runtime.report.source_annotations import build_source_annotations_for_export
+from common.runtime_shared.state import ensure_artifact_paths, fail_job, load_job_state, mutate_job_state, set_status
+from common.runtime_shared.storage import append_event, read_json, write_json_atomic, write_text_atomic
+from fact_extraction.runtime.tools.review_tools import ReviewRuntimeContext, build_review_tools
+from common.runtime_shared.types import AnnotationItem, JobStatus
 
 
 def _resolved_api_key() -> str:

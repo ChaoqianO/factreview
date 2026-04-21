@@ -105,9 +105,9 @@ Homepage = "https://anonymous.4open.science/r/factreview-E55F"
 
 [tool.hatch.build.targets.wheel]
 packages = [
+  "src/common",
   "src/execution",
   "src/fact_extraction",
-  "src/fx_runtime",
   "src/ingestion",
   "src/llm",
   "src/positioning",

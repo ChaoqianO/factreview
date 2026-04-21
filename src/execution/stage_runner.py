@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-import argparse
 import asyncio
-import json
 import sys
 from pathlib import Path
 from typing import Any
@@ -12,7 +10,12 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from ingestion.fx_stage_runner import load_bridge_state, read_json_file, write_json_file
+from ingestion.runtime_bridge import (
+    ensure_full_pipeline_context,
+    load_bridge_state,
+    read_json_file,
+    write_json_file,
+)
 
 
 def _load_execution_artifacts(state: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any], str]:
@@ -56,6 +59,7 @@ def run_execution_stage(
     max_attempts: int = 5,
     no_pdf_extract: bool = False,
 ) -> dict[str, Any]:
+    ensure_full_pipeline_context(run_dir=run_dir)
     bridge = load_bridge_state(run_dir)
     resolved_pdf = paper_pdf.resolve() if paper_pdf else (bridge.paper_pdf if bridge else None)
     resolved_key = (paper_key or "").strip() or (bridge.paper_key if bridge else "")
@@ -112,29 +116,5 @@ def run_execution_stage(
     }
 
 
-def _parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser("run_execution_fx_stage")
-    p.add_argument("--run-dir", type=str, required=True)
-    p.add_argument("--paper-pdf", type=str, default="")
-    p.add_argument("--paper-key", type=str, default="")
-    p.add_argument("--max-attempts", type=int, default=5)
-    p.add_argument("--no-pdf-extract", action="store_true")
-    return p.parse_args()
-
-
-def main() -> None:
-    args = _parse_args()
-    run_dir = Path(args.run_dir).resolve()
-    paper_pdf = Path(args.paper_pdf).resolve() if args.paper_pdf else None
-    payload = run_execution_stage(
-        run_dir=run_dir,
-        paper_pdf=paper_pdf,
-        paper_key=(args.paper_key or "").strip() or None,
-        max_attempts=int(args.max_attempts),
-        no_pdf_extract=bool(args.no_pdf_extract),
-    )
-    print(json.dumps(payload, ensure_ascii=False, indent=2))
-
-
 if __name__ == "__main__":
-    main()
+    raise SystemExit("Internal stage module. Use scripts/run_full_pipeline.py.")
