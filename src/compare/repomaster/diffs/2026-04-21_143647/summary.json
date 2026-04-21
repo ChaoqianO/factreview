@@ -1,0 +1,33 @@
+{
+  "run_id": "2026-04-21_143647",
+  "status": "inconclusive",
+  "attempts": 0,
+  "run_result": {
+    "success": true,
+    "tasks": [
+      {
+        "id": "install_deps",
+        "success": true,
+        "skipped": true
+      },
+      {
+        "id": "repo_smoke",
+        "success": true,
+        "dry_run": true
+      }
+    ]
+  },
+  "judge": {
+    "passed": false,
+    "results": [
+      {
+        "type": "inconclusive_no_baseline",
+        "passed": false,
+        "run_success": true
+      }
+    ]
+  },
+  "artifacts": {
+    "files": []
+  }
+}

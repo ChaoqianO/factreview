@@ -1,0 +1,39 @@
+{
+  "run_id": "2026-04-21_143830",
+  "status": "inconclusive",
+  "attempts": 0,
+  "run_result": {
+    "success": true,
+    "tasks": [
+      {
+        "id": "install_deps",
+        "success": true,
+        "skipped": true
+      },
+      {
+        "id": "repo_smoke",
+        "success": true,
+        "returncode": 0,
+        "duration_sec": 2.758688449859619,
+        "logs": {
+          "command": "runs/compgcn/2026-04-21_143830/logs/repo_smoke_attempt0_command.txt",
+          "stdout": "runs/compgcn/2026-04-21_143830/logs/repo_smoke_attempt0_stdout.log",
+          "stderr": "runs/compgcn/2026-04-21_143830/logs/repo_smoke_attempt0_stderr.log"
+        }
+      }
+    ]
+  },
+  "judge": {
+    "passed": false,
+    "results": [
+      {
+        "type": "inconclusive_no_baseline",
+        "passed": false,
+        "run_success": true
+      }
+    ]
+  },
+  "artifacts": {
+    "files": []
+  }
+}

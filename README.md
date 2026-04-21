@@ -54,6 +54,17 @@ pip install -e tools/refchecker        # for --enable-refcheck
 factreview path/to/paper.pdf
 ```
 
+Run the merged full pipeline (ingestion → fact_extraction → positioning → synthesis):
+
+```bash
+python scripts/run_full_pipeline.py path/to/paper.pdf
+```
+
+Outputs are written to:
+- `runs/<paper_key>/<run_id>/stages/*`
+- `runs/<paper_key>/<run_id>/full_pipeline_summary.json`
+- `output/latest_extraction.md` and `output/latest_extraction.json`
+
 With optional integrations:
 
 ```bash

@@ -35,6 +35,9 @@ htmlcov/
 runs/
 reports/
 papers/
+data/
+output/
+factreview-own/
 
 # Local uv state (prefer committing uv.lock instead)
 .uv/
