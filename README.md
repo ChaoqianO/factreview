@@ -65,6 +65,14 @@ Outputs are written to:
 - `runs/<paper_key>/<run_id>/full_pipeline_summary.json`
 - `output/latest_extraction.md` and `output/latest_extraction.json`
 
+Generate a teaser-figure prompt or image from the latest extraction:
+
+```bash
+python scripts/generate_teaser_figure.py
+```
+
+If `GEMINI_API_KEY` is present in the environment or `.env`, the script will call Gemini image generation and save the image under `output/teaser_figure/`. Otherwise it will save the prompt there and print a short fallback note telling you to use the Gemini web app manually.
+
 With optional integrations:
 
 ```bash

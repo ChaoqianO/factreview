@@ -17,6 +17,7 @@ from ingestion.runtime_bridge import (
     resolve_artifact_path,
     write_json_file,
 )
+from synthesis.runtime.report.teaser_figure import generate_teaser_figure
 
 
 def _read_text(path: Path) -> str:
@@ -94,6 +95,33 @@ def run_synthesis_stage(
         result["latest_extraction_md"] = str(latest_md)
     if latest_pdf.exists():
         result["latest_extraction_pdf"] = str(latest_pdf)
+
+    teaser_payload: dict[str, Any] = {}
+    if latest_md.exists():
+        teaser_output_dir = synthesis_dir / "teaser_figure"
+        teaser_result = generate_teaser_figure(
+            latest_md,
+            output_dir=teaser_output_dir,
+        )
+        teaser_payload = {
+            "status": teaser_result.status,
+            "message": teaser_result.message,
+            "used_gemini_api": teaser_result.used_gemini_api,
+            "model": teaser_result.model,
+            "source_markdown_path": teaser_result.source_markdown_path,
+            "prompt_path": teaser_result.prompt_path,
+            "image_path": teaser_result.image_path,
+            "response_path": teaser_result.response_path,
+        }
+        result["teaser_figure"] = teaser_payload
+        result["teaser_figure_prompt"] = teaser_result.prompt_path
+        if teaser_result.image_path:
+            result["teaser_figure_image"] = teaser_result.image_path
+
+    synthesis_payload = read_json_file(synthesis_json)
+    if synthesis_payload:
+        synthesis_payload["teaser_figure"] = teaser_payload
+        write_json_file(synthesis_json, synthesis_payload)
 
     return result
 

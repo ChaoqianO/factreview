@@ -107,6 +107,10 @@ def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
         outputs["latest_extraction_md"] = str(synthesis_result.get("latest_extraction_md"))
     if synthesis_result.get("latest_extraction_pdf"):
         outputs["latest_extraction_pdf"] = str(synthesis_result.get("latest_extraction_pdf"))
+    if synthesis_result.get("teaser_figure_prompt"):
+        outputs["teaser_figure_prompt"] = str(synthesis_result.get("teaser_figure_prompt"))
+    if synthesis_result.get("teaser_figure_image"):
+        outputs["teaser_figure_image"] = str(synthesis_result.get("teaser_figure_image"))
 
     summary = {
         "paper_key": paper_key,
@@ -116,6 +120,7 @@ def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
         "job_dir": ingestion_result.get("job_dir"),
         "stages": statuses,
         "outputs": outputs,
+        "teaser_figure": synthesis_result.get("teaser_figure") or {},
     }
 
     summary_path = run_dir / "full_pipeline_summary.json"
