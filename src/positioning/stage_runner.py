@@ -10,8 +10,11 @@ if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
 from ingestion.runtime_bridge import (
+    bootstrap_bridge_state,
     ensure_full_pipeline_context,
-    require_bridge_state,
+    load_job_state_snapshot,
+    load_stage_assets_snapshot,
+    load_bridge_state,
     read_json_file,
     write_json_file,
 )
@@ -21,15 +24,28 @@ def run_positioning_stage(
     *,
     repo_root: Path,
     run_dir: Path,
+    paper_pdf: Path | None = None,
+    paper_key: str = "",
+    reuse_job_id: str = "",
 ) -> dict[str, Any]:
-    _ = repo_root
-    ensure_full_pipeline_context(run_dir=run_dir)
-    bridge = require_bridge_state(run_dir=run_dir)
+    ensure_full_pipeline_context(run_dir=run_dir, allow_standalone=True, stage="positioning")
+    bridge = load_bridge_state(run_dir)
+    if bridge is None:
+        bridge = bootstrap_bridge_state(
+            repo_root=repo_root,
+            run_dir=run_dir,
+            paper_pdf=paper_pdf,
+            paper_key=paper_key,
+            reuse_job_id=reuse_job_id,
+        )
 
-    job_state = read_json_file(bridge.job_json_path)
+    job_state = load_job_state_snapshot(run_dir) or read_json_file(bridge.job_json_path)
+    stage_assets = load_stage_assets_snapshot(run_dir)
     metadata = job_state.get("metadata") if isinstance(job_state.get("metadata"), dict) else {}
 
-    semantic_path = bridge.job_dir / "semantic_scholar_candidates.json"
+    semantic_snapshot_raw = str(stage_assets.get("semantic_scholar_candidates_snapshot_path") or "").strip()
+    semantic_snapshot = Path(semantic_snapshot_raw).resolve() if semantic_snapshot_raw else None
+    semantic_path = semantic_snapshot if (semantic_snapshot is not None and semantic_snapshot.exists()) else (bridge.job_dir / "semantic_scholar_candidates.json")
     semantic_payload = read_json_file(semantic_path)
     if not semantic_payload:
         semantic_payload = {"success": False, "papers": []}

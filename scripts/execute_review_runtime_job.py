@@ -59,8 +59,9 @@ def main() -> None:
         "pdf_ready": bool(final_state.pdf_ready),
         "job_json_path": str((Path("data") / "jobs" / str(job.id) / "job.json").resolve()),
         "job_dir": str((Path("data") / "jobs" / str(job.id)).resolve()),
-        "latest_output_md": str((Path("output") / "latest_extraction.md").resolve()),
-        "latest_output_pdf": str((Path("output") / "latest_extraction.pdf").resolve()),
+        "latest_output_md": str(Path(artifacts["latest_output_md"]).resolve()),
+        "latest_output_pdf": str(Path(artifacts["latest_output_pdf"]).resolve()),
+        "final_report_audit_json": str(Path(artifacts["final_report_audit"]).resolve()),
     }
     print(json.dumps(payload, ensure_ascii=False, indent=2))
 

@@ -297,7 +297,7 @@ def prepare_node(state: dict[str, Any]) -> dict[str, Any]:
 
     if not paper_key:
         if pdf_path and pdf_path.exists():
-            paper_key = pdf_path.parent.name
+            paper_key = pdf_path.stem.strip() or "paper"
         elif paper_root_in:
             paper_key = Path(paper_root_in).resolve().name
         else:

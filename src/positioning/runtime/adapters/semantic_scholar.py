@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+import re
 from dataclasses import dataclass
 from typing import Any
 
@@ -69,6 +70,8 @@ class SemanticScholarAdapter:
             title = str(row.get('title') or '').strip()
             if not title:
                 continue
+            if _is_self_paper_title(query=q, candidate=title):
+                continue
             citation_count = int(row.get('citationCount') or 0)
             year = int(row.get('year') or 0) if str(row.get('year') or '').strip() else None
             venue = str(row.get('venue') or '').strip()
@@ -122,4 +125,57 @@ class SemanticScholarAdapter:
             'count': len(papers),
             'message': None,
         }
+
+
+_TITLE_STOPWORDS = {
+    'a',
+    'an',
+    'and',
+    'for',
+    'from',
+    'in',
+    'into',
+    'is',
+    'of',
+    'on',
+    'the',
+    'to',
+    'with',
+}
+
+
+def _normalize_title_tokens(title: str) -> list[str]:
+    raw = str(title or '').strip().lower()
+    if not raw:
+        return []
+    raw = re.sub(r'[^a-z0-9]+', ' ', raw)
+    tokens = [tok for tok in raw.split() if tok and tok not in _TITLE_STOPWORDS]
+    return tokens
+
+
+def _is_self_paper_title(*, query: str, candidate: str) -> bool:
+    q_tokens = _normalize_title_tokens(query)
+    c_tokens = _normalize_title_tokens(candidate)
+    if not q_tokens or not c_tokens:
+        return False
+
+    q_norm = ' '.join(q_tokens)
+    c_norm = ' '.join(c_tokens)
+    if q_norm == c_norm:
+        return True
+
+    # High-confidence near-duplicate title variants.
+    if len(q_tokens) >= 4 and (q_norm in c_norm or c_norm in q_norm):
+        return True
+
+    q_set = set(q_tokens)
+    c_set = set(c_tokens)
+    inter = len(q_set & c_set)
+    union = len(q_set | c_set)
+    if union == 0:
+        return False
+    jaccard = inter / union
+    if inter >= 4 and jaccard >= 0.8:
+        return True
+    return False
 

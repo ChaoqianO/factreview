@@ -95,6 +95,10 @@ class Settings(BaseSettings):
     min_chinese_chars_for_final: int = 0
     force_english_output: bool = True
     ui_language: str = 'en'
+    enable_final_report_audit: bool = True
+    final_report_audit_max_iterations: int = 3
+    final_report_audit_max_source_chars: int = 80000
+    final_report_audit_max_review_chars: int = 50000
 
     # PDF export
     pdf_font_name: str = 'Helvetica'
@@ -102,10 +106,8 @@ class Settings(BaseSettings):
     pdf_body_font_size: int = 10
     pdf_page_margin: int = 48
 
-    # Evaluation status thresholds (relative error based)
-    eval_supported_relative_threshold: float = 0.02
-    eval_inconclusive_relative_threshold: float = 0.05
-    factreview_truth_pdf_path: Path = Field(default=Path('./input/FactReview.pdf'))
+    # Evaluation status threshold (absolute delta, directional by metric type)
+    eval_status_threshold: float = 0.05
 
     # Integrated code_evaluation stage (run after extraction and before final PDF render)
     enable_code_evaluation: bool = True

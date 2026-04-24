@@ -38,6 +38,128 @@ class FinalReportValidation:
     missing_sections: list[str]
 
 
+def _extract_section_body(markdown_text: str, section_no: int, title: str) -> str:
+    pattern = re.compile(
+        rf'(?ims)^##\s+(?:\*\*)?{section_no}\.\s+{re.escape(title)}(?:\*\*)?\s*$\n'
+        r'(?P<body>.*?)(?=^##\s+|\Z)'
+    )
+    match = pattern.search(str(markdown_text or ''))
+    return str(match.group('body') or '') if match else ''
+
+
+def _parse_markdown_tables(markdown_text: str) -> list[tuple[list[str], list[list[str]]]]:
+    lines = str(markdown_text or '').splitlines()
+    tables: list[tuple[list[str], list[list[str]]]] = []
+    i = 0
+    while i + 1 < len(lines):
+        header = lines[i].strip()
+        sep = lines[i + 1].strip()
+        if not (
+            header.startswith('|')
+            and header.endswith('|')
+            and re.fullmatch(r'\|[ :\-|]+\|', sep)
+        ):
+            i += 1
+            continue
+        headers = [_normalize_cell(c) for c in header.strip('|').split('|')]
+        rows: list[list[str]] = []
+        j = i + 2
+        while j < len(lines):
+            raw = lines[j].strip()
+            if not (raw.startswith('|') and raw.endswith('|')):
+                break
+            rows.append([_normalize_cell(c) for c in raw.strip('|').split('|')])
+            j += 1
+        tables.append((headers, rows))
+        i = max(j, i + 2)
+    return tables
+
+
+def _normalize_cell(text: str) -> str:
+    s = re.sub(r'<[^>]+>', '', str(text or ''))
+    s = s.replace('**', '').replace('__', '').replace('`', '')
+    s = re.sub(r'\s+', ' ', s).strip()
+    return s
+
+
+def _validate_technical_positioning(markdown: str) -> str | None:
+    body = _extract_section_body(markdown, 2, 'Technical Positioning')
+    if not body.strip():
+        return 'Technical Positioning section is empty.'
+    tables = _parse_markdown_tables(body)
+    if not tables:
+        return 'Technical Positioning must contain one niche-positioning matrix table.'
+    headers, rows = tables[0]
+    if len(headers) < 3:
+        return 'Technical Positioning table must include Research domain, Method, and at least one niche dimension.'
+    if headers[0].lower() != 'research domain' or headers[1].lower() != 'method':
+        return 'Technical Positioning table first two columns must be exactly Research domain | Method.'
+    if len(headers) > 10:
+        return 'Technical Positioning table must use 3-8 niche-dimension columns after Research domain and Method.'
+    if not rows:
+        return 'Technical Positioning table must include method rows.'
+    for row in rows:
+        cells = row + [''] * max(0, len(headers) - len(row))
+        for value in cells[2:len(headers)]:
+            if value not in {'√', '×', '✓', '✗'}:
+                return 'Technical Positioning niche-dimension cells must contain only √ or ×.'
+    return None
+
+
+def _validate_claims(markdown: str) -> str | None:
+    body = _extract_section_body(markdown, 3, 'Claims')
+    if not body.strip():
+        return 'Claims section is empty.'
+    tables = _parse_markdown_tables(body)
+    if not tables:
+        return 'Claims section must contain a claim/evidence/assessment/location table.'
+    headers, rows = tables[0]
+    lowered = [h.lower() for h in headers]
+    for required in ('claim', 'evidence', 'assessment', 'location'):
+        if not any(required in h for h in lowered):
+            return f'Claims table missing required column: {required}.'
+    if any('status' in h for h in lowered):
+        return 'Claims table must not include Status before system assessment; status is appended automatically.'
+    if len(rows) != 3:
+        return 'Claims table must contain exactly 3 core claims.'
+    evidence_idx = next((i for i, h in enumerate(lowered) if 'evidence' in h), -1)
+    assessment_idx = next((i for i, h in enumerate(lowered) if 'assessment' in h), -1)
+    location_idx = next((i for i, h in enumerate(lowered) if 'location' in h), -1)
+    for row in rows:
+        cells = row + [''] * max(0, len(headers) - len(row))
+        if evidence_idx >= 0 and cells[evidence_idx].lower() in {'', 'not found', 'unknown', 'n/a'}:
+            return 'Each claim must include manuscript evidence or Not found in manuscript.'
+        if assessment_idx >= 0 and not cells[assessment_idx].strip():
+            return 'Each claim must include an initial assessment.'
+        if location_idx >= 0 and not cells[location_idx].strip():
+            return 'Each claim must include a manuscript location.'
+    return None
+
+
+def _validate_experiment(markdown: str) -> str | None:
+    body = _extract_section_body(markdown, 5, 'Experiment')
+    if not body.strip():
+        return 'Experiment section is empty.'
+    if not re.search(r'(?im)^###?\s+(?:\*\*)?Main Result(?:\*\*)?\s*$', body):
+        return 'Experiment section must include Main Result.'
+    if not re.search(r'(?im)^###?\s+(?:\*\*)?Ablation Result(?:\*\*)?\s*$', body):
+        return 'Experiment section must include Ablation Result.'
+    if re.search(r'(?i)\b(sampled|representative|selected rows|truncated|partial list)\b', body):
+        return 'Experiment section must not sample or truncate reported experiment results.'
+    tables = _parse_markdown_tables(body)
+    if not tables:
+        return 'Experiment section must contain tables for reported experimental results.'
+    return None
+
+
+def validate_final_report_logic(markdown: str) -> str | None:
+    for validator in (_validate_technical_positioning, _validate_claims, _validate_experiment):
+        issue = validator(markdown)
+        if issue:
+            return issue
+    return None
+
+
 def _extract_markdown_headings(markdown_text: str) -> list[str]:
     headings: list[str] = []
     for line in str(markdown_text or '').splitlines():
@@ -160,6 +282,16 @@ def validate_final_report(
                 f'Chinese report is too short: {stats.chinese_chars} chars, '
                 f'required >= {min_chinese_chars}.'
             ),
+            language_stats=stats,
+            missing_sections=[],
+        )
+
+    logic_issue = validate_final_report_logic(text)
+    if logic_issue:
+        return FinalReportValidation(
+            ok=False,
+            reason='final_report_logic_not_met',
+            message=logic_issue,
             language_stats=stats,
             missing_sections=[],
         )

@@ -80,7 +80,10 @@ def ensure_artifact_paths(job_id: UUID | str) -> dict[str, Path]:
         'mineru_content_list': root / 'mineru_content_list.json',
         'annotations': root / 'annotations.json',
         'final_markdown': root / 'final_report.md',
+        'final_report_audit': root / 'final_report_audit.json',
         'report_pdf': root / 'final_report.pdf',
+        'latest_output_md': root / 'latest_extraction.md',
+        'latest_output_pdf': root / 'latest_extraction.pdf',
         'prompt_snapshot': root / 'agent_prompt.txt',
         'raw_result': root / 'mineru_result_raw.json',
     }

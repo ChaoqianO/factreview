@@ -59,7 +59,7 @@ def run_execution_stage(
     max_attempts: int = 5,
     no_pdf_extract: bool = False,
 ) -> dict[str, Any]:
-    ensure_full_pipeline_context(run_dir=run_dir)
+    ensure_full_pipeline_context(run_dir=run_dir, allow_standalone=True, stage="execution")
     bridge = load_bridge_state(run_dir)
     resolved_pdf = paper_pdf.resolve() if paper_pdf else (bridge.paper_pdf if bridge else None)
     resolved_key = (paper_key or "").strip() or (bridge.paper_key if bridge else "")
@@ -69,7 +69,7 @@ def run_execution_stage(
             "paper_pdf is required for execution stage when bridge state is missing or invalid."
         )
     if not resolved_key:
-        resolved_key = resolved_pdf.parent.name or "paper"
+        resolved_key = resolved_pdf.stem.strip() or "paper"
 
     stage_root = run_dir / "stages" / "execution"
     stage_root.mkdir(parents=True, exist_ok=True)

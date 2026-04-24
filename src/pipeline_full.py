@@ -28,7 +28,7 @@ def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
     if not paper_pdf.exists():
         raise FileNotFoundError(f"paper pdf not found: {paper_pdf}")
 
-    paper_key = (args.paper_key or "").strip() or paper_pdf.parent.name or "paper"
+    paper_key = (args.paper_key or "").strip() or paper_pdf.stem.strip() or "paper"
     run_id = _now_run_id()
     run_dir = Path(args.run_root).resolve() / paper_key / run_id
     run_dir.mkdir(parents=True, exist_ok=True)
@@ -101,12 +101,10 @@ def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
         outputs["synthesis_json"] = str(synthesis_result.get("output_json"))
     if synthesis_result.get("output_md"):
         outputs["synthesis_md"] = str(synthesis_result.get("output_md"))
+    if synthesis_result.get("output_audit_json"):
+        outputs["synthesis_audit_json"] = str(synthesis_result.get("output_audit_json"))
     if synthesis_result.get("output_pdf"):
         outputs["synthesis_pdf"] = str(synthesis_result.get("output_pdf"))
-    if synthesis_result.get("latest_extraction_md"):
-        outputs["latest_extraction_md"] = str(synthesis_result.get("latest_extraction_md"))
-    if synthesis_result.get("latest_extraction_pdf"):
-        outputs["latest_extraction_pdf"] = str(synthesis_result.get("latest_extraction_pdf"))
     if synthesis_result.get("teaser_figure_prompt"):
         outputs["teaser_figure_prompt"] = str(synthesis_result.get("teaser_figure_prompt"))
     if synthesis_result.get("teaser_figure_image"):

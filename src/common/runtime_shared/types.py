@@ -69,7 +69,10 @@ class JobArtifacts(BaseModel):
     mineru_content_list_path: str | None = None
     annotations_path: str | None = None
     final_markdown_path: str | None = None
+    final_report_audit_path: str | None = None
     report_pdf_path: str | None = None
+    latest_output_md_path: str | None = None
+    latest_output_pdf_path: str | None = None
     prompt_snapshot_path: str | None = None
 
 

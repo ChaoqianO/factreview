@@ -34,11 +34,10 @@ pip install -e ".[all,dev]"
 cp .env.example .env
 ```
 
-Then edit `.env` and set `MODEL_PROVIDER` plus the matching API key
-(`OPENAI_API_KEY`, `DEEPSEEK_API_KEY`, `QWEN_API_KEY`, or `CLAUDE_API_KEY`).
-Leave `MODEL_PROVIDER=openai` with an empty `OPENAI_API_KEY` to auto-fall
-back to a cached ChatGPT browser login. Pass `--no-llm` at run time to skip
-LLM calls entirely.
+Then edit `.env` and fill the keys you need:
+- `OPENAI_API_KEY` (or `API_KEY`) + optional `BASE_URL` for OpenAI-compatible endpoints
+- `MINERU_API_TOKEN` for PDF parsing
+- optional `GEMINI_API_KEY` for teaser-figure image generation
 
 The default PDF ingestion backend (MinerU) and the vendored reference
 checker are installed separately only when needed:
@@ -54,33 +53,86 @@ pip install -e tools/refchecker        # for --enable-refcheck
 factreview path/to/paper.pdf
 ```
 
-Run the merged full pipeline (ingestion → fact_extraction → positioning → synthesis):
+### Run the full pipeline (recommended)
+
+Run the merged full pipeline:
 
 ```bash
 python scripts/execute_review_pipeline.py path/to/paper.pdf
 ```
 
-Outputs are written to:
+This runs:
+`ingestion → fact_extraction → positioning → execution → synthesis`
+
+Useful options:
+- `--paper-key <name>`: stable run folder name
+- `--skip-execution`: skip repository execution stage, still produce final review + teaser assets
+- `--max-attempts <N>`: execution-stage repair loop cap
+
+Example:
+
+```bash
+python scripts/execute_review_pipeline.py \
+  external_papers/1506.01497_faster_rcnn.pdf \
+  --paper-key faster_rcnn_1506.01497 \
+  --skip-execution
+```
+
+### Run each stage manually (advanced)
+
+Use the same `--run-dir` to keep one combined run:
+
+```bash
+python scripts/execute_stage_ingestion.py path/to/paper.pdf --run-dir runs/<paper_key>/<run_id>
+python scripts/execute_stage_fact_extraction.py --run-dir runs/<paper_key>/<run_id>
+python scripts/execute_stage_positioning.py --run-dir runs/<paper_key>/<run_id>
+python scripts/execute_stage_execution.py --run-dir runs/<paper_key>/<run_id>
+python scripts/execute_stage_synthesis.py --run-dir runs/<paper_key>/<run_id>
+```
+
+### Outputs
+
+Each run writes to:
 - `runs/<paper_key>/<run_id>/stages/*`
 - `runs/<paper_key>/<run_id>/full_pipeline_summary.json`
-- `output/latest_extraction.md` and `output/latest_extraction.json`
 
-Generate a teaser-figure prompt or image from the latest extraction:
+Primary artifacts:
+- `stages/synthesis/final_review.json`
+- `stages/synthesis/final_review.md`
+- `stages/synthesis/final_review.pdf`
+- `stages/synthesis/teaser_figure_prompt.txt`
+- `stages/synthesis/teaser_figure.png` (when image API is enabled)
+
+### Teaser figure generation
 
 ```bash
 python scripts/generate_teaser_figure.py
 ```
 
-If `GEMINI_API_KEY` is present in the environment or `.env`, the script will call Gemini image generation and save the image under `output/teaser_figure/`. Otherwise it will save the prompt there and print a short fallback note telling you to use the Gemini web app manually.
+Defaults:
+- `assets/teaser_template/teaser_figure.pdf`
+- `assets/teaser_template/teaser_figure.pptx`
 
-With optional integrations:
+Behavior:
+- If `TEASER_USE_GEMINI=true` and key is configured, synthesis calls image API and outputs `teaser_figure.png`.
+- Otherwise it always outputs prompt-only artifacts, so you can generate manually.
+
+### Run multiple papers
+
+```bash
+for pdf in external_papers/*.pdf; do
+  key="$(basename "$pdf" .pdf)"
+  python scripts/execute_review_pipeline.py "$pdf" --paper-key "$key" --skip-execution
+done
+```
+
+### Optional integrations
 
 ```bash
 factreview path/to/paper.pdf --enable-refcheck --enable-bibtex
 ```
 
-Useful flags:
-
+Useful CLI flags:
 - `--tasks PATH` — tasks YAML/JSON for execution
 - `--baseline PATH` — baseline JSON for deterministic comparison
 - `--auto-tasks [--auto-tasks-mode smoke|full]` — infer tasks from README / entrypoints

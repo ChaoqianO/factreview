@@ -31,6 +31,7 @@ from positioning.runtime.adapters.paper_search import (
 from positioning.runtime.adapters.semantic_scholar import SemanticScholarAdapter, SemanticScholarConfig
 from common.runtime_shared.config import get_settings
 from fact_extraction.runtime.prompts.review_agent_prompt import build_review_agent_system_prompt
+from synthesis.runtime.report.final_report_audit import audit_and_refine_final_report
 from synthesis.runtime.report.review_report_pdf import build_review_report_pdf
 from synthesis.runtime.report.source_annotations import build_source_annotations_for_export
 from common.runtime_shared.state import ensure_artifact_paths, fail_job, load_job_state, mutate_job_state, set_status
@@ -409,7 +410,8 @@ def _pick_overview_mineru_image(
     best_path: Path | None = None
     best_score = -1
     first_path: Path | None = None
-    overview_tokens = ('overview', 'framework', 'architecture', 'pipeline', 'model')
+    overview_tokens = ('overview', 'framework', 'architecture', 'pipeline', 'model', 'method', 'network')
+    non_overview_tokens = ('ablation', 'result', 'comparison', 'attention map', 'training curve', 'loss curve')
     for row in rows:
         if str(row.get('type') or '').strip().lower() != 'image':
             continue
@@ -427,6 +429,8 @@ def _pick_overview_mineru_image(
             score += 5
         if any(tok in caption for tok in overview_tokens):
             score += 4
+        if any(tok in caption for tok in non_overview_tokens):
+            score -= 5
         if score > best_score:
             best_score = score
             best_path = resolved
@@ -453,7 +457,8 @@ def _pick_overview_mineru_figure_bundle(
         return ([], None)
 
     entries: list[tuple[int, Path, str, int]] = []
-    overview_tokens = ('overview', 'framework', 'architecture', 'pipeline', 'model')
+    overview_tokens = ('overview', 'framework', 'architecture', 'pipeline', 'model', 'method', 'network')
+    non_overview_tokens = ('ablation', 'result', 'comparison', 'attention map', 'training curve', 'loss curve')
     for idx, row in enumerate(rows):
         if str(row.get('type') or '').strip().lower() != 'image':
             continue
@@ -470,6 +475,8 @@ def _pick_overview_mineru_figure_bundle(
             score += 6
         if any(tok in low for tok in overview_tokens):
             score += 4
+        if any(tok in low for tok in non_overview_tokens):
+            score -= 5
         if caption:
             score += 1
         entries.append((idx, resolved, caption, score))
@@ -639,6 +646,30 @@ def _compose_side_by_side_image(
         return None
 
 
+def _materialize_canonical_overview_image(
+    *,
+    image_paths: list[Path],
+    job_dir: Path,
+) -> Path | None:
+    if not image_paths:
+        return None
+    canonical = (job_dir / 'overview_figure.jpg').resolve()
+    try:
+        if len(image_paths) == 1:
+            src = image_paths[0]
+            if not src.exists() or not src.is_file():
+                return None
+            shutil.copy2(src, canonical)
+            return canonical
+        combined = _compose_side_by_side_image(image_paths=image_paths, job_dir=job_dir)
+        if combined is None or not combined.exists():
+            return None
+        shutil.copy2(combined, canonical)
+        return canonical
+    except Exception:
+        return None
+
+
 def _stabilize_experiment_section(markdown_text: str) -> str:
     text = str(markdown_text or '')
     if not text.strip():
@@ -649,9 +680,24 @@ def _stabilize_experiment_section(markdown_text: str) -> str:
     body = sec.group('body')
     body = re.sub(r'(?im)^\s*Main Result\s*$', '### Main Result', body)
     body = re.sub(r'(?im)^\s*Ablation Result\s*$', '### Ablation Result', body)
+    body = _dedupe_experiment_subsections(body)
     body = re.sub(r'\n{3,}', '\n\n', body)
     body = body.strip('\n') + '\n\n'
     return text[: sec.start('body')] + body + text[sec.end('body') :]
+
+
+def _dedupe_experiment_subsections(section_body: str) -> str:
+    body = str(section_body or '')
+    for label in ('Main Result', 'Ablation Result'):
+        pattern = re.compile(rf'(?im)^###\s+{re.escape(label)}\s*$')
+        matches = list(pattern.finditer(body))
+        if len(matches) <= 1:
+            continue
+        for match in reversed(matches[1:]):
+            next_heading = re.search(r'(?im)^###\s+', body[match.end() :])
+            end = (match.end() + next_heading.start()) if next_heading else len(body)
+            body = body[: match.start()] + body[end:]
+    return body
 
 
 def _ensure_experiment_contract(markdown_text: str) -> str:
@@ -708,24 +754,6 @@ def _ensure_experiment_contract(markdown_text: str) -> str:
     return text[: sec.start('body')] + body + text[sec.end('body') :]
 
 
-def _parse_html_table_rows(table_html: str) -> list[list[str]]:
-    raw = str(table_html or '')
-    if not raw.strip():
-        return []
-    rows: list[list[str]] = []
-    for tr in re.findall(r'<tr[^>]*>(.*?)</tr>', raw, flags=re.IGNORECASE | re.DOTALL):
-        cells = re.findall(r'<t[dh][^>]*>(.*?)</t[dh]>', tr, flags=re.IGNORECASE | re.DOTALL)
-        if not cells:
-            continue
-        normalized: list[str] = []
-        for cell in cells:
-            txt = html_lib.unescape(re.sub(r'<[^>]+>', ' ', str(cell or '')))
-            txt = ' '.join(txt.split()).strip()
-            normalized.append(txt)
-        rows.append(normalized)
-    return rows
-
-
 def _first_float(text: str) -> float | None:
     s = str(text or '').replace(',', '')
     m = re.search(r'[-+]?(?:\d+\.\d+|\d+|\.\d+)', s)
@@ -737,6 +765,68 @@ def _first_float(text: str) -> float | None:
         return None
 
 
+def _last_float(text: str) -> float | None:
+    s = str(text or '').replace(',', '')
+    matches = re.findall(r'[-+]?(?:\d+\.\d+|\d+|\.\d+)', s)
+    if not matches:
+        return None
+    try:
+        return float(matches[-1])
+    except Exception:
+        return None
+
+
+def _float_candidates(text: str) -> list[float]:
+    s = str(text or '').replace(',', '')
+    tokens = re.findall(r'[-+]?(?:\d+\.\d+|\d+|\.\d+)', s)
+    out: list[float] = []
+    for token in tokens:
+        try:
+            out.append(float(token))
+        except Exception:
+            continue
+    return out
+
+
+def _metric_aware_value(text: str, *, metric_hint: str = '') -> float | None:
+    candidates = _float_candidates(text)
+    if not candidates:
+        return None
+
+    metric_raw = str(metric_hint or '').strip().lower()
+    metric_key = _norm_metric_key(metric_hint)
+    non_year = [
+        v for v in candidates
+        if not (float(v).is_integer() and 1900 <= abs(v) <= 2100)
+    ]
+    pool = non_year or candidates
+
+    if metric_key == 'mr':
+        bounded = [v for v in pool if abs(v) < 1_000_000]
+        return bounded[-1] if bounded else pool[-1]
+
+    is_perf_metric = (
+        metric_key in {'mrr', 'hits@10', 'hits@3', 'hits@1', 'accuracy'}
+        or any(
+            token in metric_raw
+            for token in ('bleu', 'f1', 'rouge', 'map', 'auc', 'wer', 'cer', 'precision', 'recall')
+        )
+    )
+    if is_perf_metric:
+        bounded_100 = [v for v in pool if -100.0 <= v <= 100.0]
+        if bounded_100:
+            return bounded_100[-1]
+        bounded_unit = [v for v in pool if -1.5 <= v <= 1.5]
+        if bounded_unit:
+            return bounded_unit[-1]
+        return pool[-1]
+
+    bounded_default = [v for v in pool if abs(v) <= 1000.0]
+    if bounded_default:
+        return bounded_default[-1]
+    return pool[-1]
+
+
 def _fmt_value(v: float | None, *, metric_key: str = '') -> str:
     if v is None:
         return 'Not found in manuscript'
@@ -745,214 +835,12 @@ def _fmt_value(v: float | None, *, metric_key: str = '') -> str:
     return f'{float(v):.3f}'.rstrip('0').rstrip('.')
 
 
-def _find_mineru_table(content_list: list[dict[str, Any]] | None, table_no: int) -> dict[str, Any] | None:
-    rows = [r for r in (content_list or []) if isinstance(r, dict) and str(r.get('type') or '').lower() == 'table']
-    pattern = re.compile(rf'\btable\s*{table_no}\b', re.IGNORECASE)
-    for row in rows:
-        cap = ' '.join(str(x or '').strip() for x in (row.get('table_caption') or []))
-        if pattern.search(cap):
-            return row
-    return None
-
-
-def _build_main_rows_from_source_tables(content_list: list[dict[str, Any]] | None) -> list[list[str]]:
-    out: list[list[str]] = []
-
-    # Table 3: link prediction (FB15k-237 / WN18RR)
-    t3 = _find_mineru_table(content_list, 3)
-    if t3 is not None:
-        rows = _parse_html_table_rows(str(t3.get('table_body') or ''))
-        if len(rows) >= 3:
-            metric_cols = rows[1]
-            data_rows = [r for r in rows[2:] if r and len(r) >= 2]
-            comp = None
-            baselines: list[list[str]] = []
-            for r in data_rows:
-                name = str(r[0] if r else '').lower()
-                if 'compgcn' in name:
-                    comp = r
-                else:
-                    baselines.append(r)
-            if comp is not None and len(comp) >= 11 and len(metric_cols) >= 10:
-                # FB15k-237: 1..5, WN18RR: 6..10
-                for idx in range(1, 11):
-                    metric = metric_cols[idx - 1] if idx - 1 < len(metric_cols) else 'Metric'
-                    mk = _norm_metric_key(metric)
-                    dataset = 'FB15k-237' if idx <= 5 else 'WN18RR'
-                    paper_val = _first_float(comp[idx] if idx < len(comp) else '')
-                    best_val = None
-                    best_name = 'Not found in manuscript'
-                    for b in baselines:
-                        if idx >= len(b):
-                            continue
-                        val = _first_float(b[idx])
-                        if val is None:
-                            continue
-                        if best_val is None:
-                            best_val, best_name = val, str(b[0]).strip()
-                            continue
-                        if mk == 'mr':
-                            if val < best_val:
-                                best_val, best_name = val, str(b[0]).strip()
-                        else:
-                            if val > best_val:
-                                best_val, best_name = val, str(b[0]).strip()
-                    if paper_val is None:
-                        continue
-                    diff = None if best_val is None else (paper_val - best_val)
-                    diff_text = 'Not found in manuscript' if diff is None else f'{diff:+.3f}'.rstrip('0').rstrip('.')
-                    best_text = (
-                        'Not found in manuscript'
-                        if best_val is None
-                        else f'{best_name} ({_fmt_value(best_val, metric_key=mk)})'
-                    )
-                    out.append([
-                        'Link Prediction',
-                        dataset,
-                        metric or 'Metric',
-                        best_text,
-                        _fmt_value(paper_val, metric_key=mk),
-                        diff_text,
-                    ])
-
-    # Table 5: node / graph classification
-    t5 = _find_mineru_table(content_list, 5)
-    if t5 is not None:
-        rows = _parse_html_table_rows(str(t5.get('table_body') or ''))
-        if len(rows) >= 2:
-            data_rows = [r for r in rows[1:] if r and len(r) >= 6]
-            # columns: [node_method, mutag_node, am, graph_method, mutag_graph, ptc]
-            node_comp = None
-            graph_comp = None
-            node_baselines: list[list[str]] = []
-            graph_baselines: list[list[str]] = []
-            for r in data_rows:
-                node_method = str(r[0]).lower()
-                graph_method = str(r[3]).lower()
-                if 'compgcn' in node_method:
-                    node_comp = r
-                else:
-                    node_baselines.append(r)
-                if 'compgcn' in graph_method:
-                    graph_comp = r
-                else:
-                    graph_baselines.append(r)
-
-            def _best_score(rows_in: list[list[str]], value_idx: int, method_idx: int) -> tuple[str, float | None]:
-                best_name = 'Not found in manuscript'
-                best_val = None
-                for rr in rows_in:
-                    if value_idx >= len(rr) or method_idx >= len(rr):
-                        continue
-                    v = _first_float(rr[value_idx])
-                    if v is None:
-                        continue
-                    if best_val is None or v > best_val:
-                        best_val = v
-                        best_name = str(rr[method_idx]).strip() or best_name
-                return best_name, best_val
-
-            if node_comp is not None:
-                for ds, idx in [('MUTAG (Node)', 1), ('AM', 2)]:
-                    p = _first_float(node_comp[idx] if idx < len(node_comp) else '')
-                    if p is None:
-                        continue
-                    bn, bv = _best_score(node_baselines, idx, 0)
-                    diff = None if bv is None else (p - bv)
-                    out.append([
-                        'Node Classification',
-                        ds,
-                        'Accuracy',
-                        'Not found in manuscript' if bv is None else f'{bn} ({_fmt_value(bv)})',
-                        _fmt_value(p),
-                        'Not found in manuscript' if diff is None else f'{diff:+.3f}'.rstrip('0').rstrip('.'),
-                    ])
-            if graph_comp is not None:
-                for ds, idx in [('MUTAG (Graph)', 4), ('PTC', 5)]:
-                    p = _first_float(graph_comp[idx] if idx < len(graph_comp) else '')
-                    if p is None:
-                        continue
-                    bn, bv = _best_score(graph_baselines, idx, 3)
-                    diff = None if bv is None else (p - bv)
-                    out.append([
-                        'Graph Classification',
-                        ds,
-                        'Accuracy',
-                        'Not found in manuscript' if bv is None else f'{bn} ({_fmt_value(bv)})',
-                        _fmt_value(p),
-                        'Not found in manuscript' if diff is None else f'{diff:+.3f}'.rstrip('0').rstrip('.'),
-                    ])
-    return out
-
-
-def _build_ablation_rows_from_source_tables(content_list: list[dict[str, Any]] | None) -> list[list[str]]:
-    out: list[list[str]] = []
-    t4 = _find_mineru_table(content_list, 4)
-    if t4 is None:
-        return out
-    rows = _parse_html_table_rows(str(t4.get('table_body') or ''))
-    if len(rows) < 3:
-        return out
-    metric_row = rows[1]
-    data_rows = rows[2:]
-    if len(metric_row) < 9:
-        return out
-
-    # scoring groups: TransE, DistMult, ConvE
-    groups = [('TransE', 1), ('DistMult', 4), ('ConvE', 7)]
-    corr_vals: dict[str, float | None] = {}
-    for r in data_rows:
-        name = str(r[0] if r else '').lower()
-        if 'corr' in name:
-            for gname, start in groups:
-                corr_vals[gname] = _first_float(r[start] if len(r) > start else '')
-
-    for r in data_rows:
-        name = str(r[0] if r else '').strip()
-        low = name.lower()
-        if not any(k in low for k in ('sub', 'mult', 'corr')):
-            continue
-        conf = 'Subtraction' if 'sub' in low else ('Multiplication' if 'mult' in low else 'Circular-correlation')
-        for gname, start in groups:
-            paper_val = _first_float(r[start] if len(r) > start else '')
-            if paper_val is None:
-                continue
-            full_val = corr_vals.get(gname)
-            diff = None if full_val is None else (paper_val - full_val)
-            out.append([
-                f'Composition Operator ({gname})',
-                conf,
-                _fmt_value(full_val, metric_key='mrr'),
-                _fmt_value(paper_val, metric_key='mrr'),
-                'Not found in manuscript' if diff is None else f'{diff:+.3f}'.rstrip('0').rstrip('.'),
-            ])
-    # Basis-vector ablation row if present.
-    for r in data_rows:
-        name = str(r[0] if r else '').strip()
-        low = name.lower()
-        if 'b = 50' not in low and 'b=50' not in low:
-            continue
-        for gname, start in groups:
-            paper_val = _first_float(r[start] if len(r) > start else '')
-            full_val = corr_vals.get(gname)
-            if paper_val is None:
-                continue
-            diff = None if full_val is None else (paper_val - full_val)
-            out.append([
-                f'Relation Basis ({gname})',
-                'B=50',
-                _fmt_value(full_val, metric_key='mrr'),
-                _fmt_value(paper_val, metric_key='mrr'),
-                'Not found in manuscript' if diff is None else f'{diff:+.3f}'.rstrip('0').rstrip('.'),
-            ])
-    return out
-
-
 def _hard_validate_experiment_tables(
     markdown_text: str,
     *,
     content_list: list[dict[str, Any]] | None,
 ) -> str:
+    _ = content_list  # reserved for future use; current logic normalizes model-extracted tables only.
     text = str(markdown_text or '')
     if not text.strip():
         return text
@@ -960,72 +848,42 @@ def _hard_validate_experiment_tables(
     if not sec:
         return text
     body = sec.group('body')
-    main_rows = _build_main_rows_from_source_tables(content_list)
-    abl_rows = _build_ablation_rows_from_source_tables(content_list)
-    if not main_rows and not abl_rows:
-        return text
 
-    main_block = ''
-    if main_rows:
-        main_table = _format_table(
-            ['Task', 'Dataset', 'Metric', 'Best Baseline', 'Paper Result', 'Difference (Δ)'],
-            main_rows,
+    def _rewrite_subsection_table(*, section_body: str, label: str, headers: list[str]) -> str:
+        heading_re = re.compile(
+            rf'(?ims)^###\s+(?:\*\*)?{re.escape(label)}(?:\*\*)?\s*$\n(?P<chunk>.*?)(?=^###\s+|\Z)'
         )
-        main_block = (
-            "### Main Result\n\n"
-            "Location: Table 3 (link prediction), Table 5 (node and graph classification)\n\n"
-            f"{main_table}\n\n"
-        )
+        m = heading_re.search(section_body)
+        if not m:
+            return section_body
+        chunk = str(m.group('chunk') or '')
 
-    abl_block = ''
-    if abl_rows:
-        abl_table = _format_table(
-            ['Ablation Dimension', 'Configuration', 'Full Model', 'Paper Result', 'Difference (Δ)'],
-            abl_rows,
-        )
-        abl_block = (
-            "### Ablation Result\n\n"
-            "Location: Table 4 (composition operator ablations on FB15k-237)\n\n"
-            f"{abl_table}\n\n"
-        )
+        table_re = re.compile(r'(?ims)^\|[^\n]*\|\n\|[-:| ]+\|\n(?:\|[^\n]*\|\n?)+')
+        t = table_re.search(chunk)
+        if t:
+            table_block = str(t.group(0) or '')
+            rows = _collect_table_rows(table_block)
+            data_rows = rows[1:] if len(rows) > 1 else []
+            normalized = _format_table(headers, data_rows)
+            chunk = chunk[: t.start()] + normalized + chunk[t.end():]
+        else:
+            normalized = _format_table(headers, [])
+            chunk = chunk.rstrip() + '\n\n' + normalized + '\n'
 
-    body = (main_block + abl_block) or body
+        return section_body[: m.start('chunk')] + chunk + section_body[m.end('chunk') :]
 
+    body = _rewrite_subsection_table(
+        section_body=body,
+        label='Main Result',
+        headers=['Task', 'Dataset', 'Metric', 'Best Baseline', 'Paper Result', 'Difference (Δ)'],
+    )
+    body = _rewrite_subsection_table(
+        section_body=body,
+        label='Ablation Result',
+        headers=['Ablation Dimension', 'Configuration', 'Full Model', 'Paper Result', 'Difference (Δ)'],
+    )
     body = re.sub(r'\n{3,}', '\n\n', body).strip('\n') + '\n\n'
     return text[: sec.start('body')] + body + text[sec.end('body') :]
-
-
-def _load_factreview_truth_values(pdf_path: Path) -> dict[str, list[float]]:
-    out: dict[str, list[float]] = {'main': [], 'ablation': []}
-    p = Path(pdf_path).expanduser()
-    if not p.exists() or not p.is_file():
-        return out
-    try:
-        doc = fitz.open(str(p))
-        text = '\n'.join(doc.load_page(i).get_text('text') for i in range(doc.page_count))
-    except Exception:
-        return out
-
-    # Values are stored like ✓(0.352) in the user-provided FactReview template PDF.
-    main_part = text
-    abl_part = ''
-    marker = re.search(r'(?is)\bAblation\s+Result\b', text)
-    if marker:
-        main_part = text[: marker.start()]
-        abl_part = text[marker.start():]
-
-    def extract_values(chunk: str) -> list[float]:
-        vals: list[float] = []
-        for m in re.finditer(r'✓\s*\(\s*([-+]?(?:\d+\.\d+|\d+|\.\d+))\s*%?\s*\)', chunk):
-            try:
-                vals.append(float(m.group(1)))
-            except Exception:
-                continue
-        return vals
-
-    out['main'] = extract_values(main_part)
-    out['ablation'] = extract_values(abl_part)
-    return out
 
 
 def _read_json_file(path: Path) -> dict[str, Any]:
@@ -1163,12 +1021,16 @@ def _global_eval_status(summary: dict[str, Any], alignment: dict[str, Any]) -> t
     matched = int(alignment.get('matched') or 0)
     failed = int(alignment.get('failed') or 0)
     if status in {'failed', 'error'} or not run_ok:
-        return ('❌ In conflict', 'Execution failed or strongly conflicts with reported experiment behavior.')
+        return ('In conflict', 'Execution failed or strongly conflicts with reported experiment behavior.')
     if matched > 0 and failed == 0:
-        return ('✅ Supported', 'Execution-alignment supports reported experimental trends within tolerance.')
+        return ('Supported', 'Execution-alignment supports reported experimental trends within tolerance.')
     if matched > 0 and failed > 0:
-        return ('⚠ Inconclusive', 'Execution evidence is mixed: some aligned and some mismatched metrics.')
-    return ('⚠ Inconclusive', 'Execution finished but deterministic alignment evidence is insufficient.')
+        return ('Inconclusive', 'Execution evidence is mixed: some aligned and some mismatched metrics.')
+    return ('Inconclusive', 'Execution finished but deterministic alignment evidence is insufficient.')
+
+
+def _metric_higher_is_better(metric: str) -> bool:
+    return _norm_metric_key(metric) != 'mr'
 
 
 def _norm_metric_key(metric: str) -> str:
@@ -1218,18 +1080,16 @@ def _row_eval_cell(
     metric: str,
     paper_result: str,
     alignment: dict[str, Any],
-    default_symbol: str,
     observed_override: float | None = None,
 ) -> str:
-    settings = get_settings()
     observed = observed_override
     if observed is None:
         observed = _lookup_observed_metric(dataset=dataset, metric=metric, alignment=alignment)
     if observed is None:
-        return '⚠ Inconclusive'
-    paper_val = _first_float(paper_result)
+        return 'Inconclusive'
+    paper_val = _metric_aware_value(paper_result, metric_hint=metric)
     if paper_val is None:
-        return '⚠ Inconclusive'
+        return 'Inconclusive'
 
     mk = _norm_metric_key(metric)
     # Normalize scale for percentage-style paper values.
@@ -1239,59 +1099,127 @@ def _row_eval_cell(
         elif observed > 1.0 and paper_val <= 1.0:
             observed = observed / 100.0
 
-    denom = max(abs(paper_val), 1e-9)
-    rel_err = abs(observed - paper_val) / denom
-    if rel_err <= float(settings.eval_supported_relative_threshold):
-        return f'✅ Supported ({_fmt_value(observed, metric_key=mk)})'
-    if rel_err <= float(settings.eval_inconclusive_relative_threshold):
-        return f'⚠ Inconclusive ({_fmt_value(observed, metric_key=mk)})'
-    return f'❌ In conflict ({_fmt_value(observed, metric_key=mk)})'
+    # Directional rule:
+    # supported: performance drop within 1 * threshold
+    # inconclusive: drop within (1, 2] * threshold
+    # in conflict: drop > 2 * threshold
+    threshold = max(float(get_settings().eval_status_threshold), 0.0)
+    if _metric_higher_is_better(metric):
+        performance_drop = paper_val - observed
+    else:
+        performance_drop = observed - paper_val
+
+    if performance_drop <= threshold:
+        return f'Supported ({_fmt_value(observed, metric_key=mk)})'
+    if performance_drop <= (2.0 * threshold):
+        return f'Inconclusive ({_fmt_value(observed, metric_key=mk)})'
+    return f'In conflict ({_fmt_value(observed, metric_key=mk)})'
 
 
-def _truth_main_value(*, truth_values: dict[str, list[float]] | None, dataset: str, metric: str) -> float | None:
-    vals = list((truth_values or {}).get('main') or [])
-    if not vals:
-        return None
-    order: list[tuple[str, str]] = [
-        ('FB15k-237', 'MRR'),
-        ('FB15k-237', 'MR'),
-        ('FB15k-237', 'H@10'),
-        ('FB15k-237', 'H@3'),
-        ('FB15k-237', 'H@1'),
-        ('WN18RR', 'MRR'),
-        ('WN18RR', 'MR'),
-        ('WN18RR', 'H@10'),
-        ('WN18RR', 'H@3'),
-        ('WN18RR', 'H@1'),
-        ('MUTAG', 'Accuracy'),
-        ('AM', 'Accuracy'),
-        ('MUTAG', 'Accuracy'),
-        ('PTC', 'Accuracy'),
-    ]
-    ds = str(dataset or '').lower().replace(' ', '')
-    mk = _norm_metric_key(metric)
-    for i, (ods, om) in enumerate(order):
-        if i >= len(vals):
-            break
-        if ods.lower().replace(' ', '') in ds and _norm_metric_key(om) == mk:
-            return float(vals[i])
-    return None
+def _status_with_symbol(text: str) -> str:
+    raw = str(text or '').strip()
+    if not raw:
+        return raw
+    lower = raw.lower()
+    if lower.startswith('supported'):
+        return f'✓ {raw}'
+    if lower.startswith('paper-supported'):
+        return f'☑ {raw}'
+    if lower.startswith('partially supported'):
+        return f'⚠ {raw}'
+    if lower.startswith('inconclusive'):
+        return f'⚠ {raw}'
+    if lower.startswith('in conflict'):
+        return f'✗ {raw}'
+    return raw
 
 
-def _claim_dataset_metric_hint(text: str) -> tuple[str, str]:
+def _looks_like_data_evidence(text: str) -> bool:
+    raw = str(text or '')
+    if re.search(r'(?i)\b(mrr|mean rank|hits?@\d+|h@\d+|accuracy|acc|f1|bleu|rouge|map|auc|error rate|top-1|top-5)\b', raw):
+        return True
+    if re.search(r'(?i)\b(table|figure|experiment|result|dataset|benchmark|baseline|ablation)\b', raw) and _first_float(raw) is not None:
+        return True
+    return False
+
+
+def _normalize_claim_type_label(value: str) -> str:
+    raw = _strip_inline_formatting(value).strip().lower()
+    if not raw:
+        return ''
+    if 'experiment' in raw or 'empirical' in raw:
+        return 'Experimental'
+    if 'theor' in raw or 'proof' in raw or 'formal' in raw:
+        return 'Theoretical'
+    if 'method' in raw or 'model' in raw or 'architect' in raw or 'algorithm' in raw:
+        return 'Methodological'
+    return ''
+
+
+def _infer_claim_type_label(*, claim: str, evidence: str, location: str) -> str:
+    joined = f'{claim}\n{evidence}\n{location}'
+    if _looks_like_data_evidence(joined):
+        return 'Experimental'
+    lowered = joined.lower()
+    if re.search(r'(?i)\b(theorem|proposition|lemma|corollary|proof|derivation|bound)\b', joined):
+        return 'Theoretical'
+    if re.search(r'(?i)\b(module|architecture|algorithm|design|mechanism|encoder|decoder|attention)\b', joined):
+        return 'Methodological'
+    if 'equation' in lowered or 'objective' in lowered or 'loss' in lowered:
+        return 'Theoretical'
+    return 'Methodological'
+
+
+def _resolve_claim_type_label(*, model_claim_type: str, claim: str, evidence: str, location: str) -> str:
+    normalized = _normalize_claim_type_label(model_claim_type)
+    if normalized:
+        return normalized
+    return _infer_claim_type_label(claim=claim, evidence=evidence, location=location)
+
+
+def _claims_status_legend_colored() -> str:
+    return (
+        '(Status legend: '
+        '<span style="color: green;">✓ Supported</span>, '
+        '<span style="color: #1E5EFF;">☑ Paper-supported</span>, '
+        '<span style="color: #E6B800;">⚠ Inconclusive</span>, '
+        '<span style="color: red;">✗ In conflict</span>.)'
+    )
+
+
+def _experiment_status_legend_colored() -> str:
+    return (
+        '(Status legend: '
+        '<span style="color: green;">✓ Supported</span>, '
+        '<span style="color: #E6B800;">⚠ Inconclusive</span>, '
+        '<span style="color: red;">✗ In conflict</span>.)'
+    )
+
+
+def _claim_dataset_metric_hint(
+    text: str,
+    *,
+    alignment: dict[str, Any] | None = None,
+) -> tuple[str, str]:
     s = str(text or '').lower()
     dataset = ''
     metric = ''
-    if 'fb15k-237' in s:
-        dataset = 'FB15k-237'
-    elif 'wn18rr' in s:
-        dataset = 'WN18RR'
-    elif 'mutag' in s:
-        dataset = 'MUTAG'
-    elif re.search(r'\bam\b', s):
-        dataset = 'AM'
-    elif 'ptc' in s:
-        dataset = 'PTC'
+    if isinstance(alignment, dict):
+        matches = alignment.get('matches') if isinstance(alignment.get('matches'), list) else []
+        text_norm = re.sub(r'[^a-z0-9]+', '', s)
+        candidates: list[str] = []
+        for item in matches:
+            if not isinstance(item, dict):
+                continue
+            ds = str(item.get('dataset') or '').strip()
+            if ds and ds not in candidates:
+                candidates.append(ds)
+        candidates.sort(key=len, reverse=True)
+        for ds in candidates:
+            ds_norm = re.sub(r'[^a-z0-9]+', '', ds.lower())
+            if ds_norm and ds_norm in text_norm:
+                dataset = ds
+                break
 
     if 'mrr' in s:
         metric = 'MRR'
@@ -1310,7 +1238,7 @@ def _claim_dataset_metric_hint(text: str) -> tuple[str, str]:
 
 def _status_from_paper_observed(*, paper_val: float | None, observed: float | None, metric: str) -> tuple[str, str]:
     if paper_val is None or observed is None:
-        return ('⚠ Inconclusive', 'Insufficient numeric evidence for deterministic comparison.')
+        return ('Inconclusive', 'Insufficient numeric evidence for deterministic comparison.')
     mk = _norm_metric_key(metric)
     p = float(paper_val)
     o = float(observed)
@@ -1319,14 +1247,173 @@ def _status_from_paper_observed(*, paper_val: float | None, observed: float | No
             p = p / 100.0
         elif o > 1.0 and p <= 1.0:
             o = o / 100.0
-    denom = max(abs(p), 1e-9)
-    rel_err = abs(o - p) / denom
-    settings = get_settings()
-    if rel_err <= float(settings.eval_supported_relative_threshold):
-        return ('✅ Supported', f'Delta={abs(o-p):.4f}, relative={rel_err*100:.2f}%')
-    if rel_err <= float(settings.eval_inconclusive_relative_threshold):
-        return ('⚠ Inconclusive', f'Delta={abs(o-p):.4f}, relative={rel_err*100:.2f}%')
-    return ('❌ In conflict', f'Delta={abs(o-p):.4f}, relative={rel_err*100:.2f}%')
+    threshold = max(float(get_settings().eval_status_threshold), 0.0)
+    if _metric_higher_is_better(metric):
+        performance_drop = p - o
+    else:
+        performance_drop = o - p
+
+    note = f'Delta={abs(o-p):.4f}, performance_drop={performance_drop:.4f}, threshold={threshold:.4f}'
+    if performance_drop <= threshold:
+        return ('Supported', note)
+    if performance_drop <= (2.0 * threshold):
+        return ('Inconclusive', note)
+    return ('In conflict', note)
+
+
+def _build_experimental_claim_assessment(
+    *,
+    claim: str,
+    evidence: str,
+    location: str,
+    alignment: dict[str, Any],
+) -> tuple[str, str]:
+    joined = f'{claim} {evidence} {location}'
+    dataset, metric = _claim_dataset_metric_hint(joined, alignment=alignment)
+    observed = _lookup_observed_metric(dataset=dataset, metric=metric, alignment=alignment) if (dataset and metric) else None
+    paper_val = _metric_aware_value(evidence, metric_hint=metric) or _metric_aware_value(claim, metric_hint=metric)
+    status, delta_note = _status_from_paper_observed(
+        paper_val=paper_val,
+        observed=observed,
+        metric=metric or 'metric',
+    )
+    if paper_val is not None and observed is not None:
+        norm_metric = _norm_metric_key(metric)
+        assessment = (
+            f'Claim mapped to {dataset} / {metric}. '
+            f'Paper={_fmt_value(paper_val, metric_key=norm_metric)}, '
+            f'Reproduced={_fmt_value(observed, metric_key=norm_metric)}. '
+            f'{delta_note}.'
+        )
+        return assessment, status
+    missing_items: list[str] = []
+    if not dataset:
+        missing_items.append('dataset')
+    if not metric:
+        missing_items.append('metric')
+    if paper_val is None:
+        missing_items.append('paper numeric value')
+    if observed is None:
+        missing_items.append('aligned reproduced metric')
+    return (
+        'Experimental comparison is incomplete for this claim: missing '
+        + ', '.join(missing_items)
+        + '.',
+        'Inconclusive',
+    )
+
+
+def _build_theoretical_claim_assessment(*, claim: str, evidence: str, location: str) -> tuple[str, str]:
+    text = f'{claim}\n{evidence}\n{location}'
+    lower = text.lower()
+    has_anchor = bool(
+        re.search(r'(?i)\b(theorem|proposition|lemma|corollary|proof|equation|derivation)\b', text)
+    )
+    has_math_signal = bool(
+        re.search(r'(?i)(\\[a-z]+|\bO\(|=|<=|>=|->|⇒|∇|argmin|argmax|loss|objective)', text)
+    )
+    has_location = bool(str(location or '').strip() and 'not found in manuscript' not in lower)
+    has_missing_marker = bool(
+        re.search(r'(?i)\b(not found in manuscript|not provided|missing|unclear|unspecified)\b', text)
+    )
+    has_contradiction_marker = bool(
+        re.search(r'(?i)\b(contradict|inconsistent|does not hold|invalid|fails?)\b', text)
+    )
+
+    score = 0
+    if has_anchor:
+        score += 2
+    if has_math_signal:
+        score += 1
+    if has_location:
+        score += 1
+    if has_missing_marker:
+        score -= 2
+    if has_contradiction_marker:
+        score -= 2
+
+    parts: list[str] = []
+    if has_anchor:
+        parts.append('The paper gives a formal anchor for the reasoning.')
+    else:
+        parts.append('The paper gives no clear theorem/proposition/proof anchor.')
+    if has_math_signal:
+        parts.append('The evidence contains explicit mathematical derivation signals.')
+    else:
+        parts.append('The evidence lacks explicit derivation details.')
+    if has_location:
+        parts.append(f'The cited location is {location.strip()}.')
+    else:
+        parts.append('No reliable manuscript location is provided.')
+    if has_missing_marker:
+        parts.append('The evidence indicates missing or incomplete support.')
+    if has_contradiction_marker:
+        parts.append('The evidence text suggests an unresolved inconsistency risk.')
+
+    if score >= 3:
+        status = 'Paper-supported'
+    elif score <= -1:
+        status = 'In conflict'
+    else:
+        status = 'Inconclusive'
+    return ' '.join(parts), status
+
+
+def _build_methodological_claim_assessment(*, claim: str, evidence: str, location: str) -> tuple[str, str]:
+    text = f'{claim}\n{evidence}\n{location}'
+    lower = text.lower()
+    has_design_anchor = bool(
+        re.search(
+            r'(?i)\b(module|architecture|algorithm|design|pipeline|encoder|decoder|attention|component)\b',
+            text,
+        )
+    )
+    has_implementation_anchor = bool(
+        re.search(r'(?i)\b(section|table|figure|equation|appendix|implementation)\b', text)
+    )
+    has_location = bool(str(location or '').strip() and 'not found in manuscript' not in lower)
+    has_missing_marker = bool(
+        re.search(r'(?i)\b(not found in manuscript|not provided|missing|unclear|unspecified)\b', text)
+    )
+    has_contradiction_marker = bool(re.search(r'(?i)\b(contradict|inconsistent|invalid|fails?)\b', text))
+
+    score = 0
+    if has_design_anchor:
+        score += 2
+    if has_implementation_anchor:
+        score += 1
+    if has_location:
+        score += 1
+    if has_missing_marker:
+        score -= 2
+    if has_contradiction_marker:
+        score -= 2
+
+    parts: list[str] = []
+    if has_design_anchor:
+        parts.append('The claim has concrete method-design anchors in the manuscript.')
+    else:
+        parts.append('The claim lacks explicit method-design anchors.')
+    if has_implementation_anchor:
+        parts.append('Supporting evidence references implementation-level manuscript artifacts.')
+    else:
+        parts.append('Supporting evidence lacks direct implementation-level anchors.')
+    if has_location:
+        parts.append(f'The cited location is {location.strip()}.')
+    else:
+        parts.append('No reliable manuscript location is provided.')
+    if has_missing_marker:
+        parts.append('The evidence indicates missing or incomplete support.')
+    if has_contradiction_marker:
+        parts.append('The evidence text suggests unresolved inconsistency risk.')
+
+    if score >= 3:
+        status = 'Paper-supported'
+    elif score <= -1:
+        status = 'In conflict'
+    else:
+        status = 'Inconclusive'
+    return ' '.join(parts), status
 
 
 def _augment_claims_with_assessment_status(
@@ -1334,7 +1421,6 @@ def _augment_claims_with_assessment_status(
     *,
     summary: dict[str, Any],
     alignment: dict[str, Any],
-    truth_values: dict[str, list[float]] | None = None,
 ) -> str:
     text = str(markdown_text or '')
     sec = re.search(r'(?ims)^##\s+3\.\s+Claims\s*$\n(?P<body>.*?)(?=^##\s+|\Z)', text)
@@ -1355,14 +1441,53 @@ def _augment_claims_with_assessment_status(
         # Prevent markdown table column break due to literal pipe in generated text.
         return str(v or '').replace('|', '/').strip()
 
-    status_label, assessment_short = _global_eval_status(summary, alignment)
-    legend = '(Status legend: ✅ Supported, §Paper-supported, ⚠ Inconclusive, ❌ In conflict.)'
+    legend = _claims_status_legend_colored()
     if legend not in body:
         lines.insert(header_idx, legend)
         lines.insert(header_idx + 1, '')
         header_idx += 2
 
     header_cells = [c.strip() for c in lines[header_idx].strip().strip('|').split('|')]
+    normalized_headers = [_strip_inline_formatting(c).strip().lower() for c in header_cells]
+
+    def _header_index(*candidates: str, exact: str = '') -> int:
+        if exact:
+            exact_norm = str(exact or '').strip().lower()
+            for idx, name in enumerate(normalized_headers):
+                if name == exact_norm:
+                    return idx
+        for idx, name in enumerate(normalized_headers):
+            if any(candidate in name for candidate in candidates):
+                return idx
+        return -1
+
+    claim_type_idx = _header_index('claim type', exact='claim type')
+    claim_idx = _header_index('claim', exact='claim')
+    evidence_idx = _header_index('evidence')
+    assessment_idx = _header_index('assessment')
+    location_idx = _header_index('location')
+
+    def _cell_value(cells: list[str], idx: int, default: str = '') -> str:
+        if idx < 0 or idx >= len(cells):
+            return default
+        return str(cells[idx] or '').strip()
+
+    def _is_meaningful_assessment(value: str) -> bool:
+        plain = _strip_inline_formatting(value).strip().lower()
+        if not plain:
+            return False
+        if plain in {
+            'not found in manuscript',
+            'not found',
+            'n/a',
+            'na',
+            'none',
+            'unknown',
+            'not provided',
+            'unspecified',
+        }:
+            return False
+        return True
 
     # separator line expected right after header
     sep_idx = header_idx + 1
@@ -1383,41 +1508,49 @@ def _augment_claims_with_assessment_status(
         if not (s.startswith('|') and s.endswith('|')):
             continue
         cells = [c.strip() for c in s.strip('|').split('|')]
-        if len(cells) < 3:
+        if len(cells) < 2:
             continue
-        claim = cells[0]
-        evidence = cells[1] if len(cells) >= 2 else 'Not found in manuscript'
-        location = cells[-1] if len(cells) >= 3 else 'Not found in manuscript'
-        joined = f'{claim} {evidence} {location}'
-        quant = bool(re.search(r'(?i)\b(mrr|mr|hits?|accuracy|acc|fb15k|wn18rr|mutag|ptc|am)\b', joined))
-        if quant:
-            ds, mt = _claim_dataset_metric_hint(joined)
-            observed = None
-            if ds and mt:
-                observed = _truth_main_value(truth_values=truth_values, dataset=ds, metric=mt)
-                if observed is None:
-                    observed = _lookup_observed_metric(dataset=ds, metric=mt, alignment=alignment)
-            paper_val = _first_float(evidence) or _first_float(claim)
-            stat, delta_note = _status_from_paper_observed(paper_val=paper_val, observed=observed, metric=mt or 'metric')
-            if paper_val is not None and observed is not None:
-                assess = (
-                    f'Paper={_fmt_value(paper_val, metric_key=_norm_metric_key(mt))}, '
-                    f'Reproduced={_fmt_value(observed, metric_key=_norm_metric_key(mt))}; {delta_note}.'
-                )
-            else:
-                assess = assessment_short
+        claim = _cell_value(cells, claim_idx, _cell_value(cells, 0, 'Not found in manuscript'))
+        evidence = _cell_value(cells, evidence_idx, _cell_value(cells, 1, 'Not found in manuscript'))
+        default_location = _cell_value(cells, len(cells) - 1, 'Not found in manuscript')
+        location = _cell_value(cells, location_idx, default_location)
+        authored_assessment = _cell_value(cells, assessment_idx, '')
+        model_claim_type = _cell_value(cells, claim_type_idx, '')
+        resolved_claim_type = _resolve_claim_type_label(
+            model_claim_type=model_claim_type,
+            claim=claim,
+            evidence=evidence,
+            location=location,
+        )
+        if resolved_claim_type == 'Experimental':
+            _generated_assess, stat = _build_experimental_claim_assessment(
+                claim=claim,
+                evidence=evidence,
+                location=location,
+                alignment=alignment,
+            )
+        elif resolved_claim_type == 'Theoretical':
+            _generated_assess, stat = _build_theoretical_claim_assessment(
+                claim=claim,
+                evidence=evidence,
+                location=location,
+            )
         else:
-            theory_positive = bool(re.search(r'(?i)\b(proposition|theorem|proof|equation|derivation|reduction)\b', joined))
-            if theory_positive:
-                assess = 'Theory-grounded reasoning is coherent with manuscript equations/proposition support.'
-                stat = '§Paper-supported'
-            else:
-                assess = 'Theoretical support is limited or indirect; stronger formal justification is recommended.'
-                stat = '⚠ Inconclusive'
+            _generated_assess, stat = _build_methodological_claim_assessment(
+                claim=claim,
+                evidence=evidence,
+                location=location,
+            )
+        # The final assessment is system-derived and type-aware:
+        # experimental claims compare with aligned execution evidence,
+        # while theoretical/methodological claims are judged from manuscript anchors.
+        assess = _generated_assess or (
+            authored_assessment if _is_meaningful_assessment(authored_assessment) else 'Not found in manuscript'
+        )
         claim = _cell_safe(claim)
         evidence = _cell_safe(evidence)
         assess = _cell_safe(assess)
-        stat = _cell_safe(stat)
+        stat = _cell_safe(_status_with_symbol(stat))
         location = _cell_safe(location)
         new_rows.append(f'| {claim} | {evidence} | {assess} | {stat} | {location} |')
 
@@ -1435,24 +1568,21 @@ def _augment_experiment_with_eval_status(
     *,
     summary: dict[str, Any],
     alignment: dict[str, Any],
-    truth_values: dict[str, list[float]] | None = None,
 ) -> str:
     text = str(markdown_text or '')
     sec = re.search(r'(?ims)^##\s+5\.\s+Experiment\s*$\n(?P<body>.*?)(?=^##\s+|\Z)', text)
     if not sec:
         return text
     body = sec.group('body')
-    status_label, _assessment_short = _global_eval_status(summary, alignment)
-    default_symbol = '⚠ Inconclusive'
-    if status_label.startswith('✅'):
-        default_symbol = '✅ Supported'
-    elif status_label.startswith('❌'):
-        default_symbol = '❌ In conflict'
-
     # Main result legend
-    main_legend = '(Status legend: ✅ Supported, ⚠ Inconclusive, ❌ In conflict.)'
-    if '### Main Result' in body and main_legend not in body:
-        body = re.sub(r'(?m)^###\s+Main Result\s*$', f'### Main Result\n\n{main_legend}', body, count=1)
+    main_legend = _experiment_status_legend_colored()
+    if re.search(r'(?im)^###\s+(?:\*\*)?Main Result(?:\*\*)?\s*$', body) and main_legend not in body:
+        body = re.sub(
+            r'(?im)^###\s+(?:\*\*)?Main Result(?:\*\*)?\s*$',
+            f'### Main Result\n\n{main_legend}',
+            body,
+            count=1,
+        )
 
     # Main table
     main_match = re.search(
@@ -1460,12 +1590,10 @@ def _augment_experiment_with_eval_status(
         body,
     )
     if main_match:
-        header = '| Task | Dataset | Metric | Best Baseline | Paper Result | Difference (Δ) | Evaluation Status |'
+        header = '| **Task** | **Dataset** | **Metric** | **Best Baseline** | **Paper Result** | **Difference (Δ)** | **Evaluation Status** |'
         sep = '|---|---|---|---|---|---|---|'
         rows_raw = main_match.group('rows')
         new_rows: list[str] = []
-        main_truth = list((truth_values or {}).get('main') or [])
-        main_idx = 0
         for ln in rows_raw.splitlines():
             s = ln.strip()
             if not (s.startswith('|') and s.endswith('|')):
@@ -1476,59 +1604,64 @@ def _augment_experiment_with_eval_status(
             dataset = cells[1]
             metric = cells[2]
             paper_result = cells[4]
-            observed_override = None
-            if main_idx < len(main_truth):
-                observed_override = float(main_truth[main_idx])
-            main_idx += 1
             cell = _row_eval_cell(
                 dataset=dataset,
                 metric=metric,
                 paper_result=paper_result,
                 alignment=alignment,
-                default_symbol=default_symbol,
-                observed_override=observed_override,
             )
-            new_rows.append('| ' + ' | '.join(cells[:6] + [cell]) + ' |')
+            new_rows.append('| ' + ' | '.join(cells[:6] + [_status_with_symbol(cell)]) + ' |')
         rebuilt = '\n'.join([header, sep] + new_rows) + '\n'
         body = body[: main_match.start()] + rebuilt + body[main_match.end():]
 
     # Ablation legend and table
-    if '### Ablation Result' in body and main_legend not in body.split('### Ablation Result', 1)[1][:300]:
-        body = re.sub(r'(?m)^###\s+Ablation Result\s*$', f'### Ablation Result\n\n{main_legend}', body, count=1)
+    if re.search(r'(?im)^###\s+(?:\*\*)?Ablation Result(?:\*\*)?\s*$', body):
+        tail_match = re.search(r'(?ims)^###\s+(?:\*\*)?Ablation Result(?:\*\*)?\s*$\n(?P<tail>.*)$', body)
+        tail = str(tail_match.group('tail') or '') if tail_match else ''
+        if main_legend not in tail[:300]:
+            body = re.sub(
+                r'(?im)^###\s+(?:\*\*)?Ablation Result(?:\*\*)?\s*$',
+                f'### Ablation Result\n\n{main_legend}',
+                body,
+                count=1,
+            )
 
     abl_match = re.search(
         r'(?ims)^(\|\s*Ablation Dimension\s*\|.*?Difference\s*\(Δ\)\s*\|)\n(\|[-:\| ]+\|)\n(?P<rows>(?:\|.*\|\n?)*)',
         body,
     )
     if abl_match:
-        header = '| Ablation Dimension | Configuration | Full Model | Paper Result | Difference (Δ) | Evaluation Status |'
+        header = '| **Ablation Dimension** | **Configuration** | **Full Model** | **Paper Result** | **Difference (Δ)** | **Evaluation Status** |'
         sep = '|---|---|---|---|---|---|'
         rows_raw = abl_match.group('rows')
-        new_rows: list[str] = []
-        abl_truth = list((truth_values or {}).get('ablation') or [])
-        abl_idx = 0
+        parsed_rows: list[list[str]] = []
         for ln in rows_raw.splitlines():
             s = ln.strip()
             if not (s.startswith('|') and s.endswith('|')):
                 continue
-            cells = [c.strip() for c in s.strip('|').split('|')]
+            parsed_rows.append([c.strip() for c in s.strip('|').split('|')])
+        table_metric_hint = _infer_metric_hint_from_table(
+            headers=['Ablation Dimension', 'Configuration', 'Full Model', 'Paper Result', 'Difference (Δ)'],
+            rows=parsed_rows,
+            block_text=body[abl_match.start():abl_match.end()],
+        )
+        new_rows: list[str] = []
+        for cells in parsed_rows:
             if len(cells) < 5:
                 continue
-            # Most ablation rows in alignment are link prediction MRR on FB15k-237.
             paper_result = cells[3]
-            observed_override = None
-            if abl_idx < len(abl_truth):
-                observed_override = float(abl_truth[abl_idx])
-            abl_idx += 1
+            dataset_hint, metric_hint = _claim_dataset_metric_hint(' '.join(cells), alignment=alignment)
+            if not metric_hint:
+                metric_hint = table_metric_hint or 'metric'
+            if not dataset_hint:
+                dataset_hint = ''
             cell = _row_eval_cell(
-                dataset='FB15k-237',
-                metric='MRR',
+                dataset=dataset_hint,
+                metric=metric_hint,
                 paper_result=paper_result,
                 alignment=alignment,
-                default_symbol=default_symbol,
-                observed_override=observed_override,
             )
-            new_rows.append('| ' + ' | '.join(cells[:5] + [cell]) + ' |')
+            new_rows.append('| ' + ' | '.join(cells[:5] + [_status_with_symbol(cell)]) + ' |')
         rebuilt = '\n'.join([header, sep] + new_rows) + '\n'
         body = body[: abl_match.start()] + rebuilt + body[abl_match.end():]
 
@@ -1548,6 +1681,477 @@ def _compress_experiment_note(markdown_text: str) -> str:
     body = re.sub(r'(?im)^\s*Note\s*:\s*.*$', '', body)
     body = re.sub(r'\n{3,}', '\n\n', body)
     return text[: sec.start('body')] + body + text[sec.end('body') :]
+
+
+def _strip_inline_formatting(text: str) -> str:
+    s = str(text or '').strip()
+    s = re.sub(r'<[^>]+>', '', s)
+    s = s.replace('**', '').replace('__', '').replace('`', '')
+    s = s.replace('✓', '').replace('⚠', '').replace('✗', '')
+    return ' '.join(s.split()).strip()
+
+
+def _bold_label_line(text: str, label: str) -> str:
+    pattern = re.compile(
+        rf'(?im)^(\s*)(?:[-*]\s*)?(?:\*\*)?{re.escape(label)}(?:\*\*)?\s*:\s*(.*?)\s*$'
+    )
+    def _repl(match: re.Match[str]) -> str:
+        indent = str(match.group(1) or '')
+        value = str(match.group(2) or '').strip()
+        # Avoid duplicated emphasis markers when line already contains bolded values.
+        if value.startswith('**'):
+            value = value[2:].lstrip()
+        if value.endswith('**'):
+            value = value[:-2].rstrip()
+        return f'{indent}**{label}:** {value}'
+
+    return pattern.sub(_repl, str(text or ''))
+
+
+def _as_status_label(value: str) -> str:
+    raw = _strip_inline_formatting(value).lower()
+    if 'paper-supported' in raw or 'paper supported' in raw or 'supported by the paper' in raw:
+        return 'paper-supported'
+    if 'support' in raw:
+        return 'Supported'
+    if 'conflict' in raw or 'fail' in raw:
+        return 'In conflict'
+    return 'Inconclusive'
+
+
+def _parse_numeric_delta(text: str) -> float | None:
+    raw = _strip_inline_formatting(text)
+    if not raw or 'not found' in raw.lower():
+        return None
+    return _first_float(raw)
+
+
+def _colorize_difference_cell(*, diff_text: str, metric_text: str = '') -> tuple[str, str]:
+    delta = _parse_numeric_delta(diff_text)
+    if delta is None:
+        return (diff_text, 'Inconclusive')
+    higher_better = _metric_higher_is_better(metric_text) if metric_text else True
+    if abs(delta) <= 1e-12:
+        clean = _strip_inline_formatting(diff_text) or '0'
+        return (f'**{clean}**', 'Inconclusive')
+    improved = delta > 0 if higher_better else delta < 0
+    clean = _strip_inline_formatting(diff_text) or str(delta)
+    if improved:
+        return (f'<span style="color: green;">{clean}</span>', 'Supported')
+    return (f'<span style="color: red;">{clean}</span>', 'In conflict')
+
+
+def _colorize_ablation_difference_cell(*, diff_text: str) -> tuple[str, str]:
+    # Product rule requested by user:
+    # in Ablation table, negative delta means an effective change -> green.
+    delta = _parse_numeric_delta(diff_text)
+    if delta is None:
+        return (diff_text, 'Inconclusive')
+    clean = _strip_inline_formatting(diff_text) or str(delta)
+    if abs(delta) <= 1e-12:
+        return (f'**{clean}**', 'Inconclusive')
+    if delta < 0:
+        return (f'<span style="color: green;">{clean}</span>', 'Supported')
+    return (f'<span style="color: red;">{clean}</span>', 'In conflict')
+
+
+def _fmt_float_trim(value: float) -> str:
+    return f'{float(value):.3f}'.rstrip('0').rstrip('.')
+
+
+def _extract_baseline_model_name(raw_cell: str) -> str:
+    raw = _strip_inline_formatting(raw_cell)
+    if not raw:
+        return 'Baseline'
+    m_name_before_num = re.match(r'^\s*(?P<name>.+?)\s*\(\s*[-+]?(?:\d+\.\d+|\d+|\.\d+)\s*\)\s*$', raw)
+    if m_name_before_num:
+        candidate = str(m_name_before_num.group('name') or '').strip()
+        if candidate:
+            return candidate
+    m_num_before_name = re.match(r'^\s*[-+]?(?:\d+\.\d+|\d+|\.\d+)\s*\(\s*(?P<name>.+?)\s*\)\s*$', raw)
+    if m_num_before_name:
+        candidate = str(m_num_before_name.group('name') or '').strip()
+        if candidate:
+            return candidate
+    # Remove standalone numeric tokens while preserving alphanumeric model names like ConvS2S.
+    no_num = re.sub(r'(?<![A-Za-z])[-+]?(?:\d+\.\d+|\d+|\.\d+)(?![A-Za-z])', ' ', raw)
+    no_num = re.sub(r'[()\[\]{}]', ' ', no_num)
+    no_num = re.sub(r'[,;:]', ' ', no_num)
+    no_num = ' '.join(no_num.split()).strip()
+    if not no_num or no_num.lower() in {'not found in manuscript', 'n/a', 'na', 'not found'}:
+        return 'Baseline'
+    return no_num
+
+
+def _best_baseline_numeric_model(
+    *,
+    baseline_cell: str,
+    paper_result_cell: str,
+    diff_cell: str,
+    metric_hint: str = '',
+) -> str:
+    base_raw = _strip_inline_formatting(baseline_cell)
+    model = _extract_baseline_model_name(base_raw)
+    baseline_val = _metric_aware_value(base_raw, metric_hint=metric_hint)
+    paper_val = _metric_aware_value(_strip_inline_formatting(paper_result_cell), metric_hint=metric_hint)
+    diff_val = _parse_numeric_delta(diff_cell)
+    reconstructed = None
+    if paper_val is not None and diff_val is not None:
+        reconstructed = paper_val - diff_val
+
+    # If baseline text is missing or inconsistent with paper-diff arithmetic,
+    # prefer deterministic reconstruction from `paper_result - difference`.
+    if reconstructed is not None:
+        if baseline_val is None:
+            baseline_val = reconstructed
+        else:
+            mismatch = abs((paper_val - baseline_val) - diff_val) if paper_val is not None else 0.0
+            tolerance = max(0.02, abs(diff_val) * 0.02)
+            if mismatch > tolerance:
+                baseline_val = reconstructed
+    if baseline_val is None:
+        return f'Not found({model})'
+    return f'{_fmt_float_trim(baseline_val)}({model})'
+
+
+def _style_status_value(value: str) -> str:
+    normalized = _as_status_label(value)
+    if normalized == 'Supported':
+        return '<span style="color: green;">✓ Supported</span>'
+    if normalized == 'paper-supported':
+        return '<span style="color: #1E5EFF;">☑ Paper-supported</span>'
+    if normalized == 'In conflict':
+        return '<span style="color: red;">✗ In conflict</span>'
+    return '<span style="color: #E6B800;">⚠ Inconclusive</span>'
+
+
+def _style_experiment_eval_status(*, status_label: str, raw_value: str) -> str:
+    value = _strip_inline_formatting(raw_value)
+    metric_value = _first_float(value)
+    normalized = _as_status_label(status_label)
+    if normalized in {'Supported', 'In conflict'} and metric_value is None:
+        # Without numeric evidence, avoid presenting deterministic pass/fail.
+        normalized = 'Inconclusive'
+    if normalized == 'Supported':
+        icon = '✓'
+        color = 'green'
+    elif normalized == 'In conflict':
+        icon = '✗'
+        color = 'red'
+    else:
+        icon = '⚠'
+        color = '#E6B800'
+    if metric_value is None:
+        return f'<span style="color: {color};">{icon}()</span>'
+    return f'<span style="color: {color};">{icon}({_fmt_float_trim(metric_value)})</span>'
+
+
+def _infer_metric_hint_from_table(*, headers: list[str], rows: list[list[str]], block_text: str) -> str:
+    corpus_parts: list[str] = []
+    corpus_parts.extend(headers)
+    corpus_parts.append(block_text)
+    for row in rows[:8]:
+        corpus_parts.extend(row)
+    text = ' '.join(str(x or '') for x in corpus_parts).lower()
+    if 'mean rank' in text or re.search(r'(?<![a-z])mr(?!r)(?![a-z])', text):
+        return 'MR'
+    if 'mrr' in text:
+        return 'MRR'
+    if 'hits@10' in text or 'h@10' in text:
+        return 'H@10'
+    if 'hits@3' in text or 'h@3' in text:
+        return 'H@3'
+    if 'hits@1' in text or 'h@1' in text:
+        return 'H@1'
+    if 'bleu' in text:
+        return 'BLEU'
+    if 'f1' in text:
+        return 'F1'
+    if 'acc' in text or 'accuracy' in text:
+        return 'Accuracy'
+    return ''
+
+
+def _format_metric_value_for_cell(value: float, *, metric_hint: str) -> str:
+    mk = _norm_metric_key(metric_hint)
+    if mk == 'mr':
+        return str(int(round(value)))
+    return _fmt_float_trim(value)
+
+
+def _normalize_experiment_tables_in_block(block: str) -> tuple[str, list[str]]:
+    lines = str(block or '').splitlines()
+    row_statuses: list[str] = []
+    i = 0
+    while i + 1 < len(lines):
+        header = lines[i].strip()
+        sep = lines[i + 1].strip()
+        if not (header.startswith('|') and header.endswith('|') and re.fullmatch(r'\|[ :\-|]+\|', sep)):
+            i += 1
+            continue
+        j = i + 2
+        while j < len(lines):
+            s = lines[j].strip()
+            if s.startswith('|') and s.endswith('|'):
+                j += 1
+                continue
+            break
+
+        headers = [c.strip() for c in lines[i].strip().strip('|').split('|')]
+        rows: list[list[str]] = []
+        for k in range(i + 2, j):
+            s = lines[k].strip()
+            if not (s.startswith('|') and s.endswith('|')):
+                continue
+            rows.append([c.strip() for c in s.strip('|').split('|')])
+
+        lower_headers = [_strip_inline_formatting(h).lower() for h in headers]
+        diff_idx = next((idx for idx, h in enumerate(lower_headers) if 'difference' in h), -1)
+        metric_idx = next((idx for idx, h in enumerate(lower_headers) if h == 'metric'), -1)
+        best_baseline_idx = next((idx for idx, h in enumerate(lower_headers) if 'best baseline' in h), -1)
+        full_model_idx = next((idx for idx, h in enumerate(lower_headers) if h == 'full model'), -1)
+        paper_result_idx = next((idx for idx, h in enumerate(lower_headers) if h == 'paper result'), -1)
+        status_idx = next((idx for idx, h in enumerate(lower_headers) if 'status' in h), -1)
+        table_metric_hint = _infer_metric_hint_from_table(headers=headers, rows=rows, block_text=block)
+        is_ablation_table = any('ablation dimension' in h for h in lower_headers)
+        if status_idx < 0:
+            headers.append('Evaluation Status')
+            status_idx = len(headers) - 1
+            for row in rows:
+                row.append('Inconclusive')
+
+        # Ablation table normalization: use the best achievable value as Full Model anchor.
+        # This avoids inconsistent cases where ablations appear better than the reported full model.
+        if is_ablation_table and full_model_idx >= 0 and paper_result_idx >= 0:
+            higher_is_better = _metric_higher_is_better(table_metric_hint)
+            candidates: list[float] = []
+            for row in rows:
+                if paper_result_idx < len(row):
+                    v = _metric_aware_value(row[paper_result_idx], metric_hint=table_metric_hint)
+                    if v is not None:
+                        candidates.append(v)
+                if full_model_idx < len(row):
+                    v = _metric_aware_value(row[full_model_idx], metric_hint=table_metric_hint)
+                    if v is not None:
+                        candidates.append(v)
+            if candidates:
+                best_full = max(candidates) if higher_is_better else min(candidates)
+                for ridx, row in enumerate(rows):
+                    if len(row) < len(headers):
+                        row = row + [''] * (len(headers) - len(row))
+                    row[full_model_idx] = _format_metric_value_for_cell(best_full, metric_hint=table_metric_hint)
+                    if diff_idx >= 0 and diff_idx < len(row) and paper_result_idx < len(row):
+                        paper_val = _metric_aware_value(row[paper_result_idx], metric_hint=table_metric_hint)
+                        if paper_val is not None:
+                            delta = paper_val - best_full
+                            row[diff_idx] = f'{delta:+.3f}'.rstrip('0').rstrip('.')
+                    rows[ridx] = row
+
+        for ridx, row in enumerate(rows):
+            if len(row) < len(headers):
+                row = row + [''] * (len(headers) - len(row))
+            metric_text = (
+                row[metric_idx]
+                if metric_idx >= 0 and metric_idx < len(row) and str(row[metric_idx]).strip()
+                else table_metric_hint
+            )
+            raw_status_cell = row[status_idx] if status_idx < len(row) else ''
+            if (
+                best_baseline_idx >= 0
+                and paper_result_idx >= 0
+                and diff_idx >= 0
+                and best_baseline_idx < len(row)
+                and paper_result_idx < len(row)
+                and diff_idx < len(row)
+            ):
+                row[best_baseline_idx] = _best_baseline_numeric_model(
+                    baseline_cell=row[best_baseline_idx],
+                    paper_result_cell=row[paper_result_idx],
+                    diff_cell=row[diff_idx],
+                    metric_hint=metric_text,
+                )
+            if diff_idx >= 0 and diff_idx < len(row):
+                if is_ablation_table:
+                    colored_diff, _ = _colorize_ablation_difference_cell(diff_text=row[diff_idx])
+                else:
+                    colored_diff, _ = _colorize_difference_cell(
+                        diff_text=row[diff_idx],
+                        metric_text=metric_text,
+                    )
+                row[diff_idx] = colored_diff
+            row[status_idx] = _as_status_label(raw_status_cell)
+            # Experiment section is restricted to 3 statuses only.
+            if row[status_idx] == 'paper-supported':
+                row[status_idx] = 'Inconclusive'
+            row_statuses.append(_as_status_label(row[status_idx]))
+            row[status_idx] = _style_experiment_eval_status(
+                status_label=row[status_idx],
+                raw_value=raw_status_cell,
+            )
+            rows[ridx] = row
+
+        header_line = '| ' + ' | '.join(headers) + ' |'
+        sep_line = '| ' + ' | '.join(['---'] * len(headers)) + ' |'
+        data_lines = ['| ' + ' | '.join(r[: len(headers)]) + ' |' for r in rows]
+        replacement = [header_line, sep_line] + data_lines
+        lines[i:j] = replacement
+        i += len(replacement)
+    return '\n'.join(lines), row_statuses
+
+
+def _apply_experiment_hard_requirements(markdown_text: str) -> str:
+    text = str(markdown_text or '')
+    sec = re.search(r'(?ims)^##\s+(?:\*\*)?5\.\s+Experiment(?:\*\*)?\s*$\n(?P<body>.*?)(?=^##\s+|\Z)', text)
+    if not sec:
+        return text
+    body = sec.group('body')
+    subsections = list(re.finditer(r'(?im)^###\s+(?:\*\*)?(Main Result|Ablation Result)(?:\*\*)?\s*$', body))
+    if not subsections:
+        body = body.strip('\n')
+        if body:
+            body += '\n\n**Location:** Not found in manuscript\n'
+        else:
+            body = '**Location:** Not found in manuscript\n'
+        return text[: sec.start('body')] + body + text[sec.end('body') :]
+
+    rebuilt: list[str] = []
+    cursor = 0
+    for idx, subsection in enumerate(subsections):
+        start = subsection.start()
+        end = subsections[idx + 1].start() if idx + 1 < len(subsections) else len(body)
+        rebuilt.append(body[cursor:start])
+        block = body[start:end]
+        block = _bold_label_line(block, 'Location')
+        # Experiment keeps Location line; subsection Status line is intentionally removed.
+        block = re.sub(r'(?im)^\s*(?:\*\*)?Status(?:\*\*)?\s*:\s*.*$', '', block)
+        has_location = bool(re.search(r'(?im)^\s*\*\*Location:\*\*\s*.+$', block))
+        if not has_location:
+            block = re.sub(
+                r'(?im)^(###\s+(?:\*\*)?(?:Main Result|Ablation Result)(?:\*\*)?\s*)$',
+                r'\1\n\n**Location:** Not found in manuscript',
+                block,
+                count=1,
+            )
+
+        block = re.sub(
+            r'(?im)^###\s+(?:\*\*)?(Main Result|Ablation Result)(?:\*\*)?\s*$',
+            r'### **\1**',
+            block,
+        )
+
+        block, row_statuses = _normalize_experiment_tables_in_block(block)
+
+        # Ensure no subsection-level Status line remains.
+        block = re.sub(r'(?im)^\s*\*\*Status:\*\*\s*.*$', '', block)
+        rebuilt.append(block)
+        cursor = end
+    rebuilt.append(body[cursor:])
+    new_body = ''.join(rebuilt)
+    new_body = re.sub(r'\n{3,}', '\n\n', new_body).strip('\n') + '\n\n'
+    return text[: sec.start('body')] + new_body + text[sec.end('body') :]
+
+
+def _bold_markdown_table_headers(markdown_text: str) -> str:
+    lines = str(markdown_text or '').splitlines()
+    i = 0
+    while i + 1 < len(lines):
+        header = lines[i].strip()
+        sep = lines[i + 1].strip()
+        if header.startswith('|') and header.endswith('|') and re.fullmatch(r'\|[ :\-|]+\|', sep):
+            cells = [c.strip() for c in lines[i].strip().strip('|').split('|')]
+            bolded: list[str] = []
+            for c in cells:
+                plain = _strip_inline_formatting(c)
+                if not plain:
+                    bolded.append(c)
+                    continue
+                if plain.lower().startswith('difference'):
+                    plain = 'Difference (Δ)'
+                bolded.append(f'**{plain}**')
+            lines[i] = '| ' + ' | '.join(bolded) + ' |'
+            i += 2
+            continue
+        i += 1
+    return '\n'.join(lines)
+
+
+def _colorize_status_fields(markdown_text: str) -> str:
+    text = str(markdown_text or '')
+    # Status label lines.
+    text = re.sub(
+        r'(?im)^(\s*\*\*Status:\*\*\s*)(.+?)\s*$',
+        lambda m: m.group(1) + _style_status_value(m.group(2)),
+        text,
+    )
+    # Status columns in markdown tables.
+    lines = text.splitlines()
+    i = 0
+    while i + 1 < len(lines):
+        header = lines[i].strip()
+        sep = lines[i + 1].strip()
+        if not (header.startswith('|') and header.endswith('|') and re.fullmatch(r'\|[ :\-|]+\|', sep)):
+            i += 1
+            continue
+        headers = [c.strip() for c in lines[i].strip().strip('|').split('|')]
+        status_indices: list[int] = []
+        for idx, h in enumerate(headers):
+            plain = _strip_inline_formatting(h).lower()
+            if 'status' not in plain:
+                continue
+            # Experiment evaluation status is already normalized in dedicated pass.
+            if 'evaluation status' in plain:
+                continue
+            status_indices.append(idx)
+        j = i + 2
+        while j < len(lines):
+            s = lines[j].strip()
+            if not (s.startswith('|') and s.endswith('|')):
+                break
+            if status_indices:
+                cells = [c.strip() for c in s.strip('|').split('|')]
+                for idx in status_indices:
+                    if idx < len(cells):
+                        cells[idx] = _style_status_value(cells[idx])
+                lines[j] = '| ' + ' | '.join(cells) + ' |'
+            j += 1
+        i = j
+    return '\n'.join(lines)
+
+
+def _normalize_status_legends(markdown_text: str) -> str:
+    text = str(markdown_text or '')
+    claims_sec = re.search(r'(?ims)^##\s+(?:\*\*)?3\.\s+Claims(?:\*\*)?\s*$\n(?P<body>.*?)(?=^##\s+|\Z)', text)
+    if claims_sec:
+        body = claims_sec.group('body')
+        if re.search(r'(?im)^\s*\(Status legend:.*\)\s*$', body):
+            body = re.sub(r'(?im)^\s*\(Status legend:.*\)\s*$', _claims_status_legend_colored(), body)
+        else:
+            body = _claims_status_legend_colored() + '\n\n' + body.lstrip('\n')
+        text = text[: claims_sec.start('body')] + body + text[claims_sec.end('body') :]
+
+    exp_sec = re.search(r'(?ims)^##\s+(?:\*\*)?5\.\s+Experiment(?:\*\*)?\s*$\n(?P<body>.*?)(?=^##\s+|\Z)', text)
+    if exp_sec:
+        body = exp_sec.group('body')
+        body = re.sub(r'(?im)^\s*\(Status legend:.*\)\s*$', _experiment_status_legend_colored(), body)
+        text = text[: exp_sec.start('body')] + body + text[exp_sec.end('body') :]
+    return text
+
+
+def _apply_hard_formatting_requirements(markdown_text: str) -> str:
+    text = str(markdown_text or '')
+    # Required section titles in bold while preserving heading structure.
+    text = re.sub(
+        r'(?im)^##\s+(?:\*\*)?(1\.\s*Metadata|2\.\s*Technical Positioning|3\.\s*Claims|4\.\s*Summary|5\.\s*Experiment)(?:\*\*)?\s*$',
+        r'## **\1**',
+        text,
+    )
+    text = _normalize_status_legends(text)
+    for label in ('Paper scope', 'Evaluation scope', 'Strengths', 'Weaknesses', 'Location', 'Status'):
+        text = _bold_label_line(text, label)
+    text = _apply_experiment_hard_requirements(text)
+    text = _bold_markdown_table_headers(text)
+    text = _colorize_status_fields(text)
+    return text
 
 
 def _compact_ref_label_from_title(*, title: str, year: str | None, rid: str) -> str:
@@ -1682,6 +2286,46 @@ def _extract_title_method_hint(markdown_text: str) -> str:
     return ''
 
 
+def _extract_report_title_text(markdown_text: str) -> str:
+    text = str(markdown_text or '')
+    m = re.search(r'(?im)^\s*-\s*(?:\*\*)?Title(?:\*\*)?\s*:\s*(.+?)\s*$', text)
+    if m:
+        return str(m.group(1) or '').strip()
+    h = re.search(r'(?im)^\[(.+?)\]\s*$', text)
+    if h:
+        return str(h.group(1) or '').strip()
+    return ''
+
+
+def _normalize_title_tokens_local(title: str) -> list[str]:
+    raw = str(title or '').strip().lower()
+    if not raw:
+        return []
+    raw = re.sub(r'[^a-z0-9]+', ' ', raw)
+    stop = {'a', 'an', 'and', 'for', 'from', 'in', 'is', 'of', 'on', 'the', 'to', 'with'}
+    return [tok for tok in raw.split() if tok and tok not in stop]
+
+
+def _looks_like_self_title_variant(*, report_title: str, candidate: str) -> bool:
+    title_tokens = _normalize_title_tokens_local(report_title)
+    cand_tokens = _normalize_title_tokens_local(candidate)
+    if not title_tokens or not cand_tokens:
+        return False
+    t_norm = ' '.join(title_tokens)
+    c_norm = ' '.join(cand_tokens)
+    if t_norm == c_norm:
+        return True
+    if len(title_tokens) >= 4 and (t_norm in c_norm or c_norm in t_norm):
+        return True
+    t_set = set(title_tokens)
+    c_set = set(cand_tokens)
+    inter = len(t_set & c_set)
+    union = len(t_set | c_set)
+    if union == 0:
+        return False
+    return inter >= 4 and (inter / union) >= 0.8
+
+
 def _normalize_technical_positioning_layout(markdown_text: str) -> str:
     text = str(markdown_text or '')
     if not text.strip():
@@ -1691,6 +2335,7 @@ def _normalize_technical_positioning_layout(markdown_text: str) -> str:
         return text
 
     method_hint = _extract_title_method_hint(text).strip().lower()
+    report_title = _extract_report_title_text(text).strip()
     body = sec.group('body')
 
     # Remove explicit gap line in section 2.
@@ -1716,8 +2361,6 @@ def _normalize_technical_positioning_layout(markdown_text: str) -> str:
             break
     if image_idx >= 0:
         method_hint = _extract_title_method_hint(text).strip() or 'the proposed method'
-        if 'compgcn' in text.lower():
-            method_hint = 'COMPGCN'
         # Remove existing short overview caption variants around image.
         filtered: list[str] = []
         for i, raw in enumerate(lines):
@@ -1766,31 +2409,96 @@ def _normalize_technical_positioning_layout(markdown_text: str) -> str:
             header = rows[0]
             body_rows = rows[1:]
             if len(header) >= 2 and header[0].strip().lower() == 'research domain' and header[1].strip().lower() == 'method':
-                pick_idx = -1
-                for i, r in enumerate(body_rows):
-                    domain = str(r[0] if len(r) > 0 else '').strip().lower()
-                    method = str(r[1] if len(r) > 1 else '').strip().lower()
-                    if 'this work' in domain or 'this work' in method or 'proposed' in method or 'ours' in method:
-                        pick_idx = i
-                        break
-                    if 'compgcn' in method:
-                        pick_idx = i
-                        break
-                    if method_hint and method_hint in method:
-                        pick_idx = i
-                        break
-                if pick_idx >= 0:
-                    target = body_rows.pop(pick_idx)
-                    if len(target) < len(header):
-                        target = target + ['✗'] * (len(header) - len(target))
-                    target[0] = 'This work'
-                    method_cell = target[1].strip()
-                    if not method_cell:
-                        method_cell = 'Proposed method'
-                    if 'proposed' not in method_cell.lower():
-                        method_cell = f'{method_cell} (proposed)'
-                    target[1] = method_cell
-                    body_rows.append(target)
+                header[0] = 'Research domain'
+                header[1] = 'Method'
+                header = header[:2] + [
+                    re.sub(r'^\s*R\d+\s*:?\s*', '', str(c or '')).strip() or f'Niche dimension {idx}'
+                    for idx, c in enumerate(header[2:], start=1)
+                ]
+
+                def _normalize_niche_mark(value: str) -> str:
+                    raw = _strip_inline_formatting(value).strip().lower()
+                    if raw in {'√', '✓', 'yes', 'y', 'true', '1', 'supported', 'present'}:
+                        return '√'
+                    if raw in {'×', '✗', 'x', 'no', 'n', 'false', '0', 'absent'}:
+                        return '×'
+                    return '×'
+
+                normalized_body_rows: list[list[str]] = []
+                for r in body_rows:
+                    if len(r) < len(header):
+                        r = r + ['×'] * (len(header) - len(r))
+                    r = r[:len(header)]
+                    r[2:] = [_normalize_niche_mark(c) for c in r[2:]]
+                    normalized_body_rows.append(r)
+                body_rows = normalized_body_rows
+
+                def _is_this_work_row(row: list[str]) -> bool:
+                    domain = str(row[0] if len(row) > 0 else '').strip().lower()
+                    method = str(row[1] if len(row) > 1 else '').strip().lower()
+                    tokens = (
+                        'this work',
+                        'this paper',
+                        'our work',
+                        'our method',
+                        'our approach',
+                        'this method',
+                        'this model',
+                        'proposed',
+                        'proposed method',
+                        'proposed approach',
+                        'ours',
+                    )
+                    return any(tok in domain for tok in tokens) or any(tok in method for tok in tokens)
+
+                def _is_self_paper_row(row: list[str]) -> bool:
+                    domain = str(row[0] if len(row) > 0 else '').strip()
+                    method = str(row[1] if len(row) > 1 else '').strip()
+                    if _is_this_work_row(row):
+                        return True
+                    if report_title and (
+                        _looks_like_self_title_variant(report_title=report_title, candidate=method)
+                        or _looks_like_self_title_variant(report_title=report_title, candidate=domain)
+                    ):
+                        return True
+                    if method_hint and method_hint in method.lower():
+                        return True
+                    return False
+
+                # Primary rule: collect any explicit self-paper rows so external rows are filtered.
+                normal_rows: list[list[str]] = []
+                this_work_rows: list[list[str]] = []
+                for r in body_rows:
+                    if _is_self_paper_row(r):
+                        this_work_rows.append(r)
+                    else:
+                        normal_rows.append(r)
+
+                # Fallback: if no explicit this-work marker exists, use legacy heuristic to pick one.
+                if not this_work_rows:
+                    pick_idx = -1
+                    for i, r in enumerate(normal_rows):
+                        method = str(r[1] if len(r) > 1 else '').strip().lower()
+                        if method_hint and method_hint in method:
+                            pick_idx = i
+                            break
+                    if pick_idx >= 0:
+                        this_work_rows.append(normal_rows.pop(pick_idx))
+
+                normalized_this_work_rows: list[list[str]] = []
+                if this_work_rows:
+                    source_row = this_work_rows[-1]
+                else:
+                    source_row = ['Current paper', 'This Work'] + ['×'] * max(0, len(header) - 2)
+                if len(source_row) < len(header):
+                    source_row = source_row + ['×'] * (len(header) - len(source_row))
+                source_row = source_row[:len(header)]
+                source_row[0] = source_row[0].strip() or 'Current paper'
+                source_row[1] = 'This Work'
+                source_row[2:] = [_normalize_niche_mark(c) for c in source_row[2:]]
+                normalized_this_work_rows.append(source_row)
+
+                body_rows = normal_rows + normalized_this_work_rows
 
                 new_table = _format_table(header, body_rows)
                 lines = lines[:table_start] + new_table.splitlines() + lines[table_end + 1:]
@@ -1815,14 +2523,6 @@ def _inject_technical_positioning_overview_image(
         return text
 
     body = match.group('body')
-    existing_image_match = re.search(r'!\[[^\]]*\]\(([^)]+)\)', body)
-    if existing_image_match:
-        existing_src = str(existing_image_match.group(1) or '').strip()
-        existing_path = Path(existing_src).expanduser()
-        # Keep existing image only when it points to a real local file.
-        if existing_path.is_absolute() and existing_path.exists() and existing_path.is_file():
-            return text
-
     page_match = _TECHNICAL_POSITIONING_PAGE_PATTERN.search(body)
     if page_match:
         # page hint is currently advisory only; image selection comes from MinerU image assets
@@ -1841,6 +2541,15 @@ def _inject_technical_positioning_overview_image(
             if not figure_paths:
                 return text
 
+    canonical_image = _materialize_canonical_overview_image(
+        image_paths=figure_paths,
+        job_dir=job_dir,
+    )
+    if canonical_image is None:
+        return text
+
+    # Remove any existing markdown image lines in this section; we will inject one canonical image.
+    body = re.sub(r'(?im)^\s*!\[[^\]]*\]\([^)]+\)\s*$\n?', '', body)
     caption_match = re.search(r'(?im)^\s*Figure\s*1\s*:\s*.*$', body)
     caption_line = ''
     if caption_match:
@@ -1856,15 +2565,7 @@ def _inject_technical_positioning_overview_image(
         caption_line = ''
 
     body = body.lstrip('\n')
-    combined = _compose_side_by_side_image(image_paths=figure_paths, job_dir=job_dir)
-    if combined is not None:
-        images_block = f'![Overview]({combined.resolve()})'
-    elif len(figure_paths) > 1:
-        images_block = '\n\n'.join(
-            f'![Overview {idx + 1}]({path.resolve()})' for idx, path in enumerate(figure_paths)
-        )
-    else:
-        images_block = f'![Overview]({figure_paths[0].resolve()})'
+    images_block = '![Overview](./overview_figure.jpg)'
     image_block = f'{images_block}\n\n'
     if caption_line:
         image_block += f'{caption_line}\n\n'
@@ -1892,40 +2593,28 @@ def _publish_outputs_to_output_dir(
     job_id: str,
     final_md_path: Path,
     report_pdf_path: Path,
-) -> None:
-    settings = get_settings()
-    output_dir = settings.data_dir.parent / 'output'
-    output_dir.mkdir(parents=True, exist_ok=True)
-
-    latest_md = output_dir / 'latest_extraction.md'
-    latest_pdf = output_dir / 'latest_extraction.pdf'
-
-    # Keep output directory single-versioned: remove old artifacts before publishing latest.
-    for child in output_dir.iterdir():
-        if child.is_dir():
-            shutil.rmtree(child, ignore_errors=True)
-            continue
-        try:
-            child.unlink()
-        except FileNotFoundError:
-            pass
-
-    shutil.copy2(final_md_path, latest_md)
-    # Re-home section-2 image into output/ for stable local preview rendering.
+) -> tuple[Path, Path]:
+    artifacts = ensure_artifact_paths(job_id)
+    job_latest_md = Path(artifacts['latest_output_md'])
+    job_latest_pdf = Path(artifacts['latest_output_pdf'])
+    job_latest_md.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(final_md_path, job_latest_md)
+    # Re-home section-2 image beside job-level latest markdown for stable local preview rendering.
     try:
-        md_text = latest_md.read_text(encoding='utf-8')
+        md_text = job_latest_md.read_text(encoding='utf-8')
         m = re.search(r'!\[[^\]]*\]\(([^)]+)\)', md_text)
         if m:
             src = Path(m.group(1)).expanduser()
             if src.exists() and src.is_file():
-                dst = output_dir / 'overview_figure.jpg'
+                dst = job_latest_md.parent / 'overview_figure.jpg'
                 shutil.copy2(src, dst)
                 md_text = md_text[: m.start(1)] + './overview_figure.jpg' + md_text[m.end(1):]
-                latest_md.write_text(md_text, encoding='utf-8')
+                job_latest_md.write_text(md_text, encoding='utf-8')
     except Exception:
         pass
     if report_pdf_path.exists():
-        shutil.copy2(report_pdf_path, latest_pdf)
+        shutil.copy2(report_pdf_path, job_latest_pdf)
+    return job_latest_md, job_latest_pdf
 
 
 def _persist_mineru_image_files(
@@ -1997,21 +2686,19 @@ def _render_report_pdf(
             project_root=project_root,
             source_pdf_name=source_pdf_name,
         )
-    truth_values = _load_factreview_truth_values(settings.factreview_truth_pdf_path)
     final_report_markdown = _augment_claims_with_assessment_status(
         final_report_markdown,
         summary=code_eval_summary,
         alignment=code_eval_alignment,
-        truth_values=truth_values,
     )
     final_report_markdown = _augment_experiment_with_eval_status(
         final_report_markdown,
         summary=code_eval_summary,
         alignment=code_eval_alignment,
-        truth_values=truth_values,
     )
     # Re-assert experiment section contract after eval augmentation to avoid accidental section loss.
     final_report_markdown = _ensure_experiment_contract(final_report_markdown)
+    final_report_markdown = _apply_hard_formatting_requirements(final_report_markdown)
     write_text_atomic(final_md_path, final_report_markdown)
     final_report_markdown = _inject_overview_figure_image(
         markdown_text=final_report_markdown,
@@ -2057,6 +2744,66 @@ def _render_report_pdf(
     return export_stats
 
 
+def _run_final_report_audit(
+    *,
+    job_id: str,
+    final_md_path: Path,
+    source_markdown: str,
+) -> dict[str, Any]:
+    settings = get_settings()
+    if not bool(settings.enable_final_report_audit):
+        payload = {
+            'enabled': False,
+            'applied': False,
+            'iterations_run': 0,
+            'max_iterations': int(settings.final_report_audit_max_iterations),
+            'stop_reason': 'disabled_by_config',
+        }
+        append_event(job_id, 'final_report_audit_skipped', **payload)
+        return payload
+
+    if not final_md_path.exists():
+        payload = {
+            'enabled': False,
+            'applied': False,
+            'iterations_run': 0,
+            'max_iterations': int(settings.final_report_audit_max_iterations),
+            'stop_reason': 'final_markdown_missing',
+        }
+        append_event(job_id, 'final_report_audit_skipped', **payload)
+        return payload
+
+    current_markdown = final_md_path.read_text(encoding='utf-8')
+    result = audit_and_refine_final_report(
+        final_markdown=current_markdown,
+        source_markdown=source_markdown,
+        max_iterations=int(settings.final_report_audit_max_iterations),
+        max_source_chars=int(settings.final_report_audit_max_source_chars),
+        max_review_chars=int(settings.final_report_audit_max_review_chars),
+        model=str(settings.agent_model or '').strip(),
+        min_english_words=int(settings.min_english_words_for_final),
+        min_chinese_chars=int(settings.min_chinese_chars_for_final),
+        force_english_output=bool(settings.force_english_output),
+    )
+    audit_payload = result.to_dict()
+
+    if result.applied and str(result.final_markdown or '').strip():
+        write_text_atomic(final_md_path, result.final_markdown)
+
+    append_event(
+        job_id,
+        'final_report_audit_completed',
+        enabled=bool(audit_payload.get('enabled')),
+        applied=bool(audit_payload.get('applied')),
+        iterations_run=int(audit_payload.get('iterations_run') or 0),
+        max_iterations=int(audit_payload.get('max_iterations') or 0),
+        stop_reason=str(audit_payload.get('stop_reason') or '').strip(),
+        llm_provider=str(audit_payload.get('llm_provider') or '').strip(),
+        llm_model=str(audit_payload.get('llm_model') or '').strip(),
+    )
+    return audit_payload
+
+
 def _complete_with_existing_final_report(job_id: str, *, warning: str) -> bool:
     state = load_job_state(job_id)
     if state is None:
@@ -2083,6 +2830,7 @@ def _complete_with_existing_final_report(job_id: str, *, warning: str) -> bool:
         return False
 
     report_pdf_path = Path(state.artifacts.report_pdf_path or artifacts['report_pdf'])
+    final_report_audit_path = Path(state.artifacts.final_report_audit_path or artifacts['final_report_audit'])
     pdf_error: str | None = None
     if not report_pdf_path.exists():
         try:
@@ -2105,13 +2853,23 @@ def _complete_with_existing_final_report(job_id: str, *, warning: str) -> bool:
             )
         except Exception as exc:
             pdf_error = f'{type(exc).__name__}: {exc}'
+    job_latest_md, job_latest_pdf = _publish_outputs_to_output_dir(
+        job_id=job_id,
+        final_md_path=final_md_path,
+        report_pdf_path=report_pdf_path,
+    )
 
     def apply_completed(state_obj):
         state_obj.status = JobStatus.completed
         state_obj.final_report_ready = True
         state_obj.pdf_ready = report_pdf_path.exists()
         state_obj.artifacts.final_markdown_path = str(final_md_path)
+        state_obj.artifacts.final_report_audit_path = (
+            str(final_report_audit_path) if final_report_audit_path.exists() else None
+        )
         state_obj.artifacts.report_pdf_path = str(report_pdf_path) if report_pdf_path.exists() else None
+        state_obj.artifacts.latest_output_md_path = str(job_latest_md)
+        state_obj.artifacts.latest_output_pdf_path = str(job_latest_pdf) if job_latest_pdf.exists() else None
         state_obj.error = pdf_error
         state_obj.message = (
             'Review pipeline completed via recovery after post-write exception.'
@@ -2562,9 +3320,25 @@ async def run_job_async(job_id: str) -> None:
     set_status(job_id, JobStatus.pdf_exporting, 'Rendering final markdown report into PDF...')
 
     final_md_path = Path(artifacts['final_markdown'])
+    final_report_audit_path = Path(artifacts['final_report_audit'])
     report_pdf_path = Path(artifacts['report_pdf'])
     if not final_md_path.exists():
         raise RuntimeError(f'Final markdown not found: {final_md_path}')
+
+    audit_payload = _run_final_report_audit(
+        job_id=job_id,
+        final_md_path=final_md_path,
+        source_markdown=parse_result.markdown,
+    )
+    write_json_atomic(final_report_audit_path, audit_payload)
+
+    def apply_audit(state):
+        state.artifacts.final_report_audit_path = str(final_report_audit_path)
+        metadata = dict(state.metadata)
+        metadata['final_report_audit'] = audit_payload
+        state.metadata = metadata
+
+    mutate_job_state(job_id, apply_audit)
 
     state_token_usage = _token_usage_payload_from_state(load_job_state(job_id))
     token_usage_for_pdf = {
@@ -2594,7 +3368,7 @@ async def run_job_async(job_id: str) -> None:
         token_usage=token_usage_for_pdf,
         agent_model=str(settings.agent_model or '').strip(),
     )
-    _publish_outputs_to_output_dir(
+    job_latest_md, job_latest_pdf = _publish_outputs_to_output_dir(
         job_id=job_id,
         final_md_path=final_md_path,
         report_pdf_path=report_pdf_path,
@@ -2607,7 +3381,13 @@ async def run_job_async(job_id: str) -> None:
         state.final_report_ready = True
         state.pdf_ready = report_pdf_path.exists()
         state.artifacts.final_markdown_path = str(final_md_path)
+        state.artifacts.final_report_audit_path = str(final_report_audit_path) if final_report_audit_path.exists() else None
         state.artifacts.report_pdf_path = str(report_pdf_path)
+        state.artifacts.latest_output_md_path = str(job_latest_md)
+        state.artifacts.latest_output_pdf_path = str(job_latest_pdf) if job_latest_pdf.exists() else None
+        metadata = dict(state.metadata)
+        metadata['final_report_audit'] = audit_payload
+        state.metadata = metadata
 
     mutate_job_state(job_id, apply_completed)
     append_event(job_id, 'completed', report_pdf_path=str(report_pdf_path))
