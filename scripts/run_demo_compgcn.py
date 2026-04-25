@@ -8,7 +8,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 COMPGCN_PDF_URL = "https://arxiv.org/pdf/1911.03082.pdf"
-COMPGCN_PDF_PATH = ROOT / "external_papers" / "compgcn_1911.03082.pdf"
+COMPGCN_PDF_PATH = ROOT / "demo" / "compgcn.pdf"
 BASELINE_PDF_PATH = ROOT / "configs" / "baselines" / "compgcn" / "paper.pdf"
 
 

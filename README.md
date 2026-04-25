@@ -182,7 +182,7 @@ pytest tests/unit -m "not slow and not e2e and not requires_docker and not requi
 ## Paper
 
 Read the paper on [arXiv](https://arxiv.org/abs/2604.04074) or from the local
-PDF at [`factreview-arxiv-2604.04074v2.pdf`](factreview-arxiv-2604.04074v2.pdf).
+PDF at [`factreview.pdf`](factreview.pdf).
 
 If you use FactReview, please cite:
 

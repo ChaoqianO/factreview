@@ -17,11 +17,6 @@ from PIL import Image
 
 from common.runtime_shared.env import load_env_file
 
-try:
-    import fitz
-except Exception:  # pragma: no cover - optional dependency at runtime
-    fitz = None
-
 
 _SECTION_RE = re.compile(
     r"(?ims)^##\s+(?P<title>(?:\*\*)?\d+\.\s+.+?(?:\*\*)?)\s*$\n(?P<body>.*?)(?=^##\s+|\Z)"
@@ -164,70 +159,43 @@ def _repo_root() -> Path:
     return Path(__file__).resolve().parents[4]
 
 
-def _template_pdf_path() -> Path:
-    return _repo_root() / "assets" / "teaser_template" / "teaser_figure.pdf"
-
-
-def _template_pptx_path() -> Path:
-    return _repo_root() / "assets" / "teaser_template" / "teaser_figure.pptx"
+def _template_png_path() -> Path:
+    return _repo_root() / "demo" / "compgcn_teaser.png"
 
 
 def _template_reference_png_bytes(scale: float = 0.9) -> bytes | None:
-    pdf_path = _template_pdf_path()
-    if fitz is None or not pdf_path.exists():
+    png_path = _template_png_path()
+    if not png_path.exists():
         return None
     try:
-        with fitz.open(pdf_path) as doc:
-            if len(doc) == 0:
-                return None
-            page = doc[0]
-            pix = page.get_pixmap(matrix=fitz.Matrix(scale, scale), alpha=False)
-            return pix.tobytes("png")
+        if scale <= 0 or abs(scale - 1.0) < 0.001:
+            return png_path.read_bytes()
+        with Image.open(png_path) as image:
+            image = image.convert("RGB")
+            width = max(1, int(round(image.width * scale)))
+            height = max(1, int(round(image.height * scale)))
+            resized = image.resize((width, height), Image.LANCZOS)
+            buffer = io.BytesIO()
+            resized.save(buffer, format="PNG")
+            return buffer.getvalue()
     except Exception:
         return None
 
 
 def _template_layout_signature(max_panels: int = 14) -> str:
-    pdf_path = _template_pdf_path()
-    if fitz is None:
-        return "Template signature extraction unavailable because PyMuPDF is not installed."
-    if not pdf_path.exists():
-        return "Template PDF missing."
+    _ = max_panels
+    png_path = _template_png_path()
+    if not png_path.exists():
+        return "Template PNG missing."
     try:
-        with fitz.open(pdf_path) as doc:
-            if len(doc) == 0:
-                return "Template PDF has no pages."
-            page = doc[0]
-            w = max(float(page.rect.width or 1.0), 1.0)
-            h = max(float(page.rect.height or 1.0), 1.0)
-            total = max(w * h, 1.0)
-            panels: list[tuple[float, str]] = []
-            for drawing in page.get_drawings():
-                rect = drawing.get("rect")
-                fill = drawing.get("fill")
-                if rect is None or fill is None:
-                    continue
-                area = max(float(rect.width or 0.0) * float(rect.height or 0.0), 0.0)
-                if area / total < 0.004:
-                    continue
-                try:
-                    rgb = tuple(int(round(float(c) * 255)) for c in fill[:3])
-                except Exception:
-                    continue
-                x0 = float(rect.x0) / w
-                y0 = float(rect.y0) / h
-                x1 = float(rect.x1) / w
-                y1 = float(rect.y1) / h
-                panels.append(
-                    (
-                        area,
-                        f"bbox=({x0:.3f},{y0:.3f})-({x1:.3f},{y1:.3f}), rgb={rgb}, area_ratio={area/total:.3f}",
-                    )
-                )
-            panels.sort(key=lambda x: x[0], reverse=True)
-            lines = [f"Canvas ratio {w:.1f}:{h:.1f} (~{w/h:.3f}:1)", "Dominant panels:"]
-            lines.extend(f"- {desc}" for _, desc in panels[:max_panels])
-            return "\n".join(lines)
+        with Image.open(png_path) as image:
+            width = max(float(image.width or 1), 1.0)
+            height = max(float(image.height or 1), 1.0)
+            try:
+                relative = png_path.relative_to(_repo_root())
+            except ValueError:
+                relative = png_path
+            return f"Canvas size {int(width)}x{int(height)} (~{width / height:.3f}:1), reference image: {relative}"
     except Exception as exc:
         return f"Template signature extraction failed: {type(exc).__name__}: {exc}"
 
@@ -238,70 +206,18 @@ def _format_bbox(bbox: tuple[float, float, float, float]) -> str:
 
 
 def _template_visual_anchors() -> list[TemplateAnchor]:
-    pdf_path = _template_pdf_path()
-    if fitz is None or not pdf_path.exists():
-        return []
-    queries: dict[str, tuple[str, ...]] = {
-        "title": ("composition-based multi-relational",),
-        "tldr": ("tl;dr:",),
-        "task": ("task:",),
-        "supported_badge": ("supported",),
-        "paper_supported_badge": ("paper-supported",),
-        "partial_badge": ("partially supported/inconclusive",),
-        "conflict_badge": ("in conflict",),
-        "improvement_badge": ("improvement",),
-        "reduction_badge": ("reduction",),
-        "summary_title": ("summary",),
-        "strengths_title": ("strengths",),
-        "weaknesses_title": ("weaknesses",),
-        "main_result_title": ("main result",),
-        "ablation_title": ("ablation result",),
-    }
-    try:
-        with fitz.open(pdf_path) as doc:
-            if len(doc) == 0:
-                return []
-            page = doc[0]
-            width = max(float(page.rect.width or 1.0), 1.0)
-            height = max(float(page.rect.height or 1.0), 1.0)
-            anchors: list[TemplateAnchor] = []
-            seen: set[str] = set()
-            for block in page.get_text("blocks"):
-                if len(block) < 5:
-                    continue
-                raw_text = re.sub(r"\s+", " ", str(block[4] or "")).strip()
-                if not raw_text:
-                    continue
-                lowered = raw_text.lower()
-                for name, needles in queries.items():
-                    if name in seen:
-                        continue
-                    if any(needle in lowered for needle in needles):
-                        anchors.append(
-                            TemplateAnchor(
-                                name=name,
-                                bbox=(
-                                    float(block[0]) / width,
-                                    float(block[1]) / height,
-                                    float(block[2]) / width,
-                                    float(block[3]) / height,
-                                ),
-                                text=raw_text,
-                            )
-                        )
-                        seen.add(name)
-                        break
-            anchors.sort(key=lambda item: (item.bbox[1], item.bbox[0]))
-            return anchors
-    except Exception:
-        return []
+    return []
 
 
 def _template_visual_anchor_summary() -> str:
     anchors = _template_visual_anchors()
     if not anchors:
-        return "Template anchor extraction unavailable; rely on the attached template image and fixed module constraints."
-    lines = ["Exact visual anchors extracted from the template PDF (normalized coordinates on a 16:9 canvas):"]
+        try:
+            relative = _template_png_path().relative_to(_repo_root())
+        except ValueError:
+            relative = _template_png_path()
+        return f"Reference template image: {relative}; rely on the attached template image and fixed module constraints."
+    lines = ["Exact visual anchors extracted from the template image (normalized coordinates on a 16:9 canvas):"]
     for anchor in anchors:
         lines.append(f"- {anchor.name}: bbox={_format_bbox(anchor.bbox)}; text={anchor.text}")
     return "\n".join(lines)
@@ -1036,7 +952,7 @@ def build_teaser_figure_prompt(
         "The output should read like a presentation-quality overview graphic, not a raw markdown rendering.\n"
         "Use the extracted report content below as authoritative content to place into the figure.\n"
         "Preserve factual wording, numeric values, and status labels from the source.\n"
-        "Treat the following layout/style instructions as fixed constraints derived from the reference teaser_figure.pptx.\n"
+        "Treat the following layout/style instructions as fixed constraints derived from the reference demo/compgcn_teaser.png.\n"
         "Treat the attached reference image as a hard layout-and-style target, not as loose inspiration.\n"
         "If any conflict appears between content length and layout fidelity, preserve layout fidelity first and shrink or wrap text.\n"
         "Keep colors unchanged and keep the relative positions of all modules unchanged; only adjust module width/height "

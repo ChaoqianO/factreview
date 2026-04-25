@@ -45,22 +45,16 @@ FONT_OVERLAY_UNICODE_NAME = 'DS-NotoSerifSC-Overlay'
 FONT_OVERLAY_MONO_UNICODE_NAME = 'DS-DejaVuSansMono-Overlay'
 FONT_CHINESE_FALLBACK_NAME = 'STSong-Light'
 
-FONT_ENGLISH_RELATIVE = Path('assets/fonts/Satoshi-Medium-ByP-Zb-9.woff3')
-FONT_ENGLISH_FALLBACK_RELATIVE = Path('assets/fonts/Satoshi-Medium-ByP-Zb-9.woff2')
-FONT_ENGLISH_LEGACY_RELATIVE = Path('frontend/public/fonts/Satoshi-Medium-ByP-Zb-9.woff3')
-FONT_ENGLISH_FALLBACK_LEGACY_RELATIVE = Path('frontend/public/fonts/Satoshi-Medium-ByP-Zb-9.woff2')
+FONT_ENGLISH_RELATIVE = Path('frontend/public/fonts/Satoshi-Medium-ByP-Zb-9.woff3')
+FONT_ENGLISH_FALLBACK_RELATIVE = Path('frontend/public/fonts/Satoshi-Medium-ByP-Zb-9.woff2')
 FONT_ENGLISH_RELATIVE_CANDIDATES = (
     FONT_ENGLISH_RELATIVE,
     FONT_ENGLISH_FALLBACK_RELATIVE,
-    FONT_ENGLISH_LEGACY_RELATIVE,
-    FONT_ENGLISH_FALLBACK_LEGACY_RELATIVE,
 )
 
-FONT_CHINESE_RELATIVE = Path('assets/fonts/NotoSerifSC-Regular-C94HN_ZN.ttf')
-FONT_CHINESE_LEGACY_RELATIVE = Path('frontend/public/fonts/NotoSerifSC-Regular-C94HN_ZN.ttf')
+FONT_CHINESE_RELATIVE = Path('frontend/public/fonts/NotoSerifSC-Regular-C94HN_ZN.ttf')
 FONT_CHINESE_RELATIVE_CANDIDATES = (
     FONT_CHINESE_RELATIVE,
-    FONT_CHINESE_LEGACY_RELATIVE,
 )
 FONT_MONO_UNICODE_CANDIDATES = (
     Path('/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf'),
@@ -68,8 +62,6 @@ FONT_MONO_UNICODE_CANDIDATES = (
 )
 
 LOGO_CANDIDATES = (
-    Path('assets/logo-small.png'),
-    Path('assets/logo.png'),
     Path('frontend/public/logo-small.png'),
     Path('frontend/public/logo.png'),
 )
