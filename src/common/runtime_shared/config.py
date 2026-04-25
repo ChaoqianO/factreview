@@ -20,6 +20,10 @@ class Settings(BaseSettings):
     data_dir: Path = Field(default=Path('./data'))
 
     # OpenAI Agent SDK runtime
+    model_provider: str = Field(
+        default='openai',
+        validation_alias=AliasChoices('MODEL_PROVIDER', 'AGENT_MODEL_PROVIDER', 'FACTREVIEW_MODEL_PROVIDER'),
+    )
     openai_api_key: str | None = Field(
         default=None,
         validation_alias=AliasChoices('OPENAI_API_KEY', 'API_KEY', 'LLM_API_KEY'),
@@ -37,6 +41,14 @@ class Settings(BaseSettings):
         ),
     )
     agent_model: str = 'gpt-5.2'
+    openai_codex_model: str = Field(
+        default='gpt-5.3-codex',
+        validation_alias=AliasChoices('OPENAI_CODEX_MODEL', 'CODEX_MODEL'),
+    )
+    openai_codex_base_url: str = Field(
+        default='https://chatgpt.com/backend-api/codex',
+        validation_alias=AliasChoices('OPENAI_CODEX_BASE_URL', 'CODEX_BASE_URL'),
+    )
     agent_temperature: float = 0.2
     agent_max_tokens: int = 4096
     agent_max_turns: int = 1000

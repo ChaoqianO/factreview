@@ -80,7 +80,7 @@ def parse_args() -> argparse.Namespace:
         "--llm-provider",
         type=str,
         default="",
-        help="LLM provider: openai/deepseek/qwen/claude/ollama (optional)",
+        help="LLM provider: openai/openai-codex/deepseek/qwen/claude/ollama (optional)",
     )
     p.add_argument("--llm-base-url", type=str, default="", help="LLM base url (optional)")
     p.add_argument(

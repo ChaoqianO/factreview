@@ -77,6 +77,17 @@ execution = [
   "docker>=7.0",
 ]
 
+# ── Shared full-pipeline runtime (agent runner + PDF rendering) ──────────────
+runtime = [
+  "pydantic-settings>=2.3.0",
+  "httpx>=0.27.0",
+  "openai-agents>=0.6.0",
+  "reportlab>=4.2.0",
+  "pymupdf>=1.26.0",
+  "mdit-py-plugins>=0.4.2",
+  "markdown-it-py>=3.0.0",
+]
+
 # ── Development / testing ────────────────────────────────────────────────────
 dev = [
   "pytest>=8.0",
@@ -95,6 +106,7 @@ all = [
   "factreview[ingestion]",
   "factreview[positioning]",
   "factreview[execution]",
+  "factreview[runtime]",
 ]
 
 [project.scripts]

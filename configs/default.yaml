@@ -45,7 +45,7 @@ synthesis:
     - inconclusive
 
 llm:
-  provider: openai                # openai | openai-codex | deepseek | qwen | claude | ollama
+  provider: openai                # openai | openai-codex (Codex OAuth) | deepseek | qwen | claude | ollama
   model: ""                       # empty → provider default
   base_url: ""
   route:                          # optional per-stage model routing (see paper §4.3)

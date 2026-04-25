@@ -55,10 +55,45 @@ pip install -e ".[all,dev]"
 cp .env.example .env
 ```
 
-Then edit `.env` and fill the keys you need:
-- `OPENAI_API_KEY` (or `API_KEY`) + optional `BASE_URL` for OpenAI-compatible endpoints
-- `MINERU_API_TOKEN` for PDF parsing
-- optional `GEMINI_API_KEY` for teaser-figure image generation
+Then edit `.env` and configure one LLM authentication path:
+
+**Option A — OpenAI-compatible API key**
+
+```bash
+MODEL_PROVIDER=openai
+OPENAI_API_KEY=...
+# optional, for compatible gateways:
+# BASE_URL=https://...
+```
+
+**Option B — ChatGPT/Codex subscription, no OpenAI Platform API key**
+
+If you have a ChatGPT/Codex subscription, FactReview can reuse the Codex CLI
+OAuth cache in the same style as
+[Foam-Agent](https://github.com/csml-rpi/Foam-Agent#codex-oauth-sign-in-no-api-key):
+
+```bash
+# One-time setup on the host:
+codex login
+# choose "Sign in with ChatGPT", then verify:
+ls ~/.codex/auth.json
+
+# .env
+MODEL_PROVIDER=openai-codex
+OPENAI_CODEX_MODEL=gpt-5.3-codex
+OPENAI_CODEX_BASE_URL=https://chatgpt.com/backend-api/codex
+
+# Leave this empty to let execution-stage LLM calls inherit MODEL_PROVIDER:
+CODE_EVAL_MODEL_PROVIDER=
+```
+
+FactReview searches for Codex OAuth tokens at `$CODEX_HOME/auth.json`,
+`~/.codex/auth.json`, `~/.clawdbot/agents/main/agent/auth-profiles.json`,
+and compatible OpenClaw agent auth caches. Treat `auth.json` like a password.
+
+Other keys:
+- `MINERU_API_TOKEN` for the default PDF parsing backend.
+- optional `GEMINI_API_KEY` for teaser-figure image generation.
 
 The default PDF ingestion backend (MinerU) and the vendored reference
 checker are installed separately only when needed:
@@ -161,7 +196,9 @@ Useful CLI flags:
 - `--no-pdf-extract` — skip MinerU; use raw PDF text only
 - `--dry-run` — plan only; do not execute
 - `--no-llm` — deterministic only
-- `--llm-provider / --llm-model / --llm-base-url` — override LLM routing
+- `--llm-provider / --llm-model / --llm-base-url` — override LLM routing; use
+  `--llm-provider openai-codex --llm-model gpt-5.3-codex` to force the Codex
+  subscription backend for execution-stage helpers.
 
 Full flag list: `factreview --help`.
 

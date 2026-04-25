@@ -1,48 +1,87 @@
 from __future__ import annotations
 
 import asyncio
-import html as html_lib
 import importlib
 import os
 import re
+import shutil
 import sys
 import traceback
 from datetime import datetime, timezone
-
-import fitz
-import shutil
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
 
+import fitz
 from agents import Agent, ModelSettings, OpenAIProvider, RunConfig, Runner
 from agents.models.openai_chatcompletions import OpenAIChatCompletionsModel
 from agents.models.openai_responses import OpenAIResponsesModel
 from openai import AsyncOpenAI
 from openai.types.shared import Reasoning
 
+from common.runtime_shared.config import get_settings
+from common.runtime_shared.state import (
+    ensure_artifact_paths,
+    fail_job,
+    load_job_state,
+    mutate_job_state,
+    set_status,
+)
+from common.runtime_shared.storage import append_event, read_json, write_json_atomic, write_text_atomic
+from common.runtime_shared.types import AnnotationItem, JobStatus
+from fact_extraction.runtime.prompts.review_agent_prompt import build_review_agent_system_prompt
+from fact_extraction.runtime.tools.review_tools import ReviewRuntimeContext, build_review_tools
 from ingestion.runtime.adapters.markdown_parser import build_page_index
 from ingestion.runtime.adapters.mineru import MineruAdapter, MineruConfig
+from llm.codex_auth import get_codex_auth
+from llm.codex_client import is_codex_provider, resolve_codex_base_url, resolve_codex_model
 from positioning.runtime.adapters.paper_search import (
     PaperReadConfig,
     PaperSearchAdapter,
     PaperSearchConfig,
 )
 from positioning.runtime.adapters.semantic_scholar import SemanticScholarAdapter, SemanticScholarConfig
-from common.runtime_shared.config import get_settings
-from fact_extraction.runtime.prompts.review_agent_prompt import build_review_agent_system_prompt
 from synthesis.runtime.report.final_report_audit import audit_and_refine_final_report
 from synthesis.runtime.report.review_report_pdf import build_review_report_pdf
 from synthesis.runtime.report.source_annotations import build_source_annotations_for_export
-from common.runtime_shared.state import ensure_artifact_paths, fail_job, load_job_state, mutate_job_state, set_status
-from common.runtime_shared.storage import append_event, read_json, write_json_atomic, write_text_atomic
-from fact_extraction.runtime.tools.review_tools import ReviewRuntimeContext, build_review_tools
-from common.runtime_shared.types import AnnotationItem, JobStatus
 
 
 def _resolved_api_key() -> str:
     settings = get_settings()
     return str(settings.openai_api_key or 'EMPTY')
+
+
+def _uses_codex_subscription_backend() -> bool:
+    return is_codex_provider(get_settings().model_provider)
+
+
+def _resolved_agent_model() -> str:
+    settings = get_settings()
+    if not _uses_codex_subscription_backend():
+        return str(settings.agent_model or '').strip()
+
+    explicit_agent_model = str(os.getenv('AGENT_MODEL') or '').strip()
+    explicit_codex_model = str(settings.openai_codex_model or '').strip()
+    return resolve_codex_model(explicit_agent_model or explicit_codex_model)
+
+
+def _build_async_openai_client() -> AsyncOpenAI:
+    settings = get_settings()
+    if not _uses_codex_subscription_backend():
+        return AsyncOpenAI(
+            api_key=_resolved_api_key(),
+            base_url=settings.openai_base_url,
+        )
+
+    auth = get_codex_auth(allow_browser_login=sys.stdin.isatty())
+    headers = {"User-Agent": "FactReview"}
+    if auth.account_id:
+        headers["ChatGPT-Account-Id"] = auth.account_id
+    return AsyncOpenAI(
+        api_key=auth.access_token,
+        base_url=resolve_codex_base_url(settings.openai_codex_base_url),
+        default_headers=headers,
+    )
 
 
 def _build_mineru_adapter() -> MineruAdapter:
@@ -150,6 +189,13 @@ def _format_semantic_scholar_context(payload: dict[str, Any]) -> str:
 
 def _build_run_config() -> RunConfig:
     settings = get_settings()
+    if _uses_codex_subscription_backend():
+        provider = OpenAIProvider(
+            openai_client=_build_async_openai_client(),
+            use_responses=True,
+        )
+        return RunConfig(model_provider=provider)
+
     provider = OpenAIProvider(
         api_key=_resolved_api_key(),
         base_url=settings.openai_base_url,
@@ -160,31 +206,34 @@ def _build_run_config() -> RunConfig:
 
 def _build_agent_model() -> OpenAIChatCompletionsModel | OpenAIResponsesModel:
     settings = get_settings()
-    client = AsyncOpenAI(
-        api_key=_resolved_api_key(),
-        base_url=settings.openai_base_url,
-    )
-    if settings.openai_use_responses_api:
+    client = _build_async_openai_client()
+    if _uses_codex_subscription_backend() or settings.openai_use_responses_api:
         return OpenAIResponsesModel(
-            model=settings.agent_model,
+            model=_resolved_agent_model(),
             openai_client=client,
         )
     return OpenAIChatCompletionsModel(
-        model=settings.agent_model,
+        model=_resolved_agent_model(),
         openai_client=client,
     )
 
 
 def _build_agent_model_settings(*, tool_choice: str | None = None) -> ModelSettings:
     settings = get_settings()
-    model_name = str(settings.agent_model or '').strip().lower()
+    model_name = _resolved_agent_model().strip().lower()
+    uses_codex = _uses_codex_subscription_backend()
     use_xhigh_reasoning = model_name in {'gpt-5.4', 'gpt-5.3', 'gpt-5.2'}
 
     return ModelSettings(
-        temperature=settings.agent_temperature,
+        temperature=None if uses_codex else settings.agent_temperature,
         max_tokens=settings.agent_max_tokens,
         tool_choice=tool_choice,
-        reasoning=Reasoning(effort='xhigh') if use_xhigh_reasoning else None,
+        parallel_tool_calls=False if uses_codex else None,
+        response_include=['reasoning.encrypted_content'] if uses_codex else None,
+        store=False if uses_codex else None,
+        reasoning=Reasoning(summary='auto')
+        if uses_codex
+        else (Reasoning(effort='xhigh') if use_xhigh_reasoning else None),
     )
 
 
@@ -2677,7 +2726,6 @@ def _render_report_pdf(
     final_report_markdown = _stabilize_experiment_section(final_report_markdown)
     final_report_markdown = _ensure_experiment_contract(final_report_markdown)
     final_report_markdown = _compress_experiment_note(final_report_markdown)
-    settings = get_settings()
     code_eval_summary = code_eval_summary_override if isinstance(code_eval_summary_override, dict) else {}
     code_eval_alignment = code_eval_alignment_override if isinstance(code_eval_alignment_override, dict) else {}
     if not code_eval_summary and not code_eval_alignment:
@@ -2780,7 +2828,7 @@ def _run_final_report_audit(
         max_iterations=int(settings.final_report_audit_max_iterations),
         max_source_chars=int(settings.final_report_audit_max_source_chars),
         max_review_chars=int(settings.final_report_audit_max_review_chars),
-        model=str(settings.agent_model or '').strip(),
+        model=_resolved_agent_model(),
         min_english_words=int(settings.min_english_words_for_final),
         min_chinese_chars=int(settings.min_chinese_chars_for_final),
         force_english_output=bool(settings.force_english_output),
@@ -2849,7 +2897,7 @@ def _complete_with_existing_final_report(job_id: str, *, warning: str) -> bool:
                 annotations=annotations,
                 content_list=content_list,
                 token_usage=_token_usage_payload_from_state(state),
-                agent_model=str(get_settings().agent_model or '').strip(),
+                agent_model=_resolved_agent_model(),
             )
         except Exception as exc:
             pdf_error = f'{type(exc).__name__}: {exc}'
@@ -2900,12 +2948,16 @@ async def run_job_async(job_id: str) -> None:
     if job is None:
         raise FileNotFoundError(f'Job not found: {job_id}')
 
-    api_mode = 'responses' if settings.openai_use_responses_api else 'chat_completions'
+    api_mode = (
+        'codex_responses'
+        if _uses_codex_subscription_backend()
+        else ('responses' if settings.openai_use_responses_api else 'chat_completions')
+    )
     append_event(
         job_id,
         'llm_api_mode_selected',
         api_mode=api_mode,
-        model=str(settings.agent_model or '').strip(),
+        model=_resolved_agent_model(),
     )
 
     def apply_llm_mode(state):
@@ -3366,7 +3418,7 @@ async def run_job_async(job_id: str) -> None:
             code_eval_result.get('alignment') if isinstance(code_eval_result, dict) else None
         ),
         token_usage=token_usage_for_pdf,
-        agent_model=str(settings.agent_model or '').strip(),
+        agent_model=_resolved_agent_model(),
     )
     job_latest_md, job_latest_pdf = _publish_outputs_to_output_dir(
         job_id=job_id,

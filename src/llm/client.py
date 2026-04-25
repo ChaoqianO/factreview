@@ -7,7 +7,12 @@ from dataclasses import dataclass
 from typing import Any
 
 from .codex_auth import get_codex_auth
-from .codex_client import invoke_codex
+from .codex_client import (
+    invoke_codex,
+    is_codex_provider,
+    resolve_codex_base_url,
+    resolve_codex_model,
+)
 
 
 @dataclass(frozen=True)
@@ -24,13 +29,27 @@ def _resolve_openai_codex_model(explicit_model: str = "") -> str:
     candidate = (os.getenv("OPENAI_CODEX_MODEL") or "").strip()
     if candidate:
         return candidate
-    if "codex" in (explicit_model or "").lower():
-        return explicit_model
-    return "gpt-5.3-codex"
+    candidate = (os.getenv("CODE_EVAL_OPENAI_MODEL") or "").strip()
+    if candidate:
+        return candidate
+    return resolve_codex_model(explicit_model)
+
+
+def _resolve_provider(explicit_provider: str = "") -> str:
+    for candidate in (
+        explicit_provider,
+        os.getenv("CODE_EVAL_MODEL_PROVIDER"),
+        os.getenv("MODEL_PROVIDER"),
+        os.getenv("AGENT_MODEL_PROVIDER"),
+    ):
+        normalized = str(candidate or "").strip().lower().replace("_", "-")
+        if normalized:
+            return normalized
+    return "openai"
 
 
 def resolve_llm_config(provider: str = "", model: str = "", base_url: str = "") -> LLMConfig:
-    prov = (provider or os.getenv("MODEL_PROVIDER", "openai")).lower().strip()
+    prov = _resolve_provider(provider)
 
     if prov == "deepseek":
         api_key = (os.getenv("DEEPSEEK_API_KEY") or "").strip() or None
@@ -50,20 +69,27 @@ def resolve_llm_config(provider: str = "", model: str = "", base_url: str = "") 
         mdl = model or os.getenv("CLAUDE_MODEL", "claude-4-sonnet")
         return LLMConfig(provider=prov, model=mdl, base_url=base, api_key=api_key)
 
-    if prov == "openai-codex":
+    if is_codex_provider(prov):
         return LLMConfig(
             provider="openai-codex",
             model=model or _resolve_openai_codex_model(),
-            base_url=base_url or os.getenv("OPENAI_CODEX_BASE_URL", "https://chatgpt.com/backend-api/codex"),
+            base_url=resolve_codex_base_url(base_url or os.getenv("OPENAI_CODEX_BASE_URL", "")),
             api_key=None,
         )
 
-    api_key = (os.getenv("OPENAI_API_KEY") or "").strip() or None
+    api_key = (
+        os.getenv("CODE_EVAL_OPENAI_API_KEY")
+        or os.getenv("OPENAI_API_KEY")
+        or os.getenv("API_KEY")
+        or ""
+    ).strip() or None
     if api_key:
         return LLMConfig(
             provider="openai",
-            model=model or os.getenv("OPENAI_MODEL", "gpt-5"),
-            base_url=base_url or os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1"),
+            model=model or os.getenv("CODE_EVAL_OPENAI_MODEL") or os.getenv("OPENAI_MODEL", "gpt-5"),
+            base_url=base_url
+            or os.getenv("CODE_EVAL_OPENAI_BASE_URL")
+            or os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1"),
             api_key=api_key,
         )
 
@@ -71,7 +97,7 @@ def resolve_llm_config(provider: str = "", model: str = "", base_url: str = "") 
     return LLMConfig(
         provider="openai-codex",
         model=_resolve_openai_codex_model(model),
-        base_url=base_url or os.getenv("OPENAI_CODEX_BASE_URL", "https://chatgpt.com/backend-api/codex"),
+        base_url=resolve_codex_base_url(base_url or os.getenv("OPENAI_CODEX_BASE_URL", "")),
         api_key=None,
     )
 

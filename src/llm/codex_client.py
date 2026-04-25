@@ -8,7 +8,35 @@ from typing import Any
 
 from .codex_auth import CodexAuth
 
-_DEFAULT_INSTRUCTIONS = Path(__file__).resolve().parents[1] / "prompts" / "codex_instructions.txt"
+_DEFAULT_BASE_URL = "https://chatgpt.com/backend-api/codex"
+_DEFAULT_MODEL = "gpt-5.3-codex"
+_PROVIDER_ALIASES = {"openai-codex", "codex", "chatgpt-oauth", "chatgpt"}
+_DEFAULT_INSTRUCTIONS = Path(__file__).resolve().parent / "providers" / "codex_instructions.txt"
+
+
+def is_codex_provider(provider: str | None) -> bool:
+    return (provider or "").strip().lower().replace("_", "-") in _PROVIDER_ALIASES
+
+
+def resolve_codex_model(explicit_model: str = "") -> str:
+    candidate = str(explicit_model or "").strip()
+    if candidate:
+        return candidate
+    return _DEFAULT_MODEL
+
+
+def resolve_codex_base_url(explicit_base_url: str = "") -> str:
+    return str(explicit_base_url or "").strip() or _DEFAULT_BASE_URL
+
+
+def codex_headers(auth: CodexAuth) -> dict[str, str]:
+    headers: dict[str, str] = {
+        "Authorization": f"Bearer {auth.access_token}",
+        "Content-Type": "application/json",
+    }
+    if auth.account_id:
+        headers["ChatGPT-Account-Id"] = auth.account_id
+    return headers
 
 
 def load_codex_instructions() -> str:
@@ -72,9 +100,9 @@ def _iter_sse_data(response) -> list[str]:
 
 
 def invoke_codex(prompt: str, system: str, *, auth: CodexAuth, model: str, base_url: str) -> str:
-    url = base_url.rstrip("/") + "/responses"
+    url = resolve_codex_base_url(base_url).rstrip("/") + "/responses"
     payload = {
-        "model": model,
+        "model": resolve_codex_model(model),
         "input": _to_input_messages(system=system, prompt=prompt),
         "instructions": load_codex_instructions(),
         "tools": [],
@@ -91,12 +119,10 @@ def invoke_codex(prompt: str, system: str, *, auth: CodexAuth, model: str, base_
         data=json.dumps(payload).encode("utf-8"),
         method="POST",
     )
-    request.add_header("Authorization", f"Bearer {auth.access_token}")
-    request.add_header("Content-Type", "application/json")
+    for key, value in codex_headers(auth).items():
+        request.add_header(key, value)
     request.add_header("Accept", "text/event-stream")
     request.add_header("User-Agent", "ai_review/code_evaluation")
-    if auth.account_id:
-        request.add_header("ChatGPT-Account-Id", auth.account_id)
 
     try:
         with urllib.request.urlopen(request, timeout=120) as response:

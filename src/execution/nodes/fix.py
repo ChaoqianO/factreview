@@ -351,6 +351,7 @@ def fix_node(state: dict[str, Any]) -> dict[str, Any]:
             "How to proceed:\n"
             "- rerun with --no-llm to disable LLM fixes, OR\n"
             "- set a valid provider/model in env (MODEL_PROVIDER / API_KEY / MODEL), OR\n"
+            "- set MODEL_PROVIDER=openai-codex after `codex login`, OR\n"
             "- set OPENAI_MODEL to a model available to your account.\n",
         )
         return state

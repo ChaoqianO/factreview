@@ -503,7 +503,7 @@ def finalize_node(state: dict[str, Any]) -> dict[str, Any]:
             {
                 "type": "llm_config",
                 "why": "LLM-based fix step failed due to missing/invalid provider config.",
-                "next": "Rerun with --no-llm, or set MODEL_PROVIDER/OPENAI_API_KEY (or Claude keys) and a valid model.",
+                "next": "Rerun with --no-llm, set MODEL_PROVIDER=openai-codex after `codex login`, or set MODEL_PROVIDER/OPENAI_API_KEY (or Claude keys) and a valid model.",
             }
         )
 
