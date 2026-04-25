@@ -10,6 +10,27 @@ Every judgment is tagged with one of five labels: **Supported**,
 **Supported by the paper**, **Partially supported**, **In conflict**, or
 **Inconclusive**.
 
+## Paper
+
+Read the paper on [arXiv](https://arxiv.org/abs/2604.04074) or from the
+local PDF at
+[`factreview-arxiv-2604.04074v2.pdf`](factreview-arxiv-2604.04074v2.pdf).
+
+If you use FactReview, please cite:
+
+```bibtex
+@misc{xu2026factreview,
+  title = {FactReview: Evidence-Grounded Reviews with Literature Positioning and Execution-Based Claim Verification},
+  author = {Xu, Hang and Yue, Ling and Ouyang, Chaoqian and Liu, Yuchen and Zheng, Libin and Pan, Shaowu and Di, Shimin and Zhang, Min-Ling},
+  year = {2026},
+  eprint = {2604.04074},
+  archivePrefix = {arXiv},
+  primaryClass = {cs.AI},
+  doi = {10.48550/arXiv.2604.04074},
+  url = {https://arxiv.org/abs/2604.04074}
+}
+```
+
 ## Pipeline
 
 ```
