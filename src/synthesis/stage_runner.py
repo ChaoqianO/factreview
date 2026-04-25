@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 import re
 import shutil
 import sys
@@ -26,7 +25,7 @@ from ingestion.runtime_bridge import (
 )
 from common.runtime_shared.config import get_settings
 from synthesis.runtime.report.review_report_pdf import build_review_report_pdf
-from synthesis.runtime.report.teaser_figure import _ensure_env_loaded, _env_true, generate_teaser_figure
+from synthesis.runtime.report.teaser_figure import _env_true, generate_teaser_figure
 
 
 @dataclass(frozen=True)
@@ -429,17 +428,7 @@ def run_synthesis_stage(
         # Use final_review markdown as the canonical teaser source to ensure
         # prompt extraction follows the finalized report content exactly.
         teaser_source = synthesis_md
-        _ensure_env_loaded()
-        has_image_api = bool(
-            str(
-                os.getenv("GEMINI_API_KEY")
-                or os.getenv("OPENROUTER_API_KEY")
-                or os.getenv("OPENAI_API_KEY")
-                or os.getenv("API_KEY")
-                or ""
-            ).strip()
-        )
-        use_gemini = _env_true("TEASER_USE_GEMINI", default=has_image_api)
+        use_gemini = _env_true("TEASER_USE_GEMINI", default=True)
         teaser_result = generate_teaser_figure(
             teaser_source,
             output_dir=teaser_output_dir,

@@ -93,7 +93,9 @@ and compatible OpenClaw agent auth caches. Treat `auth.json` like a password.
 
 Other keys:
 - `MINERU_API_TOKEN` for the default PDF parsing backend.
-- optional `GEMINI_API_KEY` for teaser-figure image generation.
+- optional `GEMINI_API_KEY` for teaser-figure image generation. It is not
+  required; without it FactReview returns the exact prompt for manual use in
+  the Gemini web app.
 
 The default PDF ingestion backend (MinerU) and the vendored reference
 checker are installed separately only when needed:
@@ -165,13 +167,21 @@ Primary artifacts:
 python scripts/generate_teaser_figure.py
 ```
 
+Prompt-only mode is always available:
+
+```bash
+python scripts/generate_teaser_figure.py --prompt-only
+```
+
 Defaults:
 - `assets/teaser_template/teaser_figure.pdf`
 - `assets/teaser_template/teaser_figure.pptx`
 
 Behavior:
-- If `TEASER_USE_GEMINI=true` and key is configured, synthesis calls image API and outputs `teaser_figure.png`.
-- Otherwise it always outputs prompt-only artifacts, so you can generate manually.
+- FactReview always writes and returns `teaser_figure_prompt.txt`.
+- By default, synthesis calls the image API only when a usable key is configured and then outputs `teaser_figure.png`.
+- Without an image key, or with `TEASER_USE_GEMINI=false` / `--prompt-only`, it returns `status=prompt_only` plus the exact prompt to paste into the Gemini web app.
+- Use `GEMINI_API_KEY` for Google Imagen/Gemini image generation. Compatible gateways require `GEMINI_BASE_URL` plus `OPENROUTER_API_KEY`, `OPENAI_API_KEY`, or `API_KEY`.
 
 ### Run multiple papers
 

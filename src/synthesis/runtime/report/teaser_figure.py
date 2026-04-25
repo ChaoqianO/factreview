@@ -1156,14 +1156,15 @@ def _resolve_image_request(
     timeout_override: int | None,
 ) -> tuple[str, str, int, str]:
     _ensure_env_loaded()
-    api_key = str(
-        api_key_override
-        or os.getenv("GEMINI_API_KEY")
-        or os.getenv("OPENROUTER_API_KEY")
-        or os.getenv("OPENAI_API_KEY")
-        or os.getenv("API_KEY")
-        or ""
-    ).strip()
+    base_url = str(os.getenv("GEMINI_BASE_URL") or "").strip().rstrip("/")
+    api_key = str(api_key_override or os.getenv("GEMINI_API_KEY") or "").strip()
+    if not api_key and base_url:
+        api_key = str(
+            os.getenv("OPENROUTER_API_KEY")
+            or os.getenv("OPENAI_API_KEY")
+            or os.getenv("API_KEY")
+            or ""
+        ).strip()
     model = str(
         model_override
         or os.getenv("GEMINI_IMAGE_MODEL")
@@ -1171,7 +1172,6 @@ def _resolve_image_request(
         or "imagen-4.0-generate-001"
     ).strip()
     timeout_seconds = int(timeout_override or int(os.getenv("GEMINI_TIMEOUT_SECONDS") or "120"))
-    base_url = str(os.getenv("GEMINI_BASE_URL") or "").strip().rstrip("/")
     return api_key, model, timeout_seconds, base_url
 
 
@@ -1338,7 +1338,10 @@ def generate_teaser_figure(
             image_path="",
             response_path="",
             model=model,
-            message="Image generation disabled. Prompt was written to disk.",
+            message=(
+                "Image generation disabled. Prompt was written to disk. "
+                "Paste it into the Gemini web app to generate the teaser figure manually."
+            ),
             used_gemini_api=False,
             source_markdown_path=str(latest_path),
         )
@@ -1360,8 +1363,8 @@ def generate_teaser_figure(
             response_path="",
             model=model,
             message=(
-                "GEMINI_API_KEY not found. Prompt was written to disk. "
-                "You can paste it into the Gemini web app to generate the teaser figure manually."
+                "No teaser image API key configured. Prompt was written to disk. "
+                "Paste it into the Gemini web app to generate the teaser figure manually."
             ),
             used_gemini_api=False,
             source_markdown_path=str(latest_path),

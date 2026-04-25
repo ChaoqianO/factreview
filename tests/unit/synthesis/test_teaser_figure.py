@@ -87,6 +87,45 @@ def test_generate_teaser_figure_without_gemini_key_writes_prompt(tmp_path: Path,
     assert result.status == "prompt_only"
     assert result.used_gemini_api is False
     assert Path(result.prompt_path).exists()
+    assert result.prompt
+    assert "Gemini web app" in result.message
+
+
+def test_generate_teaser_figure_ignores_openai_key_without_image_base_url(
+    tmp_path: Path, monkeypatch
+) -> None:
+    latest_md = tmp_path / "latest_extraction.md"
+    latest_md.write_text(SAMPLE_MARKDOWN, encoding="utf-8")
+    monkeypatch.setattr(teaser_figure_module, "_ensure_env_loaded", lambda: None)
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    monkeypatch.delenv("GEMINI_BASE_URL", raising=False)
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+    monkeypatch.setenv("OPENAI_API_KEY", "regular-openai-key")
+
+    result = generate_teaser_figure(latest_md, output_dir=tmp_path / "artifacts")
+
+    assert result.status == "prompt_only"
+    assert result.used_gemini_api is False
+    assert Path(result.prompt_path).read_text(encoding="utf-8") == result.prompt
+
+
+def test_generate_teaser_figure_prompt_only_mode_returns_manual_prompt(
+    tmp_path: Path, monkeypatch
+) -> None:
+    latest_md = tmp_path / "latest_extraction.md"
+    latest_md.write_text(SAMPLE_MARKDOWN, encoding="utf-8")
+    monkeypatch.setattr(teaser_figure_module, "_ensure_env_loaded", lambda: None)
+    monkeypatch.setenv("GEMINI_API_KEY", "dummy-key")
+
+    result = generate_teaser_figure(
+        latest_md,
+        output_dir=tmp_path / "artifacts",
+        generate_image=False,
+    )
+
+    assert result.status == "prompt_only"
+    assert result.used_gemini_api is False
+    assert result.prompt
     assert "Gemini web app" in result.message
 
 
