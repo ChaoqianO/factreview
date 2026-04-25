@@ -122,7 +122,7 @@ class Settings(BaseSettings):
     eval_status_threshold: float = 0.05
 
     # Integrated code_evaluation stage (run after extraction and before final PDF render)
-    enable_code_evaluation: bool = True
+    enable_code_evaluation: bool = False
     code_evaluation_max_attempts: int = 5
     code_evaluation_no_pdf_extract: bool = True
     code_evaluation_enable_refcheck: bool = False

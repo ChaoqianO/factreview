@@ -49,7 +49,8 @@ def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
         repo_root=repo_root,
         run_dir=run_dir,
     )
-    if bool(args.skip_execution):
+    run_execution = bool(getattr(args, "run_execution", False)) and not bool(args.skip_execution)
+    if not run_execution:
         execution_payload = {
             "paper_key": paper_key,
             "paper_pdf": str(paper_pdf),
@@ -132,7 +133,16 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--paper-key", type=str, default="")
     p.add_argument("--run-root", type=str, default="runs")
     p.add_argument("--reuse-job-id", type=str, default="", help="Reuse existing data/jobs/<job_id>/job.json")
-    p.add_argument("--skip-execution", action="store_true", help="Skip execution stage and continue to synthesis")
+    p.add_argument(
+        "--run-execution",
+        action="store_true",
+        help="Run the repository execution/code-evaluation stage. Disabled by default.",
+    )
+    p.add_argument(
+        "--skip-execution",
+        action="store_true",
+        help="Compatibility flag; execution is already skipped unless --run-execution is set.",
+    )
     p.add_argument("--max-attempts", type=int, default=5, help="Execution-stage max fix loop attempts")
     p.add_argument(
         "--no-pdf-extract",

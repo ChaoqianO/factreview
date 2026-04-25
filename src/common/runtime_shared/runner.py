@@ -226,7 +226,7 @@ def _build_agent_model_settings(*, tool_choice: str | None = None) -> ModelSetti
 
     return ModelSettings(
         temperature=None if uses_codex else settings.agent_temperature,
-        max_tokens=settings.agent_max_tokens,
+        max_tokens=None if uses_codex else settings.agent_max_tokens,
         tool_choice=tool_choice,
         parallel_tool_calls=False if uses_codex else None,
         response_include=['reasoning.encrypted_content'] if uses_codex else None,
@@ -235,6 +235,35 @@ def _build_agent_model_settings(*, tool_choice: str | None = None) -> ModelSetti
         if uses_codex
         else (Reasoning(effort='xhigh') if use_xhigh_reasoning else None),
     )
+
+
+async def _run_agent_once(
+    agent: Agent[Any],
+    *,
+    input_payload: str | list[Any],
+    context: ReviewRuntimeContext,
+    max_turns: int,
+    run_config: RunConfig,
+) -> Any:
+    if not _uses_codex_subscription_backend():
+        return await Runner.run(
+            agent,
+            input=input_payload,
+            context=context,
+            max_turns=max_turns,
+            run_config=run_config,
+        )
+
+    result = Runner.run_streamed(
+        agent,
+        input=input_payload,
+        context=context,
+        max_turns=max_turns,
+        run_config=run_config,
+    )
+    async for _event in result.stream_events():
+        pass
+    return result
 
 
 def _sync_token_usage(job_id: str, usage: Any) -> None:
@@ -3134,9 +3163,9 @@ async def run_job_async(job_id: str) -> None:
             break
 
         run_task = asyncio.create_task(
-            Runner.run(
+            _run_agent_once(
                 agent,
-                input=next_input,
+                input_payload=next_input,
                 context=runtime,
                 max_turns=max(20, settings.agent_max_turns),
                 run_config=run_config,
@@ -3246,9 +3275,9 @@ async def run_job_async(job_id: str) -> None:
                         model=agent_model,
                         model_settings=_build_agent_model_settings(tool_choice=forced_choice),
                     )
-                    forced_result = await Runner.run(
+                    forced_result = await _run_agent_once(
                         forced_agent,
-                        input=forced_input,
+                        input_payload=forced_input,
                         context=runtime,
                         max_turns=12,
                         run_config=run_config,

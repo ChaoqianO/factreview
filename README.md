@@ -34,10 +34,10 @@ If you use FactReview, please cite:
 ## Pipeline
 
 ```
-ingestion → fact_extraction → positioning → execution → synthesis
+ingestion → fact_extraction → positioning → synthesis
 ```
 
-The `execution/` stage is a LangGraph workflow:
+The optional `execution/` stage is a LangGraph workflow:
 `prepare → plan → run → judge → fix → finalize`.
 
 ## Installation
@@ -120,20 +120,23 @@ python scripts/execute_review_pipeline.py path/to/paper.pdf
 ```
 
 This runs:
-`ingestion → fact_extraction → positioning → execution → synthesis`
+`ingestion → fact_extraction → positioning → synthesis`
 
 Useful options:
 - `--paper-key <name>`: stable run folder name
-- `--skip-execution`: skip repository execution stage, still produce final review + teaser assets
+- `--run-execution`: opt into the repository execution/code-evaluation stage
 - `--max-attempts <N>`: execution-stage repair loop cap
+
+The internal runtime `code_evaluation` integration is disabled by default. Set
+`ENABLE_CODE_EVALUATION=true` only when you want the extraction runtime itself
+to launch repository execution.
 
 Example:
 
 ```bash
 python scripts/execute_review_pipeline.py \
   external_papers/1506.01497_faster_rcnn.pdf \
-  --paper-key faster_rcnn_1506.01497 \
-  --skip-execution
+  --paper-key faster_rcnn_1506.01497
 ```
 
 ### Run each stage manually (advanced)
@@ -188,7 +191,7 @@ Behavior:
 ```bash
 for pdf in external_papers/*.pdf; do
   key="$(basename "$pdf" .pdf)"
-  python scripts/execute_review_pipeline.py "$pdf" --paper-key "$key" --skip-execution
+  python scripts/execute_review_pipeline.py "$pdf" --paper-key "$key"
 done
 ```
 
