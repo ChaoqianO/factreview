@@ -222,11 +222,10 @@ def finalize_node(state: dict[str, Any]) -> dict[str, Any]:
     }
     write_text(run_dir / "summary.json", json.dumps(summary, ensure_ascii=False, indent=2) + "\n")
 
-    # 3) mirror report into compare/
+    # 3) keep reviewer-facing report and diff summaries inside this execution run.
     paper_key = str((state.get("config") or {}).get("paper_key") or "paper")
-    compare_root = Path(__file__).resolve().parents[2] / "compare" / paper_key
-    reports_dir = ensure_dir(compare_root / "reports")
-    diffs_dir = ensure_dir(compare_root / "diffs" / str(run_info.get("id") or "unknown"))
+    reports_dir = ensure_dir(run_dir / "reports")
+    diffs_dir = ensure_dir(run_dir / "diffs")
 
     cfg = state.get("config") or {}
     run_result = state.get("run_result") or {}
@@ -366,7 +365,7 @@ def finalize_node(state: dict[str, Any]) -> dict[str, Any]:
     md_lines.append("## Available Evidence")
     md_lines.append("")
     md_lines.append(f"- Run directory: `{run_dir}`")
-    md_lines.append(f"- Compare report: `{reports_dir / (str(run_info.get('id')) + '.md')}`")
+    md_lines.append(f"- Report: `{reports_dir / (str(run_info.get('id')) + '.md')}`")
     md_lines.append(f"- Issues log: `{run_dir / 'issues.md'}`")
     md_lines.append(f"- Artifact file count: `{len(artifacts_index.get('files') or [])}`")
     if artifact_files:
@@ -468,10 +467,8 @@ def finalize_node(state: dict[str, Any]) -> dict[str, Any]:
     # diff artifacts
     write_text(diffs_dir / "summary.json", json.dumps(summary, ensure_ascii=False, indent=2) + "\n")
 
-    # 4) "facts pack" for final review writing (separate from baseline/run/compare)
-    review_root = (
-        Path(__file__).resolve().parents[2] / "review" / paper_key / str(run_info.get("id") or "unknown")
-    )
+    # 4) "facts pack" for final review writing.
+    review_root = run_dir / "review_pack"
     ensure_dir(review_root)
 
     # Deterministic actionable hints (no LLM)
@@ -485,7 +482,7 @@ def finalize_node(state: dict[str, Any]) -> dict[str, Any]:
             {
                 "type": "define_baseline",
                 "why": "No baseline checks defined; cannot verify paper results.",
-                "next": "Fill baseline/<paper_key>/baseline.json checks to match a paper table row and ensure artifact_paths collect required outputs.",
+                "next": "Fill inputs/baseline/<paper_key>/baseline.json checks to match a paper table row and ensure artifact_paths collect required outputs.",
             }
         )
     # common deps issue
@@ -494,7 +491,7 @@ def finalize_node(state: dict[str, Any]) -> dict[str, Any]:
             {
                 "type": "fix_requirements_stdlib",
                 "why": "requirements.txt contains Python stdlib module (difflib); pip cannot install it.",
-                "next": "Use run/<paper_key>/<run_id>/logs/requirements.cleaned.txt or patch the repo requirements file; update tasks install_deps to point to cleaned file.",
+                "next": "Use this run's logs/requirements.cleaned.txt or patch the repo requirements file; update tasks install_deps to point to cleaned file.",
             }
         )
     # LLM config issues
@@ -622,8 +619,8 @@ def finalize_node(state: dict[str, Any]) -> dict[str, Any]:
             "run_dir": str(run_dir),
             "issues_jsonl": str(run_dir / "issues.jsonl"),
             "issues_md": str(run_dir / "issues.md"),
-            "compare_report": str(report_path),
-            "compare_diff_dir": str(diffs_dir),
+            "report": str(report_path),
+            "diff_dir": str(diffs_dir),
         },
         "suggestions": suggestions,
         "bibtex": bibtex_entries if bibtex_entries else [],

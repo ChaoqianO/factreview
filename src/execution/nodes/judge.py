@@ -66,7 +66,12 @@ def judge_node(state: dict[str, Any]) -> dict[str, Any]:
     try:
         paper_key = str(cfg.get("paper_key") or "").strip() or "paper"
         repo_root = Path(__file__).resolve().parents[2]
-        paper_tables_dir = repo_root / "baseline" / paper_key / "paper_extracted" / "tables"
+        configured_tables_dir = str(cfg.get("paper_extracted_tables_dir") or "").strip()
+        paper_tables_dir = (
+            Path(configured_tables_dir).resolve()
+            if configured_tables_dir
+            else repo_root / "baseline" / paper_key / "paper_extracted" / "tables"
+        )
         if paper_tables_dir.exists():
             ar = run_alignment(
                 cfg=cfg,

@@ -44,6 +44,7 @@ from positioning.runtime.adapters.paper_search import (
 from positioning.runtime.adapters.semantic_scholar import SemanticScholarAdapter, SemanticScholarConfig
 from synthesis.runtime.report.final_report_audit import audit_and_refine_final_report
 from synthesis.runtime.report.review_report_pdf import build_review_report_pdf
+from util.run_layout import slugify_run_key
 from synthesis.runtime.report.source_annotations import build_source_annotations_for_export
 
 
@@ -974,15 +975,32 @@ def _read_json_file(path: Path) -> dict[str, Any]:
         return {}
 
 
+def _project_root() -> Path:
+    token = str(os.getenv('FACTREVIEW_PROJECT_ROOT') or '').strip()
+    if token:
+        return Path(token).expanduser().resolve()
+    return get_settings().data_dir.parent.resolve()
+
+
 def _latest_code_eval_payload(*, project_root: Path, source_pdf_name: str) -> tuple[dict[str, Any], dict[str, Any]]:
     paper_key = _paper_key_from_source_name(source_pdf_name)
-    run_root = project_root / 'code_evaluation' / 'run' / paper_key
-    if not run_root.exists():
-        return ({}, {})
-    runs = [p for p in run_root.iterdir() if p.is_dir()]
+    code_eval_root = project_root / 'code_evaluation'
+    candidates: list[Path] = []
+    legacy_root = code_eval_root / 'run' / paper_key
+    if legacy_root.exists():
+        candidates.extend([p for p in legacy_root.iterdir() if p.is_dir()])
+    search_keys = []
+    for key in (paper_key, slugify_run_key(paper_key)):
+        if key and key not in search_keys:
+            search_keys.append(key)
+    for root in (code_eval_root / 'runs', code_eval_root):
+        if root.exists():
+            for key in search_keys:
+                candidates.extend([p for p in root.glob(f'{key}_*') if p.is_dir()])
+    runs = candidates
     if not runs:
         return ({}, {})
-    runs.sort(key=lambda p: p.name)
+    runs.sort(key=lambda p: (p.stat().st_mtime if p.exists() else 0.0, p.name))
     latest = runs[-1]
     summary = _read_json_file(latest / 'summary.json')
     alignment = _read_json_file(latest / 'artifacts' / 'alignment' / 'alignment.json')
@@ -1002,7 +1020,7 @@ def _load_env_defaults(env_path: Path) -> None:
 
 def _paper_key_from_source_name(source_pdf_name: str) -> str:
     stem = Path(str(source_pdf_name or 'paper')).stem.strip().lower() or 'paper'
-    project_root = get_settings().data_dir.parent.resolve()
+    project_root = _project_root()
     baseline_root = project_root / 'code_evaluation' / 'baseline'
     if not baseline_root.exists():
         return stem
@@ -1040,7 +1058,7 @@ async def _run_code_evaluation_for_pdf(
     if not settings.enable_code_evaluation:
         return result
 
-    project_root = settings.data_dir.parent.resolve()
+    project_root = _project_root()
     code_eval_root = project_root / 'code_evaluation'
     if not code_eval_root.exists():
         result['error'] = f'code_evaluation directory not found: {code_eval_root}'
@@ -1060,7 +1078,7 @@ async def _run_code_evaluation_for_pdf(
         workflow_mod = importlib.import_module('src.workflow')
         orchestrator_cls = getattr(workflow_mod, 'CodeEvalOrchestrator')
         orchestrator = orchestrator_cls(
-            run_root=str(code_eval_root / 'run'),
+            run_root=str(code_eval_root / 'runs'),
             max_attempts=int(settings.code_evaluation_max_attempts),
             enable_refcheck=bool(settings.code_evaluation_enable_refcheck),
             enable_bibtex=bool(settings.code_evaluation_enable_bibtex),
@@ -2760,7 +2778,7 @@ def _render_report_pdf(
     code_eval_summary = code_eval_summary_override if isinstance(code_eval_summary_override, dict) else {}
     code_eval_alignment = code_eval_alignment_override if isinstance(code_eval_alignment_override, dict) else {}
     if not code_eval_summary and not code_eval_alignment:
-        project_root = get_settings().data_dir.parent
+        project_root = _project_root()
         code_eval_summary, code_eval_alignment = _latest_code_eval_payload(
             project_root=project_root,
             source_pdf_name=source_pdf_name,

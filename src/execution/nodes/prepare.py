@@ -4,7 +4,6 @@ import json
 import os
 import re
 import shutil
-from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -12,6 +11,7 @@ from ingestion.mineru import extract_with_mineru, mineru_available
 from util.fs import ensure_dir, write_text
 from util.recorder import append_event
 from util.runner import persist_command_result, run_command
+from util.run_layout import build_run_dir, ensure_run_subdirs, make_run_id, slugify_run_key
 
 from ..tools.docker import docker_ensure_paper_image, docker_strategy
 
@@ -19,6 +19,10 @@ from ..tools.docker import docker_ensure_paper_image, docker_strategy
 def _repo_root() -> Path:
     # code_evaluation/src/nodes/prepare.py -> code_evaluation/
     return Path(__file__).resolve().parents[2]
+
+
+def _project_root() -> Path:
+    return Path(__file__).resolve().parents[3]
 
 
 def _read_text(path: Path) -> str:
@@ -183,22 +187,109 @@ def _copy_tree(src: Path, dst: Path) -> None:
         except Exception:
             # Best-effort fallback: merge into existing dir (Python 3.8+).
             try:
-                shutil.copytree(
-                    src,
-                    dst,
-                    ignore=shutil.ignore_patterns(".git", "__pycache__", ".mypy_cache"),
-                    dirs_exist_ok=True,
-                )
+                shutil.copytree(src, dst, ignore=_copy_ignore_patterns(src), dirs_exist_ok=True)
                 return
             except Exception:
                 # Re-raise the original intent: caller will record copy_source_failed.
                 raise
-    shutil.copytree(
-        src,
-        dst,
-        ignore=shutil.ignore_patterns(".git", "__pycache__", ".mypy_cache"),
-        dirs_exist_ok=True,
-    )
+    shutil.copytree(src, dst, ignore=_copy_ignore_patterns(src), dirs_exist_ok=True)
+
+
+def _copy_ignore_patterns(src_root: Path):
+    src_root = src_root.resolve()
+    recursive_ignored = {
+        ".git",
+        "__pycache__",
+        ".mypy_cache",
+        ".pytest_cache",
+        ".ruff_cache",
+        "wandb",
+    }
+    root_generated_ignored = {
+        "runs",
+        "outputs",
+        "output",
+        "checkpoints",
+        "checkpoint",
+        "logs",
+        "log",
+    }
+
+    def ignore(current: str, names: list[str]) -> set[str]:
+        ignored = set(names).intersection(recursive_ignored)
+        try:
+            if Path(current).resolve() == src_root:
+                ignored.update(set(names).intersection(root_generated_ignored))
+        except Exception:
+            pass
+        return ignored
+
+    return ignore
+
+
+def _copy_file_if_exists(src: Path, dst: Path) -> bool:
+    if not src.exists() or not src.is_file():
+        return False
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(src, dst)
+    return True
+
+
+def _configured_baseline_dir(paper_key: str) -> Path | None:
+    raw_key = str(paper_key or "paper").strip()
+    keys: list[str] = []
+    for key in (raw_key, slugify_run_key(raw_key)):
+        if key and key not in keys:
+            keys.append(key)
+    candidates = []
+    for key in keys:
+        candidates.extend(
+            [
+                _project_root() / "configs" / "baselines" / key,
+                _project_root() / "baseline" / key,
+                _repo_root() / "baseline" / key,
+            ]
+        )
+    for candidate in candidates:
+        if candidate.exists() and candidate.is_dir():
+            return candidate.resolve()
+    return None
+
+
+def _select_seed_source(seed_baseline_dir: Path | None) -> Path | None:
+    if seed_baseline_dir is None:
+        return None
+    for name in ("source_gpu", "source"):
+        candidate = seed_baseline_dir / name
+        if candidate.exists() and candidate.is_dir() and any(candidate.iterdir()):
+            return candidate.resolve()
+    return None
+
+
+def _materialize_seed_baseline(seed_baseline_dir: Path | None, baseline_dir: Path) -> None:
+    if seed_baseline_dir is None:
+        return
+    for name in ("tasks.yaml", "baseline.json", "paper.pdf"):
+        _copy_file_if_exists(seed_baseline_dir / name, baseline_dir / name)
+    if not (baseline_dir / "tasks.yaml").exists():
+        _copy_file_if_exists(seed_baseline_dir / "tasks.yml", baseline_dir / "tasks.yaml")
+    seed_extract = seed_baseline_dir / "paper_extracted"
+    if seed_extract.exists() and seed_extract.is_dir():
+        _copy_tree(seed_extract, baseline_dir / "paper_extracted")
+
+
+def _copy_prepared_extract(prepared_extract_dir: str, baseline_dir: Path) -> str:
+    token = str(prepared_extract_dir or "").strip()
+    if not token:
+        return ""
+    src = Path(token).expanduser().resolve()
+    if not src.exists() or not src.is_dir():
+        return ""
+    dst = baseline_dir / "paper_extracted"
+    if src.resolve() != dst.resolve():
+        _copy_tree(src, dst)
+    md = dst / "paper.mineru.md"
+    return str(md.resolve()) if md.exists() else ""
 
 
 def _ensure_default_baseline(baseline_path: Path) -> None:
@@ -283,7 +374,7 @@ def _write_run_manifest(*, run_dir: Path, cfg: dict[str, Any], baseline_dir: Pat
 
 def prepare_node(state: dict[str, Any]) -> dict[str, Any]:
     cfg: dict[str, Any] = state.get("config", {}) or {}
-    run_root = str(cfg.get("run_root") or (_repo_root() / "run"))
+    run_root = str(cfg.get("run_root") or (_project_root() / "runs" / "execution"))
 
     paper_pdf = str(cfg.get("paper_pdf") or "").strip()
     paper_root_in = str(cfg.get("paper_root") or "").strip()
@@ -303,11 +394,18 @@ def prepare_node(state: dict[str, Any]) -> dict[str, Any]:
         else:
             paper_key = "paper"
 
-    run_id = datetime.now().strftime("%Y-%m-%d_%H%M%S")
-    run_dir = Path(run_root) / paper_key / run_id
-    logs_dir = ensure_dir(run_dir / "logs")
-    artifacts_dir = ensure_dir(run_dir / "artifacts")
+    run_id = str(cfg.get("run_id") or "").strip() or make_run_id()
+    run_dir = (
+        Path(str(cfg.get("run_dir") or "")).resolve()
+        if str(cfg.get("run_dir") or "").strip()
+        else build_run_dir(run_root, paper_key, run_id)
+    )
+    layout = ensure_run_subdirs(run_dir)
+    logs_dir = ensure_dir(layout["logs"])
+    artifacts_dir = ensure_dir(layout["artifacts"])
     fixes_dir = ensure_dir(run_dir / "fixes")
+    inputs_dir = ensure_dir(layout["inputs"])
+    workspace_dir = ensure_dir(layout["workspace"])
 
     state["run"] = {
         "id": run_id,
@@ -326,23 +424,27 @@ def prepare_node(state: dict[str, Any]) -> dict[str, Any]:
         {"kind": "prepare_start", "data": {"paper_key": paper_key, "paper_pdf": paper_pdf}}
     )
 
-    baseline_dir = _repo_root() / "baseline" / paper_key
-    source_dir = baseline_dir / "source"
-
-    # Resolve the repo root path used by tasks.
-    # Priority:
-    # 1) explicit --paper-root
-    # 2) explicit local source path (second positional argument) => USE IN PLACE (no clone, no copy)
-    # 3) baseline/<paper_key>/source (PDF-driven clone target)
-    if paper_root_in:
-        paper_root = Path(paper_root_in).resolve()
-    elif local_source_path:
-        paper_root = Path(local_source_path).resolve()
-    else:
-        paper_root = source_dir.resolve()
-
-    # Ensure baseline folder exists and keep a copy of the paper PDF there for traceability.
+    seed_baseline_dir = _configured_baseline_dir(paper_key)
+    baseline_dir = (
+        Path(str(cfg.get("baseline_dir") or "")).resolve()
+        if str(cfg.get("baseline_dir") or "").strip()
+        else (inputs_dir / "baseline" / slugify_run_key(paper_key)).resolve()
+    )
     ensure_dir(baseline_dir)
+    _materialize_seed_baseline(seed_baseline_dir, baseline_dir)
+
+    source_dir = (workspace_dir / "source").resolve()
+    seed_source_dir = _select_seed_source(seed_baseline_dir)
+
+    if paper_root_in:
+        source_origin = Path(paper_root_in).resolve()
+    elif local_source_path:
+        source_origin = Path(local_source_path).resolve()
+    elif seed_source_dir is not None:
+        source_origin = seed_source_dir
+    else:
+        source_origin = source_dir
+
     if pdf_path and pdf_path.exists():
         try:
             dst_pdf = baseline_dir / "paper.pdf"
@@ -351,22 +453,43 @@ def prepare_node(state: dict[str, Any]) -> dict[str, Any]:
         except Exception:
             pass
 
-    # Acquire source code.
-    if local_source_path:
-        # Use provided local repository directory in-place.
-        # Do NOT clone and do NOT copy into baseline/<paper_key>/source.
-        if not paper_root.exists():
-            msg = f"local_source_not_found: {paper_root}"
+    if paper_root_in or local_source_path or seed_source_dir is not None:
+        if not source_origin.exists():
+            msg = f"source_not_found: {source_origin}"
             append_event(run_dir, "prepare_error", {"error": msg})
             state.setdefault("history", []).append({"kind": "prepare_error", "data": {"error": msg}})
             state["status"] = "failed"
             return state
-        append_event(run_dir, "prepare_use_local_source", {"path": str(paper_root)})
-        state.setdefault("history", []).append(
-            {"kind": "prepare_use_local_source", "data": {"path": str(paper_root)}}
+        try:
+            _copy_tree(source_origin, source_dir)
+        except Exception as exc:
+            msg = f"copy_source_failed: {type(exc).__name__}: {exc}"
+            append_event(
+                run_dir,
+                "prepare_error",
+                {"error": msg, "source": str(source_origin), "dest": str(source_dir)},
+            )
+            state.setdefault("history", []).append({"kind": "prepare_error", "data": {"error": msg}})
+            state["status"] = "failed"
+            return state
+        paper_root = source_dir.resolve()
+        append_event(
+            run_dir,
+            "prepare_source_snapshot",
+            {
+                "source": str(source_origin),
+                "dest": str(paper_root),
+                "seed_baseline": str(seed_baseline_dir or ""),
+            },
         )
-    elif not paper_root_in:
-        # PDF-driven mode: clone repo into baseline/<paper_key>/source if missing.
+        state.setdefault("history", []).append(
+            {
+                "kind": "prepare_source_snapshot",
+                "data": {"source": str(source_origin), "dest": str(paper_root)},
+            }
+        )
+    else:
+        paper_root = source_dir.resolve()
         need_clone = (not source_dir.exists()) or (not any(source_dir.iterdir()))
         if need_clone:
             repo_url = str(cfg.get("paper_repo_url") or "").strip()
@@ -406,19 +529,23 @@ def prepare_node(state: dict[str, Any]) -> dict[str, Any]:
             cfg["paper_repo_url"] = repo_url
             append_event(run_dir, "prepare_clone_ok", {"repo_url": repo_url, "dest": str(source_dir)})
 
-    # If the repo is already present, ensure it's clean (no carried-over patches).
-    # IMPORTANT: never mutate a user-provided local repo in-place.
-    if (not local_source_path) and (not paper_root_in):
-        _git_reset_if_possible(paper_root, logs_dir)
+    _git_reset_if_possible(paper_root, logs_dir)
 
-    # PDF extraction (MinerU).
-    # Default behavior: REQUIRED when paper_pdf is provided, unless user explicitly disables via --no-pdf-extract.
+    prepared_md = _copy_prepared_extract(str(cfg.get("paper_extracted_dir") or ""), baseline_dir)
+    if prepared_md:
+        cfg["paper_pdf_extracted_md"] = prepared_md
+        append_event(run_dir, "pdf_extract_reuse_pipeline_snapshot", {"output_md": prepared_md})
+
     if (not no_pdf_extract) and pdf_path and pdf_path.exists():
-        # If we already have extracted artifacts (from a previous run), reuse them.
-        # This makes the workflow robust when MinerU is not installed on the current machine.
         out_dir = baseline_dir / "paper_extracted"
         existing_md = out_dir / "paper.mineru.md"
-        if existing_md.exists():
+        if str(cfg.get("paper_pdf_extracted_md") or "").strip():
+            append_event(
+                run_dir,
+                "pdf_extract_reuse_configured",
+                {"output_md": str(cfg.get("paper_pdf_extracted_md"))},
+            )
+        elif existing_md.exists():
             cfg["paper_pdf_extracted_md"] = str(existing_md)
             append_event(run_dir, "pdf_extract_reuse_existing", {"output_md": str(existing_md)})
         else:
@@ -429,16 +556,16 @@ def prepare_node(state: dict[str, Any]) -> dict[str, Any]:
                     "prepare_error",
                     {
                         "error": msg,
-                        "hint": "Install MinerU and ensure `mineru` is on PATH (see: https://github.com/opendatalab/MinerU). "
-                        "Or rerun with --no-pdf-extract to bypass (not recommended).",
+                        "hint": (
+                            "Install MinerU and ensure `mineru` is on PATH. "
+                            "Or rerun with --no-pdf-extract to bypass."
+                        ),
                     },
                 )
                 state.setdefault("history", []).append({"kind": "prepare_error", "data": {"error": msg}})
                 state["status"] = "failed"
                 return state
 
-        # Keep extraction outputs in a single stable folder per paper.
-        # User preference: no nested `paper_extracted/mineru/` directory.
         if "paper_pdf_extracted_md" not in cfg:
             r = extract_with_mineru(
                 pdf_path=str(pdf_path), out_dir=out_dir, logs_dir=logs_dir, timeout_sec=1800
@@ -471,7 +598,6 @@ def prepare_node(state: dict[str, Any]) -> dict[str, Any]:
         if pdf_path and pdf_path.exists():
             append_event(run_dir, "pdf_extract_skipped", {"reason": "disabled"})
 
-    # Determine python spec for container env.
     python_spec = str(cfg.get("python_spec") or os.getenv("CODE_EVAL_PYTHON_SPEC") or "").strip()
     if not python_spec:
         python_spec = _infer_python_spec_from_requirements(paper_root / "requirements.txt")
@@ -479,8 +605,6 @@ def prepare_node(state: dict[str, Any]) -> dict[str, Any]:
     cfg["docker_enabled"] = True
     cfg["docker_strategy"] = strategy
 
-    # Tasks and baseline paths (wrapper config stored under baseline/<paper_key>/ by default).
-    # The dedicated `plan` node will generate/normalize tasks and load baseline contents.
     tasks_path = str(cfg.get("tasks_path") or "").strip()
     baseline_path = str(cfg.get("baseline_path") or "").strip()
     if not tasks_path:
@@ -490,13 +614,14 @@ def prepare_node(state: dict[str, Any]) -> dict[str, Any]:
     cfg["tasks_path"] = tasks_path
     cfg["baseline_path"] = baseline_path
 
-    # Persist config into state
     cfg["paper_key"] = paper_key
     cfg["paper_pdf"] = paper_pdf
     cfg["paper_root"] = str(paper_root)
+    cfg["baseline_dir"] = str(baseline_dir)
+    cfg["paper_extracted_dir"] = str((baseline_dir / "paper_extracted").resolve())
+    cfg["paper_extracted_tables_dir"] = str((baseline_dir / "paper_extracted" / "tables").resolve())
     state["config"] = cfg
 
-    # Only supported docker strategy: per-paper image build.
     if not dry_run:
         ok_img, img_or_msg = docker_ensure_paper_image(
             cfg,

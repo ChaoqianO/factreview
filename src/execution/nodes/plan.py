@@ -35,7 +35,11 @@ def plan_node(state: dict[str, Any]) -> dict[str, Any]:
         {"kind": "plan_start", "data": {"paper_key": paper_key, "paper_root": str(paper_root)}}
     )
 
-    baseline_dir = _repo_root() / "baseline" / paper_key
+    baseline_dir = (
+        Path(str(cfg.get("baseline_dir") or "")).resolve()
+        if str(cfg.get("baseline_dir") or "").strip()
+        else (_repo_root() / "baseline" / paper_key)
+    )
     tasks_path = str(cfg.get("tasks_path") or "").strip()
     baseline_path = str(cfg.get("baseline_path") or "").strip()
     if not tasks_path:

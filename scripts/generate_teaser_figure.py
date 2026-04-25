@@ -14,12 +14,21 @@ from common.runtime_shared.env import load_env_file
 from synthesis.runtime.report.teaser_figure import _env_true, generate_teaser_figure
 
 
+def _latest_synthesis_markdown() -> str:
+    candidates = sorted(
+        (ROOT / "runs").glob("*/stages/synthesis/final_review.md"),
+        key=lambda p: p.stat().st_mtime if p.exists() else 0,
+        reverse=True,
+    )
+    return str(candidates[0].resolve()) if candidates else ""
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser("generate_teaser_figure")
     parser.add_argument(
         "--latest-extraction",
-        default=str((ROOT / "output" / "latest_extraction.md").resolve()),
-        help="Path to latest_extraction markdown.",
+        default="",
+        help="Path to final_review/latest_extraction markdown. Defaults to the newest runs/*/stages/synthesis/final_review.md.",
     )
     parser.add_argument(
         "--output-dir",
@@ -53,9 +62,12 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     load_env_file(ROOT / ".env")
+    latest_extraction = args.latest_extraction or _latest_synthesis_markdown()
+    if not latest_extraction:
+        raise FileNotFoundError("No synthesis markdown found under runs/*/stages/synthesis/final_review.md")
     generate_image = False if bool(args.prompt_only) else _env_true("TEASER_USE_GEMINI", default=True)
     result = generate_teaser_figure(
-        args.latest_extraction,
+        latest_extraction,
         output_dir=args.output_dir or None,
         gemini_api_key=args.gemini_api_key or None,
         gemini_model=args.gemini_model or None,

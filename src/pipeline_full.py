@@ -3,7 +3,6 @@ from __future__ import annotations
 import argparse
 import json
 import os
-from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -15,10 +14,7 @@ from ingestion.runtime_bridge import init_full_pipeline_context, run_ingestion_s
 from llm.provider_capabilities import is_codex_provider
 from positioning.stage_runner import run_positioning_stage
 from synthesis.stage_runner import run_synthesis_stage
-
-
-def _now_run_id() -> str:
-    return datetime.now().strftime("%Y-%m-%d_%H%M%S")
+from util.run_layout import build_run_dir, ensure_run_subdirs, make_run_id
 
 
 def _write_json(path: Path, payload: dict[str, Any]) -> None:
@@ -64,9 +60,9 @@ def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
         raise FileNotFoundError(f"paper pdf not found: {paper_pdf}")
 
     paper_key = (args.paper_key or "").strip() or paper_pdf.stem.strip() or "paper"
-    run_id = _now_run_id()
-    run_dir = Path(args.run_root).resolve() / paper_key / run_id
-    run_dir.mkdir(parents=True, exist_ok=True)
+    run_id = make_run_id()
+    run_dir = build_run_dir(args.run_root, paper_key, run_id)
+    ensure_run_subdirs(run_dir)
     init_full_pipeline_context(run_dir=run_dir)
     run_execution = bool(getattr(args, "run_execution", False)) and not bool(args.skip_execution)
 
@@ -109,6 +105,9 @@ def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
             run_dir=run_dir,
             paper_pdf=paper_pdf,
             paper_key=paper_key,
+            paper_extracted_dir=str(
+                (ingestion_result.get("shared_execution_extract") or {}).get("paper_extracted_dir") or ""
+            ),
             max_attempts=int(args.max_attempts),
             no_pdf_extract=bool(args.no_pdf_extract),
         )
@@ -168,7 +167,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("paper_pdf", type=str, help="Path to paper PDF")
     p.add_argument("--paper-key", type=str, default="")
     p.add_argument("--run-root", type=str, default="runs")
-    p.add_argument("--reuse-job-id", type=str, default="", help="Reuse existing data/jobs/<job_id>/job.json")
+    p.add_argument("--reuse-job-id", type=str, default="", help="Reuse an existing runtime job snapshot")
     p.add_argument(
         "--llm-provider",
         type=str,

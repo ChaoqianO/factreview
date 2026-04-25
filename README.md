@@ -48,7 +48,7 @@ python scripts/execute_review_pipeline.py path/to/paper.pdf --paper-key my_paper
 The first useful output to open is:
 
 ```text
-runs/<paper_key>/<run_id>/stages/synthesis/final_review.md
+runs/<paper_key>_<timestamp>/stages/synthesis/final_review.md
 ```
 
 ## Required Configuration
@@ -145,12 +145,15 @@ is configured.
 Each run writes to:
 
 ```text
-runs/<paper_key>/<run_id>/
+runs/<paper_key>_<timestamp>/
 ```
 
 Primary artifacts:
 
 - `full_pipeline_summary.json`
+- `runtime/jobs/<job_id>/` for raw runtime job state, MinerU output, prompts, and agent traces
+- `inputs/` for copied PDFs, paper extraction snapshots, and execution baseline snapshots
+- `stages/execution/run/workspace/source/` for the run-local paper code checkout when execution is enabled
 - `stages/synthesis/final_review.json`
 - `stages/synthesis/final_review.md`
 - `stages/synthesis/final_review.pdf`

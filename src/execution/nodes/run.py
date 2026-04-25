@@ -71,6 +71,23 @@ def _expand_artifact_paths(cwd: str, paper_root: str, items: list[str]) -> list[
     return uniq
 
 
+def _ensure_task_output_roots(*, cwd: str, artifact_paths: list[Any]) -> None:
+    for raw in artifact_paths:
+        if not isinstance(raw, str):
+            continue
+        token = raw.replace("\\", "/").strip()
+        if not token or token.startswith("{"):
+            continue
+        token = token.replace("{paper_root}/", "").replace("{paper_dir}/", "").replace("{run_dir}/", "")
+        first = token.split("/", 1)[0].strip()
+        if not first or any(ch in first for ch in "*?[]"):
+            continue
+        try:
+            (Path(cwd) / first).mkdir(parents=True, exist_ok=True)
+        except Exception:
+            continue
+
+
 def run_node(state: dict[str, Any]) -> dict[str, Any]:
     cfg = state.get("config", {})
     run_info = state.get("run", {})
@@ -193,6 +210,12 @@ def run_node(state: dict[str, Any]) -> dict[str, Any]:
         env["CODE_EVAL_RUN_DIR"] = str(run_dir)
         env["CODE_EVAL_ARTIFACT_DIR"] = str(artifacts_dir)
         env["CODE_EVAL_PAPER_ROOT"] = pr_host
+        env["CODE_EVAL_OUTPUT_DIR"] = str(run_dir / "outputs" / task_id)
+        env["CODE_EVAL_TASK_OUTPUT_DIR"] = str(run_dir / "outputs" / task_id)
+        (run_dir / "outputs" / task_id).mkdir(parents=True, exist_ok=True)
+        artifact_paths = task.get("artifact_paths") or []
+        if isinstance(artifact_paths, list):
+            _ensure_task_output_roots(cwd=cwd_h if docker_enabled else cwd, artifact_paths=artifact_paths)
 
         # Execute the task inside docker.
         if docker_enabled:
@@ -218,7 +241,10 @@ def run_node(state: dict[str, Any]) -> dict[str, Any]:
                 run_dir_host=str(run_dir),
                 cwd_container=cwd,
                 cmd=cmd,
-                env={},
+                env={
+                    "CODE_EVAL_OUTPUT_DIR": f"/workspace/run_dir/outputs/{task_id}",
+                    "CODE_EVAL_TASK_OUTPUT_DIR": f"/workspace/run_dir/outputs/{task_id}",
+                },
                 gpus=str(cfg.get("docker_gpus") or os.environ.get("CODE_EVAL_DOCKER_GPUS") or "").strip()
                 or None,
                 shm_size=str(
@@ -280,7 +306,6 @@ def run_node(state: dict[str, Any]) -> dict[str, Any]:
             return state
 
         # Archive artifacts (optional per task)
-        artifact_paths = task.get("artifact_paths") or []
         if isinstance(artifact_paths, list) and artifact_paths:
             # In docker mode, the task ran against a host-mounted paper_root (now mounted at /app),
             # but artifact globbing must happen on the host paths.
@@ -304,14 +329,12 @@ def run_node(state: dict[str, Any]) -> dict[str, Any]:
                     # preserve relative path under paper_root if possible, otherwise under cwd
                     rel = None
                     try:
-                        if (
-                            pr
-                            and Path(pr).exists()
-                            and str(p).lower().startswith(str(Path(pr).resolve()).lower())
-                        ):
-                            rel = safe_relpath(p, Path(pr).resolve())
+                        root_for_rel = Path(pr_h if docker_enabled else pr).resolve()
+                        cwd_for_rel = Path(cwd_h if docker_enabled else cwd).resolve()
+                        if str(p.resolve()).lower().startswith(str(root_for_rel).lower()):
+                            rel = safe_relpath(p, root_for_rel)
                         else:
-                            rel = safe_relpath(p, Path(cwd).resolve())
+                            rel = safe_relpath(p, cwd_for_rel)
                     except Exception:
                         rel = p.name
                     dest = Path(artifacts_dir) / rel

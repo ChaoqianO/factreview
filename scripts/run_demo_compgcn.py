@@ -45,8 +45,8 @@ def _resolve_compgcn_pdf() -> Path:
 
 def parse_args() -> tuple[argparse.Namespace, list[str]]:
     parser = argparse.ArgumentParser("run_demo_compgcn")
-    parser.add_argument("--paper-key", default="compgcn_demo")
-    parser.add_argument("--run-root", default="runs/demo_compgcn")
+    parser.add_argument("--paper-key", default="compgcn")
+    parser.add_argument("--run-root", default="runs")
     parser.add_argument(
         "--teaser-mode",
         choices=("auto", "prompt", "api"),

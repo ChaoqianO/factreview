@@ -25,13 +25,13 @@ def parse_args() -> argparse.Namespace:
         "local_repo_pos",
         nargs="?",
         default="",
-        help="Optional positional local repository folder path. If provided, it will be copied into baseline/<paper_key>/source and cloning will be skipped.",
+        help="Optional positional local repository folder path. If provided, it will be copied into this run's workspace/source and cloning will be skipped.",
     )
     p.add_argument(
         "--paper-pdf",
         type=str,
         default="",
-        help="Path to the paper PDF. If provided, the system will try to extract repo URL(s) and prepare papers/<paper_key>/source automatically.",
+        help="Path to the paper PDF. If provided, the system will try to extract repo URL(s) and prepare a run-local source checkout automatically.",
     )
     p.add_argument(
         "--paper-key",
@@ -62,8 +62,8 @@ def parse_args() -> argparse.Namespace:
     p.add_argument(
         "--run-dir",
         type=str,
-        default=str(Path(__file__).parent / "run"),
-        help="Where to store run/<timestamp>/... artifacts",
+        default=str(Path(__file__).resolve().parents[1] / "runs" / "execution"),
+        help="Run root for execution artifacts; actual runs use <paper_key>_<timestamp>",
     )
     p.add_argument("--max-attempts", type=int, default=5, help="Max fix loop attempts per run")
     p.add_argument(
@@ -175,14 +175,14 @@ async def _amain() -> int:
         paper_root = (st.get("config") or {}).get("paper_root")
         repo_url = (st.get("config") or {}).get("paper_repo_url")
         report = None
-        if run_id:
-            report = (
-                Path(__file__).parent / "compare" / str(paper_key or "paper") / "reports" / f"{run_id}.md"
-            )
         run_dir = (st.get("run") or {}).get("dir")
+        if run_id and run_dir:
+            report = Path(run_dir) / "reports" / f"{run_id}.md"
         if not paper_key and run_dir:
             try:
-                paper_key = Path(run_dir).parent.name
+                name = Path(run_dir).name
+                marker = f"_{run_id}"
+                paper_key = name[: -len(marker)] if name.endswith(marker) else name
             except Exception:
                 pass
         print("")

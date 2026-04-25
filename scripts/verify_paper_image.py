@@ -37,7 +37,7 @@ def main() -> int:
     args = ap.parse_args()
 
     root = repo_root()
-    verify_root = root / "run" / "_paper_image_verify"
+    verify_root = root / "runs" / "_paper_image_verify"
     repo_dir = verify_root / "repo"
     run_dir = verify_root / "run"
 

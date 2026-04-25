@@ -112,6 +112,8 @@ class CodeEvalOrchestrator:
         auto_tasks_force: bool = False,
         enable_refcheck: bool = False,
         enable_bibtex: bool = False,
+        paper_extracted_dir: str = "",
+        run_dir: str = "",
     ) -> None:
         self.run_root = run_root
         self.max_attempts = max_attempts
@@ -126,6 +128,8 @@ class CodeEvalOrchestrator:
         self.auto_tasks_force = auto_tasks_force
         self.enable_refcheck = enable_refcheck
         self.enable_bibtex = enable_bibtex
+        self.paper_extracted_dir = paper_extracted_dir
+        self.run_dir = run_dir
 
         self._workflow = self._build_workflow()
         self._app = self._workflow.compile()
@@ -182,6 +186,8 @@ class CodeEvalOrchestrator:
                 "auto_tasks_force": self.auto_tasks_force,
                 "enable_refcheck": self.enable_refcheck,
                 "enable_bibtex": self.enable_bibtex,
+                "paper_extracted_dir": self.paper_extracted_dir,
+                "run_dir": self.run_dir,
             },
             "history": [],
         }

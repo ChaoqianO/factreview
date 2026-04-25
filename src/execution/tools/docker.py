@@ -5,6 +5,7 @@ import os
 import re
 from pathlib import Path
 
+from util.run_layout import slugify_run_key
 from util.runner import run_command
 
 
@@ -310,7 +311,7 @@ def _paper_install_deps_py_text() -> str:
 
 def _paper_image_tag(*, cfg: dict, paper_key: str, payload: str) -> str:
     h = hashlib.sha256(payload.encode("utf-8", errors="ignore")).hexdigest()[:12]
-    return f"{_paper_image_prefix(cfg)}:{paper_key}-{h}"
+    return f"{_paper_image_prefix(cfg)}:{slugify_run_key(paper_key)}-{h}"
 
 
 def docker_ensure_paper_image(

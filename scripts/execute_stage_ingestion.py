@@ -18,7 +18,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("paper_pdf", type=str, help="Path to paper PDF")
     p.add_argument("--paper-key", type=str, default="")
     p.add_argument("--run-dir", type=str, required=True, help="Run directory to write stage outputs")
-    p.add_argument("--reuse-job-id", type=str, default="", help="Reuse existing data/jobs/<job_id>/job.json")
+    p.add_argument("--reuse-job-id", type=str, default="", help="Reuse an existing runtime job snapshot")
     return p.parse_args()
 
 

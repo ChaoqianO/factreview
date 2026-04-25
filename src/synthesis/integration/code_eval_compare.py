@@ -6,6 +6,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from util.run_layout import slugify_run_key
+
 
 @dataclass
 class TableBlock:
@@ -66,13 +68,25 @@ def extract_experiment_tables_from_report(md_text: str) -> dict[str, Any]:
 
 
 def find_latest_code_eval_run(code_eval_root: Path, paper_key: str) -> Path | None:
-    run_root = code_eval_root / 'run' / paper_key
-    if not run_root.exists():
-        return None
-    candidates = [p for p in run_root.iterdir() if p.is_dir()]
+    candidates: list[Path] = []
+    legacy_root = code_eval_root / 'run' / paper_key
+    if legacy_root.exists():
+        candidates.extend([p for p in legacy_root.iterdir() if p.is_dir()])
+    search_keys = []
+    for key in (paper_key, slugify_run_key(paper_key)):
+        if key and key not in search_keys:
+            search_keys.append(key)
+    modern_roots = [
+        code_eval_root / 'runs',
+        code_eval_root,
+    ]
+    for root in modern_roots:
+        if root.exists():
+            for key in search_keys:
+                candidates.extend([p for p in root.glob(f'{key}_*') if p.is_dir()])
     if not candidates:
         return None
-    candidates.sort(key=lambda p: p.name)
+    candidates.sort(key=lambda p: (p.stat().st_mtime if p.exists() else 0.0, p.name))
     return candidates[-1]
 
 
@@ -138,7 +152,7 @@ def generate_compare_report(
             'paper_key': paper_key,
             'review_runtime_markdown': str(review_runtime_md_path),
             'code_eval_latest_run': None,
-            'error': f'No code_evaluation run found under {code_eval_root / "run" / paper_key}',
+            'error': f'No code_evaluation run found for {paper_key} under {code_eval_root}',
             'review_runtime_experiment': experiments,
         }
         out_dir.mkdir(parents=True, exist_ok=True)

@@ -23,6 +23,7 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     from common.runtime_shared.runner import run_job
     from common.runtime_shared.state import ensure_artifact_paths, load_job_state, mutate_job_state, save_job_state
+    from common.runtime_shared.storage import job_dir as runtime_job_dir
     from common.runtime_shared.types import JobState
 
     args = parse_args()
@@ -46,6 +47,7 @@ def main() -> None:
     if final_state is None:
         raise RuntimeError("failed to load final job state")
 
+    job_dir_path = runtime_job_dir(str(job.id)).resolve()
     payload = {
         "job_id": str(job.id),
         "status": final_state.status.value,
@@ -57,8 +59,8 @@ def main() -> None:
         "annotation_count": int(final_state.annotation_count),
         "final_report_ready": bool(final_state.final_report_ready),
         "pdf_ready": bool(final_state.pdf_ready),
-        "job_json_path": str((Path("data") / "jobs" / str(job.id) / "job.json").resolve()),
-        "job_dir": str((Path("data") / "jobs" / str(job.id)).resolve()),
+        "job_json_path": str((job_dir_path / "job.json").resolve()),
+        "job_dir": str(job_dir_path),
         "latest_output_md": str(Path(artifacts["latest_output_md"]).resolve()),
         "latest_output_pdf": str(Path(artifacts["latest_output_pdf"]).resolve()),
         "final_report_audit_json": str(Path(artifacts["final_report_audit"]).resolve()),

@@ -51,7 +51,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(description="Node-by-node debug runner for code_evaluation")
     ap.add_argument("--paper-pdf", required=True)
     ap.add_argument("--paper-key", default="")
-    ap.add_argument("--run-root", default=str(_CODE_EVAL / "run"))
+    ap.add_argument("--run-root", default=str(_CODE_EVAL / "runs" / "debug"))
     ap.add_argument("--no-pdf-extract", action="store_true")
     ap.add_argument(
         "--dry-run", action="store_true", help="Run tasks in dry-run mode (no docker/paper execution)."

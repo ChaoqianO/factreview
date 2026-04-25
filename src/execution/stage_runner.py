@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import shutil
 import sys
 from pathlib import Path
 from typing import Any
@@ -26,6 +27,16 @@ def _load_execution_artifacts(state: dict[str, Any]) -> tuple[dict[str, Any], di
     return summary, alignment, str(run_dir) if run_dir else ""
 
 
+def _reset_fixed_execution_run_dir(*, stage_root: Path, execution_run_dir: Path) -> None:
+    resolved_stage = stage_root.resolve()
+    resolved_run = execution_run_dir.resolve()
+    if resolved_run.parent != resolved_stage or resolved_run.name != "run":
+        raise RuntimeError(f"refusing to reset unexpected execution run dir: {resolved_run}")
+    if resolved_run.exists():
+        shutil.rmtree(resolved_run)
+    resolved_run.mkdir(parents=True, exist_ok=True)
+
+
 async def _run_orchestrator_async(
     *,
     run_root: Path,
@@ -33,12 +44,16 @@ async def _run_orchestrator_async(
     paper_key: str,
     max_attempts: int,
     no_pdf_extract: bool,
+    paper_extracted_dir: str = "",
+    execution_run_dir: Path | None = None,
 ) -> dict[str, Any]:
     from execution.graph import CodeEvalOrchestrator
 
     orchestrator = CodeEvalOrchestrator(
         run_root=str(run_root),
         max_attempts=max_attempts,
+        paper_extracted_dir=str(paper_extracted_dir or ""),
+        run_dir=str(execution_run_dir or ""),
     )
     return await orchestrator.run(
         paper_root="",
@@ -56,6 +71,7 @@ def run_execution_stage(
     run_dir: Path,
     paper_pdf: Path | None = None,
     paper_key: str | None = None,
+    paper_extracted_dir: str = "",
     max_attempts: int = 5,
     no_pdf_extract: bool = False,
 ) -> dict[str, Any]:
@@ -73,13 +89,17 @@ def run_execution_stage(
 
     stage_root = run_dir / "stages" / "execution"
     stage_root.mkdir(parents=True, exist_ok=True)
-    stage_run_root = stage_root / "run"
+    execution_run_dir = stage_root / "run"
+    stage_run_root = stage_root / "runs"
+    _reset_fixed_execution_run_dir(stage_root=stage_root, execution_run_dir=execution_run_dir)
 
     run_result = asyncio.run(
         _run_orchestrator_async(
             run_root=stage_run_root,
             paper_pdf=resolved_pdf,
             paper_key=resolved_key,
+            paper_extracted_dir=str(paper_extracted_dir or ""),
+            execution_run_dir=execution_run_dir,
             max_attempts=max_attempts,
             no_pdf_extract=no_pdf_extract,
         )

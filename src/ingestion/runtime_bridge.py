@@ -98,6 +98,40 @@ def write_json_file(path: Path, payload: dict[str, Any]) -> None:
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+def _reuse_job_candidates(*, repo_root: Path, run_dir: Path, job_ref: str) -> list[Path]:
+    token = str(job_ref or "").strip()
+    if not token:
+        return []
+
+    candidates: list[Path] = []
+    raw_path = Path(token).expanduser()
+    looks_like_path = raw_path.is_absolute() or any(sep in token for sep in ("/", "\\", os.sep))
+    if looks_like_path:
+        candidate = raw_path.resolve()
+        candidates.append(candidate.parent if candidate.name == "job.json" else candidate)
+
+    candidates.append((run_dir / "runtime" / "jobs" / token).resolve())
+
+    runs_root = repo_root / "runs"
+    if runs_root.exists():
+        try:
+            candidates.extend(sorted(p.resolve() for p in runs_root.glob(f"**/runtime/jobs/{token}")))
+        except Exception:
+            pass
+
+    candidates.append((repo_root / "data" / "jobs" / token).resolve())
+
+    deduped: list[Path] = []
+    seen: set[str] = set()
+    for candidate in candidates:
+        key = str(candidate)
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(candidate)
+    return deduped
+
+
 def _copy_file_if_exists(src: Path | None, dst: Path) -> bool:
     if src is None or (not src.exists()) or (not src.is_file()):
         return False
@@ -144,7 +178,7 @@ def _materialize_stage_inputs_snapshot(
 ) -> None:
     """
     Persist run-local snapshots so downstream stages can run independently
-    of data/jobs/<job_id>/job.json and sibling runtime directories.
+    of runtime/jobs/<job_id>/job.json and sibling runtime directories.
     """
     stage_dir = _ingestion_stage_dir(run_dir)
     snapshot_root = stage_dir / "snapshot_artifacts"
@@ -199,19 +233,22 @@ def _materialize_stage_inputs_snapshot(
 def _materialize_execution_paper_extract(
     *,
     repo_root: Path,
+    run_dir: Path,
     paper_key: str,
     job_dir: Path,
     mineru_md: Path | None,
     mineru_content: Path | None,
 ) -> dict[str, str]:
     """
-    Bridge the runtime MinerU output into the execution stage's shared baseline folder.
+    Bridge the runtime MinerU output into this run's execution input folder.
 
     This lets execution reuse the first PDF parse instead of requiring a second,
-    local MinerU CLI invocation under src/baseline/<paper_key>/paper_extracted/.
+    local MinerU CLI invocation. The execution stage copies this folder into its
+    own run-local baseline snapshot.
     """
-    baseline_dir = repo_root / "src" / "baseline" / str(paper_key or "paper").strip()
-    extracted_dir = baseline_dir / "paper_extracted"
+    _ = repo_root
+    _ = paper_key
+    extracted_dir = run_dir / "inputs" / "paper_extracted"
     extracted_dir.mkdir(parents=True, exist_ok=True)
 
     md_dst = extracted_dir / "paper.mineru.md"
@@ -269,13 +306,15 @@ def _pick_python_executable(repo_root: Path) -> Path:
     return Path("python3")
 
 
-def _run_review_runtime(*, repo_root: Path, paper_pdf: Path, title: str) -> dict[str, Any]:
+def _run_review_runtime(*, repo_root: Path, run_dir: Path, paper_pdf: Path, title: str) -> dict[str, Any]:
     py_exec = _pick_python_executable(repo_root)
     script = repo_root / "scripts" / "execute_review_runtime_job.py"
 
     env = os.environ.copy()
     # Keep parity with legacy integration behavior: execution is handled as external stage.
     env.setdefault("ENABLE_CODE_EVALUATION", "false")
+    env["DATA_DIR"] = str((run_dir / "runtime").resolve())
+    env["FACTREVIEW_PROJECT_ROOT"] = str(repo_root.resolve())
 
     proc = subprocess.run(
         [str(py_exec), str(script), "--paper-pdf", str(paper_pdf), "--title", title],
@@ -401,10 +440,12 @@ def bootstrap_bridge_state(
 
     job_id = str(reuse_job_id or "").strip()
     if job_id:
-        job_dir = (repo_root / "data" / "jobs" / job_id).resolve()
+        candidates = _reuse_job_candidates(repo_root=repo_root, run_dir=run_dir, job_ref=job_id)
+        job_dir = next((p for p in candidates if (p / "job.json").exists()), candidates[0])
         job_json_path = job_dir / "job.json"
         if not job_json_path.exists():
-            raise FileNotFoundError(f"reused job.json not found: {job_json_path}")
+            searched = ", ".join(str(p / "job.json") for p in candidates)
+            raise FileNotFoundError(f"reused job.json not found; searched: {searched}")
         job_state = read_json_file(job_json_path)
         if not job_state:
             raise RuntimeError(f"reused job state is empty/invalid: {job_json_path}")
@@ -459,7 +500,7 @@ def bootstrap_bridge_state(
         raise FileNotFoundError(f"paper pdf not found: {resolved_pdf}")
 
     key = str(paper_key or "").strip() or resolved_pdf.parent.name or "paper"
-    own_payload = _run_review_runtime(repo_root=repo_root, paper_pdf=resolved_pdf, title=key)
+    own_payload = _run_review_runtime(repo_root=repo_root, run_dir=run_dir, paper_pdf=resolved_pdf, title=key)
     return save_bridge_state(
         run_dir=run_dir,
         paper_pdf=resolved_pdf,
@@ -504,6 +545,7 @@ def run_ingestion_stage(
     shared_extract = (
         _materialize_execution_paper_extract(
             repo_root=repo_root,
+            run_dir=run_dir,
             paper_key=state.paper_key,
             job_dir=state.job_dir,
             mineru_md=mineru_md,
@@ -551,6 +593,7 @@ def run_ingestion_stage(
         "bridge": str(_bridge_path(run_dir)),
         "job_id": state.job_id,
         "job_dir": str(state.job_dir),
+        "shared_execution_extract": shared_extract,
     }
 
 

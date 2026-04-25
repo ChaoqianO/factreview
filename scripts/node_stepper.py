@@ -42,7 +42,7 @@ def _build_initial_state(args: argparse.Namespace) -> State:
             "tasks_path": args.tasks or "",
             "baseline_path": args.baseline or "",
             "local_source_path": args.local_source or "",
-            "run_root": args.run_root or str(_CODE_EVAL / "run"),
+            "run_root": args.run_root or str(_CODE_EVAL / "runs" / "node_stepper"),
             "no_llm": bool(args.no_llm),
             "no_pdf_extract": bool(args.no_pdf_extract),
             "llm_provider": args.llm_provider or "",
