@@ -17,7 +17,7 @@ class StageToggles(BaseModel):
     ingestion: bool = True
     fact_extraction: bool = True
     positioning: bool = True
-    execution: bool = True
+    execution: bool = False
     synthesis: bool = True
 
 
@@ -58,7 +58,7 @@ class SynthesisCfg(BaseModel):
 
 
 class LLMCfg(BaseModel):
-    provider: str = "openai"
+    provider: str = "openai-codex"
     model: str = ""
     base_url: str = ""
     route: dict[str, str] = Field(default_factory=dict)

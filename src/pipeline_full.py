@@ -2,13 +2,17 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from common.runtime_shared.config import get_settings
+from common.runtime_shared.env import load_env_file
 from execution.stage_runner import run_execution_stage
 from fact_extraction.stage_runner import run_fact_extraction_stage
 from ingestion.runtime_bridge import init_full_pipeline_context, run_ingestion_stage
+from llm.provider_capabilities import is_codex_provider
 from positioning.stage_runner import run_positioning_stage
 from synthesis.stage_runner import run_synthesis_stage
 
@@ -22,6 +26,37 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+def _set_env_if_value(name: str, value: str | None) -> None:
+    token = str(value or "").strip()
+    if token:
+        os.environ[name] = token
+
+
+def _apply_cli_env_overrides(args: argparse.Namespace) -> None:
+    llm_provider = str(getattr(args, "llm_provider", "") or "").strip()
+    if llm_provider:
+        os.environ["MODEL_PROVIDER"] = llm_provider
+        os.environ["CODE_EVAL_MODEL_PROVIDER"] = llm_provider
+    _set_env_if_value("MINERU_API_TOKEN", getattr(args, "mineru_api_token", ""))
+    _set_env_if_value("GEMINI_API_KEY", getattr(args, "gemini_api_key", ""))
+
+    llm_model = str(getattr(args, "llm_model", "") or "").strip()
+    if llm_model:
+        os.environ["AGENT_MODEL"] = llm_model
+        os.environ["CODE_EVAL_OPENAI_MODEL"] = llm_model
+        provider = str(getattr(args, "llm_provider", "") or os.getenv("MODEL_PROVIDER") or "").strip()
+        if is_codex_provider(provider):
+            os.environ["OPENAI_CODEX_MODEL"] = llm_model
+
+    teaser_mode = str(getattr(args, "teaser_mode", "auto") or "auto").strip().lower()
+    if teaser_mode == "prompt":
+        os.environ["TEASER_USE_GEMINI"] = "false"
+    elif teaser_mode == "api":
+        os.environ["TEASER_USE_GEMINI"] = "true"
+
+    get_settings.cache_clear()
+
+
 def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
     repo_root = Path(__file__).resolve().parents[1]
     paper_pdf = Path(args.paper_pdf).resolve()
@@ -33,6 +68,7 @@ def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
     run_dir = Path(args.run_root).resolve() / paper_key / run_id
     run_dir.mkdir(parents=True, exist_ok=True)
     init_full_pipeline_context(run_dir=run_dir)
+    run_execution = bool(getattr(args, "run_execution", False)) and not bool(args.skip_execution)
 
     ingestion_result = run_ingestion_stage(
         repo_root=repo_root,
@@ -40,6 +76,7 @@ def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
         paper_pdf=paper_pdf,
         paper_key=paper_key,
         reuse_job_id=str(args.reuse_job_id or "").strip(),
+        materialize_execution_extract=run_execution,
     )
     fact_result = run_fact_extraction_stage(
         repo_root=repo_root,
@@ -49,7 +86,6 @@ def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
         repo_root=repo_root,
         run_dir=run_dir,
     )
-    run_execution = bool(getattr(args, "run_execution", False)) and not bool(args.skip_execution)
     if not run_execution:
         execution_payload = {
             "paper_key": paper_key,
@@ -134,6 +170,36 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--run-root", type=str, default="runs")
     p.add_argument("--reuse-job-id", type=str, default="", help="Reuse existing data/jobs/<job_id>/job.json")
     p.add_argument(
+        "--llm-provider",
+        type=str,
+        default="",
+        help="LLM provider override. Default is openai-codex after `codex login`.",
+    )
+    p.add_argument(
+        "--llm-model",
+        type=str,
+        default="",
+        help="LLM model override for the selected provider.",
+    )
+    p.add_argument(
+        "--mineru-api-token",
+        type=str,
+        default="",
+        help="MinerU API token override. Prefer MINERU_API_TOKEN in .env for routine use.",
+    )
+    p.add_argument(
+        "--gemini-api-key",
+        type=str,
+        default="",
+        help="Optional Gemini API key override for teaser image generation.",
+    )
+    p.add_argument(
+        "--teaser-mode",
+        choices=("auto", "prompt", "api"),
+        default="auto",
+        help="Teaser figure mode: auto attempts Gemini when a key exists, prompt saves/copies the prompt, api attempts the configured image API.",
+    )
+    p.add_argument(
         "--run-execution",
         action="store_true",
         help="Run the repository execution/code-evaluation stage. Disabled by default.",
@@ -154,6 +220,8 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
+    load_env_file(Path(__file__).resolve().parents[1] / ".env")
+    _apply_cli_env_overrides(args)
     summary = run_full_pipeline(args)
     print(json.dumps(summary, ensure_ascii=False, indent=2))
 

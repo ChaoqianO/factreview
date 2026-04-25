@@ -1,20 +1,188 @@
 # FactReview
 
-Evidence-grounded AI reviewing for empirical ML papers. Given a paper PDF
-(and optionally its released repository), FactReview extracts the major
-claims, positions the paper against nearby literature, executes the
-repository under bounded budgets to test the central empirical claims, and
-writes a concise review linked to an evidence report.
+Evidence-grounded AI reviewing for empirical ML papers. Given a paper PDF,
+FactReview extracts the major claims, positions the paper against nearby
+literature, and writes a concise review linked to evidence. Repository/code
+execution is available, but disabled by default.
 
-Every judgment is tagged with one of five labels: **Supported**,
-**Supported by the paper**, **Partially supported**, **In conflict**, or
-**Inconclusive**.
+## Quick Start
+
+**Requirements:** Python 3.11+ and a local Codex login.
+Docker is only needed if you explicitly enable code execution.
+
+```bash
+git clone https://github.com/ChaoqianO/factreview.git
+cd factreview
+
+python -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
+
+pip install -e ".[runtime]"
+codex login
+
+cp .env.example .env
+```
+
+If `codex` is not on your PATH, install the Codex CLI first, then rerun
+`codex login`.
+
+Edit `.env` and fill:
+
+```bash
+MODEL_PROVIDER=openai-codex
+MINERU_API_TOKEN=your_mineru_token
+```
+
+Then run the bundled CompGCN demo:
+
+```bash
+python scripts/run_demo_compgcn.py
+```
+
+Run your own PDF:
+
+```bash
+python scripts/execute_review_pipeline.py path/to/paper.pdf --paper-key my_paper
+```
+
+The first useful output to open is:
+
+```text
+runs/<paper_key>/<run_id>/stages/synthesis/final_review.md
+```
+
+## Required Configuration
+
+FactReview intentionally keeps routine configuration to two places:
+
+- `.env` / environment variables for secrets and normal runtime choices.
+- CLI flags for one-off overrides.
+
+Advanced developer knobs live in `configs/default.yaml`.
+
+### LLM Backend
+
+The default backend is Codex login:
+
+```bash
+MODEL_PROVIDER=openai-codex
+OPENAI_CODEX_MODEL=gpt-5.3-codex
+```
+
+Run `codex login` once and choose the ChatGPT sign-in flow. FactReview reads
+the local Codex OAuth cache, so no OpenAI Platform API key is needed for the
+default path.
+
+### MinerU PDF Parsing
+
+`MINERU_API_TOKEN` is required. FactReview uses MinerU's cloud API by default
+because it is free to start with generous quota and avoids local CUDA/GPU and
+MinerU model setup.
+
+```bash
+MINERU_API_TOKEN=your_mineru_token
+```
+
+You can also pass it once from CLI:
+
+```bash
+python scripts/execute_review_pipeline.py paper.pdf --mineru-api-token your_mineru_token
+```
+
+### Gemini Teaser Figure
+
+Gemini is optional. If `GEMINI_API_KEY` is empty, FactReview treats teaser
+generation as successful prompt-only output: it writes
+`teaser_figure_prompt.txt`, copies the prompt to the clipboard when possible,
+and tells you to paste it into the Gemini web app. If `GEMINI_API_KEY` is set,
+FactReview uses it automatically.
+
+```bash
+GEMINI_API_KEY=
+```
+
+To force prompt-only output even when a Gemini key is configured:
+
+```bash
+TEASER_USE_GEMINI=false
+```
+
+## Running
+
+Full default pipeline:
+
+```bash
+python scripts/execute_review_pipeline.py path/to/paper.pdf --paper-key paper_name
+```
+
+This runs:
+
+```text
+ingestion -> fact_extraction -> positioning -> synthesis
+```
+
+Code execution is off by default. Enable it only when you want repository/code
+evaluation:
+
+```bash
+python scripts/execute_review_pipeline.py path/to/paper.pdf --run-execution
+```
+
+Useful one-off overrides:
+
+```bash
+python scripts/execute_review_pipeline.py paper.pdf \
+  --llm-provider openai-codex \
+  --llm-model gpt-5.3-codex \
+  --teaser-mode prompt
+```
+
+`--teaser-mode prompt` forces the prompt-only Gemini fallback even when a key
+is configured.
+
+## Outputs
+
+Each run writes to:
+
+```text
+runs/<paper_key>/<run_id>/
+```
+
+Primary artifacts:
+
+- `full_pipeline_summary.json`
+- `stages/synthesis/final_review.json`
+- `stages/synthesis/final_review.md`
+- `stages/synthesis/final_review.pdf`
+- `stages/synthesis/teaser_figure_prompt.txt`
+- `stages/synthesis/teaser_figure.png` when image API generation is enabled
+
+## Pipeline
+
+Judgments use five labels: **Supported**, **Supported by the paper**,
+**Partially supported**, **In conflict**, and **Inconclusive**.
+
+The optional execution stage is a bounded workflow:
+
+```text
+prepare -> plan -> run -> judge -> fix -> finalize
+```
+
+## Development
+
+```bash
+pip install -e ".[runtime,dev]"
+
+ruff check .
+ruff format --check .
+mypy src/schemas src/util
+pytest tests/unit -m "not slow and not e2e and not requires_docker and not requires_llm and not requires_mineru"
+```
 
 ## Paper
 
-Read the paper on [arXiv](https://arxiv.org/abs/2604.04074) or from the
-local PDF at
-[`factreview-arxiv-2604.04074v2.pdf`](factreview-arxiv-2604.04074v2.pdf).
+Read the paper on [arXiv](https://arxiv.org/abs/2604.04074) or from the local
+PDF at [`factreview-arxiv-2604.04074v2.pdf`](factreview-arxiv-2604.04074v2.pdf).
 
 If you use FactReview, please cite:
 
@@ -29,224 +197,6 @@ If you use FactReview, please cite:
   doi = {10.48550/arXiv.2604.04074},
   url = {https://arxiv.org/abs/2604.04074}
 }
-```
-
-## Pipeline
-
-```
-ingestion → fact_extraction → positioning → synthesis
-```
-
-The optional `execution/` stage is a LangGraph workflow:
-`prepare → plan → run → judge → fix → finalize`.
-
-## Installation
-
-**Requirements:** Python 3.11+, Docker (only for the `execution` stage).
-
-```bash
-git clone https://github.com/ChaoqianO/factreview.git
-cd factreview
-
-python -m venv .venv
-source .venv/bin/activate          # Windows: .venv\Scripts\activate
-
-pip install -e ".[all,dev]"
-cp .env.example .env
-```
-
-Then edit `.env` and configure one LLM authentication path:
-
-**Option A — OpenAI-compatible API key**
-
-```bash
-MODEL_PROVIDER=openai
-OPENAI_API_KEY=...
-# optional, for compatible gateways:
-# BASE_URL=https://...
-```
-
-**Option B — ChatGPT/Codex subscription, no OpenAI Platform API key**
-
-If you have a ChatGPT/Codex subscription, FactReview can reuse the Codex CLI
-OAuth cache in the same style as
-[Foam-Agent](https://github.com/csml-rpi/Foam-Agent#codex-oauth-sign-in-no-api-key):
-
-```bash
-# One-time setup on the host:
-codex login
-# choose "Sign in with ChatGPT", then verify:
-ls ~/.codex/auth.json
-
-# .env
-MODEL_PROVIDER=openai-codex
-OPENAI_CODEX_MODEL=gpt-5.3-codex
-OPENAI_CODEX_BASE_URL=https://chatgpt.com/backend-api/codex
-
-# Leave this empty to let execution-stage LLM calls inherit MODEL_PROVIDER:
-CODE_EVAL_MODEL_PROVIDER=
-```
-
-FactReview searches for Codex OAuth tokens at `$CODEX_HOME/auth.json`,
-`~/.codex/auth.json`, `~/.clawdbot/agents/main/agent/auth-profiles.json`,
-and compatible OpenClaw agent auth caches. Treat `auth.json` like a password.
-
-Other keys:
-- `MINERU_API_TOKEN` for the default PDF parsing backend.
-- optional `GEMINI_API_KEY` for teaser-figure image generation. It is not
-  required; without it FactReview returns the exact prompt for manual use in
-  the Gemini web app.
-
-The default PDF ingestion backend (MinerU) and the vendored reference
-checker are installed separately only when needed:
-
-```bash
-pip install -e ".[ingestion-mineru]"   # for the default PDF backend
-pip install -e tools/refchecker        # for --enable-refcheck
-```
-
-## Usage
-
-```bash
-factreview path/to/paper.pdf
-```
-
-### Run the full pipeline (recommended)
-
-Run the merged full pipeline:
-
-```bash
-python scripts/execute_review_pipeline.py path/to/paper.pdf
-```
-
-This runs:
-`ingestion → fact_extraction → positioning → synthesis`
-
-Useful options:
-- `--paper-key <name>`: stable run folder name
-- `--run-execution`: opt into the repository execution/code-evaluation stage
-- `--max-attempts <N>`: execution-stage repair loop cap
-
-The internal runtime `code_evaluation` integration is disabled by default. Set
-`ENABLE_CODE_EVALUATION=true` only when you want the extraction runtime itself
-to launch repository execution.
-
-Example:
-
-```bash
-python scripts/execute_review_pipeline.py \
-  external_papers/1506.01497_faster_rcnn.pdf \
-  --paper-key faster_rcnn_1506.01497
-```
-
-### Run each stage manually (advanced)
-
-Use the same `--run-dir` to keep one combined run:
-
-```bash
-python scripts/execute_stage_ingestion.py path/to/paper.pdf --run-dir runs/<paper_key>/<run_id>
-python scripts/execute_stage_fact_extraction.py --run-dir runs/<paper_key>/<run_id>
-python scripts/execute_stage_positioning.py --run-dir runs/<paper_key>/<run_id>
-python scripts/execute_stage_execution.py --run-dir runs/<paper_key>/<run_id>
-python scripts/execute_stage_synthesis.py --run-dir runs/<paper_key>/<run_id>
-```
-
-### Outputs
-
-Each run writes to:
-- `runs/<paper_key>/<run_id>/stages/*`
-- `runs/<paper_key>/<run_id>/full_pipeline_summary.json`
-
-Primary artifacts:
-- `stages/synthesis/final_review.json`
-- `stages/synthesis/final_review.md`
-- `stages/synthesis/final_review.pdf`
-- `stages/synthesis/teaser_figure_prompt.txt`
-- `stages/synthesis/teaser_figure.png` (when image API is enabled)
-
-### Teaser figure generation
-
-```bash
-python scripts/generate_teaser_figure.py
-```
-
-Prompt-only mode is always available:
-
-```bash
-python scripts/generate_teaser_figure.py --prompt-only
-```
-
-Defaults:
-- `assets/teaser_template/teaser_figure.pdf`
-- `assets/teaser_template/teaser_figure.pptx`
-
-Behavior:
-- FactReview always writes and returns `teaser_figure_prompt.txt`.
-- By default, synthesis calls the image API only when a usable key is configured and then outputs `teaser_figure.png`.
-- Without an image key, or with `TEASER_USE_GEMINI=false` / `--prompt-only`, it returns `status=prompt_only` plus the exact prompt to paste into the Gemini web app.
-- Use `GEMINI_API_KEY` for Google Imagen/Gemini image generation. Compatible gateways require `GEMINI_BASE_URL` plus `OPENROUTER_API_KEY`, `OPENAI_API_KEY`, or `API_KEY`.
-
-### Run multiple papers
-
-```bash
-for pdf in external_papers/*.pdf; do
-  key="$(basename "$pdf" .pdf)"
-  python scripts/execute_review_pipeline.py "$pdf" --paper-key "$key"
-done
-```
-
-### Optional integrations
-
-```bash
-factreview path/to/paper.pdf --enable-refcheck --enable-bibtex
-```
-
-Useful CLI flags:
-- `--tasks PATH` — tasks YAML/JSON for execution
-- `--baseline PATH` — baseline JSON for deterministic comparison
-- `--auto-tasks [--auto-tasks-mode smoke|full]` — infer tasks from README / entrypoints
-- `--max-attempts N` — cap the bounded repair loop (default `5`)
-- `--no-pdf-extract` — skip MinerU; use raw PDF text only
-- `--dry-run` — plan only; do not execute
-- `--no-llm` — deterministic only
-- `--llm-provider / --llm-model / --llm-base-url` — override LLM routing; use
-  `--llm-provider openai-codex --llm-model gpt-5.3-codex` to force the Codex
-  subscription backend for execution-stage helpers.
-
-Full flag list: `factreview --help`.
-
-Exit codes: `0` verified, `1` failed, `2` inconclusive.
-
-## Project layout
-
-```
-factreview/
-├── configs/                # default.yaml, per-paper baselines/
-├── src/
-│   ├── cli.py              # `factreview` CLI entry
-│   ├── cli_legacy.py
-│   ├── ingestion/          # PDF → structured representation
-│   ├── fact_extraction/    # claim decomposition
-│   ├── positioning/        # literature positioning
-│   ├── execution/          # LangGraph workflow + tools
-│   ├── synthesis/          # review + evidence report
-│   ├── schemas/            # cross-stage Pydantic contracts
-│   ├── llm/                # provider-agnostic LLM client
-│   └── util/
-├── tools/                  # vendored checkers (refchecker, s2_title_to_bibtex)
-├── tests/unit/
-└── scripts/
-```
-
-## Development
-
-```bash
-pip install -e ".[dev]"
-
-ruff check .
-ruff format --check .
-mypy src/schemas src/util
-pytest tests/unit -m "not slow and not e2e and not requires_docker and not requires_llm and not requires_mineru"
 ```
 
 ## License

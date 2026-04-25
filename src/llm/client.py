@@ -9,10 +9,10 @@ from typing import Any
 from .codex_auth import get_codex_auth
 from .codex_client import (
     invoke_codex,
-    is_codex_provider,
     resolve_codex_base_url,
     resolve_codex_model,
 )
+from .provider_capabilities import is_codex_provider, normalize_provider
 
 
 @dataclass(frozen=True)
@@ -42,10 +42,10 @@ def _resolve_provider(explicit_provider: str = "") -> str:
         os.getenv("MODEL_PROVIDER"),
         os.getenv("AGENT_MODEL_PROVIDER"),
     ):
-        normalized = str(candidate or "").strip().lower().replace("_", "-")
+        normalized = normalize_provider(str(candidate or ""), default="")
         if normalized:
             return normalized
-    return "openai"
+    return "openai-codex"
 
 
 def resolve_llm_config(provider: str = "", model: str = "", base_url: str = "") -> LLMConfig:

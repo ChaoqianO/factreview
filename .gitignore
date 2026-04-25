@@ -35,9 +35,11 @@ htmlcov/
 runs/
 reports/
 papers/
+external_papers/
 data/
 output/
 factreview-own/
+src/baseline/
 
 # Local uv state (prefer committing uv.lock instead)
 .uv/

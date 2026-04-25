@@ -7,15 +7,15 @@ from pathlib import Path
 from typing import Any
 
 from .codex_auth import CodexAuth
+from .provider_capabilities import is_codex_provider as _is_codex_provider
 
 _DEFAULT_BASE_URL = "https://chatgpt.com/backend-api/codex"
 _DEFAULT_MODEL = "gpt-5.3-codex"
-_PROVIDER_ALIASES = {"openai-codex", "codex", "chatgpt-oauth", "chatgpt"}
 _DEFAULT_INSTRUCTIONS = Path(__file__).resolve().parent / "providers" / "codex_instructions.txt"
 
 
 def is_codex_provider(provider: str | None) -> bool:
-    return (provider or "").strip().lower().replace("_", "-") in _PROVIDER_ALIASES
+    return _is_codex_provider(provider)
 
 
 def resolve_codex_model(explicit_model: str = "") -> str:

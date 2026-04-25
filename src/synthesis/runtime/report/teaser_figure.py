@@ -6,6 +6,7 @@ import json
 import os
 import re
 import shutil
+import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -13,6 +14,8 @@ from typing import Any
 import numpy as np
 import requests
 from PIL import Image
+
+from common.runtime_shared.env import load_env_file
 
 try:
     import fitz
@@ -66,6 +69,7 @@ class TeaserFigureGenerationResult:
     response_path: str
     model: str
     message: str
+    clipboard_copied: bool
     used_gemini_api: bool
     source_markdown_path: str
 
@@ -111,6 +115,49 @@ def _read_text(path: Path) -> str:
         return path.read_text(encoding="utf-8", errors="ignore")
     except Exception:
         return ""
+
+
+def _copy_text_to_clipboard(text: str) -> bool:
+    if not str(text or ""):
+        return False
+
+    commands: list[list[str]] = []
+    if shutil.which("pbcopy"):
+        commands.append(["pbcopy"])
+    if shutil.which("wl-copy"):
+        commands.append(["wl-copy"])
+    if shutil.which("xclip"):
+        commands.append(["xclip", "-selection", "clipboard"])
+    if shutil.which("xsel"):
+        commands.append(["xsel", "--clipboard", "--input"])
+    if os.name == "nt" and shutil.which("clip"):
+        commands.append(["clip"])
+
+    for command in commands:
+        try:
+            subprocess.run(
+                command,
+                input=text.encode("utf-8"),
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                check=True,
+            )
+            return True
+        except Exception:
+            continue
+    return False
+
+
+def _prompt_only_message(reason: str, *, clipboard_copied: bool) -> str:
+    copy_sentence = (
+        "Prompt was also copied to the clipboard."
+        if clipboard_copied
+        else "Automatic clipboard copy was unavailable; open the prompt file and copy it manually."
+    )
+    return (
+        f"{reason} Prompt was written to disk. {copy_sentence} "
+        "Paste it into the Gemini web app to generate the teaser figure manually."
+    )
 
 
 def _repo_root() -> Path:
@@ -437,19 +484,8 @@ def _int_env(name: str, default: int) -> int:
         return default
 
 
-def _load_env_file(env_path: Path) -> None:
-    if not env_path.exists():
-        return
-    for line in env_path.read_text(encoding="utf-8", errors="ignore").splitlines():
-        stripped = line.strip()
-        if not stripped or stripped.startswith("#") or "=" not in stripped:
-            continue
-        key, value = stripped.split("=", 1)
-        os.environ.setdefault(key.strip(), value.strip())
-
-
 def _ensure_env_loaded() -> None:
-    _load_env_file(_repo_root() / ".env")
+    load_env_file(_repo_root() / ".env")
 
 
 def _env_true(name: str, default: bool = False) -> bool:
@@ -1326,6 +1362,7 @@ def generate_teaser_figure(
     prompt_path.write_text(prompt, encoding="utf-8")
 
     if not generate_image:
+        clipboard_copied = _copy_text_to_clipboard(prompt)
         _, model, _, _ = _resolve_image_request(
             model_override=gemini_model,
             api_key_override=gemini_api_key,
@@ -1338,10 +1375,8 @@ def generate_teaser_figure(
             image_path="",
             response_path="",
             model=model,
-            message=(
-                "Image generation disabled. Prompt was written to disk. "
-                "Paste it into the Gemini web app to generate the teaser figure manually."
-            ),
+            message=_prompt_only_message("Image generation disabled.", clipboard_copied=clipboard_copied),
+            clipboard_copied=clipboard_copied,
             used_gemini_api=False,
             source_markdown_path=str(latest_path),
         )
@@ -1355,6 +1390,7 @@ def generate_teaser_figure(
     image_path = final_output_dir / "teaser_figure.png"
 
     if not api_key:
+        clipboard_copied = _copy_text_to_clipboard(prompt)
         return TeaserFigureGenerationResult(
             status="prompt_only",
             prompt=prompt,
@@ -1362,10 +1398,11 @@ def generate_teaser_figure(
             image_path="",
             response_path="",
             model=model,
-            message=(
-                "No teaser image API key configured. Prompt was written to disk. "
-                "Paste it into the Gemini web app to generate the teaser figure manually."
+            message=_prompt_only_message(
+                "No teaser image API key configured.",
+                clipboard_copied=clipboard_copied,
             ),
+            clipboard_copied=clipboard_copied,
             used_gemini_api=False,
             source_markdown_path=str(latest_path),
         )
@@ -1491,6 +1528,7 @@ def generate_teaser_figure(
         response_path=str(response_path),
         model=model,
         message=message,
+        clipboard_copied=False,
         used_gemini_api=True,
         source_markdown_path=str(latest_path),
     )

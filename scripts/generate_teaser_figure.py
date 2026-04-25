@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import sys
 from pathlib import Path
 
@@ -11,18 +10,8 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
+from common.runtime_shared.env import load_env_file
 from synthesis.runtime.report.teaser_figure import _env_true, generate_teaser_figure
-
-
-def _load_env_file(env_path: Path) -> None:
-    if not env_path.exists():
-        return
-    for line in env_path.read_text(encoding="utf-8", errors="ignore").splitlines():
-        stripped = line.strip()
-        if not stripped or stripped.startswith("#") or "=" not in stripped:
-            continue
-        key, value = stripped.split("=", 1)
-        os.environ.setdefault(key.strip(), value.strip())
 
 
 def parse_args() -> argparse.Namespace:
@@ -63,7 +52,7 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
-    _load_env_file(ROOT / ".env")
+    load_env_file(ROOT / ".env")
     generate_image = False if bool(args.prompt_only) else _env_true("TEASER_USE_GEMINI", default=True)
     result = generate_teaser_figure(
         args.latest_extraction,
@@ -77,6 +66,7 @@ def main() -> None:
     payload = {
         "status": result.status,
         "message": result.message,
+        "clipboard_copied": result.clipboard_copied,
         "used_gemini_api": result.used_gemini_api,
         "model": result.model,
         "source_markdown_path": result.source_markdown_path,
@@ -92,7 +82,10 @@ def main() -> None:
         print("Gemini web fallback:")
         print("1. Open https://gemini.google.com/")
         print("2. Start an image-generation chat.")
-        print(f"3. Paste the prompt from the JSON above or from: {result.prompt_path}")
+        if result.clipboard_copied:
+            print("3. Paste the prompt from your clipboard.")
+        else:
+            print(f"3. Paste the prompt from the JSON above or from: {result.prompt_path}")
 
 
 if __name__ == "__main__":

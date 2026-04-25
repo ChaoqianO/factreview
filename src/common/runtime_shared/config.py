@@ -21,7 +21,7 @@ class Settings(BaseSettings):
 
     # OpenAI Agent SDK runtime
     model_provider: str = Field(
-        default='openai',
+        default='openai-codex',
         validation_alias=AliasChoices('MODEL_PROVIDER', 'AGENT_MODEL_PROVIDER', 'FACTREVIEW_MODEL_PROVIDER'),
     )
     openai_api_key: str | None = Field(

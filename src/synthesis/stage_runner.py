@@ -437,6 +437,7 @@ def run_synthesis_stage(
         teaser_payload = {
             "status": teaser_result.status,
             "message": teaser_result.message,
+            "clipboard_copied": teaser_result.clipboard_copied,
             "used_gemini_api": teaser_result.used_gemini_api,
             "model": teaser_result.model,
             "source_markdown_path": teaser_result.source_markdown_path,

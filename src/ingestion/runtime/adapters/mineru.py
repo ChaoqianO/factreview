@@ -49,7 +49,11 @@ class MineruAdapter:
 
         if not self.configured:
             if not self.cfg.allow_local_fallback:
-                raise RuntimeError('MinerU is not configured and local fallback is disabled')
+                raise RuntimeError(
+                    "MinerU API token is required for PDF parsing. "
+                    "Set MINERU_API_TOKEN in .env or pass --mineru-api-token. "
+                    "FactReview uses MinerU's free cloud API by default to avoid local CUDA/GPU and MinerU model setup."
+                )
             return self._local_fallback(
                 pdf_bytes,
                 warning='MinerU is not configured; used local pypdf parser fallback.',
@@ -59,7 +63,11 @@ class MineruAdapter:
             return await self._parse_via_mineru(pdf_path=pdf_path, pdf_bytes=pdf_bytes, data_id=data_id)
         except Exception as exc:
             if not self.cfg.allow_local_fallback:
-                raise RuntimeError(f'MinerU parse failed and fallback is disabled: {exc}') from exc
+                raise RuntimeError(
+                    "MinerU API parse failed and local fallback is disabled. "
+                    f"base_url={self.cfg.base_url!r}, model_version={self.cfg.model_version!r}, "
+                    f"reason={type(exc).__name__}: {exc}"
+                ) from exc
             return self._local_fallback(
                 pdf_bytes,
                 warning=f'MinerU parse failed; used local pypdf parser fallback. reason={type(exc).__name__}: {exc}',

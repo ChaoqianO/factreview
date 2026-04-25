@@ -34,7 +34,8 @@ from fact_extraction.runtime.tools.review_tools import ReviewRuntimeContext, bui
 from ingestion.runtime.adapters.markdown_parser import build_page_index
 from ingestion.runtime.adapters.mineru import MineruAdapter, MineruConfig
 from llm.codex_auth import get_codex_auth
-from llm.codex_client import is_codex_provider, resolve_codex_base_url, resolve_codex_model
+from llm.codex_client import resolve_codex_base_url, resolve_codex_model
+from llm.provider_capabilities import provider_capabilities
 from positioning.runtime.adapters.paper_search import (
     PaperReadConfig,
     PaperSearchAdapter,
@@ -52,7 +53,7 @@ def _resolved_api_key() -> str:
 
 
 def _uses_codex_subscription_backend() -> bool:
-    return is_codex_provider(get_settings().model_provider)
+    return provider_capabilities(get_settings().model_provider).uses_codex_subscription
 
 
 def _resolved_agent_model() -> str:
@@ -221,16 +222,17 @@ def _build_agent_model() -> OpenAIChatCompletionsModel | OpenAIResponsesModel:
 def _build_agent_model_settings(*, tool_choice: str | None = None) -> ModelSettings:
     settings = get_settings()
     model_name = _resolved_agent_model().strip().lower()
-    uses_codex = _uses_codex_subscription_backend()
+    capabilities = provider_capabilities(settings.model_provider)
+    uses_codex = capabilities.uses_codex_subscription
     use_xhigh_reasoning = model_name in {'gpt-5.4', 'gpt-5.3', 'gpt-5.2'}
 
     return ModelSettings(
         temperature=None if uses_codex else settings.agent_temperature,
-        max_tokens=None if uses_codex else settings.agent_max_tokens,
+        max_tokens=settings.agent_max_tokens if capabilities.supports_max_output_tokens else None,
         tool_choice=tool_choice,
-        parallel_tool_calls=False if uses_codex else None,
-        response_include=['reasoning.encrypted_content'] if uses_codex else None,
-        store=False if uses_codex else None,
+        parallel_tool_calls=False if not capabilities.supports_parallel_tool_calls else None,
+        response_include=['reasoning.encrypted_content'] if uses_codex and capabilities.supports_response_include else None,
+        store=False if not capabilities.supports_store else None,
         reasoning=Reasoning(summary='auto')
         if uses_codex
         else (Reasoning(effort='xhigh') if use_xhigh_reasoning else None),

@@ -2,12 +2,11 @@ from __future__ import annotations
 
 import json
 import os
-import subprocess
 import shutil
+import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
-
 
 _BRIDGE_FILE = "_runtime_bridge.json"
 _PIPELINE_CONTEXT_FILE = "_full_pipeline_context.json"
@@ -476,6 +475,7 @@ def run_ingestion_stage(
     paper_pdf: Path,
     paper_key: str,
     reuse_job_id: str = "",
+    materialize_execution_extract: bool = True,
 ) -> dict[str, Any]:
     ensure_full_pipeline_context(run_dir=run_dir, allow_standalone=True, stage="ingestion")
     state = bootstrap_bridge_state(
@@ -501,12 +501,16 @@ def run_ingestion_stage(
 
     mineru_md = resolve_artifact_path(repo_root, mineru_md_raw)
     mineru_content = resolve_artifact_path(repo_root, mineru_content_raw)
-    shared_extract = _materialize_execution_paper_extract(
-        repo_root=repo_root,
-        paper_key=state.paper_key,
-        job_dir=state.job_dir,
-        mineru_md=mineru_md,
-        mineru_content=mineru_content,
+    shared_extract = (
+        _materialize_execution_paper_extract(
+            repo_root=repo_root,
+            paper_key=state.paper_key,
+            job_dir=state.job_dir,
+            mineru_md=mineru_md,
+            mineru_content=mineru_content,
+        )
+        if materialize_execution_extract
+        else {}
     )
 
     ingestion_out = run_dir / "stages" / "ingestion" / "paper.json"

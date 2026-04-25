@@ -3,18 +3,12 @@ import asyncio
 import os
 from pathlib import Path
 
+from common.runtime_shared.env import load_env_file
 from execution.graph import CodeEvalOrchestrator
 
 
 def _load_env_file(env_path: Path) -> None:
-    if not env_path.exists():
-        return
-    for line in env_path.read_text(encoding="utf-8", errors="ignore").splitlines():
-        s = line.strip()
-        if not s or s.startswith("#") or "=" not in s:
-            continue
-        k, v = s.split("=", 1)
-        os.environ.setdefault(k.strip(), v.strip())
+    load_env_file(env_path)
 
 
 def parse_args() -> argparse.Namespace:

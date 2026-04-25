@@ -84,6 +84,7 @@ runtime = [
   "openai-agents>=0.6.0",
   "reportlab>=4.2.0",
   "pymupdf>=1.26.0",
+  "Pillow>=10.0.0",
   "mdit-py-plugins>=0.4.2",
   "markdown-it-py>=3.0.0",
 ]
