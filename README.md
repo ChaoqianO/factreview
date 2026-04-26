@@ -123,7 +123,7 @@ python scripts/execute_review_pipeline.py path/to/paper.pdf --paper-key paper_na
 This runs:
 
 ```text
-ingestion -> fact_extraction -> positioning -> synthesis
+ingestion -> fact_extraction -> reference_check -> positioning -> synthesis
 ```
 
 Code execution is off by default. Enable it only when you want repository/code
@@ -132,6 +132,22 @@ evaluation:
 ```bash
 python scripts/execute_review_pipeline.py path/to/paper.pdf --run-execution
 ```
+
+Reference-accuracy checking is also off by default. Enable it when you want
+RefChecker to validate bibliography entries and append warning/error details to
+the final report:
+
+```bash
+python scripts/execute_review_pipeline.py path/to/paper.pdf --enable-refcheck
+```
+
+You can also enable it through the environment with `FACTREVIEW_ENABLE_REFCHECK=true`.
+The results are written under `stages/reference_check/reference_check.*` and appended
+to `stages/synthesis/final_review.md`; teaser figure generation intentionally
+uses the original review content without this reference-check section.
+RefChecker is provided as a git submodule, so fresh clones should run
+`git submodule update --init --recursive` and install `factreview[reference-check]`
+before using this option.
 
 Useful one-off overrides:
 

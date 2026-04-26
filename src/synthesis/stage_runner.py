@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 import shutil
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -12,19 +12,20 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from ingestion.runtime_bridge import (
+from common.runtime_shared.config import get_settings  # noqa: E402
+from ingestion.runtime_bridge import (  # noqa: E402
     bootstrap_bridge_state,
     ensure_full_pipeline_context,
+    load_bridge_state,
     load_job_state_snapshot,
     load_stage_assets_snapshot,
-    load_bridge_state,
     read_json_file,
     resolve_artifact_path,
     write_json_file,
 )
-from common.runtime_shared.config import get_settings
-from synthesis.runtime.report.review_report_pdf import build_review_report_pdf
-from synthesis.runtime.report.teaser_figure import _env_true, generate_teaser_figure
+from reference_check.refcheck import format_reference_check_markdown  # noqa: E402
+from synthesis.runtime.report.review_report_pdf import build_review_report_pdf  # noqa: E402
+from synthesis.runtime.report.teaser_figure import _env_true, generate_teaser_figure  # noqa: E402
 
 
 def _read_text(path: Path) -> str:
@@ -61,7 +62,7 @@ def _render_synthesis_pdf(*, markdown_path: Path, pdf_path: Path, workspace_titl
             decision=None,
             estimated_cost=0,
             actual_cost=None,
-            exported_at=datetime.now(timezone.utc),
+            exported_at=datetime.now(UTC),
             meta_review={},
             reviewers=[],
             raw_output=None,
@@ -119,6 +120,26 @@ def _absolutize_markdown_image_refs(*, markdown_path: Path, source_base_dirs: li
         markdown_path.write_text(updated, encoding="utf-8")
 
 
+def _load_reference_check_payload(run_dir: Path) -> dict[str, Any]:
+    return read_json_file(run_dir / "stages" / "reference_check" / "reference_check.json")
+
+
+def _append_reference_check_section(
+    *,
+    markdown_path: Path,
+    reference_check: dict[str, Any],
+    max_issues: int,
+) -> str:
+    if not reference_check.get("enabled"):
+        return ""
+    section = format_reference_check_markdown(reference_check, max_issues=max_issues).strip()
+    if not section:
+        return ""
+    current = _read_text(markdown_path).rstrip()
+    markdown_path.write_text(current + "\n\n" + section + "\n", encoding="utf-8")
+    return section + "\n"
+
+
 def run_synthesis_stage(
     *,
     repo_root: Path,
@@ -145,7 +166,6 @@ def run_synthesis_stage(
     final_md_raw = str(artifacts.get("final_markdown_path") or "").strip()
     final_audit_raw = str(artifacts.get("final_report_audit_path") or "").strip()
     final_pdf_raw = str(artifacts.get("report_pdf_path") or "").strip()
-    latest_extraction_raw = str(artifacts.get("latest_output_md_path") or artifacts.get("latest_output_md") or "").strip()
 
     final_md_snapshot_raw = str(stage_assets.get("final_markdown_snapshot_path") or "").strip()
     final_pdf_snapshot_raw = str(stage_assets.get("report_pdf_snapshot_path") or "").strip()
@@ -154,7 +174,6 @@ def run_synthesis_stage(
     final_md = final_md_snapshot if (final_md_snapshot is not None and final_md_snapshot.exists()) else resolve_artifact_path(repo_root, final_md_raw)
     final_audit = resolve_artifact_path(repo_root, final_audit_raw) if final_audit_raw else None
     final_pdf = final_pdf_snapshot if (final_pdf_snapshot is not None and final_pdf_snapshot.exists()) else resolve_artifact_path(repo_root, final_pdf_raw)
-    latest_extraction = resolve_artifact_path(repo_root, latest_extraction_raw) if latest_extraction_raw else None
 
     synthesis_dir = run_dir / "stages" / "synthesis"
     synthesis_json = synthesis_dir / "final_review.json"
@@ -165,21 +184,44 @@ def run_synthesis_stage(
     audit_ok = _copy_if_exists(final_audit, synthesis_audit)
     pdf_path = synthesis_dir / "final_review.pdf"
     pdf_ok = _copy_if_exists(final_pdf, pdf_path)
+    settings = get_settings()
+    reference_check_payload = _load_reference_check_payload(run_dir)
+    reference_check_markdown = ""
+    reference_check_appended = False
+    teaser_source_md = synthesis_md
     if md_ok:
         if final_md is not None and final_md.exists():
             _absolutize_markdown_image_refs(
                 markdown_path=synthesis_md,
                 source_base_dirs=[final_md.parent, bridge.job_dir],
             )
+        if reference_check_payload.get("enabled"):
+            teaser_source_md = synthesis_dir / "final_review_teaser_source.md"
+            shutil.copy2(synthesis_md, teaser_source_md)
+            reference_check_markdown = _append_reference_check_section(
+                markdown_path=synthesis_md,
+                reference_check=reference_check_payload,
+                max_issues=max(1, int(settings.reference_check_report_max_issues)),
+            )
+            reference_check_appended = bool(reference_check_markdown.strip())
         # Keep markdown image references exactly as produced by runtime output.
         # Do not select/replace overview figures in synthesis stage.
         source_name = bridge.paper_pdf.name if bridge.paper_pdf else "paper.pdf"
-        pdf_ok = _render_synthesis_pdf(
+        rendered_pdf_ok = _render_synthesis_pdf(
             markdown_path=synthesis_md,
             pdf_path=pdf_path,
             workspace_title=bridge.paper_key,
             source_pdf_name=source_name,
-        ) or pdf_ok
+        )
+        if reference_check_appended:
+            pdf_ok = rendered_pdf_ok
+            if not pdf_ok and pdf_path.exists():
+                try:
+                    pdf_path.unlink()
+                except OSError:
+                    pass
+        else:
+            pdf_ok = rendered_pdf_ok or pdf_ok
 
     execution_payload = read_json_file(run_dir / "stages" / "execution" / "execution.json")
 
@@ -195,6 +237,8 @@ def run_synthesis_stage(
             "usage": bridge.own_payload.get("usage") or {},
             "metadata": metadata,
             "execution": execution_payload,
+            "reference_check": reference_check_payload,
+            "reference_check_markdown": reference_check_markdown,
             "final_markdown": _read_text(synthesis_md) if md_ok else "",
             "final_audit_path": str(final_audit_raw) if (final_audit is not None and final_audit.exists()) else "",
             "final_audit": read_json_file(synthesis_audit) if audit_ok else {},
@@ -216,9 +260,9 @@ def run_synthesis_stage(
     teaser_payload: dict[str, Any] = {}
     if synthesis_md.exists():
         teaser_output_dir = synthesis_dir
-        # Use final_review markdown as the canonical teaser source to ensure
-        # prompt extraction follows the finalized report content exactly.
-        teaser_source = synthesis_md
+        # Keep reference-check findings out of teaser prompts; they belong in the
+        # final report only.
+        teaser_source = teaser_source_md
         use_gemini = _env_true("TEASER_USE_GEMINI", default=True)
         teaser_result = generate_teaser_figure(
             teaser_source,

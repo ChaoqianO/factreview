@@ -13,6 +13,7 @@ from pydantic import BaseModel, ConfigDict, Field
 class StageToggles(BaseModel):
     ingestion: bool = True
     fact_extraction: bool = True
+    reference_check: bool = False
     positioning: bool = True
     execution: bool = False
     synthesis: bool = True
@@ -30,9 +31,13 @@ class FactExtractionCfg(BaseModel):
 
 
 class PositioningCfg(BaseModel):
-    enable_refcheck: bool = False
     enable_bibtex: bool = False
     max_neighbors: int = 12
+
+
+class ReferenceCheckCfg(BaseModel):
+    enabled: bool = False
+    max_report_issues: int = 20
 
 
 class ExecutionCfg(BaseModel):
@@ -82,6 +87,7 @@ class RunConfig(BaseModel):
     stages: StageToggles = Field(default_factory=StageToggles)
     ingestion: IngestionCfg = Field(default_factory=IngestionCfg)
     fact_extraction: FactExtractionCfg = Field(default_factory=FactExtractionCfg)
+    reference_check: ReferenceCheckCfg = Field(default_factory=ReferenceCheckCfg)
     positioning: PositioningCfg = Field(default_factory=PositioningCfg)
     execution: ExecutionCfg = Field(default_factory=ExecutionCfg)
     synthesis: SynthesisCfg = Field(default_factory=SynthesisCfg)

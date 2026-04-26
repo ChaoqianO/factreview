@@ -11,7 +11,8 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from ingestion.runtime_bridge import (
+from common.runtime_shared.config import get_settings  # noqa: E402
+from ingestion.runtime_bridge import (  # noqa: E402
     ensure_full_pipeline_context,
     load_bridge_state,
     read_json_file,
@@ -46,12 +47,14 @@ async def _run_orchestrator_async(
     no_pdf_extract: bool,
     paper_extracted_dir: str = "",
     execution_run_dir: Path | None = None,
+    enable_refcheck: bool = False,
 ) -> dict[str, Any]:
     from execution.graph import CodeEvalOrchestrator
 
     orchestrator = CodeEvalOrchestrator(
         run_root=str(run_root),
         max_attempts=max_attempts,
+        enable_refcheck=enable_refcheck,
         paper_extracted_dir=str(paper_extracted_dir or ""),
         run_dir=str(execution_run_dir or ""),
     )
@@ -74,6 +77,7 @@ def run_execution_stage(
     paper_extracted_dir: str = "",
     max_attempts: int = 5,
     no_pdf_extract: bool = False,
+    enable_refcheck: bool | None = None,
 ) -> dict[str, Any]:
     ensure_full_pipeline_context(run_dir=run_dir, allow_standalone=True, stage="execution")
     bridge = load_bridge_state(run_dir)
@@ -92,6 +96,10 @@ def run_execution_stage(
     execution_run_dir = stage_root / "run"
     stage_run_root = stage_root / "runs"
     _reset_fixed_execution_run_dir(stage_root=stage_root, execution_run_dir=execution_run_dir)
+    settings = get_settings()
+    resolved_refcheck = bool(
+        settings.code_evaluation_enable_refcheck if enable_refcheck is None else enable_refcheck
+    )
 
     run_result = asyncio.run(
         _run_orchestrator_async(
@@ -102,6 +110,7 @@ def run_execution_stage(
             execution_run_dir=execution_run_dir,
             max_attempts=max_attempts,
             no_pdf_extract=no_pdf_extract,
+            enable_refcheck=resolved_refcheck,
         )
     )
 

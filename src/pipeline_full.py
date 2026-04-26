@@ -13,6 +13,7 @@ from fact_extraction.stage_runner import run_fact_extraction_stage
 from ingestion.runtime_bridge import init_full_pipeline_context, run_ingestion_stage
 from llm.provider_capabilities import is_codex_provider
 from positioning.stage_runner import run_positioning_stage
+from reference_check.stage_runner import run_reference_check_stage
 from synthesis.stage_runner import run_synthesis_stage
 from util.paper_input import infer_paper_key, materialize_paper_pdf
 from util.run_layout import build_run_dir, ensure_run_subdirs, make_run_id
@@ -56,6 +57,7 @@ def _apply_cli_env_overrides(args: argparse.Namespace) -> None:
 
 def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
     repo_root = Path(__file__).resolve().parents[1]
+    settings = get_settings()
     paper_source = str(args.paper_pdf or "").strip()
     paper_key = (args.paper_key or "").strip() or infer_paper_key(paper_source)
     run_id = make_run_id()
@@ -81,6 +83,14 @@ def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
     fact_result = run_fact_extraction_stage(
         repo_root=repo_root,
         run_dir=run_dir,
+    )
+    enable_refcheck = bool(getattr(args, "enable_refcheck", False) or settings.reference_check_enabled)
+    reference_check_result = run_reference_check_stage(
+        repo_root=repo_root,
+        run_dir=run_dir,
+        paper_pdf=paper_pdf,
+        paper_key=paper_key,
+        enable_refcheck=enable_refcheck,
     )
     positioning_result = run_positioning_stage(
         repo_root=repo_root,
@@ -123,6 +133,7 @@ def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
     statuses = {
         "ingestion": str(ingestion_result.get("status") or "failed"),
         "fact_extraction": str(fact_result.get("status") or "failed"),
+        "reference_check": str(reference_check_result.get("status") or "failed"),
         "positioning": str(positioning_result.get("status") or "failed"),
         "execution": str(execution_result.get("status") or "failed"),
         "synthesis": str(synthesis_result.get("status") or "failed"),
@@ -135,6 +146,10 @@ def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
         outputs["fact_extraction"] = str(fact_result.get("output"))
     if positioning_result.get("output"):
         outputs["positioning"] = str(positioning_result.get("output"))
+    if reference_check_result.get("output"):
+        outputs["reference_check"] = str(reference_check_result.get("output"))
+    if reference_check_result.get("output_md"):
+        outputs["reference_check_md"] = str(reference_check_result.get("output_md"))
     if execution_result.get("output"):
         outputs["execution"] = str(execution_result.get("output"))
     if synthesis_result.get("output_json"):
@@ -161,6 +176,7 @@ def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
         "job_dir": ingestion_result.get("job_dir"),
         "stages": statuses,
         "outputs": outputs,
+        "reference_check": reference_check_result.get("reference_check") or {"enabled": enable_refcheck},
         "teaser_figure": synthesis_result.get("teaser_figure") or {},
     }
 
@@ -204,6 +220,11 @@ def parse_args() -> argparse.Namespace:
         choices=("auto", "prompt", "api"),
         default="auto",
         help="Teaser figure mode: auto attempts Gemini when a key exists, prompt saves/copies the prompt, api attempts the configured image API.",
+    )
+    p.add_argument(
+        "--enable-refcheck",
+        action="store_true",
+        help="Run RefChecker reference-accuracy validation and append warning/error results to the final report.",
     )
     p.add_argument(
         "--run-execution",

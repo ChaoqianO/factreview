@@ -63,13 +63,24 @@ ingestion = [
 # ── Literature positioning (§3.2) ────────────────────────────────────────────
 positioning = [
   "bibtexparser>=1.4.0",
-  "arxiv>=1.4.0",
-  "pdfplumber>=0.6.0",
-  "beautifulsoup4>=4.9.0",
-  "fuzzywuzzy>=0.18.0",
-  "python-Levenshtein>=0.12.0",
-  "colorama>=0.4.4",
   "semanticscholar>=0.8",
+]
+
+# ── Reference quality checks ─────────────────────────────────────────────────
+reference-check = [
+  "numpy>=1.26.0,<2",
+  "requests>=2.32.5",
+  "beautifulsoup4>=4.12.0",
+  "pypdf>=4.0.0",
+  "arxiv>=2.1.0",
+  "python-dateutil>=2.9.0.post0",
+  "tqdm>=4.67.0",
+  "colorama>=0.4.4",
+  "fuzzywuzzy>=0.18.0",
+  "python-Levenshtein>=0.25.0",
+  "pandas>=2.0.0",
+  "pdfplumber>=0.10.0",
+  "pybtex>=0.25.1",
 ]
 
 # ── Execution-based verification (§3.3) ──────────────────────────────────────
@@ -106,6 +117,7 @@ all = [
   "factreview[llm]",
   "factreview[ingestion]",
   "factreview[positioning]",
+  "factreview[reference-check]",
   "factreview[execution]",
   "factreview[runtime]",
 ]
@@ -124,6 +136,7 @@ packages = [
   "src/ingestion",
   "src/llm",
   "src/positioning",
+  "src/reference_check",
   "src/schemas",
   "src/synthesis",
   "src/util",
@@ -175,6 +188,7 @@ packages = [
   "ingestion",
   "llm",
   "positioning",
+  "reference_check",
   "schemas",
   "synthesis",
   "util",

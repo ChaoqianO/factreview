@@ -112,6 +112,18 @@ class Settings(BaseSettings):
     final_report_audit_max_source_chars: int = 80000
     final_report_audit_max_review_chars: int = 50000
 
+    # Optional reference-accuracy checking with tools/refchecker.
+    reference_check_enabled: bool = Field(
+        default=False,
+        validation_alias=AliasChoices(
+            'FACTREVIEW_ENABLE_REFCHECK',
+            'REFERENCE_CHECK_ENABLED',
+            'REFCHECK_ENABLED',
+            'ENABLE_REFCHECK',
+        ),
+    )
+    reference_check_report_max_issues: int = 20
+
     # PDF export
     pdf_font_name: str = 'Helvetica'
     pdf_title_font_size: int = 15

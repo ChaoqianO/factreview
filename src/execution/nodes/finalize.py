@@ -160,11 +160,16 @@ def _judge_highlights(
             )
         elif r.get("type") == "reference_check":
             errs = int(r.get("errors") or 0)
+            warns = int(r.get("warnings") or 0)
             total = int(r.get("total_refs") or 0)
             if errs:
-                notes.append(f"Reference check found {errs} error(s) across {total} references.")
+                notes.append(
+                    f"Reference check found {errs} error(s) and {warns} warning(s) across {total} references."
+                )
+            elif warns:
+                notes.append(f"Reference check found {warns} warning(s) across {total} references.")
             elif total:
-                notes.append(f"Reference check: all {total} references verified.")
+                notes.append(f"Reference check: all {total} references verified without warnings.")
         elif r.get("passed") is False and r.get("type") not in {"inconclusive_no_baseline", "llm_judge"}:
             notes.append(
                 f"Check `{r.get('type')}` on `{r.get('path', '')}`: expected={r.get('expected')}, observed={r.get('observed')}."
@@ -402,6 +407,25 @@ def finalize_node(state: dict[str, Any]) -> dict[str, Any]:
         md_lines.append("```")
         md_lines.append("")
 
+    reference_check = next(
+        (
+            r
+            for r in (judge.get("results") or [])
+            if isinstance(r, dict) and r.get("type") == "reference_check"
+        ),
+        None,
+    )
+    if isinstance(reference_check, dict):
+        try:
+            from reference_check.refcheck import format_reference_check_markdown
+
+            reference_check_md = format_reference_check_markdown(reference_check)
+        except Exception:
+            reference_check_md = ""
+        if reference_check_md.strip():
+            md_lines.append(reference_check_md.rstrip())
+            md_lines.append("")
+
     md_lines.append("## Reviewer-Facing Template")
     md_lines.append("")
     md_lines.append(
@@ -533,6 +557,10 @@ def finalize_node(state: dict[str, Any]) -> dict[str, Any]:
                     "errors": r.get("errors", 0),
                     "warnings": r.get("warnings", 0),
                     "unverified": r.get("unverified", 0),
+                    "error_details": r.get("error_details", []),
+                    "warning_details": r.get("warning_details", []),
+                    "unverified_details": r.get("unverified_details", []),
+                    "report_file": r.get("report_file", ""),
                 }
             )
         elif rtype == "paper_table_alignment":

@@ -181,9 +181,13 @@ def judge_node(state: dict[str, Any]) -> dict[str, Any]:
         paper_pdf = str(cfg.get("paper_pdf") or "").strip()
         if paper_pdf and Path(paper_pdf).exists():
             try:
-                from ..tools.refcheck import check_references
+                from reference_check.refcheck import check_references
 
-                rc = check_references(paper=paper_pdf, debug=False)
+                rc = check_references(
+                    paper=paper_pdf,
+                    output_file=str(artifacts_dir / "reference_check_details.txt"),
+                    debug=False,
+                )
                 results.append(
                     {
                         "type": "reference_check",
@@ -193,6 +197,11 @@ def judge_node(state: dict[str, Any]) -> dict[str, Any]:
                         "warnings": rc.get("warnings", 0),
                         "unverified": rc.get("unverified", 0),
                         "error_message": rc.get("error_message", ""),
+                        "issues": rc.get("issues", []),
+                        "error_details": rc.get("error_details", []),
+                        "warning_details": rc.get("warning_details", []),
+                        "unverified_details": rc.get("unverified_details", []),
+                        "report_file": rc.get("report_file", ""),
                     }
                 )
             except Exception as e:
