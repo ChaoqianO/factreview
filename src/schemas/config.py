@@ -1,15 +1,12 @@
-"""Runtime configuration schema.
+"""Structured runtime configuration models.
 
-Loaded from :file:`configs/default.yaml`, optionally overridden by a user
-config file, and finally by CLI flags / environment variables.
+The main application is configured through `.env` and CLI flags. These
+models remain available for callers that want to validate structured
+configuration dictionaries.
 """
 
 from __future__ import annotations
 
-from pathlib import Path
-from typing import Any
-
-import yaml
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -90,32 +87,3 @@ class RunConfig(BaseModel):
     synthesis: SynthesisCfg = Field(default_factory=SynthesisCfg)
     llm: LLMCfg = Field(default_factory=LLMCfg)
     logging: LoggingCfg = Field(default_factory=LoggingCfg)
-
-    # ---- Loaders ------------------------------------------------------------
-    @classmethod
-    def from_yaml(cls, path: Path | str) -> RunConfig:
-        p = Path(path)
-        raw: dict[str, Any] = yaml.safe_load(p.read_text(encoding="utf-8")) or {}
-        return cls.model_validate(raw)
-
-    @classmethod
-    def layered(cls, *paths: Path | str) -> RunConfig:
-        """Later paths override earlier ones. Missing files are skipped."""
-        merged: dict[str, Any] = {}
-        for p in paths:
-            pp = Path(p)
-            if not pp.exists():
-                continue
-            chunk = yaml.safe_load(pp.read_text(encoding="utf-8")) or {}
-            merged = _deep_merge(merged, chunk)
-        return cls.model_validate(merged)
-
-
-def _deep_merge(a: dict[str, Any], b: dict[str, Any]) -> dict[str, Any]:
-    out = dict(a)
-    for k, v in b.items():
-        if k in out and isinstance(out[k], dict) and isinstance(v, dict):
-            out[k] = _deep_merge(out[k], v)
-        else:
-            out[k] = v
-    return out

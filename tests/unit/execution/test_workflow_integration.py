@@ -62,15 +62,15 @@ def test_run_layout_uses_single_run_folder():
     assert build_run_dir("/tmp/runs", "CompGCN Paper", "2026-04-25_120000") == expected
 
 
-def test_configured_baseline_uses_slugified_key(tmp_path, monkeypatch):
+def test_configured_demo_uses_slugified_key(tmp_path, monkeypatch):
     from execution.nodes import prepare
 
-    baseline_dir = tmp_path / "configs" / "baselines" / "compgcn_paper"
-    baseline_dir.mkdir(parents=True)
+    demo_dir = tmp_path / "demos" / "compgcn_paper"
+    demo_dir.mkdir(parents=True)
     monkeypatch.setattr(prepare, "_project_root", lambda: tmp_path)
     monkeypatch.setattr(prepare, "_repo_root", lambda: tmp_path / "src")
 
-    assert prepare._configured_baseline_dir("CompGCN Paper") == baseline_dir.resolve()
+    assert prepare._configured_demo_dir("CompGCN Paper") == demo_dir.resolve()
 
 
 def test_fixed_execution_run_dir_reset_removes_stale_outputs(tmp_path):

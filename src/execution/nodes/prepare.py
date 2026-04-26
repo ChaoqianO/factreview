@@ -235,7 +235,8 @@ def _copy_file_if_exists(src: Path, dst: Path) -> bool:
     return True
 
 
-def _configured_baseline_dir(paper_key: str) -> Path | None:
+def _configured_demo_dir(paper_key: str) -> Path | None:
+    """Locate a bundled demo fixture for a paper key."""
     raw_key = str(paper_key or "paper").strip()
     keys: list[str] = []
     for key in (raw_key, slugify_run_key(raw_key)):
@@ -243,39 +244,55 @@ def _configured_baseline_dir(paper_key: str) -> Path | None:
             keys.append(key)
     candidates = []
     for key in keys:
-        candidates.extend(
-            [
-                _project_root() / "configs" / "baselines" / key,
-                _project_root() / "baseline" / key,
-                _repo_root() / "baseline" / key,
-            ]
-        )
+        candidates.append(_project_root() / "demos" / key)
     for candidate in candidates:
         if candidate.exists() and candidate.is_dir():
             return candidate.resolve()
     return None
 
 
-def _select_seed_source(seed_baseline_dir: Path | None) -> Path | None:
-    if seed_baseline_dir is None:
+def _select_demo_source(demo_dir: Path | None) -> Path | None:
+    if demo_dir is None:
         return None
-    for name in ("source_gpu", "source"):
-        candidate = seed_baseline_dir / name
+    for candidate in (
+        demo_dir / "execution" / "repo",
+    ):
         if candidate.exists() and candidate.is_dir() and any(candidate.iterdir()):
             return candidate.resolve()
     return None
 
 
-def _materialize_seed_baseline(seed_baseline_dir: Path | None, baseline_dir: Path) -> None:
-    if seed_baseline_dir is None:
+def _materialize_demo_fixture(demo_dir: Path | None, baseline_dir: Path) -> None:
+    if demo_dir is None:
         return
-    for name in ("tasks.yaml", "baseline.json", "paper.pdf"):
-        _copy_file_if_exists(seed_baseline_dir / name, baseline_dir / name)
-    if not (baseline_dir / "tasks.yaml").exists():
-        _copy_file_if_exists(seed_baseline_dir / "tasks.yml", baseline_dir / "tasks.yaml")
-    seed_extract = seed_baseline_dir / "paper_extracted"
-    if seed_extract.exists() and seed_extract.is_dir():
-        _copy_tree(seed_extract, baseline_dir / "paper_extracted")
+    execution_dir = demo_dir / "execution"
+
+    def _copy_first(dst_name: str, candidates: tuple[Path, ...]) -> None:
+        dst = baseline_dir / dst_name
+        if dst.exists():
+            return
+        for src in candidates:
+            if _copy_file_if_exists(src, dst):
+                return
+
+    _copy_first(
+        "tasks.yaml",
+        (
+            execution_dir / "tasks.yaml",
+            execution_dir / "tasks.yml",
+            demo_dir / "tasks.yaml",
+            demo_dir / "tasks.yml",
+        ),
+    )
+    _copy_first(
+        "baseline.json",
+        (
+            execution_dir / "checks.json",
+            execution_dir / "baseline.json",
+            demo_dir / "baseline.json",
+        ),
+    )
+    _copy_file_if_exists(demo_dir / "paper.pdf", baseline_dir / "paper.pdf")
 
 
 def _copy_prepared_extract(prepared_extract_dir: str, baseline_dir: Path) -> str:
@@ -424,24 +441,24 @@ def prepare_node(state: dict[str, Any]) -> dict[str, Any]:
         {"kind": "prepare_start", "data": {"paper_key": paper_key, "paper_pdf": paper_pdf}}
     )
 
-    seed_baseline_dir = _configured_baseline_dir(paper_key)
+    demo_dir = _configured_demo_dir(paper_key)
     baseline_dir = (
         Path(str(cfg.get("baseline_dir") or "")).resolve()
         if str(cfg.get("baseline_dir") or "").strip()
         else (inputs_dir / "baseline" / slugify_run_key(paper_key)).resolve()
     )
     ensure_dir(baseline_dir)
-    _materialize_seed_baseline(seed_baseline_dir, baseline_dir)
+    _materialize_demo_fixture(demo_dir, baseline_dir)
 
     source_dir = (workspace_dir / "source").resolve()
-    seed_source_dir = _select_seed_source(seed_baseline_dir)
+    demo_source_dir = _select_demo_source(demo_dir)
 
     if paper_root_in:
         source_origin = Path(paper_root_in).resolve()
     elif local_source_path:
         source_origin = Path(local_source_path).resolve()
-    elif seed_source_dir is not None:
-        source_origin = seed_source_dir
+    elif demo_source_dir is not None:
+        source_origin = demo_source_dir
     else:
         source_origin = source_dir
 
@@ -453,7 +470,7 @@ def prepare_node(state: dict[str, Any]) -> dict[str, Any]:
         except Exception:
             pass
 
-    if paper_root_in or local_source_path or seed_source_dir is not None:
+    if paper_root_in or local_source_path or demo_source_dir is not None:
         if not source_origin.exists():
             msg = f"source_not_found: {source_origin}"
             append_event(run_dir, "prepare_error", {"error": msg})
@@ -479,7 +496,7 @@ def prepare_node(state: dict[str, Any]) -> dict[str, Any]:
             {
                 "source": str(source_origin),
                 "dest": str(paper_root),
-                "seed_baseline": str(seed_baseline_dir or ""),
+                "demo_fixture": str(demo_dir or ""),
             },
         )
         state.setdefault("history", []).append(

@@ -482,7 +482,7 @@ def finalize_node(state: dict[str, Any]) -> dict[str, Any]:
             {
                 "type": "define_baseline",
                 "why": "No baseline checks defined; cannot verify paper results.",
-                "next": "Fill inputs/baseline/<paper_key>/baseline.json checks to match a paper table row and ensure artifact_paths collect required outputs.",
+                "next": "Define execution checks, or for bundled demos edit demos/<paper_key>/execution/checks.json; ensure artifact_paths collect required outputs.",
             }
         )
     # common deps issue

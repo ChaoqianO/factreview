@@ -160,7 +160,7 @@ def _repo_root() -> Path:
 
 
 def _template_png_path() -> Path:
-    return _repo_root() / "demo" / "compgcn_teaser.png"
+    return _repo_root() / "demos" / "compgcn" / "teaser_reference.png"
 
 
 def _template_reference_png_bytes(scale: float = 0.9) -> bytes | None:
@@ -952,7 +952,7 @@ def build_teaser_figure_prompt(
         "The output should read like a presentation-quality overview graphic, not a raw markdown rendering.\n"
         "Use the extracted report content below as authoritative content to place into the figure.\n"
         "Preserve factual wording, numeric values, and status labels from the source.\n"
-        "Treat the following layout/style instructions as fixed constraints derived from the reference demo/compgcn_teaser.png.\n"
+        "Treat the following layout/style instructions as fixed constraints derived from the reference demos/compgcn/teaser_reference.png.\n"
         "Treat the attached reference image as a hard layout-and-style target, not as loose inspiration.\n"
         "If any conflict appears between content length and layout fidelity, preserve layout fidelity first and shrink or wrap text.\n"
         "Keep colors unchanged and keep the relative positions of all modules unchanged; only adjust module width/height "

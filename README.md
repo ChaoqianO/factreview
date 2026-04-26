@@ -36,7 +36,7 @@ MINERU_API_TOKEN=your_mineru_token
 Then run the bundled CompGCN demo:
 
 ```bash
-python scripts/run_demo_compgcn.py
+python demos/compgcn/run.py
 ```
 
 Run your own PDF:
@@ -57,8 +57,6 @@ FactReview intentionally keeps routine configuration to two places:
 
 - `.env` / environment variables for secrets and normal runtime choices.
 - CLI flags for one-off overrides.
-
-Advanced developer knobs live in `configs/default.yaml`.
 
 ### LLM Backend
 

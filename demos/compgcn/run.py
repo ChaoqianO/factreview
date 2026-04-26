@@ -6,10 +6,11 @@ import sys
 import urllib.request
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+DEMO_DIR = Path(__file__).resolve().parent
+ROOT = DEMO_DIR.parents[1]
 COMPGCN_PDF_URL = "https://arxiv.org/pdf/1911.03082.pdf"
-COMPGCN_PDF_PATH = ROOT / "demo" / "compgcn.pdf"
-BASELINE_PDF_PATH = ROOT / "configs" / "baselines" / "compgcn" / "paper.pdf"
+DEMO_PDF_PATH = DEMO_DIR / "paper.pdf"
+COMPGCN_DOWNLOAD_PATH = ROOT / ".cache" / "compgcn.pdf"
 
 
 def _looks_like_pdf(path: Path) -> bool:
@@ -22,29 +23,29 @@ def _looks_like_pdf(path: Path) -> bool:
 
 
 def _resolve_compgcn_pdf() -> Path:
-    for candidate in (COMPGCN_PDF_PATH, BASELINE_PDF_PATH):
+    for candidate in (DEMO_PDF_PATH, COMPGCN_DOWNLOAD_PATH):
         if _looks_like_pdf(candidate):
             return candidate.resolve()
 
-    COMPGCN_PDF_PATH.parent.mkdir(parents=True, exist_ok=True)
+    COMPGCN_DOWNLOAD_PATH.parent.mkdir(parents=True, exist_ok=True)
     print(f"Downloading CompGCN paper PDF from {COMPGCN_PDF_URL}", flush=True)
     try:
         with urllib.request.urlopen(COMPGCN_PDF_URL, timeout=60) as response:
-            COMPGCN_PDF_PATH.write_bytes(response.read())
+            COMPGCN_DOWNLOAD_PATH.write_bytes(response.read())
     except Exception as exc:
         raise RuntimeError(
             "Could not download the CompGCN PDF. "
-            "Run `git lfs pull` if you use the tracked baseline PDF, or manually place "
-            f"the PDF at {COMPGCN_PDF_PATH}."
+            "Run `git lfs pull` if you use the bundled demo PDF, or manually place "
+            f"the PDF at {DEMO_PDF_PATH}."
         ) from exc
 
-    if not _looks_like_pdf(COMPGCN_PDF_PATH):
-        raise RuntimeError(f"Downloaded file is not a valid PDF: {COMPGCN_PDF_PATH}")
-    return COMPGCN_PDF_PATH.resolve()
+    if not _looks_like_pdf(COMPGCN_DOWNLOAD_PATH):
+        raise RuntimeError(f"Downloaded file is not a valid PDF: {COMPGCN_DOWNLOAD_PATH}")
+    return COMPGCN_DOWNLOAD_PATH.resolve()
 
 
 def parse_args() -> tuple[argparse.Namespace, list[str]]:
-    parser = argparse.ArgumentParser("run_demo_compgcn")
+    parser = argparse.ArgumentParser("compgcn_demo")
     parser.add_argument("--paper-key", default="compgcn")
     parser.add_argument("--run-root", default="runs")
     parser.add_argument(
