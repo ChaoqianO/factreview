@@ -42,32 +42,31 @@ llm = [
   "anthropic>=0.45.0",
 ]
 
-# ── Ingestion backends (§3.1a — PDF → structured representation) ─────────────
-ingestion-mineru = [
+# ── preprocessing/parse backends (§3.1a — PDF → structured representation) ───
+parse-mineru = [
   "magic-pdf",
   "ultralytics",
   "doclayout-yolo",
   "rapid-table",
 ]
-ingestion-grobid = ["lxml>=4.9"]
-ingestion-nougat = ["nougat-ocr"]
-ingestion-scienceparse = []          # external JAR; no python dep
-ingestion-llama = ["llama-index>=0.10"]
-ingestion = [
-  "factreview[ingestion-grobid]",
-  "factreview[ingestion-nougat]",
-  "factreview[ingestion-llama]",
+parse-grobid = ["lxml>=4.9"]
+parse-nougat = ["nougat-ocr"]
+parse-scienceparse = []          # external JAR; no python dep
+parse-llama = ["llama-index>=0.10"]
+parse = [
+  "factreview[parse-grobid]",
+  "factreview[parse-nougat]",
+  "factreview[parse-llama]",
 ]
 
-
-# ── Literature positioning (§3.2) ────────────────────────────────────────────
+# ── fact_generation/positioning (§3.2) ───────────────────────────────────────
 positioning = [
   "bibtexparser>=1.4.0",
   "semanticscholar>=0.8",
 ]
 
-# ── Reference quality checks ─────────────────────────────────────────────────
-reference-check = [
+# ── fact_generation/refcheck (reference-accuracy validation) ─────────────────
+refcheck = [
   "numpy>=1.26.0,<2",
   "requests>=2.32.5",
   "beautifulsoup4>=4.12.0",
@@ -83,12 +82,12 @@ reference-check = [
   "pybtex>=0.25.1",
 ]
 
-# ── Execution-based verification (§3.3) ──────────────────────────────────────
+# ── fact_generation/execution (§3.3 code execution / verification) ───────────
 execution = [
   "docker>=7.0",
 ]
 
-# ── Shared full-pipeline runtime (agent runner + PDF rendering) ──────────────
+# ── agent_runtime (the OpenAI-Agents-based runtime + PDF rendering) ──────────
 runtime = [
   "pydantic-settings>=2.3.0",
   "httpx>=0.27.0",
@@ -115,9 +114,9 @@ dev = [
 # ── Meta ─────────────────────────────────────────────────────────────────────
 all = [
   "factreview[llm]",
-  "factreview[ingestion]",
+  "factreview[parse]",
   "factreview[positioning]",
-  "factreview[reference-check]",
+  "factreview[refcheck]",
   "factreview[execution]",
   "factreview[runtime]",
 ]
@@ -130,15 +129,13 @@ Homepage = "https://anonymous.4open.science/r/factreview-E55F"
 
 [tool.hatch.build.targets.wheel]
 packages = [
+  "src/agent_runtime",
   "src/common",
-  "src/execution",
-  "src/fact_extraction",
-  "src/ingestion",
+  "src/fact_generation",
   "src/llm",
-  "src/positioning",
-  "src/reference_check",
+  "src/preprocessing",
+  "src/review",
   "src/schemas",
-  "src/synthesis",
   "src/util",
 ]
 
@@ -183,14 +180,13 @@ quote-style = "double"
 [tool.mypy]
 python_version = "3.11"
 packages = [
-  "execution",
-  "fact_extraction",
-  "ingestion",
+  "agent_runtime",
+  "common",
+  "fact_generation",
   "llm",
-  "positioning",
-  "reference_check",
+  "preprocessing",
+  "review",
   "schemas",
-  "synthesis",
   "util",
 ]
 mypy_path = "src"

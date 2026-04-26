@@ -10,13 +10,14 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from common.runtime_shared.env import load_env_file
-from synthesis.runtime.report.teaser_figure import _env_true, generate_teaser_figure
+from common.env import load_env_file
+from review.teaser.teaser import _env_true, generate_teaser_figure
 
 
-def _latest_synthesis_markdown() -> str:
+def _latest_review_markdown() -> str:
     candidates = sorted(
-        (ROOT / "runs").glob("*/stages/synthesis/final_review.md"),
+        list((ROOT / "runs").glob("*/stages/review/report/final_review_clean.md"))
+        + list((ROOT / "runs").glob("*/stages/review/report/final_review.md")),
         key=lambda p: p.stat().st_mtime if p.exists() else 0,
         reverse=True,
     )
@@ -28,7 +29,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--latest-extraction",
         default="",
-        help="Path to final_review/latest_extraction markdown. Defaults to the newest runs/*/stages/synthesis/final_review.md.",
+        help="Path to final_review/latest_extraction markdown. Defaults to the newest runs/*/stages/review/report/final_review_clean.md (or final_review.md).",
     )
     parser.add_argument(
         "--output-dir",
@@ -62,9 +63,9 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     load_env_file(ROOT / ".env")
-    latest_extraction = args.latest_extraction or _latest_synthesis_markdown()
+    latest_extraction = args.latest_extraction or _latest_review_markdown()
     if not latest_extraction:
-        raise FileNotFoundError("No synthesis markdown found under runs/*/stages/synthesis/final_review.md")
+        raise FileNotFoundError("No review markdown found under runs/*/stages/review/report/final_review*.md")
     generate_image = False if bool(args.prompt_only) else _env_true("TEASER_USE_GEMINI", default=True)
     result = generate_teaser_figure(
         latest_extraction,

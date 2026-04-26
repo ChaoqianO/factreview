@@ -55,7 +55,7 @@ python scripts/execute_review_pipeline.py https://arxiv.org/abs/1911.03082 --pap
 The first useful output to open is:
 
 ```text
-runs/<paper_key>_<timestamp>/stages/synthesis/final_review.md
+runs/<paper_key>_<timestamp>/stages/review/report/final_review.md
 ```
 
 ## Required Configuration
@@ -120,10 +120,11 @@ Full default pipeline:
 python scripts/execute_review_pipeline.py path/to/paper.pdf --paper-key paper_name
 ```
 
-This runs:
+This runs the seven sub-stages, grouped into three phases:
 
 ```text
-ingestion -> fact_extraction -> reference_check -> positioning -> synthesis
+preprocessing                fact_generation                       review
+parse → claim_extract  →  refcheck → positioning → execution? → report → teaser
 ```
 
 Code execution is off by default. Enable it only when you want repository/code
@@ -142,11 +143,12 @@ python scripts/execute_review_pipeline.py path/to/paper.pdf --enable-refcheck
 ```
 
 You can also enable it through the environment with `FACTREVIEW_ENABLE_REFCHECK=true`.
-The results are written under `stages/reference_check/reference_check.*` and appended
-to `stages/synthesis/final_review.md`; teaser figure generation intentionally
-uses the original review content without this reference-check section.
+The results are written under `stages/fact_generation/refcheck/reference_check.*` and
+appended to `stages/review/report/final_review.md`; the report sub-stage also writes
+`final_review_clean.md` (without the refcheck section), and the teaser sub-stage reads
+that clean copy so refcheck warnings stay out of teaser prompts.
 RefChecker is provided as a git submodule, so fresh clones should run
-`git submodule update --init --recursive` and install `factreview[reference-check]`
+`git submodule update --init --recursive` and install `factreview[refcheck]`
 before using this option.
 
 Useful one-off overrides:
@@ -174,12 +176,12 @@ Primary artifacts:
 - `full_pipeline_summary.json`
 - `runtime/jobs/<job_id>/` for raw runtime job state, MinerU output, prompts, and agent traces
 - `inputs/` for copied PDFs, paper extraction snapshots, and execution baseline snapshots
-- `stages/execution/run/workspace/source/` for the run-local paper code checkout when execution is enabled
-- `stages/synthesis/final_review.json`
-- `stages/synthesis/final_review.md`
-- `stages/synthesis/final_review.pdf`
-- `stages/synthesis/teaser_figure_prompt.txt`
-- `stages/synthesis/teaser_figure.png` when image API generation is enabled
+- `stages/fact_generation/execution/run/workspace/source/` for the run-local paper code checkout when execution is enabled
+- `stages/review/report/final_review.json`
+- `stages/review/report/final_review.md`
+- `stages/review/report/final_review.pdf`
+- `stages/review/teaser/teaser_figure_prompt.txt`
+- `stages/review/teaser/teaser_figure.png` when image API generation is enabled
 
 ## Pipeline
 

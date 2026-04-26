@@ -10,7 +10,7 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from positioning.stage_runner import run_positioning_stage
+from fact_generation.positioning.stage_runner import run_positioning_stage
 from util.paper_input import infer_paper_key, materialize_paper_pdf
 
 

@@ -1,4 +1,4 @@
-"""Review schemas — the output of §3.4 synthesis."""
+"""Review schemas — the output of §3.4 review (report + teaser)."""
 
 from __future__ import annotations
 

@@ -10,6 +10,5 @@ if str(SRC) not in sys.path:
 
 from pipeline_full import main
 
-
 if __name__ == "__main__":
     main()

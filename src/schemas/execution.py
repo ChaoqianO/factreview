@@ -30,7 +30,7 @@ class RunArtifact(BaseModel):
 
 
 class ExecutionEvidence(BaseModel):
-    """Per-task evidence record consumed by §3.4 synthesis."""
+    """Per-task evidence record consumed by §3.4 review."""
 
     model_config = ConfigDict(extra="ignore")
 

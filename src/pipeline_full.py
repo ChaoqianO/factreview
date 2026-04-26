@@ -6,15 +6,17 @@ import os
 from pathlib import Path
 from typing import Any
 
-from common.runtime_shared.config import get_settings
-from common.runtime_shared.env import load_env_file
-from execution.stage_runner import run_execution_stage
-from fact_extraction.stage_runner import run_fact_extraction_stage
-from ingestion.runtime_bridge import init_full_pipeline_context, run_ingestion_stage
+from common.config import get_settings
+from common.env import load_env_file
+from common.pipeline_context import init_full_pipeline_context
+from fact_generation.execution.stage_runner import run_execution_stage
+from fact_generation.positioning.stage_runner import run_positioning_stage
+from fact_generation.refcheck.stage_runner import run_refcheck_stage
 from llm.provider_capabilities import is_codex_provider
-from positioning.stage_runner import run_positioning_stage
-from reference_check.stage_runner import run_reference_check_stage
-from synthesis.stage_runner import run_synthesis_stage
+from preprocessing.claim_extract.stage_runner import run_claim_extract_stage
+from preprocessing.parse.stage_runner import run_parse_stage
+from review.report.stage_runner import run_report_stage
+from review.teaser.stage_runner import run_teaser_stage
 from util.paper_input import infer_paper_key, materialize_paper_pdf
 from util.run_layout import build_run_dir, ensure_run_subdirs, make_run_id
 
@@ -72,7 +74,7 @@ def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
     init_full_pipeline_context(run_dir=run_dir)
     run_execution = bool(getattr(args, "run_execution", False)) and not bool(args.skip_execution)
 
-    ingestion_result = run_ingestion_stage(
+    parse_result = run_parse_stage(
         repo_root=repo_root,
         run_dir=run_dir,
         paper_pdf=paper_pdf,
@@ -80,12 +82,12 @@ def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
         reuse_job_id=str(args.reuse_job_id or "").strip(),
         materialize_execution_extract=run_execution,
     )
-    fact_result = run_fact_extraction_stage(
+    claim_extract_result = run_claim_extract_stage(
         repo_root=repo_root,
         run_dir=run_dir,
     )
     enable_refcheck = bool(getattr(args, "enable_refcheck", False) or settings.reference_check_enabled)
-    reference_check_result = run_reference_check_stage(
+    refcheck_result = run_refcheck_stage(
         repo_root=repo_root,
         run_dir=run_dir,
         paper_pdf=paper_pdf,
@@ -107,7 +109,7 @@ def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
             "summary": {},
             "alignment": {},
         }
-        execution_out = run_dir / "stages" / "execution" / "execution.json"
+        execution_out = run_dir / "stages" / "fact_generation" / "execution" / "execution.json"
         _write_json(execution_out, execution_payload)
         execution_result = {
             "status": "skipped",
@@ -120,50 +122,52 @@ def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
             paper_pdf=paper_pdf,
             paper_key=paper_key,
             paper_extracted_dir=str(
-                (ingestion_result.get("shared_execution_extract") or {}).get("paper_extracted_dir") or ""
+                (parse_result.get("shared_execution_extract") or {}).get("paper_extracted_dir") or ""
             ),
             max_attempts=int(args.max_attempts),
             no_pdf_extract=bool(args.no_pdf_extract),
         )
-    synthesis_result = run_synthesis_stage(
+    report_result = run_report_stage(
         repo_root=repo_root,
         run_dir=run_dir,
     )
+    teaser_result = run_teaser_stage(run_dir=run_dir)
 
     statuses = {
-        "ingestion": str(ingestion_result.get("status") or "failed"),
-        "fact_extraction": str(fact_result.get("status") or "failed"),
-        "reference_check": str(reference_check_result.get("status") or "failed"),
+        "parse": str(parse_result.get("status") or "failed"),
+        "claim_extract": str(claim_extract_result.get("status") or "failed"),
+        "refcheck": str(refcheck_result.get("status") or "failed"),
         "positioning": str(positioning_result.get("status") or "failed"),
         "execution": str(execution_result.get("status") or "failed"),
-        "synthesis": str(synthesis_result.get("status") or "failed"),
+        "report": str(report_result.get("status") or "failed"),
+        "teaser": str(teaser_result.get("status") or "failed"),
     }
 
     outputs: dict[str, str] = {}
-    if ingestion_result.get("output"):
-        outputs["ingestion"] = str(ingestion_result.get("output"))
-    if fact_result.get("output"):
-        outputs["fact_extraction"] = str(fact_result.get("output"))
+    if parse_result.get("output"):
+        outputs["parse"] = str(parse_result.get("output"))
+    if claim_extract_result.get("output"):
+        outputs["claim_extract"] = str(claim_extract_result.get("output"))
     if positioning_result.get("output"):
         outputs["positioning"] = str(positioning_result.get("output"))
-    if reference_check_result.get("output"):
-        outputs["reference_check"] = str(reference_check_result.get("output"))
-    if reference_check_result.get("output_md"):
-        outputs["reference_check_md"] = str(reference_check_result.get("output_md"))
+    if refcheck_result.get("output"):
+        outputs["refcheck"] = str(refcheck_result.get("output"))
+    if refcheck_result.get("output_md"):
+        outputs["refcheck_md"] = str(refcheck_result.get("output_md"))
     if execution_result.get("output"):
         outputs["execution"] = str(execution_result.get("output"))
-    if synthesis_result.get("output_json"):
-        outputs["synthesis_json"] = str(synthesis_result.get("output_json"))
-    if synthesis_result.get("output_md"):
-        outputs["synthesis_md"] = str(synthesis_result.get("output_md"))
-    if synthesis_result.get("output_audit_json"):
-        outputs["synthesis_audit_json"] = str(synthesis_result.get("output_audit_json"))
-    if synthesis_result.get("output_pdf"):
-        outputs["synthesis_pdf"] = str(synthesis_result.get("output_pdf"))
-    if synthesis_result.get("teaser_figure_prompt"):
-        outputs["teaser_figure_prompt"] = str(synthesis_result.get("teaser_figure_prompt"))
-    if synthesis_result.get("teaser_figure_image"):
-        outputs["teaser_figure_image"] = str(synthesis_result.get("teaser_figure_image"))
+    if report_result.get("output_json"):
+        outputs["report_json"] = str(report_result.get("output_json"))
+    if report_result.get("output_md"):
+        outputs["report_md"] = str(report_result.get("output_md"))
+    if report_result.get("output_audit_json"):
+        outputs["report_audit_json"] = str(report_result.get("output_audit_json"))
+    if report_result.get("output_pdf"):
+        outputs["report_pdf"] = str(report_result.get("output_pdf"))
+    if teaser_result.get("teaser_figure_prompt"):
+        outputs["teaser_figure_prompt"] = str(teaser_result.get("teaser_figure_prompt"))
+    if teaser_result.get("teaser_figure_image"):
+        outputs["teaser_figure_image"] = str(teaser_result.get("teaser_figure_image"))
 
     summary = {
         "paper_key": paper_key,
@@ -172,12 +176,12 @@ def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
         "paper_pdf": str(paper_pdf),
         "run_id": run_id,
         "run_dir": str(run_dir),
-        "job_id": ingestion_result.get("job_id"),
-        "job_dir": ingestion_result.get("job_dir"),
+        "job_id": parse_result.get("job_id"),
+        "job_dir": parse_result.get("job_dir"),
         "stages": statuses,
         "outputs": outputs,
-        "reference_check": reference_check_result.get("reference_check") or {"enabled": enable_refcheck},
-        "teaser_figure": synthesis_result.get("teaser_figure") or {},
+        "reference_check": refcheck_result.get("reference_check") or {"enabled": enable_refcheck},
+        "teaser_figure": teaser_result.get("teaser_figure") or {},
     }
 
     summary_path = run_dir / "full_pipeline_summary.json"

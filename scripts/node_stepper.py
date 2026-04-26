@@ -6,17 +6,16 @@ import sys
 from pathlib import Path
 from typing import Any
 
-# Ensure the project root (code_evaluation/) is importable when running this script directly.
-# scripts/ lives inside code_evaluation/; parents[1] == code_evaluation/.
-_CODE_EVAL = Path(__file__).resolve().parents[1]
-if str(_CODE_EVAL) not in sys.path:
-    sys.path.insert(0, str(_CODE_EVAL))
+ROOT = Path(__file__).resolve().parents[1]
+SRC = ROOT / "src"
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
 
-from src.nodes.finalize import finalize_node
-from src.nodes.fix import fix_node
-from src.nodes.judge import judge_node
-from src.nodes.prepare import prepare_node
-from src.nodes.run import run_node
+from fact_generation.execution.nodes.finalize import finalize_node
+from fact_generation.execution.nodes.fix import fix_node
+from fact_generation.execution.nodes.judge import judge_node
+from fact_generation.execution.nodes.prepare import prepare_node
+from fact_generation.execution.nodes.run import run_node
 
 State = dict[str, Any]
 
@@ -42,7 +41,7 @@ def _build_initial_state(args: argparse.Namespace) -> State:
             "tasks_path": args.tasks or "",
             "baseline_path": args.baseline or "",
             "local_source_path": args.local_source or "",
-            "run_root": args.run_root or str(_CODE_EVAL / "runs" / "node_stepper"),
+            "run_root": args.run_root or str(ROOT / "runs" / "node_stepper"),
             "no_llm": bool(args.no_llm),
             "no_pdf_extract": bool(args.no_pdf_extract),
             "llm_provider": args.llm_provider or "",

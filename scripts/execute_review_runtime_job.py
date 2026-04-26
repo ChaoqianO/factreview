@@ -20,16 +20,16 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
-    from common.runtime_shared.config import get_settings
-    from common.runtime_shared.runner import run_job
-    from common.runtime_shared.state import (
+    from agent_runtime.runner import run_job
+    from common.config import get_settings
+    from common.state import (
         ensure_artifact_paths,
         load_job_state,
         mutate_job_state,
         save_job_state,
     )
-    from common.runtime_shared.storage import job_dir as runtime_job_dir
-    from common.runtime_shared.types import JobState
+    from common.storage import job_dir as runtime_job_dir
+    from common.types import JobState
     from util.paper_input import infer_paper_key, materialize_paper_pdf
 
     args = parse_args()

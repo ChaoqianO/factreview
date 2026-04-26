@@ -2,7 +2,7 @@
 
 The main application is configured through `.env` and CLI flags. These
 models remain available for callers that want to validate structured
-configuration dictionaries.
+configuration dictionaries against the canonical pipeline shape.
 """
 
 from __future__ import annotations
@@ -11,21 +11,22 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class StageToggles(BaseModel):
-    ingestion: bool = True
-    fact_extraction: bool = True
-    reference_check: bool = False
+    parse: bool = True
+    claim_extract: bool = True
+    refcheck: bool = False
     positioning: bool = True
     execution: bool = False
-    synthesis: bool = True
+    report: bool = True
+    teaser: bool = True
 
 
-class IngestionCfg(BaseModel):
+class ParseCfg(BaseModel):
     backend: str = "mineru"
     fallback_chain: list[str] = Field(default_factory=lambda: ["grobid", "nougat"])
     timeout_sec: int = 1800
 
 
-class FactExtractionCfg(BaseModel):
+class ClaimExtractCfg(BaseModel):
     mode: str = "auto"  # auto | llm | heuristic
     decompose_broad_claims: bool = True
 
@@ -35,7 +36,7 @@ class PositioningCfg(BaseModel):
     max_neighbors: int = 12
 
 
-class ReferenceCheckCfg(BaseModel):
+class RefcheckCfg(BaseModel):
     enabled: bool = False
     max_report_issues: int = 20
 
@@ -47,7 +48,7 @@ class ExecutionCfg(BaseModel):
     python_spec: str = ""
 
 
-class SynthesisCfg(BaseModel):
+class ReviewCfg(BaseModel):
     labels: list[str] = Field(
         default_factory=lambda: [
             "supported",
@@ -85,11 +86,11 @@ class RunConfig(BaseModel):
 
     run: RunCfg = Field(default_factory=RunCfg)
     stages: StageToggles = Field(default_factory=StageToggles)
-    ingestion: IngestionCfg = Field(default_factory=IngestionCfg)
-    fact_extraction: FactExtractionCfg = Field(default_factory=FactExtractionCfg)
-    reference_check: ReferenceCheckCfg = Field(default_factory=ReferenceCheckCfg)
+    parse: ParseCfg = Field(default_factory=ParseCfg)
+    claim_extract: ClaimExtractCfg = Field(default_factory=ClaimExtractCfg)
+    refcheck: RefcheckCfg = Field(default_factory=RefcheckCfg)
     positioning: PositioningCfg = Field(default_factory=PositioningCfg)
     execution: ExecutionCfg = Field(default_factory=ExecutionCfg)
-    synthesis: SynthesisCfg = Field(default_factory=SynthesisCfg)
+    review: ReviewCfg = Field(default_factory=ReviewCfg)
     llm: LLMCfg = Field(default_factory=LLMCfg)
     logging: LoggingCfg = Field(default_factory=LoggingCfg)

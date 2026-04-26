@@ -7,17 +7,16 @@ import sys
 from pathlib import Path
 from typing import Any
 
-# Ensure imports like `from src...` work when executing this script directly.
-# scripts/ lives inside code_evaluation/; parents[1] == code_evaluation/.
-_CODE_EVAL = Path(__file__).resolve().parents[1]
-if str(_CODE_EVAL) not in sys.path:
-    sys.path.insert(0, str(_CODE_EVAL))
+ROOT = Path(__file__).resolve().parents[1]
+SRC = ROOT / "src"
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
 
-from src.nodes.finalize import finalize_node
-from src.nodes.fix import fix_node
-from src.nodes.judge import judge_node
-from src.nodes.prepare import prepare_node
-from src.nodes.run import run_node
+from fact_generation.execution.nodes.finalize import finalize_node
+from fact_generation.execution.nodes.fix import fix_node
+from fact_generation.execution.nodes.judge import judge_node
+from fact_generation.execution.nodes.prepare import prepare_node
+from fact_generation.execution.nodes.run import run_node
 
 
 def _pp(obj: Any) -> str:
@@ -51,7 +50,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(description="Node-by-node debug runner for code_evaluation")
     ap.add_argument("--paper-pdf", required=True)
     ap.add_argument("--paper-key", default="")
-    ap.add_argument("--run-root", default=str(_CODE_EVAL / "runs" / "debug"))
+    ap.add_argument("--run-root", default=str(ROOT / "runs" / "debug"))
     ap.add_argument("--no-pdf-extract", action="store_true")
     ap.add_argument(
         "--dry-run", action="store_true", help="Run tasks in dry-run mode (no docker/paper execution)."
