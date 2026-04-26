@@ -22,6 +22,7 @@ __pycache__/
 .vscode/
 .idea/
 .DS_Store
+.claude/
 
 # Build / package artefacts
 build/
@@ -39,6 +40,10 @@ data/
 output/
 factreview-own/
 src/baseline/
+compare/
+
+# Codex CLI scratch placeholder
+.codex
 
 # Local uv state (prefer committing uv.lock instead)
 .uv/
