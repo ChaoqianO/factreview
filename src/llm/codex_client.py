@@ -10,7 +10,7 @@ from .codex_auth import CodexAuth
 from .provider_capabilities import is_codex_provider as _is_codex_provider
 
 _DEFAULT_BASE_URL = "https://chatgpt.com/backend-api/codex"
-_DEFAULT_MODEL = "gpt-5.3-codex"
+_DEFAULT_MODEL = "gpt-5.5"
 _DEFAULT_INSTRUCTIONS = Path(__file__).resolve().parent / "providers" / "codex_instructions.txt"
 
 

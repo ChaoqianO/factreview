@@ -42,7 +42,7 @@ class Settings(BaseSettings):
     )
     agent_model: str = 'gpt-5.2'
     openai_codex_model: str = Field(
-        default='gpt-5.3-codex',
+        default='gpt-5.5',
         validation_alias=AliasChoices('OPENAI_CODEX_MODEL', 'CODEX_MODEL'),
     )
     openai_codex_base_url: str = Field(

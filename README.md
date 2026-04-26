@@ -71,7 +71,7 @@ The default backend is Codex login:
 
 ```bash
 MODEL_PROVIDER=openai-codex
-OPENAI_CODEX_MODEL=gpt-5.3-codex
+OPENAI_CODEX_MODEL=gpt-5.5
 ```
 
 Run `codex login` once and choose the ChatGPT sign-in flow. FactReview reads
@@ -154,7 +154,7 @@ Useful one-off overrides:
 ```bash
 python scripts/execute_review_pipeline.py paper.pdf \
   --llm-provider openai-codex \
-  --llm-model gpt-5.3-codex \
+  --llm-model gpt-5.5 \
   --teaser-mode prompt
 ```
 
