@@ -19,7 +19,7 @@ def parse_args() -> argparse.Namespace:
         "paper_pdf_pos",
         nargs="?",
         default="",
-        help="Optional positional paper PDF path. Equivalent to --paper-pdf.",
+        help="Optional positional paper PDF path or URL. Equivalent to --paper-pdf.",
     )
     p.add_argument(
         "local_repo_pos",
@@ -31,7 +31,7 @@ def parse_args() -> argparse.Namespace:
         "--paper-pdf",
         type=str,
         default="",
-        help="Path to the paper PDF. If provided, the system will try to extract repo URL(s) and prepare a run-local source checkout automatically.",
+        help="Path or URL to the paper PDF. If provided, the system will try to extract repo URL(s) and prepare a run-local source checkout automatically.",
     )
     p.add_argument(
         "--paper-key",

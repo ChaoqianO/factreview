@@ -9,9 +9,10 @@ from typing import Any
 
 from ingestion.mineru import extract_with_mineru, mineru_available
 from util.fs import ensure_dir, write_text
+from util.paper_input import infer_paper_key, is_url, materialize_paper_pdf
 from util.recorder import append_event
-from util.runner import persist_command_result, run_command
 from util.run_layout import build_run_dir, ensure_run_subdirs, make_run_id, slugify_run_key
+from util.runner import persist_command_result, run_command
 
 from ..tools.docker import docker_ensure_paper_image, docker_strategy
 
@@ -401,11 +402,11 @@ def prepare_node(state: dict[str, Any]) -> dict[str, Any]:
     dry_run = bool(cfg.get("dry_run"))
     strategy = docker_strategy(cfg)
 
-    pdf_path = Path(paper_pdf).resolve() if paper_pdf else None
+    pdf_path = Path(paper_pdf).resolve() if (paper_pdf and not is_url(paper_pdf)) else None
 
     if not paper_key:
-        if pdf_path and pdf_path.exists():
-            paper_key = pdf_path.stem.strip() or "paper"
+        if paper_pdf:
+            paper_key = infer_paper_key(paper_pdf)
         elif paper_root_in:
             paper_key = Path(paper_root_in).resolve().name
         else:
@@ -432,10 +433,36 @@ def prepare_node(state: dict[str, Any]) -> dict[str, Any]:
         "fixes_dir": str(fixes_dir),
     }
 
+    paper_pdf_source = paper_pdf
+    if paper_pdf:
+        try:
+            materialized = materialize_paper_pdf(
+                paper_pdf,
+                inputs_dir / "source_pdf",
+                paper_key=paper_key,
+            )
+            paper_pdf = str(materialized.path)
+            pdf_path = materialized.path
+        except Exception as exc:
+            msg = f"paper_pdf_unavailable: {type(exc).__name__}: {exc}"
+            append_event(
+                run_dir,
+                "prepare_error",
+                {"error": msg, "paper_pdf": paper_pdf_source},
+            )
+            state.setdefault("history", []).append({"kind": "prepare_error", "data": {"error": msg}})
+            state["status"] = "failed"
+            return state
+
     append_event(
         run_dir,
         "prepare_start",
-        {"paper_key": paper_key, "paper_pdf": paper_pdf, "paper_root": paper_root_in},
+        {
+            "paper_key": paper_key,
+            "paper_pdf": paper_pdf,
+            "paper_pdf_source": paper_pdf_source,
+            "paper_root": paper_root_in,
+        },
     )
     state.setdefault("history", []).append(
         {"kind": "prepare_start", "data": {"paper_key": paper_key, "paper_pdf": paper_pdf}}

@@ -6,7 +6,6 @@ import shutil
 import sys
 from pathlib import Path
 
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SRC = REPO_ROOT / "src"
 if str(SRC) not in sys.path:
@@ -15,21 +14,31 @@ if str(SRC) not in sys.path:
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser("execute_review_runtime_job")
-    p.add_argument("--paper-pdf", required=True)
+    p.add_argument("--paper-pdf", required=True, help="Path or URL to a paper PDF")
     p.add_argument("--title", default="factreview-job")
     return p.parse_args()
 
 
 def main() -> None:
+    from common.runtime_shared.config import get_settings
     from common.runtime_shared.runner import run_job
-    from common.runtime_shared.state import ensure_artifact_paths, load_job_state, mutate_job_state, save_job_state
+    from common.runtime_shared.state import (
+        ensure_artifact_paths,
+        load_job_state,
+        mutate_job_state,
+        save_job_state,
+    )
     from common.runtime_shared.storage import job_dir as runtime_job_dir
     from common.runtime_shared.types import JobState
+    from util.paper_input import infer_paper_key, materialize_paper_pdf
 
     args = parse_args()
-    source_pdf = Path(args.paper_pdf).resolve()
-    if not source_pdf.exists():
-        raise FileNotFoundError(f"paper pdf not found: {source_pdf}")
+    source_input = materialize_paper_pdf(
+        args.paper_pdf,
+        get_settings().data_dir / "inputs" / "source_pdf",
+        paper_key=str(args.title or "").strip() or infer_paper_key(args.paper_pdf),
+    )
+    source_pdf = source_input.path
 
     job = JobState(title=str(args.title), source_pdf_name=source_pdf.name)
     save_job_state(job)

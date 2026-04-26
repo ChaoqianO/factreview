@@ -14,6 +14,7 @@ from ingestion.runtime_bridge import init_full_pipeline_context, run_ingestion_s
 from llm.provider_capabilities import is_codex_provider
 from positioning.stage_runner import run_positioning_stage
 from synthesis.stage_runner import run_synthesis_stage
+from util.paper_input import infer_paper_key, materialize_paper_pdf
 from util.run_layout import build_run_dir, ensure_run_subdirs, make_run_id
 
 
@@ -55,14 +56,17 @@ def _apply_cli_env_overrides(args: argparse.Namespace) -> None:
 
 def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
     repo_root = Path(__file__).resolve().parents[1]
-    paper_pdf = Path(args.paper_pdf).resolve()
-    if not paper_pdf.exists():
-        raise FileNotFoundError(f"paper pdf not found: {paper_pdf}")
-
-    paper_key = (args.paper_key or "").strip() or paper_pdf.stem.strip() or "paper"
+    paper_source = str(args.paper_pdf or "").strip()
+    paper_key = (args.paper_key or "").strip() or infer_paper_key(paper_source)
     run_id = make_run_id()
     run_dir = build_run_dir(args.run_root, paper_key, run_id)
-    ensure_run_subdirs(run_dir)
+    layout = ensure_run_subdirs(run_dir)
+    paper_input = materialize_paper_pdf(
+        paper_source,
+        layout["inputs"] / "source_pdf",
+        paper_key=paper_key,
+    )
+    paper_pdf = paper_input.path
     init_full_pipeline_context(run_dir=run_dir)
     run_execution = bool(getattr(args, "run_execution", False)) and not bool(args.skip_execution)
 
@@ -148,6 +152,9 @@ def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
 
     summary = {
         "paper_key": paper_key,
+        "paper_source": paper_input.source,
+        "paper_source_type": paper_input.source_type,
+        "paper_pdf": str(paper_pdf),
         "run_id": run_id,
         "run_dir": str(run_dir),
         "job_id": ingestion_result.get("job_id"),
@@ -164,7 +171,7 @@ def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser("factreview_full_pipeline")
-    p.add_argument("paper_pdf", type=str, help="Path to paper PDF")
+    p.add_argument("paper_pdf", type=str, help="Path or URL to a paper PDF")
     p.add_argument("--paper-key", type=str, default="")
     p.add_argument("--run-root", type=str, default="runs")
     p.add_argument("--reuse-job-id", type=str, default="", help="Reuse an existing runtime job snapshot")

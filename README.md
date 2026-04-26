@@ -45,6 +45,13 @@ Run your own PDF:
 python scripts/execute_review_pipeline.py path/to/paper.pdf --paper-key my_paper
 ```
 
+You can also pass a PDF URL. arXiv abstract links are normalized to the PDF
+download automatically:
+
+```bash
+python scripts/execute_review_pipeline.py https://arxiv.org/abs/1911.03082 --paper-key compgcn
+```
+
 The first useful output to open is:
 
 ```text

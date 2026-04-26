@@ -3,14 +3,11 @@ from __future__ import annotations
 import argparse
 import subprocess
 import sys
-import urllib.request
 from pathlib import Path
 
 DEMO_DIR = Path(__file__).resolve().parent
 ROOT = DEMO_DIR.parents[1]
-COMPGCN_PDF_URL = "https://arxiv.org/pdf/1911.03082.pdf"
 DEMO_PDF_PATH = DEMO_DIR / "paper.pdf"
-COMPGCN_DOWNLOAD_PATH = ROOT / ".cache" / "compgcn.pdf"
 
 
 def _looks_like_pdf(path: Path) -> bool:
@@ -22,30 +19,21 @@ def _looks_like_pdf(path: Path) -> bool:
         return False
 
 
-def _resolve_compgcn_pdf() -> Path:
-    for candidate in (DEMO_PDF_PATH, COMPGCN_DOWNLOAD_PATH):
-        if _looks_like_pdf(candidate):
-            return candidate.resolve()
-
-    COMPGCN_DOWNLOAD_PATH.parent.mkdir(parents=True, exist_ok=True)
-    print(f"Downloading CompGCN paper PDF from {COMPGCN_PDF_URL}", flush=True)
-    try:
-        with urllib.request.urlopen(COMPGCN_PDF_URL, timeout=60) as response:
-            COMPGCN_DOWNLOAD_PATH.write_bytes(response.read())
-    except Exception as exc:
-        raise RuntimeError(
-            "Could not download the CompGCN PDF. "
-            "Run `git lfs pull` if you use the bundled demo PDF, or manually place "
-            f"the PDF at {DEMO_PDF_PATH}."
-        ) from exc
-
-    if not _looks_like_pdf(COMPGCN_DOWNLOAD_PATH):
-        raise RuntimeError(f"Downloaded file is not a valid PDF: {COMPGCN_DOWNLOAD_PATH}")
-    return COMPGCN_DOWNLOAD_PATH.resolve()
+def _resolve_compgcn_pdf(override: str = "") -> str:
+    token = str(override or "").strip()
+    if token:
+        return token
+    if _looks_like_pdf(DEMO_PDF_PATH):
+        return str(DEMO_PDF_PATH.resolve())
+    raise RuntimeError(
+        "Bundled CompGCN PDF is missing or invalid. "
+        f"Run `git lfs pull` or manually place the PDF at {DEMO_PDF_PATH}."
+    )
 
 
 def parse_args() -> tuple[argparse.Namespace, list[str]]:
     parser = argparse.ArgumentParser("compgcn_demo")
+    parser.add_argument("--paper-pdf", default="", help="Optional path or URL override for the paper PDF.")
     parser.add_argument("--paper-key", default="compgcn")
     parser.add_argument("--run-root", default="runs")
     parser.add_argument(
@@ -64,12 +52,12 @@ def parse_args() -> tuple[argparse.Namespace, list[str]]:
 
 def main() -> None:
     args, passthrough = parse_args()
-    pdf_path = _resolve_compgcn_pdf()
+    pdf_input = _resolve_compgcn_pdf(args.paper_pdf)
 
     command = [
         sys.executable,
         str(ROOT / "scripts" / "execute_review_pipeline.py"),
-        str(pdf_path),
+        pdf_input,
         "--paper-key",
         args.paper_key,
         "--run-root",
@@ -89,7 +77,7 @@ def main() -> None:
             command.extend([flag_name, str(value).strip()])
     command.extend(passthrough)
 
-    print(f"Running CompGCN demo with PDF: {pdf_path}", flush=True)
+    print(f"Running CompGCN demo with PDF: {pdf_input}", flush=True)
     result = subprocess.run(command, cwd=ROOT)
     raise SystemExit(result.returncode)
 
