@@ -1,23 +1,18 @@
 from __future__ import annotations
 
-import sys
 from pathlib import Path
-from typing import Any
 
-ROOT = Path(__file__).resolve().parents[3]
-SRC = ROOT / "src"
-if str(SRC) not in sys.path:
-    sys.path.insert(0, str(SRC))
-
-from common.pipeline_context import (  # noqa: E402
+from common.pipeline_context import (
     bootstrap_bridge_state,
     ensure_full_pipeline_context,
     load_bridge_state,
     load_job_state_snapshot,
     load_stage_assets_snapshot,
+    positioning_stage_dir,
     read_json_file,
     write_json_file,
 )
+from schemas.stage import StageResult, StageStatus
 
 
 def run_positioning_stage(
@@ -27,7 +22,7 @@ def run_positioning_stage(
     paper_pdf: Path | None = None,
     paper_key: str = "",
     reuse_job_id: str = "",
-) -> dict[str, Any]:
+) -> StageResult:
     ensure_full_pipeline_context(run_dir=run_dir, allow_standalone=True, stage="positioning")
     bridge = load_bridge_state(run_dir)
     if bridge is None:
@@ -57,9 +52,14 @@ def run_positioning_stage(
     )
     search_started = bool(paper_search_state.get("started"))
     semantic_file_exists = semantic_path.exists()
-    status = "ok" if (semantic_file_exists or (not search_started)) else "failed"
+    status: StageStatus = "ok" if (semantic_file_exists or (not search_started)) else "failed"
+    error = (
+        ""
+        if status == "ok"
+        else f"paper search reported started but semantic candidates file is missing ({semantic_path})"
+    )
 
-    positioning_out = run_dir / "stages" / "fact_generation" / "positioning" / "positioning.json"
+    positioning_out = positioning_stage_dir(run_dir) / "positioning.json"
     write_json_file(
         positioning_out,
         {
@@ -70,11 +70,12 @@ def run_positioning_stage(
         },
     )
 
-    return {
-        "status": status,
-        "output": str(positioning_out),
-        "job_id": bridge.job_id,
-    }
+    return StageResult(
+        status=status,
+        outputs={"main": str(positioning_out)},
+        extra={"job_id": bridge.job_id},
+        error=error,
+    )
 
 
 if __name__ == "__main__":

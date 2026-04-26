@@ -1,22 +1,18 @@
 from __future__ import annotations
 
-import sys
 from pathlib import Path
 from typing import Any
 
-ROOT = Path(__file__).resolve().parents[3]
-SRC = ROOT / "src"
-if str(SRC) not in sys.path:
-    sys.path.insert(0, str(SRC))
-
-from common.config import get_settings  # noqa: E402
-from common.pipeline_context import (  # noqa: E402
+from common.config import get_settings
+from common.pipeline_context import (
     bootstrap_bridge_state,
     ensure_full_pipeline_context,
     load_bridge_state,
+    refcheck_stage_dir,
     write_json_file,
 )
-from fact_generation.refcheck.refcheck import check_references, format_reference_check_markdown  # noqa: E402
+from fact_generation.refcheck.refcheck import check_references, format_reference_check_markdown
+from schemas.stage import StageResult, StageStatus
 
 
 def run_refcheck_stage(
@@ -27,7 +23,7 @@ def run_refcheck_stage(
     paper_key: str = "",
     reuse_job_id: str = "",
     enable_refcheck: bool | None = None,
-) -> dict[str, Any]:
+) -> StageResult:
     ensure_full_pipeline_context(run_dir=run_dir, allow_standalone=True, stage="refcheck")
     bridge = load_bridge_state(run_dir)
     if bridge is None:
@@ -41,7 +37,7 @@ def run_refcheck_stage(
 
     settings = get_settings()
     refcheck_enabled = bool(settings.reference_check_enabled if enable_refcheck is None else enable_refcheck)
-    stage_dir = run_dir / "stages" / "fact_generation" / "refcheck"
+    stage_dir = refcheck_stage_dir(run_dir)
     output_json = stage_dir / "reference_check.json"
     output_md = stage_dir / "reference_check.md"
     detail_txt = stage_dir / "reference_check_details.txt"
@@ -75,16 +71,22 @@ def run_refcheck_stage(
             output_md.write_text(markdown, encoding="utf-8")
 
     write_json_file(output_json, payload)
-    status = "skipped" if not refcheck_enabled else "ok"
+    status: StageStatus = "skipped" if not refcheck_enabled else "ok"
+    error = ""
     if refcheck_enabled and payload.get("ok") is False:
         status = "failed"
+        detail = str(payload.get("error_message") or payload.get("message") or "").strip()
+        error = f"reference check failed: {detail}" if detail else "reference check reported failure"
 
-    return {
-        "status": status,
-        "output": str(output_json),
-        "output_md": str(output_md) if output_md.exists() else "",
-        "reference_check": payload,
-    }
+    outputs = {"main": str(output_json)}
+    if output_md.exists():
+        outputs["markdown"] = str(output_md)
+    return StageResult(
+        status=status,
+        outputs=outputs,
+        extra={"reference_check": payload},
+        error=error,
+    )
 
 
 if __name__ == "__main__":

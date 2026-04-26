@@ -121,11 +121,8 @@ all = [
   "factreview[runtime]",
 ]
 
-[project.scripts]
-factreview = "cli:main"
-
 [project.urls]
-Homepage = "https://anonymous.4open.science/r/factreview-E55F"
+Homepage = "https://github.com/ChaoqianO/factreview"
 
 [tool.hatch.build.targets.wheel]
 packages = [
@@ -138,10 +135,6 @@ packages = [
   "src/schemas",
   "src/util",
 ]
-
-[tool.hatch.build.targets.wheel.force-include]
-"src/cli.py" = "cli.py"
-"src/cli_legacy.py" = "cli_legacy.py"
 
 [tool.hatch.build.targets.sdist]
 include = ["src", "demos", "README.md"]

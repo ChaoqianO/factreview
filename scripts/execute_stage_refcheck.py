@@ -24,7 +24,7 @@ def parse_args() -> argparse.Namespace:
         "--enable-refcheck",
         action="store_true",
         default=None,
-        help="Run RefChecker; otherwise this stage records a disabled payload unless enabled by environment.",
+        help="Run RefChecker; otherwise this stage records a disabled result unless enabled by environment.",
     )
     return p.parse_args()
 
@@ -45,7 +45,7 @@ def main() -> None:
         if str(args.paper_pdf or "").strip()
         else None
     )
-    payload = run_refcheck_stage(
+    result = run_refcheck_stage(
         repo_root=ROOT,
         run_dir=run_dir,
         paper_pdf=paper_pdf,
@@ -53,7 +53,7 @@ def main() -> None:
         reuse_job_id=str(args.reuse_job_id or "").strip(),
         enable_refcheck=args.enable_refcheck,
     )
-    print(json.dumps(payload, ensure_ascii=False, indent=2))
+    print(json.dumps(result.model_dump(), ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":

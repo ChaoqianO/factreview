@@ -8,7 +8,7 @@ from typing import Any
 
 from common.config import get_settings
 from common.env import load_env_file
-from common.pipeline_context import init_full_pipeline_context
+from common.pipeline_context import execution_stage_dir, init_full_pipeline_context
 from fact_generation.execution.stage_runner import run_execution_stage
 from fact_generation.positioning.stage_runner import run_positioning_stage
 from fact_generation.refcheck.stage_runner import run_refcheck_stage
@@ -17,6 +17,7 @@ from preprocessing.claim_extract.stage_runner import run_claim_extract_stage
 from preprocessing.parse.stage_runner import run_parse_stage
 from review.report.stage_runner import run_report_stage
 from review.teaser.stage_runner import run_teaser_stage
+from schemas.stage import StageResult
 from util.paper_input import infer_paper_key, materialize_paper_pdf
 from util.run_layout import build_run_dir, ensure_run_subdirs, make_run_id
 
@@ -109,20 +110,20 @@ def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
             "summary": {},
             "alignment": {},
         }
-        execution_out = run_dir / "stages" / "fact_generation" / "execution" / "execution.json"
+        execution_out = execution_stage_dir(run_dir) / "execution.json"
         _write_json(execution_out, execution_payload)
-        execution_result = {
-            "status": "skipped",
-            "output": str(execution_out),
-            "run_dir": "",
-        }
+        execution_result = StageResult(
+            status="skipped",
+            outputs={"main": str(execution_out)},
+            extra={"run_dir": ""},
+        )
     else:
         execution_result = run_execution_stage(
             run_dir=run_dir,
             paper_pdf=paper_pdf,
             paper_key=paper_key,
             paper_extracted_dir=str(
-                (parse_result.get("shared_execution_extract") or {}).get("paper_extracted_dir") or ""
+                (parse_result.extra.get("shared_execution_extract") or {}).get("paper_extracted_dir") or ""
             ),
             max_attempts=int(args.max_attempts),
             no_pdf_extract=bool(args.no_pdf_extract),
@@ -133,41 +134,35 @@ def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
     )
     teaser_result = run_teaser_stage(run_dir=run_dir)
 
-    statuses = {
-        "parse": str(parse_result.get("status") or "failed"),
-        "claim_extract": str(claim_extract_result.get("status") or "failed"),
-        "refcheck": str(refcheck_result.get("status") or "failed"),
-        "positioning": str(positioning_result.get("status") or "failed"),
-        "execution": str(execution_result.get("status") or "failed"),
-        "report": str(report_result.get("status") or "failed"),
-        "teaser": str(teaser_result.get("status") or "failed"),
+    results: dict[str, StageResult] = {
+        "parse": parse_result,
+        "claim_extract": claim_extract_result,
+        "refcheck": refcheck_result,
+        "positioning": positioning_result,
+        "execution": execution_result,
+        "report": report_result,
+        "teaser": teaser_result,
     }
+    statuses = {name: r.status for name, r in results.items()}
+    stage_errors = {name: r.error for name, r in results.items() if r.error}
 
     outputs: dict[str, str] = {}
-    if parse_result.get("output"):
-        outputs["parse"] = str(parse_result.get("output"))
-    if claim_extract_result.get("output"):
-        outputs["claim_extract"] = str(claim_extract_result.get("output"))
-    if positioning_result.get("output"):
-        outputs["positioning"] = str(positioning_result.get("output"))
-    if refcheck_result.get("output"):
-        outputs["refcheck"] = str(refcheck_result.get("output"))
-    if refcheck_result.get("output_md"):
-        outputs["refcheck_md"] = str(refcheck_result.get("output_md"))
-    if execution_result.get("output"):
-        outputs["execution"] = str(execution_result.get("output"))
-    if report_result.get("output_json"):
-        outputs["report_json"] = str(report_result.get("output_json"))
-    if report_result.get("output_md"):
-        outputs["report_md"] = str(report_result.get("output_md"))
-    if report_result.get("output_audit_json"):
-        outputs["report_audit_json"] = str(report_result.get("output_audit_json"))
-    if report_result.get("output_pdf"):
-        outputs["report_pdf"] = str(report_result.get("output_pdf"))
-    if teaser_result.get("teaser_figure_prompt"):
-        outputs["teaser_figure_prompt"] = str(teaser_result.get("teaser_figure_prompt"))
-    if teaser_result.get("teaser_figure_image"):
-        outputs["teaser_figure_image"] = str(teaser_result.get("teaser_figure_image"))
+    for name in ("parse", "claim_extract", "refcheck", "positioning", "execution"):
+        main = results[name].outputs.get("main")
+        if main:
+            outputs[name] = main
+    granular = (
+        ("refcheck_md", refcheck_result.outputs.get("markdown")),
+        ("report_json", report_result.outputs.get("json")),
+        ("report_md", report_result.outputs.get("markdown")),
+        ("report_audit_json", report_result.outputs.get("audit_json")),
+        ("report_pdf", report_result.outputs.get("pdf")),
+        ("teaser_figure_prompt", teaser_result.outputs.get("prompt")),
+        ("teaser_figure_image", teaser_result.outputs.get("image")),
+    )
+    for key, value in granular:
+        if value:
+            outputs[key] = value
 
     summary = {
         "paper_key": paper_key,
@@ -176,12 +171,13 @@ def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
         "paper_pdf": str(paper_pdf),
         "run_id": run_id,
         "run_dir": str(run_dir),
-        "job_id": parse_result.get("job_id"),
-        "job_dir": parse_result.get("job_dir"),
+        "job_id": parse_result.extra.get("job_id"),
+        "job_dir": parse_result.extra.get("job_dir"),
         "stages": statuses,
+        "stage_errors": stage_errors,
         "outputs": outputs,
-        "reference_check": refcheck_result.get("reference_check") or {"enabled": enable_refcheck},
-        "teaser_figure": teaser_result.get("teaser_figure") or {},
+        "reference_check": refcheck_result.extra.get("reference_check") or {"enabled": enable_refcheck},
+        "teaser_figure": teaser_result.extra.get("teaser_figure") or {},
     }
 
     summary_path = run_dir / "full_pipeline_summary.json"

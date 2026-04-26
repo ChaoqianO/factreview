@@ -7,9 +7,7 @@ writes ``stages/preprocessing/parse/paper.json`` for downstream stages.
 
 from __future__ import annotations
 
-import shutil
 from pathlib import Path
-from typing import Any
 
 from common.pipeline_context import (
     bootstrap_bridge_state,
@@ -19,23 +17,8 @@ from common.pipeline_context import (
     resolve_artifact_path,
     write_json_file,
 )
-
-
-def _copy_file_if_exists(src: Path | None, dst: Path) -> bool:
-    if src is None or (not src.exists()) or (not src.is_file()):
-        return False
-    dst.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(src, dst)
-    return True
-
-
-def _copy_dir_if_exists(src: Path | None, dst: Path) -> bool:
-    if src is None or (not src.exists()) or (not src.is_dir()):
-        return False
-    if dst.exists():
-        shutil.rmtree(dst, ignore_errors=True)
-    shutil.copytree(src, dst)
-    return True
+from schemas.stage import StageResult
+from util.fs import copy_dir_if_exists, copy_file_if_exists
 
 
 def _materialize_execution_paper_extract(
@@ -56,9 +39,9 @@ def _materialize_execution_paper_extract(
     assets_src = job_dir / "mineru_assets"
     assets_dst = extracted_dir / "mineru_assets"
 
-    copied_md = _copy_file_if_exists(mineru_md, md_dst)
-    copied_content = _copy_file_if_exists(mineru_content, content_dst)
-    copied_assets = _copy_dir_if_exists(assets_src, assets_dst)
+    copied_md = copy_file_if_exists(mineru_md, md_dst)
+    copied_content = copy_file_if_exists(mineru_content, content_dst)
+    copied_assets = copy_dir_if_exists(assets_src, assets_dst)
 
     tables_dir = extracted_dir / "tables"
     tables_dir.mkdir(parents=True, exist_ok=True)
@@ -80,7 +63,7 @@ def run_parse_stage(
     paper_key: str,
     reuse_job_id: str = "",
     materialize_execution_extract: bool = True,
-) -> dict[str, Any]:
+) -> StageResult:
     ensure_full_pipeline_context(run_dir=run_dir, allow_standalone=True, stage="parse")
     state = bootstrap_bridge_state(
         repo_root=repo_root,
@@ -148,13 +131,24 @@ def run_parse_stage(
         },
     )
 
-    return {
-        "status": "ok" if (mineru_md is not None and mineru_md.exists()) else "failed",
-        "output": str(parse_out),
-        "job_id": state.job_id,
-        "job_dir": str(state.job_dir),
-        "shared_execution_extract": shared_extract,
-    }
+    md_ok = mineru_md is not None and mineru_md.exists()
+    error = ""
+    if not md_ok:
+        runtime_error = str(own_payload.get("error") or "").strip()
+        runtime_message = str(own_payload.get("message") or "").strip()
+        runtime_status = str(own_payload.get("status") or "").strip()
+        detail = runtime_error or runtime_message or f"runtime status={runtime_status!r}" or "no detail"
+        error = f"MinerU markdown not produced ({detail})"
+    return StageResult(
+        status="ok" if md_ok else "failed",
+        outputs={"main": str(parse_out)},
+        extra={
+            "job_id": state.job_id,
+            "job_dir": str(state.job_dir),
+            "shared_execution_extract": shared_extract,
+        },
+        error=error,
+    )
 
 
 if __name__ == "__main__":

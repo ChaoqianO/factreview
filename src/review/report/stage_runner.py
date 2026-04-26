@@ -19,39 +19,30 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-ROOT = Path(__file__).resolve().parents[3]
-SRC = ROOT / "src"
-if str(SRC) not in sys.path:
-    sys.path.insert(0, str(SRC))
-
-from common.config import get_settings  # noqa: E402
-from common.pipeline_context import (  # noqa: E402
+from common.config import get_settings
+from common.pipeline_context import (
     bootstrap_bridge_state,
     ensure_full_pipeline_context,
+    execution_stage_dir,
     load_bridge_state,
     load_job_state_snapshot,
     load_stage_assets_snapshot,
     read_json_file,
+    refcheck_stage_dir,
+    report_stage_dir,
     resolve_artifact_path,
     write_json_file,
 )
-from fact_generation.refcheck.refcheck import format_reference_check_markdown  # noqa: E402
-from review.report.pdf_renderer import build_review_report_pdf  # noqa: E402
+from fact_generation.refcheck.refcheck import format_reference_check_markdown
+from review.report.pdf_renderer import build_review_report_pdf
+from schemas.stage import StageResult
+from util.fs import copy_file_if_exists
 
 
 def _read_text(path: Path) -> str:
-    try:
-        return path.read_text(encoding="utf-8", errors="ignore")
-    except Exception:
+    if not path.exists():
         return ""
-
-
-def _copy_if_exists(src: Path | None, dst: Path) -> bool:
-    if src is None or not src.exists() or not src.is_file():
-        return False
-    dst.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(src, dst)
-    return True
+    return path.read_text(encoding="utf-8", errors="ignore")
 
 
 def _render_review_pdf(*, markdown_path: Path, pdf_path: Path, workspace_title: str, source_pdf_name: str) -> bool:
@@ -86,17 +77,19 @@ def _render_review_pdf(*, markdown_path: Path, pdf_path: Path, workspace_title: 
         pdf_path.parent.mkdir(parents=True, exist_ok=True)
         pdf_path.write_bytes(pdf_bytes)
         return True
-    except Exception:
+    except Exception as exc:
+        # PDF rendering is best-effort; the markdown is the canonical artifact.
+        # Surface the cause so users can debug a missing PDF instead of guessing.
+        # Route to stderr so this never pollutes the JSON output that
+        # scripts/execute_stage_report.py writes to stdout.
+        print(f"[report] PDF render failed: {type(exc).__name__}: {exc}", file=sys.stderr)
         return False
 
 
 def _absolutize_markdown_image_refs(*, markdown_path: Path, source_base_dirs: list[Path]) -> None:
     if not markdown_path.exists() or not markdown_path.is_file():
         return
-    try:
-        text = markdown_path.read_text(encoding="utf-8", errors="ignore")
-    except Exception:
-        return
+    text = markdown_path.read_text(encoding="utf-8", errors="ignore")
 
     def _replace(match: re.Match[str]) -> str:
         whole = match.group(0) or ""
@@ -107,10 +100,7 @@ def _absolutize_markdown_image_refs(*, markdown_path: Path, source_base_dirs: li
         if src_path.is_absolute():
             return whole
         for base_dir in source_base_dirs:
-            try:
-                resolved = (base_dir / src).resolve()
-            except Exception:
-                continue
+            resolved = (base_dir / src).resolve()
             if resolved.exists() and resolved.is_file():
                 target = resolved
                 if resolved.name.lower() == "overview_figure.jpg":
@@ -119,7 +109,7 @@ def _absolutize_markdown_image_refs(*, markdown_path: Path, source_base_dirs: li
                         if not alias.exists() or not alias.is_file():
                             shutil.copy2(resolved, alias)
                         target = alias
-                    except Exception:
+                    except OSError:
                         target = resolved
                 return whole.replace(src, str(target))
         return whole
@@ -130,7 +120,7 @@ def _absolutize_markdown_image_refs(*, markdown_path: Path, source_base_dirs: li
 
 
 def _load_reference_check_payload(run_dir: Path) -> dict[str, Any]:
-    return read_json_file(run_dir / "stages" / "fact_generation" / "refcheck" / "reference_check.json")
+    return read_json_file(refcheck_stage_dir(run_dir) / "reference_check.json")
 
 
 def _append_reference_check_section(
@@ -149,10 +139,6 @@ def _append_reference_check_section(
     return section + "\n"
 
 
-def report_stage_dir(run_dir: Path) -> Path:
-    return run_dir / "stages" / "review" / "report"
-
-
 def run_report_stage(
     *,
     repo_root: Path,
@@ -160,7 +146,7 @@ def run_report_stage(
     paper_pdf: Path | None = None,
     paper_key: str = "",
     reuse_job_id: str = "",
-) -> dict[str, Any]:
+) -> StageResult:
     ensure_full_pipeline_context(run_dir=run_dir, allow_standalone=True, stage="report")
     bridge = load_bridge_state(run_dir)
     if bridge is None:
@@ -203,9 +189,9 @@ def run_report_stage(
     review_audit = out_dir / "final_review_audit.json"
     pdf_path = out_dir / "final_review.pdf"
 
-    md_ok = _copy_if_exists(final_md, review_md)
-    audit_ok = _copy_if_exists(final_audit, review_audit)
-    pdf_ok = _copy_if_exists(final_pdf, pdf_path)
+    md_ok = copy_file_if_exists(final_md, review_md)
+    audit_ok = copy_file_if_exists(final_audit, review_audit)
+    pdf_ok = copy_file_if_exists(final_pdf, pdf_path)
 
     settings = get_settings()
     reference_check_payload = _load_reference_check_payload(run_dir)
@@ -246,7 +232,7 @@ def run_report_stage(
         else:
             pdf_ok = rendered_pdf_ok or pdf_ok
 
-    execution_payload = read_json_file(run_dir / "stages" / "fact_generation" / "execution" / "execution.json")
+    execution_payload = read_json_file(execution_stage_dir(run_dir) / "execution.json")
 
     write_json_file(
         review_json,
@@ -270,17 +256,35 @@ def run_report_stage(
         },
     )
 
-    result: dict[str, Any] = {
-        "status": "ok" if (final_md is not None and final_md.exists()) else "failed",
-        "output_json": str(review_json),
-        "output_md": str(review_md),
-        "output_md_clean": str(review_md_clean) if review_md_clean.exists() else "",
-    }
+    # ``main`` is the canonical user-facing artifact (the rendered review
+    # markdown). Only populate keys for files that actually exist on disk so
+    # callers don't dereference paths to nothing. ``json`` is always written
+    # because we just produced ``review_json`` above. Tie the overall stage
+    # status to ``md_ok`` so the contract ``status == "ok" ⟹ outputs["main"]
+    # exists`` holds.
+    outputs: dict[str, str] = {"json": str(review_json)}
+    if md_ok:
+        outputs["main"] = str(review_md)
+        outputs["markdown"] = str(review_md)
+    if review_md_clean.exists():
+        outputs["markdown_clean"] = str(review_md_clean)
     if audit_ok:
-        result["output_audit_json"] = str(review_audit)
+        outputs["audit_json"] = str(review_audit)
     if pdf_ok:
-        result["output_pdf"] = str(pdf_path)
-    return result
+        outputs["pdf"] = str(pdf_path)
+    error = ""
+    if not md_ok:
+        if final_md is None:
+            error = "agent runner produced no final_markdown_path"
+        elif not final_md.exists():
+            error = f"final review markdown not found at {final_md}"
+        else:
+            error = f"failed to copy final review markdown from {final_md} to {review_md}"
+    return StageResult(
+        status="ok" if md_ok else "failed",
+        outputs=outputs,
+        error=error,
+    )
 
 
 if __name__ == "__main__":

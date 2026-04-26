@@ -22,8 +22,8 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     run_dir = Path(args.run_dir).resolve()
-    payload = run_teaser_stage(run_dir=run_dir)
-    print(json.dumps(payload, ensure_ascii=False, indent=2))
+    result = run_teaser_stage(run_dir=run_dir)
+    print(json.dumps(result.model_dump(), ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":

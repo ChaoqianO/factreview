@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from preprocessing.parse.mineru import extract_with_mineru, mineru_available
-from util.fs import ensure_dir, write_text
+from util.fs import copy_file_if_exists, ensure_dir, write_text
 from util.paper_input import infer_paper_key, is_url, materialize_paper_pdf
 from util.recorder import append_event
 from util.run_layout import build_run_dir, ensure_run_subdirs, make_run_id, slugify_run_key
@@ -224,14 +224,6 @@ def _copy_ignore_patterns(src_root: Path):
     return ignore
 
 
-def _copy_file_if_exists(src: Path, dst: Path) -> bool:
-    if not src.exists() or not src.is_file():
-        return False
-    dst.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(src, dst)
-    return True
-
-
 def _configured_demo_dir(paper_key: str) -> Path | None:
     """Locate a bundled demo fixture for a paper key."""
     raw_key = str(paper_key or "paper").strip()
@@ -269,7 +261,7 @@ def _materialize_demo_fixture(demo_dir: Path | None, baseline_dir: Path) -> None
         if dst.exists():
             return
         for src in candidates:
-            if _copy_file_if_exists(src, dst):
+            if copy_file_if_exists(src, dst):
                 return
 
     _copy_first(
@@ -289,7 +281,7 @@ def _materialize_demo_fixture(demo_dir: Path | None, baseline_dir: Path) -> None
             demo_dir / "baseline.json",
         ),
     )
-    _copy_file_if_exists(demo_dir / "paper.pdf", baseline_dir / "paper.pdf")
+    copy_file_if_exists(demo_dir / "paper.pdf", baseline_dir / "paper.pdf")
 
 
 def _copy_prepared_extract(prepared_extract_dir: str, baseline_dir: Path) -> str:

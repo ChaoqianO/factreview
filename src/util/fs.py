@@ -47,6 +47,33 @@ def safe_relpath(path: str | Path, start: str | Path) -> str:
         return str(path)
 
 
+def copy_file_if_exists(src: Path | None, dst: Path) -> bool:
+    """Copy ``src`` to ``dst`` when ``src`` is an existing regular file.
+
+    Returns ``True`` when the copy occurred, ``False`` when ``src`` was
+    missing or not a file. Creates ``dst``'s parent directory as needed.
+    """
+    if src is None or (not src.exists()) or (not src.is_file()):
+        return False
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(src, dst)
+    return True
+
+
+def copy_dir_if_exists(src: Path | None, dst: Path) -> bool:
+    """Copy directory tree ``src`` to ``dst`` when ``src`` is an existing dir.
+
+    If ``dst`` already exists, it is removed first. Returns ``True`` on copy,
+    ``False`` when ``src`` was missing or not a directory.
+    """
+    if src is None or (not src.exists()) or (not src.is_dir()):
+        return False
+    if dst.exists():
+        shutil.rmtree(dst, ignore_errors=True)
+    shutil.copytree(src, dst)
+    return True
+
+
 def copy_into(src: str | Path, dst_dir: str | Path, ignore_globs: Iterable[str] | None = None) -> Path:
     src_p = Path(src)
     dst_dir_p = ensure_dir(dst_dir)

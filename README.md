@@ -194,6 +194,23 @@ The optional execution stage is a bounded workflow:
 prepare -> plan -> run -> judge -> fix -> finalize
 ```
 
+## Troubleshooting
+
+- **`codex login` fails or is not on PATH** — install the Codex CLI first
+  (`npm install -g @openai/codex` or follow the OpenAI Codex docs), then rerun
+  `codex login` and pick the ChatGPT sign-in flow.
+- **`MINERU_API_TOKEN` missing** — the parse stage will raise on the first run.
+  Get a token from <https://mineru.net> (free tier is sufficient for most
+  papers) and set it in `.env` or pass `--mineru-api-token`.
+- **`--enable-refcheck` errors with "tools/refchecker not found"** — RefChecker
+  is a git submodule that fresh clones don't pull by default. Run
+  `git submodule update --init --recursive` and `pip install -e ".[refcheck]"`.
+- **Teaser stage skips silently / no `teaser_figure.png`** — `GEMINI_API_KEY`
+  is unset (this is the default). The prompt is still written to
+  `stages/review/teaser/teaser_figure_prompt.txt` and copied to your
+  clipboard; paste it into the Gemini web app to generate the image
+  manually.
+
 ## Development
 
 ```bash
@@ -201,7 +218,7 @@ pip install -e ".[runtime,dev]"
 
 ruff check .
 ruff format --check .
-mypy src/schemas src/util
+mypy src/schemas src/util src/common
 pytest tests/unit -m "not slow and not e2e and not requires_docker and not requires_llm and not requires_mineru"
 ```
 

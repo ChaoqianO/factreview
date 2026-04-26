@@ -41,7 +41,7 @@ def main() -> None:
         if str(args.paper_pdf or "").strip()
         else None
     )
-    payload = run_execution_stage(
+    result = run_execution_stage(
         run_dir=run_dir,
         paper_pdf=paper_pdf,
         paper_key=paper_key,
@@ -49,7 +49,7 @@ def main() -> None:
         max_attempts=int(args.max_attempts),
         no_pdf_extract=bool(args.no_pdf_extract),
     )
-    print(json.dumps(payload, ensure_ascii=False, indent=2))
+    print(json.dumps(result.model_dump(), ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":

@@ -281,6 +281,8 @@ def _build_sections_from_legacy_fields(
     suggestions: Any,
     storylines: Any,
 ) -> dict[str, str]:
+    # Intentionally kept: handles the pre-section-schema state shape that older
+    # cached job states still use. Required for resuming/replaying legacy runs.
     sections: dict[str, str] = {}
 
     summary_text = _coerce_markdown_text(summary)

@@ -1,16 +1,11 @@
 from __future__ import annotations
 
-import sys
 from pathlib import Path
 from typing import Any
 
-ROOT = Path(__file__).resolve().parents[3]
-SRC = ROOT / "src"
-if str(SRC) not in sys.path:
-    sys.path.insert(0, str(SRC))
-
-from common.pipeline_context import (  # noqa: E402
+from common.pipeline_context import (
     bootstrap_bridge_state,
+    claim_extract_stage_dir,
     ensure_full_pipeline_context,
     load_bridge_state,
     load_job_state_snapshot,
@@ -19,6 +14,7 @@ from common.pipeline_context import (  # noqa: E402
     resolve_artifact_path,
     write_json_file,
 )
+from schemas.stage import StageResult
 
 
 def run_claim_extract_stage(
@@ -28,7 +24,7 @@ def run_claim_extract_stage(
     paper_pdf: Path | None = None,
     paper_key: str = "",
     reuse_job_id: str = "",
-) -> dict[str, Any]:
+) -> StageResult:
     ensure_full_pipeline_context(run_dir=run_dir, allow_standalone=True, stage="claim_extract")
     bridge = load_bridge_state(run_dir)
     if bridge is None:
@@ -61,7 +57,7 @@ def run_claim_extract_stage(
         # factreview-own completed jobs can legitimately have zero annotations and no annotations.json.
         annotations_payload = []
 
-    facts_out = run_dir / "stages" / "preprocessing" / "claim_extract" / "facts.json"
+    facts_out = claim_extract_stage_dir(run_dir) / "facts.json"
     write_json_file(
         facts_out,
         {
@@ -78,11 +74,20 @@ def run_claim_extract_stage(
         },
     )
 
-    return {
-        "status": "ok" if (has_annotations_file or annotation_count == 0) else "failed",
-        "output": str(facts_out),
-        "job_id": bridge.job_id,
-    }
+    ok = has_annotations_file or annotation_count == 0
+    error = ""
+    if not ok:
+        looked_at = annotations_raw or (str(annotations) if annotations else "no path resolved")
+        error = (
+            f"job reported {annotation_count} annotations but annotations.json is missing "
+            f"(looked at {looked_at})"
+        )
+    return StageResult(
+        status="ok" if ok else "failed",
+        outputs={"main": str(facts_out)},
+        extra={"job_id": bridge.job_id},
+        error=error,
+    )
 
 
 if __name__ == "__main__":

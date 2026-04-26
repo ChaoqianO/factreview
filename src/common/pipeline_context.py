@@ -35,6 +35,12 @@ _STAGE_ASSETS_SNAPSHOT_FILE = "_stage_assets_snapshot.json"
 # snapshot artifacts. Kept here (not in parse/) because the snapshot loaders
 # are called from every downstream stage and we want a single source of truth.
 _PARSE_STAGE_PATH: tuple[str, ...] = ("preprocessing", "parse")
+_CLAIM_EXTRACT_STAGE_PATH: tuple[str, ...] = ("preprocessing", "claim_extract")
+_REFCHECK_STAGE_PATH: tuple[str, ...] = ("fact_generation", "refcheck")
+_POSITIONING_STAGE_PATH: tuple[str, ...] = ("fact_generation", "positioning")
+_EXECUTION_STAGE_PATH: tuple[str, ...] = ("fact_generation", "execution")
+_REPORT_STAGE_PATH: tuple[str, ...] = ("review", "report")
+_TEASER_STAGE_PATH: tuple[str, ...] = ("review", "teaser")
 
 
 @dataclass(frozen=True)
@@ -125,11 +131,49 @@ def ensure_full_pipeline_context(*, run_dir: Path, allow_standalone: bool = Fals
         )
 
 
-# ── Snapshot paths ───────────────────────────────────────────────────────────
+# ── Stage directory helpers ──────────────────────────────────────────────────
+#
+# One helper per stage so that every stage_runner and pipeline_full.py asks for
+# its output directory the same way. If the on-disk layout ever changes,
+# updating the ``_*_STAGE_PATH`` tuples above is the only edit needed.
 
 
 def parse_stage_dir(run_dir: Path) -> Path:
+    """Return ``run_dir/stages/preprocessing/parse``."""
     return run_dir.joinpath("stages", *_PARSE_STAGE_PATH)
+
+
+def claim_extract_stage_dir(run_dir: Path) -> Path:
+    """Return ``run_dir/stages/preprocessing/claim_extract``."""
+    return run_dir.joinpath("stages", *_CLAIM_EXTRACT_STAGE_PATH)
+
+
+def refcheck_stage_dir(run_dir: Path) -> Path:
+    """Return ``run_dir/stages/fact_generation/refcheck``."""
+    return run_dir.joinpath("stages", *_REFCHECK_STAGE_PATH)
+
+
+def positioning_stage_dir(run_dir: Path) -> Path:
+    """Return ``run_dir/stages/fact_generation/positioning``."""
+    return run_dir.joinpath("stages", *_POSITIONING_STAGE_PATH)
+
+
+def execution_stage_dir(run_dir: Path) -> Path:
+    """Return ``run_dir/stages/fact_generation/execution``."""
+    return run_dir.joinpath("stages", *_EXECUTION_STAGE_PATH)
+
+
+def report_stage_dir(run_dir: Path) -> Path:
+    """Return ``run_dir/stages/review/report``."""
+    return run_dir.joinpath("stages", *_REPORT_STAGE_PATH)
+
+
+def teaser_stage_dir(run_dir: Path) -> Path:
+    """Return ``run_dir/stages/review/teaser``."""
+    return run_dir.joinpath("stages", *_TEASER_STAGE_PATH)
+
+
+# ── Snapshot paths ───────────────────────────────────────────────────────────
 
 
 def _job_state_snapshot_path(run_dir: Path) -> Path:
@@ -152,24 +196,7 @@ def load_stage_assets_snapshot(run_dir: Path) -> dict[str, Any]:
     return read_json_file(_stage_assets_snapshot_path(run_dir))
 
 
-# ── File-copy helpers used by snapshot materialization ───────────────────────
-
-
-def _copy_file_if_exists(src: Path | None, dst: Path) -> bool:
-    if src is None or (not src.exists()) or (not src.is_file()):
-        return False
-    dst.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(src, dst)
-    return True
-
-
-def _copy_dir_if_exists(src: Path | None, dst: Path) -> bool:
-    if src is None or (not src.exists()) or (not src.is_dir()):
-        return False
-    if dst.exists():
-        shutil.rmtree(dst, ignore_errors=True)
-    shutil.copytree(src, dst)
-    return True
+# ── Snapshot materialization ─────────────────────────────────────────────────
 
 
 def _snapshot_file(*, source: Path | None, destination: Path) -> str:

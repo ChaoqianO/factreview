@@ -2,22 +2,18 @@ from __future__ import annotations
 
 import asyncio
 import shutil
-import sys
 from pathlib import Path
 from typing import Any
 
-ROOT = Path(__file__).resolve().parents[3]
-SRC = ROOT / "src"
-if str(SRC) not in sys.path:
-    sys.path.insert(0, str(SRC))
-
-from common.config import get_settings  # noqa: E402
-from common.pipeline_context import (  # noqa: E402
+from common.config import get_settings
+from common.pipeline_context import (
     ensure_full_pipeline_context,
+    execution_stage_dir,
     load_bridge_state,
     read_json_file,
     write_json_file,
 )
+from schemas.stage import StageResult, StageStatus
 
 
 def _load_execution_artifacts(state: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any], str]:
@@ -78,7 +74,7 @@ def run_execution_stage(
     max_attempts: int = 5,
     no_pdf_extract: bool = False,
     enable_refcheck: bool | None = None,
-) -> dict[str, Any]:
+) -> StageResult:
     ensure_full_pipeline_context(run_dir=run_dir, allow_standalone=True, stage="execution")
     bridge = load_bridge_state(run_dir)
     resolved_pdf = paper_pdf.resolve() if paper_pdf else (bridge.paper_pdf if bridge else None)
@@ -91,7 +87,7 @@ def run_execution_stage(
     if not resolved_key:
         resolved_key = resolved_pdf.stem.strip() or "paper"
 
-    stage_root = run_dir / "stages" / "fact_generation" / "execution"
+    stage_root = execution_stage_dir(run_dir)
     stage_root.mkdir(parents=True, exist_ok=True)
     execution_run_dir = stage_root / "run"
     stage_run_root = stage_root / "runs"
@@ -118,11 +114,20 @@ def run_execution_stage(
     summary, alignment, actual_run_dir = _load_execution_artifacts(state)
     exit_status = str(run_result.get("exit_status") or "failed")
 
-    stage_status = "failed"
+    stage_status: StageStatus = "failed"
     if exit_status == "success":
         stage_status = "ok"
     elif exit_status == "inconclusive":
         stage_status = "inconclusive"
+
+    error = ""
+    if stage_status == "failed":
+        detail = str(run_result.get("error") or run_result.get("message") or "").strip()
+        error = (
+            f"execution orchestrator exit_status={exit_status!r}: {detail}"
+            if detail
+            else f"execution orchestrator exit_status={exit_status!r}"
+        )
 
     payload = {
         "paper_key": resolved_key,
@@ -138,11 +143,12 @@ def run_execution_stage(
     output_path = stage_root / "execution.json"
     write_json_file(output_path, payload)
 
-    return {
-        "status": stage_status,
-        "output": str(output_path),
-        "run_dir": actual_run_dir,
-    }
+    return StageResult(
+        status=stage_status,
+        outputs={"main": str(output_path)},
+        extra={"run_dir": actual_run_dir},
+        error=error,
+    )
 
 
 if __name__ == "__main__":

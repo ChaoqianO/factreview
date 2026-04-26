@@ -10,34 +10,26 @@ teaser image is generated via Gemini; otherwise only the prompt is written.
 
 from __future__ import annotations
 
-import sys
 from pathlib import Path
-from typing import Any
 
-ROOT = Path(__file__).resolve().parents[3]
-SRC = ROOT / "src"
-if str(SRC) not in sys.path:
-    sys.path.insert(0, str(SRC))
-
-from common.pipeline_context import (  # noqa: E402
+from common.pipeline_context import (
     ensure_full_pipeline_context,
     read_json_file,
+    report_stage_dir,
+    teaser_stage_dir,
     write_json_file,
 )
-from review.teaser.teaser import _env_true, generate_teaser_figure  # noqa: E402
-
-
-def teaser_stage_dir(run_dir: Path) -> Path:
-    return run_dir / "stages" / "review" / "teaser"
+from review.teaser.teaser import _env_true, generate_teaser_figure
+from schemas.stage import StageResult
 
 
 def run_teaser_stage(
     *,
     run_dir: Path,
-) -> dict[str, Any]:
+) -> StageResult:
     ensure_full_pipeline_context(run_dir=run_dir, allow_standalone=True, stage="teaser")
 
-    report_dir = run_dir / "stages" / "review" / "report"
+    report_dir = report_stage_dir(run_dir)
     clean_md = report_dir / "final_review_clean.md"
     final_md = report_dir / "final_review.md"
     source_md = clean_md if clean_md.exists() else final_md
@@ -47,15 +39,24 @@ def run_teaser_stage(
     teaser_json_path = out_dir / "teaser_figure.json"
 
     if not source_md.exists():
+        # The report stage failed to produce a markdown — propagate as a hard
+        # failure so callers and CI signal correctly instead of silently skipping.
+        error_msg = (
+            f"no review markdown produced by the report stage (checked {clean_md.name} and {final_md.name})"
+        )
         payload = {
-            "status": "skipped",
-            "message": f"no review markdown found at {source_md}",
+            "status": "failed",
+            "message": error_msg,
             "source_markdown_path": "",
             "prompt_path": "",
             "image_path": "",
         }
         write_json_file(teaser_json_path, payload)
-        return {"status": "skipped", "output_json": str(teaser_json_path)}
+        return StageResult(
+            status="failed",
+            outputs={"main": str(teaser_json_path), "json": str(teaser_json_path)},
+            error=error_msg,
+        )
 
     use_gemini = _env_true("TEASER_USE_GEMINI", default=True)
     teaser_result = generate_teaser_figure(
@@ -85,16 +86,23 @@ def run_teaser_stage(
         review_payload["teaser_figure"] = payload
         write_json_file(review_json_path, review_payload)
 
-    result: dict[str, Any] = {
-        "status": teaser_result.status,
-        "output_json": str(teaser_json_path),
-        "teaser_figure": payload,
-    }
+    # ``main`` is the canonical user-facing artifact: the generated image when
+    # Gemini was used, otherwise the prompt that the user pastes into the
+    # Gemini web app to produce one.
+    outputs: dict[str, str] = {"json": str(teaser_json_path)}
     if teaser_result.prompt_path:
-        result["teaser_figure_prompt"] = teaser_result.prompt_path
+        outputs["prompt"] = str(teaser_result.prompt_path)
     if teaser_result.image_path:
-        result["teaser_figure_image"] = teaser_result.image_path
-    return result
+        outputs["image"] = str(teaser_result.image_path)
+    outputs["main"] = outputs.get("image") or outputs.get("prompt") or outputs["json"]
+    # generate_teaser_figure() returns "prompt_only" or "generated"; both are
+    # successful outcomes for this stage. The granular value is kept in the
+    # teaser_figure payload for callers that care.
+    return StageResult(
+        status="ok",
+        outputs=outputs,
+        extra={"teaser_figure": payload},
+    )
 
 
 if __name__ == "__main__":

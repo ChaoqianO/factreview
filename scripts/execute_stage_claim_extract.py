@@ -39,14 +39,14 @@ def main() -> None:
         if str(args.paper_pdf or "").strip()
         else None
     )
-    payload = run_claim_extract_stage(
+    result = run_claim_extract_stage(
         repo_root=ROOT,
         run_dir=run_dir,
         paper_pdf=paper_pdf,
         paper_key=paper_key,
         reuse_job_id=str(args.reuse_job_id or "").strip(),
     )
-    print(json.dumps(payload, ensure_ascii=False, indent=2))
+    print(json.dumps(result.model_dump(), ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":
