@@ -66,11 +66,7 @@ def _truncate_for_model(text: str, limit: int) -> str:
         return normalized[:limit]
     head = int(limit * 0.65)
     tail = max(0, limit - head - len("\n\n[... truncated ...]\n\n"))
-    return (
-        normalized[:head].rstrip()
-        + "\n\n[... truncated ...]\n\n"
-        + normalized[-tail:].lstrip()
-    )
+    return normalized[:head].rstrip() + "\n\n[... truncated ...]\n\n" + normalized[-tail:].lstrip()
 
 
 def _coerce_issue_list(raw_issues: Any) -> list[FinalReportAuditIssue]:
@@ -121,11 +117,7 @@ def _collect_table_shapes(markdown: str) -> list[tuple[str, int]]:
     while index + 1 < len(lines):
         header = lines[index].strip()
         separator = lines[index + 1].strip()
-        if not (
-            header.startswith("|")
-            and header.endswith("|")
-            and re.fullmatch(r"\|[ :\-|]+\|", separator)
-        ):
+        if not (header.startswith("|") and header.endswith("|") and re.fullmatch(r"\|[ :\-|]+\|", separator)):
             index += 1
             continue
         row_count = 0
@@ -165,7 +157,9 @@ def _check_format_compatibility(original_markdown: str, candidate_markdown: str)
     candidate_tables = _collect_table_shapes(candidate_markdown)
     if len(original_tables) != len(candidate_tables):
         return False, "table count changed"
-    for index, (original_table, candidate_table) in enumerate(zip(original_tables, candidate_tables), start=1):
+    for index, (original_table, candidate_table) in enumerate(
+        zip(original_tables, candidate_tables, strict=False), start=1
+    ):
         original_header, original_row_count = original_table
         candidate_header, candidate_row_count = candidate_table
         if original_header != candidate_header:
@@ -199,7 +193,9 @@ def _build_audit_system_prompt() -> str:
     )
 
 
-def _build_audit_user_prompt(*, iteration: int, max_iterations: int, paper_markdown: str, review_markdown: str) -> str:
+def _build_audit_user_prompt(
+    *, iteration: int, max_iterations: int, paper_markdown: str, review_markdown: str
+) -> str:
     return (
         f"Audit iteration {iteration} of {max_iterations}.\n\n"
         "Compare the current final review against the source paper and list only evidence-grounded mismatches.\n\n"

@@ -6,12 +6,12 @@ review traces back to a :class:`Claim` defined here.
 
 from __future__ import annotations
 
-from enum import Enum
+from enum import StrEnum
 
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class ClaimType(str, Enum):
+class ClaimType(StrEnum):
     """Paper §3.1: claim taxonomy."""
 
     EMPIRICAL = "empirical"
@@ -20,7 +20,7 @@ class ClaimType(str, Enum):
     REPRODUCIBILITY = "reproducibility"
 
 
-class ClaimLabel(str, Enum):
+class ClaimLabel(StrEnum):
     """The five verdicts from paper §3.4."""
 
     SUPPORTED = "supported"

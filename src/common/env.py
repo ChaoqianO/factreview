@@ -34,7 +34,7 @@ def parse_env_line(line: str) -> tuple[str, str] | None:
     if not stripped or stripped.startswith("#") or "=" not in stripped:
         return None
     if stripped.startswith("export "):
-        stripped = stripped[len("export "):].strip()
+        stripped = stripped[len("export ") :].strip()
     key, value = stripped.split("=", 1)
     key = key.strip()
     if not _ENV_KEY_RE.match(key):

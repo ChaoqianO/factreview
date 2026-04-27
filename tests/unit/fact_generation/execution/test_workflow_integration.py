@@ -4,9 +4,9 @@ from __future__ import annotations
 
 
 def test_workflow_importable():
-    from fact_generation.execution.graph import CodeEvalOrchestrator
+    from fact_generation.execution.graph import ExecutionOrchestrator
 
-    assert callable(CodeEvalOrchestrator)
+    assert callable(ExecutionOrchestrator)
 
 
 def test_all_nodes_importable():
@@ -37,9 +37,9 @@ def test_tools_importable():
 
 def test_orchestrator_accepts_new_flags():
     """The orchestrator must accept optional integration flags."""
-    from fact_generation.execution.graph import CodeEvalOrchestrator
+    from fact_generation.execution.graph import ExecutionOrchestrator
 
-    o = CodeEvalOrchestrator(
+    o = ExecutionOrchestrator(
         run_root="/tmp/test_run",
         enable_refcheck=True,
         enable_bibtex=True,
@@ -72,31 +72,25 @@ def test_configured_demo_uses_slugified_key(tmp_path, monkeypatch):
     assert prepare._configured_demo_dir("CompGCN Paper") == demo_dir.resolve()
 
 
-def test_fixed_execution_run_dir_reset_removes_stale_outputs(tmp_path):
-    from fact_generation.execution.stage_runner import _reset_fixed_execution_run_dir
+def test_archive_prior_current_dir_preserves_old_attempt(tmp_path):
+    from fact_generation.execution.stage_runner import _archive_prior_current_dir
 
     stage_root = tmp_path / "stages" / "fact_generation" / "execution"
-    execution_run_dir = stage_root / "run"
-    stale_metric = execution_run_dir / "artifacts" / "metrics" / "old.json"
+    current_dir = stage_root / "current"
+    stale_metric = current_dir / "artifacts" / "metrics" / "old.json"
     stale_metric.parent.mkdir(parents=True)
     stale_metric.write_text("{}", encoding="utf-8")
-    execution_json = stage_root / "execution.json"
-    execution_json.write_text("{}", encoding="utf-8")
+    sibling_execution_json = stage_root / "execution.json"
+    sibling_execution_json.write_text("{}", encoding="utf-8")
 
-    _reset_fixed_execution_run_dir(stage_root=stage_root, execution_run_dir=execution_run_dir)
+    _archive_prior_current_dir(stage_root=stage_root, current_dir=current_dir)
 
-    assert execution_run_dir.exists()
-    assert not stale_metric.exists()
-    assert execution_json.exists()
-
-
-def test_find_latest_code_eval_run_uses_slugified_key(tmp_path):
-    from review.report.code_eval_compare import find_latest_code_eval_run
-
-    run_dir = tmp_path / "runs" / "compgcn_paper_2026-04-25_120000"
-    run_dir.mkdir(parents=True)
-
-    assert find_latest_code_eval_run(tmp_path, "CompGCN Paper") == run_dir
+    assert current_dir.exists()
+    assert not (current_dir / "artifacts" / "metrics" / "old.json").exists()
+    archives = sorted(p for p in stage_root.iterdir() if p.is_dir() and p.name.startswith("current."))
+    assert len(archives) == 1
+    assert (archives[0] / "artifacts" / "metrics" / "old.json").exists()
+    assert sibling_execution_json.exists()
 
 
 def test_paper_image_tag_uses_slugified_key():
@@ -104,8 +98,34 @@ def test_paper_image_tag_uses_slugified_key():
 
     image = _paper_image_tag(cfg={}, paper_key="CompGCN Paper", payload="same")
 
-    assert image.startswith("code-eval-paper:compgcn_paper-")
+    assert image.startswith("factreview-paper:compgcn_paper-")
     assert " " not in image
+
+
+def test_fix_node_terminates_at_max_attempts(tmp_path):
+    """Once ``attempt > max_attempts`` the fix loop must mark the run failed
+    and route to finalize, so the orchestrator can never spin forever."""
+    from fact_generation.execution.graph import _route_after_fix
+    from fact_generation.execution.nodes.fix import fix_node
+
+    run_dir = tmp_path / "run"
+    run_dir.mkdir()
+    state = {
+        "status": "running",
+        "attempt": 2,  # Will be incremented to 3, exceeding max_attempts=2.
+        "max_attempts": 2,
+        "config": {"paper_root": str(tmp_path), "docker_enabled": False},
+        "run": {"dir": str(run_dir), "logs_dir": str(run_dir / "logs"), "fixes_dir": str(run_dir / "fixes")},
+        "history": [],
+    }
+
+    result = fix_node(state)
+
+    assert result["status"] == "failed"
+    assert result["attempt"] == 3
+    history_kinds = [h.get("kind") for h in result.get("history", []) if isinstance(h, dict)]
+    assert "fix_stop" in history_kinds
+    assert _route_after_fix(result) == "finalize"
 
 
 def test_refchecker_package_importable_when_deps_installed():

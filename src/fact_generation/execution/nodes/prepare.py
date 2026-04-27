@@ -12,7 +12,7 @@ from util.fs import copy_file_if_exists, ensure_dir, write_text
 from util.paper_input import infer_paper_key, is_url, materialize_paper_pdf
 from util.recorder import append_event
 from util.run_layout import build_run_dir, ensure_run_subdirs, make_run_id, slugify_run_key
-from util.runner import persist_command_result, run_command
+from util.subprocess_runner import persist_command_result, run_command
 
 from ..tools.docker import docker_ensure_paper_image, docker_strategy
 
@@ -243,9 +243,7 @@ def _configured_demo_dir(paper_key: str) -> Path | None:
 def _select_demo_source(demo_dir: Path | None) -> Path | None:
     if demo_dir is None:
         return None
-    for candidate in (
-        demo_dir / "execution" / "repo",
-    ):
+    for candidate in (demo_dir / "execution" / "repo",):
         if candidate.exists() and candidate.is_dir() and any(candidate.iterdir()):
             return candidate.resolve()
     return None
@@ -359,11 +357,11 @@ def _write_run_manifest(*, run_dir: Path, cfg: dict[str, Any], baseline_dir: Pat
                 "strategy": str(cfg.get("docker_strategy") or ""),
                 "python_spec": str(cfg.get("python_spec") or ""),
                 "paper_image": str(cfg.get("docker_paper_image") or ""),
-                "gpus": str(cfg.get("docker_gpus") or os.environ.get("CODE_EVAL_DOCKER_GPUS") or ""),
+                "gpus": str(cfg.get("docker_gpus") or os.environ.get("EXECUTION_DOCKER_GPUS") or ""),
                 "shm_size": str(
-                    cfg.get("docker_shm_size") or os.environ.get("CODE_EVAL_DOCKER_SHM_SIZE") or ""
+                    cfg.get("docker_shm_size") or os.environ.get("EXECUTION_DOCKER_SHM_SIZE") or ""
                 ),
-                "ipc": str(cfg.get("docker_ipc") or os.environ.get("CODE_EVAL_DOCKER_IPC") or ""),
+                "ipc": str(cfg.get("docker_ipc") or os.environ.get("EXECUTION_DOCKER_IPC") or ""),
             },
             "llm": {
                 "no_llm": bool(cfg.get("no_llm")),
@@ -630,7 +628,7 @@ def prepare_node(state: dict[str, Any]) -> dict[str, Any]:
         if pdf_path and pdf_path.exists():
             append_event(run_dir, "pdf_extract_skipped", {"reason": "disabled"})
 
-    python_spec = str(cfg.get("python_spec") or os.getenv("CODE_EVAL_PYTHON_SPEC") or "").strip()
+    python_spec = str(cfg.get("python_spec") or os.getenv("EXECUTION_PYTHON_SPEC") or "").strip()
     if not python_spec:
         python_spec = _infer_python_spec_from_requirements(paper_root / "requirements.txt")
     cfg["python_spec"] = python_spec

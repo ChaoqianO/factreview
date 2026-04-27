@@ -214,7 +214,7 @@ def main() -> int:
                 if rc == 0:
                     ok = True
                     break
-        allow = str(os.getenv('CODE_EVAL_ALLOW_TORCH_SCATTER_FALLBACK', '1')).strip().lower() in {'1', 'true', 'yes', 'y', 'on'}
+        allow = str(os.getenv('EXECUTION_ALLOW_TORCH_SCATTER_FALLBACK', '1')).strip().lower() in {'1', 'true', 'yes', 'y', 'on'}
         if (not ok) and allow:
             ok = _install_torch_scatter_fallback()
         if not ok:

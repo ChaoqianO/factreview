@@ -1,3 +1,11 @@
+"""Internal entry point invoked by the parse stage as a subprocess.
+
+Not intended for direct user invocation. ``src.common.pipeline_context._run_review_runtime``
+calls this script to drive the agent runtime and capture its job state.
+End users should run ``scripts/execute_review_pipeline.py`` (or one of the
+``execute_stage_*`` scripts) instead.
+"""
+
 from __future__ import annotations
 
 import argparse

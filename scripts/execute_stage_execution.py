@@ -19,7 +19,9 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--run-dir", type=str, required=True, help="Run directory to write stage outputs")
     p.add_argument("--paper-pdf", type=str, default="", help="Optional explicit paper PDF path or URL")
     p.add_argument("--paper-key", type=str, default="")
-    p.add_argument("--paper-extracted-dir", type=str, default="", help="Optional run-local MinerU extract snapshot")
+    p.add_argument(
+        "--paper-extracted-dir", type=str, default="", help="Optional run-local MinerU extract snapshot"
+    )
     p.add_argument("--max-attempts", type=int, default=5)
     p.add_argument("--no-pdf-extract", action="store_true")
     return p.parse_args()
@@ -28,9 +30,8 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     run_dir = Path(args.run_dir).resolve()
-    paper_key = (
-        str(args.paper_key or "").strip()
-        or (infer_paper_key(args.paper_pdf) if str(args.paper_pdf or "").strip() else "")
+    paper_key = str(args.paper_key or "").strip() or (
+        infer_paper_key(args.paper_pdf) if str(args.paper_pdf or "").strip() else ""
     )
     paper_pdf = (
         materialize_paper_pdf(

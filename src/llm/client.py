@@ -29,7 +29,7 @@ def _resolve_openai_codex_model(explicit_model: str = "") -> str:
     candidate = (os.getenv("OPENAI_CODEX_MODEL") or "").strip()
     if candidate:
         return candidate
-    candidate = (os.getenv("CODE_EVAL_OPENAI_MODEL") or "").strip()
+    candidate = (os.getenv("EXECUTION_OPENAI_MODEL") or "").strip()
     if candidate:
         return candidate
     return resolve_codex_model(explicit_model)
@@ -38,7 +38,7 @@ def _resolve_openai_codex_model(explicit_model: str = "") -> str:
 def _resolve_provider(explicit_provider: str = "") -> str:
     for candidate in (
         explicit_provider,
-        os.getenv("CODE_EVAL_MODEL_PROVIDER"),
+        os.getenv("EXECUTION_MODEL_PROVIDER"),
         os.getenv("MODEL_PROVIDER"),
         os.getenv("AGENT_MODEL_PROVIDER"),
     ):
@@ -78,17 +78,14 @@ def resolve_llm_config(provider: str = "", model: str = "", base_url: str = "") 
         )
 
     api_key = (
-        os.getenv("CODE_EVAL_OPENAI_API_KEY")
-        or os.getenv("OPENAI_API_KEY")
-        or os.getenv("API_KEY")
-        or ""
+        os.getenv("EXECUTION_OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY") or os.getenv("API_KEY") or ""
     ).strip() or None
     if api_key:
         return LLMConfig(
             provider="openai",
-            model=model or os.getenv("CODE_EVAL_OPENAI_MODEL") or os.getenv("OPENAI_MODEL", "gpt-5"),
+            model=model or os.getenv("EXECUTION_OPENAI_MODEL") or os.getenv("OPENAI_MODEL", "gpt-5"),
             base_url=base_url
-            or os.getenv("CODE_EVAL_OPENAI_BASE_URL")
+            or os.getenv("EXECUTION_OPENAI_BASE_URL")
             or os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1"),
             api_key=api_key,
         )
@@ -121,7 +118,7 @@ def llm_json(
     cfg: LLMConfig,
 ) -> dict[str, Any]:
     """
-    Minimal JSON response helper for the providers used in code_evaluation.
+    Minimal JSON response helper for the providers used in the execution stage.
     """
     try:
         if cfg.provider == "claude":

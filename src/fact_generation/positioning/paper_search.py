@@ -39,12 +39,12 @@ class PaperSearchRuntimeState:
 
     def to_dict(self) -> dict:
         return {
-            'enabled': bool(self.enabled),
-            'started': bool(self.started),
-            'availability': str(self.availability or '').strip(),
-            'base_url': str(self.base_url or '').strip() or None,
-            'health_url': str(self.health_url or '').strip() or None,
-            'error': str(self.error or '').strip() or None,
+            "enabled": bool(self.enabled),
+            "started": bool(self.started),
+            "availability": str(self.availability or "").strip(),
+            "base_url": str(self.base_url or "").strip() or None,
+            "health_url": str(self.health_url or "").strip() or None,
+            "error": str(self.error or "").strip() or None,
         }
 
 
@@ -81,10 +81,10 @@ class PaperSearchAdapter:
             self._search_state_cache = PaperSearchRuntimeState(
                 enabled=bool(self.search_cfg.enabled),
                 started=False,
-                availability='became_unavailable_during_run',
+                availability="became_unavailable_during_run",
                 base_url=self.search_cfg.base_url,
                 health_url=self._search_health_url(),
-                error=f'{type(exc).__name__}: {exc}',
+                error=f"{type(exc).__name__}: {exc}",
             )
             raise
 
@@ -101,13 +101,13 @@ class PaperSearchAdapter:
         if self._search_state_cache is not None and not force_refresh:
             return self._search_state_cache
 
-        base_url = str(self.search_cfg.base_url or '').strip() or None
+        base_url = str(self.search_cfg.base_url or "").strip() or None
         health_url = self._search_health_url()
         if not bool(self.search_cfg.enabled):
             state = PaperSearchRuntimeState(
                 enabled=False,
                 started=False,
-                availability='disabled_by_config',
+                availability="disabled_by_config",
                 base_url=base_url,
                 health_url=health_url,
             )
@@ -118,18 +118,18 @@ class PaperSearchAdapter:
             state = PaperSearchRuntimeState(
                 enabled=True,
                 started=False,
-                availability='missing_base_url',
+                availability="missing_base_url",
                 base_url=None,
                 health_url=health_url,
             )
             self._search_state_cache = state
             return state
 
-        if not str(self.search_cfg.health_endpoint or '').strip():
+        if not str(self.search_cfg.health_endpoint or "").strip():
             state = PaperSearchRuntimeState(
                 enabled=True,
                 started=True,
-                availability='ready',
+                availability="ready",
                 base_url=base_url,
                 health_url=None,
             )
@@ -137,9 +137,9 @@ class PaperSearchAdapter:
             return state
 
         headers: dict[str, str] = {}
-        api_key = str(self.search_cfg.api_key or '').strip()
+        api_key = str(self.search_cfg.api_key or "").strip()
         if api_key:
-            headers['Authorization'] = f'Bearer {api_key}'
+            headers["Authorization"] = f"Bearer {api_key}"
 
         try:
             async with httpx.AsyncClient(
@@ -155,20 +155,20 @@ class PaperSearchAdapter:
                 payload = None
 
             if isinstance(payload, dict):
-                status = str(payload.get('status') or '').strip().lower()
-                if status and status not in {'healthy', 'ok', 'ready'}:
+                status = str(payload.get("status") or "").strip().lower()
+                if status and status not in {"healthy", "ok", "ready"}:
                     raise RuntimeError(
-                        str(payload.get('error') or payload.get('message') or f'health status={status}')
+                        str(payload.get("error") or payload.get("message") or f"health status={status}")
                     )
-                if 'models_loaded' in payload and not bool(payload.get('models_loaded')):
+                if "models_loaded" in payload and not bool(payload.get("models_loaded")):
                     raise RuntimeError(
-                        str(payload.get('error') or payload.get('message') or 'models_loaded=false')
+                        str(payload.get("error") or payload.get("message") or "models_loaded=false")
                     )
 
             state = PaperSearchRuntimeState(
                 enabled=True,
                 started=True,
-                availability='ready',
+                availability="ready",
                 base_url=base_url,
                 health_url=health_url,
             )
@@ -176,18 +176,18 @@ class PaperSearchAdapter:
             state = PaperSearchRuntimeState(
                 enabled=True,
                 started=False,
-                availability='health_check_failed',
+                availability="health_check_failed",
                 base_url=base_url,
                 health_url=health_url,
-                error=f'{type(exc).__name__}: {exc}',
+                error=f"{type(exc).__name__}: {exc}",
             )
 
         self._search_state_cache = state
         return state
 
     def _search_health_url(self) -> str | None:
-        base_url = str(self.search_cfg.base_url or '').strip()
-        health_endpoint = str(self.search_cfg.health_endpoint or '').strip()
+        base_url = str(self.search_cfg.base_url or "").strip()
+        health_endpoint = str(self.search_cfg.health_endpoint or "").strip()
         if not base_url or not health_endpoint:
             return None
         return f"{base_url.rstrip('/')}/{health_endpoint.lstrip('/')}"
@@ -199,29 +199,29 @@ class PaperSearchAdapter:
         query: str | None,
         question_list: list[str] | None,
     ) -> dict:
-        questions = [q for q in (question_list or []) if str(q or '').strip()]
-        query_text = str(query or '').strip()
+        questions = [q for q in (question_list or []) if str(q or "").strip()]
+        query_text = str(query or "").strip()
         if query_text and query_text not in questions:
             questions = [query_text, *questions]
 
         return {
-            'status': 'not_started',
-            'success': False,
-            'reason': 'paper_search_not_started',
-            'message': 'External paper search was not started in this run.',
-            'query': query_text,
-            'questions': questions,
-            'papers': [],
-            'count': 0,
-            'question_results': [],
-            'retry_required': False,
-            'next_action': 'enter_retrieval_disabled_mode',
-            'next_steps': [
-                'Proceed without external literature search in this run.',
-                'Mark novelty/comparison conclusions as deferred manual verification.',
-                'If external literature search is required, start the retrieval service and rerun the job.',
+            "status": "not_started",
+            "success": False,
+            "reason": "paper_search_not_started",
+            "message": "External paper search was not started in this run.",
+            "query": query_text,
+            "questions": questions,
+            "papers": [],
+            "count": 0,
+            "question_results": [],
+            "retry_required": False,
+            "next_action": "enter_retrieval_disabled_mode",
+            "next_steps": [
+                "Proceed without external literature search in this run.",
+                "Mark novelty/comparison conclusions as deferred manual verification.",
+                "If external literature search is required, start the retrieval service and rerun the job.",
             ],
-            'paper_search_state': state.to_dict(),
+            "paper_search_state": state.to_dict(),
         }
 
     async def _search_remote(
@@ -233,11 +233,11 @@ class PaperSearchAdapter:
         assert self.search_cfg.base_url is not None
 
         url = f"{self.search_cfg.base_url.rstrip('/')}/{self.search_cfg.endpoint.lstrip('/')}"
-        headers = {'Content-Type': 'application/json'}
-        api_key = str(self.search_cfg.api_key or '').strip()
+        headers = {"Content-Type": "application/json"}
+        api_key = str(self.search_cfg.api_key or "").strip()
         if api_key:
-            headers['Authorization'] = f'Bearer {api_key}'
-        payload = {'query': query, 'question_list': question_list}
+            headers["Authorization"] = f"Bearer {api_key}"
+        payload = {"query": query, "question_list": question_list}
 
         async with httpx.AsyncClient(timeout=max(20, int(self.search_cfg.timeout_seconds))) as client:
             response = await client.post(url, headers=headers, json=payload)
@@ -249,54 +249,54 @@ class PaperSearchAdapter:
         if isinstance(data, list):
             papers = [self._normalize_remote_paper_item(item) for item in data if isinstance(item, dict)]
             papers = [row for row in papers if row]
-            questions = [q for q in (question_list or []) if str(q or '').strip()]
-            query_text = str(query or '').strip()
+            questions = [q for q in (question_list or []) if str(q or "").strip()]
+            query_text = str(query or "").strip()
             if query_text and query_text not in questions:
                 questions = [query_text, *questions]
             return {
-                'success': True,
-                'provider': 'remote_list_adapted',
-                'query': query_text,
-                'questions': questions,
-                'papers': papers,
-                'count': len(papers),
-                'question_results': [
+                "success": True,
+                "provider": "remote_list_adapted",
+                "query": query_text,
+                "questions": questions,
+                "papers": papers,
+                "count": len(papers),
+                "question_results": [
                     {
-                        'question': q,
-                        'success': bool(papers),
-                        'count': len(papers),
-                        'papers': papers,
+                        "question": q,
+                        "success": bool(papers),
+                        "count": len(papers),
+                        "papers": papers,
                     }
                     for q in (questions or ([query_text] if query_text else []))
                 ],
             }
         return {
-            'success': False,
-            'error': 'invalid_remote_payload',
-            'papers': [],
-            'count': 0,
+            "success": False,
+            "error": "invalid_remote_payload",
+            "papers": [],
+            "count": 0,
         }
 
     async def _read_remote(self, items: list[dict]) -> dict:
         assert self.read_cfg.base_url is not None
 
         url = f"{self.read_cfg.base_url.rstrip('/')}/{self.read_cfg.endpoint.lstrip('/')}"
-        headers = {'Content-Type': 'application/json'}
-        api_key = str(self.read_cfg.api_key or '').strip()
+        headers = {"Content-Type": "application/json"}
+        api_key = str(self.read_cfg.api_key or "").strip()
         if api_key:
-            headers['Authorization'] = f'Bearer {api_key}'
+            headers["Authorization"] = f"Bearer {api_key}"
 
         async with httpx.AsyncClient(timeout=max(20, int(self.read_cfg.timeout_seconds))) as client:
-            response = await client.post(url, headers=headers, json={'items': items})
+            response = await client.post(url, headers=headers, json={"items": items})
         response.raise_for_status()
 
         data = response.json()
         if isinstance(data, dict):
             return data
         return {
-            'success': False,
-            'error': 'invalid_remote_payload',
-            'items': [],
+            "success": False,
+            "error": "invalid_remote_payload",
+            "items": [],
         }
 
     async def _search_arxiv_fallback(
@@ -305,17 +305,17 @@ class PaperSearchAdapter:
         query: str | None,
         question_list: list[str] | None,
     ) -> dict:
-        questions = [q for q in (question_list or []) if str(q or '').strip()]
+        questions = [q for q in (question_list or []) if str(q or "").strip()]
         if not questions and query:
             questions = [query]
         if not questions:
             return {
-                'success': False,
-                'error': 'empty_query',
-                'papers': [],
-                'count': 0,
-                'question_results': [],
-                'provider': 'arxiv_fallback',
+                "success": False,
+                "error": "empty_query",
+                "papers": [],
+                "count": 0,
+                "question_results": [],
+                "provider": "arxiv_fallback",
             }
 
         all_papers: list[dict] = []
@@ -326,14 +326,14 @@ class PaperSearchAdapter:
             papers = await self._arxiv_query(q, max_results=8)
             question_results.append(
                 {
-                    'question': q,
-                    'success': bool(papers),
-                    'count': len(papers),
-                    'papers': papers,
+                    "question": q,
+                    "success": bool(papers),
+                    "count": len(papers),
+                    "papers": papers,
                 }
             )
             for paper in papers:
-                key = str(paper.get('arxiv_id') or paper.get('url') or '')
+                key = str(paper.get("arxiv_id") or paper.get("url") or "")
                 if key and key in seen:
                     continue
                 if key:
@@ -341,43 +341,43 @@ class PaperSearchAdapter:
                 all_papers.append(paper)
 
         return {
-            'success': True,
-            'query': questions[0],
-            'questions': questions,
-            'papers': all_papers,
-            'count': len(all_papers),
-            'question_results': question_results,
-            'provider': 'arxiv_fallback',
+            "success": True,
+            "query": questions[0],
+            "questions": questions,
+            "papers": all_papers,
+            "count": len(all_papers),
+            "question_results": question_results,
+            "provider": "arxiv_fallback",
         }
 
     async def _read_arxiv_fallback(self, items: list[dict]) -> dict:
         normalized = [item for item in items if isinstance(item, dict)]
         if not normalized:
             return {
-                'success': False,
-                'error': 'empty_items',
-                'items': [],
-                'provider': 'arxiv_fallback',
+                "success": False,
+                "error": "empty_items",
+                "items": [],
+                "provider": "arxiv_fallback",
             }
 
         outputs: list[dict] = []
         for item in normalized[:8]:
-            arxiv_id = str(item.get('id') or item.get('arxiv_id') or '').strip()
-            question = str(item.get('question') or '').strip()
-            title_hint = str(item.get('title') or '').strip()
+            arxiv_id = str(item.get("id") or item.get("arxiv_id") or "").strip()
+            question = str(item.get("question") or "").strip()
+            title_hint = str(item.get("title") or "").strip()
 
             if not arxiv_id and title_hint:
                 guessed = await self._arxiv_query(title_hint, max_results=1)
                 if guessed:
-                    arxiv_id = str(guessed[0].get('arxiv_id') or '').strip()
+                    arxiv_id = str(guessed[0].get("arxiv_id") or "").strip()
 
             if not arxiv_id:
                 outputs.append(
                     {
-                        'id': '',
-                        'question': question,
-                        'success': False,
-                        'error': 'missing_arxiv_id',
+                        "id": "",
+                        "question": question,
+                        "success": False,
+                        "error": "missing_arxiv_id",
                     }
                 )
                 continue
@@ -386,10 +386,10 @@ class PaperSearchAdapter:
             if not detail:
                 outputs.append(
                     {
-                        'id': arxiv_id,
-                        'question': question,
-                        'success': False,
-                        'error': 'paper_not_found',
+                        "id": arxiv_id,
+                        "question": question,
+                        "success": False,
+                        "error": "paper_not_found",
                     }
                 )
                 continue
@@ -397,26 +397,26 @@ class PaperSearchAdapter:
             answer = self._build_read_answer(detail=detail, question=question)
             outputs.append(
                 {
-                    'id': arxiv_id,
-                    'question': question,
-                    'success': True,
-                    'paper': detail,
-                    'answer': answer,
+                    "id": arxiv_id,
+                    "question": question,
+                    "success": True,
+                    "paper": detail,
+                    "answer": answer,
                 }
             )
 
         return {
-            'success': True,
-            'items': outputs,
-            'count': len(outputs),
-            'provider': 'arxiv_fallback',
+            "success": True,
+            "items": outputs,
+            "count": len(outputs),
+            "provider": "arxiv_fallback",
         }
 
     def _build_read_answer(self, *, detail: dict, question: str) -> str:
-        title = str(detail.get('title') or '').strip()
-        abstract = str(detail.get('abstract') or '').strip()
+        title = str(detail.get("title") or "").strip()
+        abstract = str(detail.get("abstract") or "").strip()
         if not abstract:
-            abstract = 'No abstract available.'
+            abstract = "No abstract available."
 
         if not question:
             return f"Title: {title}\n\nAbstract:\n{abstract}"
@@ -424,15 +424,15 @@ class PaperSearchAdapter:
         return (
             f"Question: {question}\n\n"
             f"From paper '{title}', available evidence (abstract-level) is:\n{abstract}\n\n"
-            'Note: This fallback reader uses arXiv metadata/abstract, not full-text deep parsing.'
+            "Note: This fallback reader uses arXiv metadata/abstract, not full-text deep parsing."
         )
 
     async def _arxiv_query(self, question: str, *, max_results: int) -> list[dict]:
         tokens = self._question_to_arxiv_query(question)
         query = quote_plus(tokens)
         url = (
-            'https://export.arxiv.org/api/query?'
-            f'search_query=all:{query}&start=0&max_results={max(1, min(16, max_results))}'
+            "https://export.arxiv.org/api/query?"
+            f"search_query=all:{query}&start=0&max_results={max(1, min(16, max_results))}"
         )
 
         async with httpx.AsyncClient(timeout=45) as client:
@@ -446,8 +446,8 @@ class PaperSearchAdapter:
         if not clean:
             return None
 
-        query = quote_plus(f'id:{clean}')
-        url = f'https://export.arxiv.org/api/query?search_query={query}&start=0&max_results=1'
+        query = quote_plus(f"id:{clean}")
+        url = f"https://export.arxiv.org/api/query?search_query={query}&start=0&max_results=1"
 
         async with httpx.AsyncClient(timeout=45) as client:
             response = await client.get(url)
@@ -457,82 +457,103 @@ class PaperSearchAdapter:
         return papers[0] if papers else None
 
     def _question_to_arxiv_query(self, question: str) -> str:
-        text = re.sub(r'\s+', ' ', str(question or '').strip().lower())
-        text = re.sub(r'[^a-z0-9\s-]', ' ', text)
-        tokens = [tok for tok in text.split(' ') if tok]
+        text = re.sub(r"\s+", " ", str(question or "").strip().lower())
+        text = re.sub(r"[^a-z0-9\s-]", " ", text)
+        tokens = [tok for tok in text.split(" ") if tok]
         stop = {
-            'what', 'which', 'how', 'are', 'is', 'the', 'for', 'of', 'to', 'in', 'and', 'on', 'with',
-            'recent', 'papers', 'methods', 'paper', 'about', 'does', 'can', 'be', 'used', 'that',
+            "what",
+            "which",
+            "how",
+            "are",
+            "is",
+            "the",
+            "for",
+            "of",
+            "to",
+            "in",
+            "and",
+            "on",
+            "with",
+            "recent",
+            "papers",
+            "methods",
+            "paper",
+            "about",
+            "does",
+            "can",
+            "be",
+            "used",
+            "that",
         }
         kept = [tok for tok in tokens if tok not in stop]
-        return ' '.join(kept[:10]) or text
+        return " ".join(kept[:10]) or text
 
     def _normalize_remote_paper_item(self, item: dict) -> dict:
-        title = str(item.get('title') or '').strip()
-        snippet = str(item.get('snippet') or item.get('abstract') or '').strip()
-        link = str(item.get('link') or item.get('url') or '').strip()
-        raw_id = str(item.get('id') or item.get('arxiv_id') or '').strip()
+        title = str(item.get("title") or "").strip()
+        snippet = str(item.get("snippet") or item.get("abstract") or "").strip()
+        link = str(item.get("link") or item.get("url") or "").strip()
+        raw_id = str(item.get("id") or item.get("arxiv_id") or "").strip()
 
         # Common PASA list response uses "link" as arXiv identifier.
         arxiv_id = raw_id
-        if not arxiv_id and link and 'http' not in link:
+        if not arxiv_id and link and "http" not in link:
             arxiv_id = link
-        if arxiv_id.startswith('arXiv:'):
-            arxiv_id = arxiv_id.split(':', 1)[1].strip()
+        if arxiv_id.startswith("arXiv:"):
+            arxiv_id = arxiv_id.split(":", 1)[1].strip()
 
-        abs_url = ''
-        pdf_url = ''
+        abs_url = ""
+        pdf_url = ""
         if arxiv_id:
-            abs_url = f'https://arxiv.org/abs/{arxiv_id}'
-            pdf_url = f'https://arxiv.org/pdf/{arxiv_id}.pdf'
-        elif link.startswith('http://') or link.startswith('https://'):
+            abs_url = f"https://arxiv.org/abs/{arxiv_id}"
+            pdf_url = f"https://arxiv.org/pdf/{arxiv_id}.pdf"
+        elif link.startswith("http://") or link.startswith("https://"):
             abs_url = link
 
         return {
-            'id': arxiv_id or link,
-            'arxiv_id': arxiv_id,
-            'title': title,
-            'abstract': snippet,
-            'url': abs_url or link,
-            'abs_url': abs_url or link,
-            'pdf_url': pdf_url,
-            'source': 'remote',
+            "id": arxiv_id or link,
+            "arxiv_id": arxiv_id,
+            "title": title,
+            "abstract": snippet,
+            "url": abs_url or link,
+            "abs_url": abs_url or link,
+            "pdf_url": pdf_url,
+            "source": "remote",
         }
 
     def _parse_arxiv_feed(self, xml_text: str) -> list[dict]:
         root = ET.fromstring(xml_text)
-        ns = {'atom': 'http://www.w3.org/2005/Atom'}
+        ns = {"atom": "http://www.w3.org/2005/Atom"}
         papers: list[dict] = []
 
-        for entry in root.findall('atom:entry', ns):
-            entry_id = entry.findtext('atom:id', default='', namespaces=ns)
-            title = entry.findtext('atom:title', default='', namespaces=ns).strip()
-            summary = entry.findtext('atom:summary', default='', namespaces=ns).strip()
-            published = entry.findtext('atom:published', default='', namespaces=ns).strip()
-            updated = entry.findtext('atom:updated', default='', namespaces=ns).strip()
+        for entry in root.findall("atom:entry", ns):
+            entry_id = entry.findtext("atom:id", default="", namespaces=ns)
+            title = entry.findtext("atom:title", default="", namespaces=ns).strip()
+            summary = entry.findtext("atom:summary", default="", namespaces=ns).strip()
+            published = entry.findtext("atom:published", default="", namespaces=ns).strip()
+            updated = entry.findtext("atom:updated", default="", namespaces=ns).strip()
 
             authors: list[str] = []
-            for author in entry.findall('atom:author', ns):
-                name = author.findtext('atom:name', default='', namespaces=ns).strip()
+            for author in entry.findall("atom:author", ns):
+                name = author.findtext("atom:name", default="", namespaces=ns).strip()
                 if name:
                     authors.append(name)
 
-            arxiv_id = entry_id.rsplit('/', 1)[-1] if entry_id else ''
-            abs_url = f'https://arxiv.org/abs/{arxiv_id}' if arxiv_id else ''
-            pdf_url = f'https://arxiv.org/pdf/{arxiv_id}.pdf' if arxiv_id else ''
+            arxiv_id = entry_id.rsplit("/", 1)[-1] if entry_id else ""
+            abs_url = f"https://arxiv.org/abs/{arxiv_id}" if arxiv_id else ""
+            pdf_url = f"https://arxiv.org/pdf/{arxiv_id}.pdf" if arxiv_id else ""
 
             papers.append(
                 {
-                    'title': title,
-                    'abstract': summary,
-                    'authors': authors,
-                    'published': published,
-                    'updated': updated,
-                    'arxiv_id': arxiv_id,
-                    'url': abs_url,
-                    'abs_url': abs_url,
-                    'pdf_url': pdf_url,
-                    'source': 'arxiv',
+                    "title": title,
+                    "abstract": summary,
+                    "authors": authors,
+                    "published": published,
+                    "updated": updated,
+                    "arxiv_id": arxiv_id,
+                    "url": abs_url,
+                    "abs_url": abs_url,
+                    "pdf_url": pdf_url,
+                    "source": "arxiv",
                 }
             )
 
@@ -554,14 +575,12 @@ def normalize_question_list(raw: object) -> list[str]:
             if isinstance(parsed, list):
                 raw_items.extend(str(item).strip() for item in parsed if str(item).strip())
             else:
-                raw_items.extend(
-                    line.strip('-• \t') for line in text.splitlines() if line.strip('-• \t')
-                )
+                raw_items.extend(line.strip("-• \t") for line in text.splitlines() if line.strip("-• \t"))
 
     cleaned: list[str] = []
     seen: set[str] = set()
     for item in raw_items:
-        normalized = ' '.join(item.split())
+        normalized = " ".join(item.split())
         if not normalized:
             continue
         key = normalized.lower()

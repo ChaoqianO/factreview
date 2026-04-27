@@ -57,13 +57,18 @@ class RuntimeBridgeState:
 
 
 def read_json_file(path: Path) -> dict[str, Any]:
+    """Lenient JSON reader. Returns ``{}`` for missing or malformed files;
+    any other I/O error (permission denied, disk error, etc.) propagates so
+    the caller is not silently fed an empty dict on a real failure."""
     try:
-        payload = json.loads(path.read_text(encoding="utf-8", errors="ignore"))
-        if isinstance(payload, dict):
-            return payload
-    except Exception:
-        pass
-    return {}
+        text = path.read_text(encoding="utf-8", errors="ignore")
+    except FileNotFoundError:
+        return {}
+    try:
+        payload = json.loads(text)
+    except json.JSONDecodeError:
+        return {}
+    return payload if isinstance(payload, dict) else {}
 
 
 def write_json_file(path: Path, payload: dict[str, Any]) -> None:
@@ -126,8 +131,7 @@ def ensure_full_pipeline_context(*, run_dir: Path, allow_standalone: bool = Fals
         )
     if runner != "full_pipeline":
         raise RuntimeError(
-            "Invalid pipeline context marker. "
-            "Please run through scripts/execute_review_pipeline.py."
+            "Invalid pipeline context marker. Please run through scripts/execute_review_pipeline.py."
         )
 
 
@@ -222,7 +226,8 @@ def materialize_stage_inputs_snapshot(
 
     job_state = read_json_file(state.job_json_path)
     if not job_state:
-        artifacts = own_payload.get("artifacts") if isinstance(own_payload.get("artifacts"), dict) else {}
+        own_artifacts = own_payload.get("artifacts")
+        artifacts: dict[str, Any] = own_artifacts if isinstance(own_artifacts, dict) else {}
         job_state = {
             "status": own_payload.get("status"),
             "message": own_payload.get("message"),
@@ -236,7 +241,8 @@ def materialize_stage_inputs_snapshot(
         }
     write_json_file(_job_state_snapshot_path(run_dir), job_state)
 
-    artifacts = job_state.get("artifacts") if isinstance(job_state.get("artifacts"), dict) else {}
+    job_artifacts = job_state.get("artifacts")
+    artifacts = job_artifacts if isinstance(job_artifacts, dict) else {}
     annotations_src = resolve_artifact_path(repo_root, artifacts.get("annotations_path"))
     final_md_src = resolve_artifact_path(repo_root, artifacts.get("final_markdown_path"))
     final_pdf_src = resolve_artifact_path(repo_root, artifacts.get("report_pdf_path"))
@@ -304,26 +310,21 @@ def _reuse_job_candidates(*, repo_root: Path, run_dir: Path, job_ref: str) -> li
 
 
 def _pick_python_executable(repo_root: Path) -> Path:
-    candidates = [
-        repo_root / ".venv" / "bin" / "python",
-        repo_root / "factreview-own" / ".venv" / "bin" / "python",
-    ]
-    for cand in candidates:
-        if cand.exists():
-            try:
-                chk = subprocess.run(
-                    [str(cand), "-c", "import agents"],
-                    cwd=str(repo_root),
-                    capture_output=True,
-                    text=True,
-                )
-                if chk.returncode == 0:
-                    return cand
-            except Exception:
-                continue
-    for cand in candidates:
-        if cand.exists():
-            return cand
+    candidate = repo_root / ".venv" / "bin" / "python"
+    if candidate.exists():
+        try:
+            chk = subprocess.run(
+                [str(candidate), "-c", "import agents"],
+                cwd=str(repo_root),
+                capture_output=True,
+                text=True,
+                timeout=15,
+            )
+            if chk.returncode == 0:
+                return candidate
+        except (subprocess.TimeoutExpired, OSError):
+            pass
+        return candidate
     return Path("python3")
 
 
@@ -332,23 +333,25 @@ def _run_review_runtime(*, repo_root: Path, run_dir: Path, paper_pdf: Path, titl
     script = repo_root / "scripts" / "execute_review_runtime_job.py"
 
     env = os.environ.copy()
-    env.setdefault("ENABLE_CODE_EVALUATION", "false")
     env["DATA_DIR"] = str((run_dir / "runtime").resolve())
-    env["FACTREVIEW_PROJECT_ROOT"] = str(repo_root.resolve())
 
-    proc = subprocess.run(
-        [str(py_exec), str(script), "--paper-pdf", str(paper_pdf), "--title", title],
-        cwd=str(repo_root),
-        env=env,
-        capture_output=True,
-        text=True,
-    )
-    if proc.returncode != 0:
-        raise RuntimeError(
-            "factreview-own runtime pipeline failed\n"
-            f"stdout:\n{proc.stdout}\n"
-            f"stderr:\n{proc.stderr}\n"
+    # Hard ceiling: a single agent runtime job for one paper should never need
+    # more than a few hours. Without this, a hung subprocess would pin the
+    # entire pipeline indefinitely.
+    runtime_timeout_seconds = 3 * 60 * 60
+    try:
+        proc = subprocess.run(
+            [str(py_exec), str(script), "--paper-pdf", str(paper_pdf), "--title", title],
+            cwd=str(repo_root),
+            env=env,
+            capture_output=True,
+            text=True,
+            timeout=runtime_timeout_seconds,
         )
+    except subprocess.TimeoutExpired as exc:
+        raise RuntimeError(f"agent runtime pipeline timed out after {runtime_timeout_seconds}s") from exc
+    if proc.returncode != 0:
+        raise RuntimeError(f"agent runtime pipeline failed\nstdout:\n{proc.stdout}\nstderr:\n{proc.stderr}\n")
 
     text = (proc.stdout or "").strip()
     payload: dict[str, Any] | None = None
@@ -365,7 +368,7 @@ def _run_review_runtime(*, repo_root: Path, run_dir: Path, paper_pdf: Path, titl
                 except Exception:
                     payload = None
     if payload is None:
-        raise RuntimeError(f"cannot parse factreview-own runtime output: {text}")
+        raise RuntimeError(f"cannot parse agent runtime output: {text}")
     return payload
 
 
@@ -379,7 +382,8 @@ def load_bridge_state(run_dir: Path) -> RuntimeBridgeState | None:
     job_id = str(payload.get("job_id") or "").strip()
     job_dir = Path(str(payload.get("job_dir") or "")).resolve()
     job_json_path = Path(str(payload.get("job_json_path") or "")).resolve()
-    own_payload = payload.get("own_payload") if isinstance(payload.get("own_payload"), dict) else {}
+    raw_own_payload = payload.get("own_payload")
+    own_payload: dict[str, Any] = raw_own_payload if isinstance(raw_own_payload, dict) else {}
     if not job_json_path.exists() and job_dir.exists():
         job_json_path = job_dir / "job.json"
     if not (paper_pdf.exists() and job_id):
@@ -463,7 +467,8 @@ def bootstrap_bridge_state(
         if not job_state:
             raise RuntimeError(f"reused job state is empty/invalid: {job_json_path}")
 
-        artifacts = job_state.get("artifacts") if isinstance(job_state.get("artifacts"), dict) else {}
+        reuse_artifacts = job_state.get("artifacts")
+        artifacts = reuse_artifacts if isinstance(reuse_artifacts, dict) else {}
         source_pdf = resolve_artifact_path(repo_root, artifacts.get("source_pdf_path"))
         fallback_pdf = paper_pdf.resolve() if paper_pdf is not None else None
         resolved_pdf = source_pdf if (source_pdf is not None and source_pdf.exists()) else fallback_pdf

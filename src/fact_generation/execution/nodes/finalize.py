@@ -435,7 +435,7 @@ def finalize_node(state: dict[str, Any]) -> dict[str, Any]:
     md_lines.append("### 1. Claim")
     md_lines.append("")
     md_lines.append(
-        "- The submitted code was executed through the `code_evaluation` workflow on the provided repository snapshot."
+        "- The submitted code was executed through the `execution` workflow on the provided repository snapshot."
     )
     md_lines.append(
         "- The workflow attempted to reproduce the paper's reported experiments and collect machine-readable outputs."

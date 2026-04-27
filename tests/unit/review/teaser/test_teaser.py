@@ -108,9 +108,7 @@ def test_generate_teaser_figure_ignores_openai_key_without_image_base_url(
     assert Path(result.prompt_path).read_text(encoding="utf-8") == result.prompt
 
 
-def test_generate_teaser_figure_prompt_only_mode_returns_manual_prompt(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_generate_teaser_figure_prompt_only_mode_returns_manual_prompt(tmp_path: Path, monkeypatch) -> None:
     latest_md = tmp_path / "latest_extraction.md"
     latest_md.write_text(SAMPLE_MARKDOWN, encoding="utf-8")
     monkeypatch.setattr(teaser_figure_module, "_ensure_env_loaded", lambda: None)
@@ -171,7 +169,9 @@ def test_generate_teaser_figure_retries_with_validation_feedback(tmp_path: Path,
                 "color_similarity": 0.6,
                 "edge_similarity": 0.4,
                 "region_scores": [],
-                "prompt_feedback": ["Keep the task label as a light rounded badge anchored at the top-right corner inside the header area."],
+                "prompt_feedback": [
+                    "Keep the task label as a light rounded badge anchored at the top-right corner inside the header area."
+                ],
                 "reason": "template_similarity_below_threshold",
             },
             {
@@ -188,7 +188,9 @@ def test_generate_teaser_figure_retries_with_validation_feedback(tmp_path: Path,
     )
 
     monkeypatch.setattr(teaser_figure_module, "_call_gemini_image_api", fake_call_gemini_image_api)
-    monkeypatch.setattr(teaser_figure_module, "_validate_generated_teaser_image", lambda _path: next(validation_results))
+    monkeypatch.setattr(
+        teaser_figure_module, "_validate_generated_teaser_image", lambda _path: next(validation_results)
+    )
 
     result = generate_teaser_figure(latest_md, output_dir=tmp_path / "artifacts")
 

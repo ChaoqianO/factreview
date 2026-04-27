@@ -17,7 +17,9 @@ from util.paper_input import infer_paper_key, materialize_paper_pdf
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser("factreview_stage_claim_extract")
     p.add_argument("--run-dir", type=str, required=True, help="Run directory to write stage outputs")
-    p.add_argument("--paper-pdf", type=str, default="", help="Optional bootstrap PDF path or URL when bridge is missing")
+    p.add_argument(
+        "--paper-pdf", type=str, default="", help="Optional bootstrap PDF path or URL when bridge is missing"
+    )
     p.add_argument("--paper-key", type=str, default="")
     p.add_argument("--reuse-job-id", type=str, default="", help="Optional bootstrap with existing job id")
     return p.parse_args()
@@ -26,9 +28,8 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     run_dir = Path(args.run_dir).resolve()
-    paper_key = (
-        str(args.paper_key or "").strip()
-        or (infer_paper_key(args.paper_pdf) if str(args.paper_pdf or "").strip() else "")
+    paper_key = str(args.paper_key or "").strip() or (
+        infer_paper_key(args.paper_pdf) if str(args.paper_pdf or "").strip() else ""
     )
     paper_pdf = (
         materialize_paper_pdf(

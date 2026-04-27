@@ -116,7 +116,9 @@ def run_parse_stage(
             "shared_execution_extract": shared_extract,
             "annotation_count": annotation_count,
             "annotations_path": str(artifacts.get("annotations_path") or ""),
-            "semantic_scholar_candidates_path": str((state.job_dir / "semantic_scholar_candidates.json").resolve()),
+            "semantic_scholar_candidates_path": str(
+                (state.job_dir / "semantic_scholar_candidates.json").resolve()
+            ),
             "final_markdown_path": str(artifacts.get("final_markdown_path") or ""),
             "report_pdf_path": str(artifacts.get("report_pdf_path") or ""),
             "latest_output_md": str(own_payload.get("latest_output_md") or ""),

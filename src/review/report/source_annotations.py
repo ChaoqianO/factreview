@@ -14,12 +14,12 @@ class _ContentLine:
 
 
 def _normalize_object_type(value: Any) -> str:
-    token = str(value or '').strip().lower()
-    if token in {'issue', 'suggestion', 'verification'}:
+    token = str(value or "").strip().lower()
+    if token in {"issue", "suggestion", "verification"}:
         return token
-    if token == 'evidence':
-        return 'suggestion'
-    return 'suggestion'
+    if token == "evidence":
+        return "suggestion"
+    return "suggestion"
 
 
 def _coerce_bbox(value: Any) -> tuple[float, float, float, float] | None:
@@ -37,10 +37,10 @@ def _coerce_bbox(value: Any) -> tuple[float, float, float, float] | None:
             return None
     elif isinstance(value, dict):
         try:
-            x1 = float(value.get('x1'))
-            y1 = float(value.get('y1'))
-            x2 = float(value.get('x2'))
-            y2 = float(value.get('y2'))
+            x1 = float(value.get("x1"))
+            y1 = float(value.get("y1"))
+            x2 = float(value.get("x2"))
+            y2 = float(value.get("y2"))
         except (TypeError, ValueError):
             return None
     else:
@@ -63,11 +63,11 @@ def _collect_content_lines(
             continue
 
         page_number: int | None = None
-        page_idx = row.get('page_idx')
+        page_idx = row.get("page_idx")
         if isinstance(page_idx, int):
             page_number = page_idx + 1
         else:
-            for key in ('page_number', 'pageNumber', 'page'):
+            for key in ("page_number", "pageNumber", "page"):
                 raw = row.get(key)
                 try:
                     if raw is not None:
@@ -79,12 +79,14 @@ def _collect_content_lines(
         if page_number is None or page_number < 1:
             continue
 
-        text = str(row.get('text') or '').strip()
+        text = str(row.get("text") or "").strip()
         if not text:
             continue
 
-        bbox = _coerce_bbox(row.get('bbox'))
-        per_page.setdefault(page_number, []).append(_ContentLine(page_number=page_number, text=text, bbox=bbox))
+        bbox = _coerce_bbox(row.get("bbox"))
+        per_page.setdefault(page_number, []).append(
+            _ContentLine(page_number=page_number, text=text, bbox=bbox)
+        )
 
         if bbox is not None:
             prev_x, prev_y = max_xy.get(page_number, (100.0, 100.0))
@@ -104,27 +106,27 @@ def _to_rect_dict(
 ) -> dict[str, float]:
     x1, y1, x2, y2 = bbox
     return {
-        'x1': float(x1),
-        'y1': float(y1),
-        'x2': float(x2),
-        'y2': float(y2),
-        'width': float(max(1.0, width_ref)),
-        'height': float(max(1.0, height_ref)),
+        "x1": float(x1),
+        "y1": float(y1),
+        "x2": float(x2),
+        "y2": float(y2),
+        "width": float(max(1.0, width_ref)),
+        "height": float(max(1.0, height_ref)),
     }
 
 
 def _union_rects(rects: list[dict[str, float]]) -> dict[str, float] | None:
     if not rects:
         return None
-    width_ref = float(rects[0].get('width') or 100.0)
-    height_ref = float(rects[0].get('height') or 100.0)
+    width_ref = float(rects[0].get("width") or 100.0)
+    height_ref = float(rects[0].get("height") or 100.0)
     return {
-        'x1': min(float(item['x1']) for item in rects),
-        'y1': min(float(item['y1']) for item in rects),
-        'x2': max(float(item['x2']) for item in rects),
-        'y2': max(float(item['y2']) for item in rects),
-        'width': width_ref,
-        'height': height_ref,
+        "x1": min(float(item["x1"]) for item in rects),
+        "y1": min(float(item["y1"]) for item in rects),
+        "x2": max(float(item["x2"]) for item in rects),
+        "y2": max(float(item["y2"]) for item in rects),
+        "width": width_ref,
+        "height": height_ref,
     }
 
 
@@ -142,12 +144,12 @@ def _fallback_line_ratio_rect(
     y1 = max(0.0, min(98.0, y1))
     y2 = max(y1 + 1.2, min(100.0, y2))
     return {
-        'x1': 8.0,
-        'y1': y1,
-        'x2': 92.0,
-        'y2': y2,
-        'width': 100.0,
-        'height': 100.0,
+        "x1": 8.0,
+        "y1": y1,
+        "x2": 92.0,
+        "y2": y2,
+        "width": 100.0,
+        "height": 100.0,
     }
 
 
@@ -189,9 +191,7 @@ def build_source_annotations_for_export(
             nearby_start = max(0, start_idx - 2)
             nearby_end = min(len(page_lines), end_idx + 2)
             selected_boxes = [
-                line.bbox
-                for line in page_lines[nearby_start:nearby_end]
-                if line.bbox is not None
+                line.bbox for line in page_lines[nearby_start:nearby_end] if line.bbox is not None
             ]
 
         rects: list[dict[str, float]] = []
@@ -218,25 +218,25 @@ def build_source_annotations_for_export(
         if not rects or bounding_rect is None:
             continue
 
-        comment = str(ann.comment or '').strip()
-        content_text = str(ann.text or '').strip()
-        display_text = comment or content_text or '(no text provided)'
+        comment = str(ann.comment or "").strip()
+        content_text = str(ann.text or "").strip()
+        display_text = comment or content_text or "(no text provided)"
 
         output.append(
             {
-                'annotation_id': str(ann.id),
-                'page_number': page_number,
-                'rects': rects,
-                'bounding_rect': bounding_rect,
-                'object_type': _normalize_object_type(ann.object_type),
-                'severity': str(ann.severity or '').strip().lower() or None,
-                'review_item_id': f'R{index:03d}',
-                'display_text': display_text,
-                'comment': comment,
-                'content_text': content_text,
-                'summary': str(ann.summary or '').strip() or None,
-                'color': None,
-                'tags': ['review_annotation'],
+                "annotation_id": str(ann.id),
+                "page_number": page_number,
+                "rects": rects,
+                "bounding_rect": bounding_rect,
+                "object_type": _normalize_object_type(ann.object_type),
+                "severity": str(ann.severity or "").strip().lower() or None,
+                "review_item_id": f"R{index:03d}",
+                "display_text": display_text,
+                "comment": comment,
+                "content_text": content_text,
+                "summary": str(ann.summary or "").strip() or None,
+                "color": None,
+                "tags": ["review_annotation"],
             }
         )
 

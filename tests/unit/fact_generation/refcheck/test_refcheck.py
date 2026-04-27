@@ -70,7 +70,9 @@ def test_refcheck_extracts_severity_from_original_issue_fields():
                     "ref_title": "Not found",
                     "error_type": "unverified",
                     "error_details": "Could not verify reference.",
-                    "_original_errors": [{"error_type": "unverified", "error_details": "Could not verify reference."}],
+                    "_original_errors": [
+                        {"error_type": "unverified", "error_details": "Could not verify reference."}
+                    ],
                 },
             ]
 

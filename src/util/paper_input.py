@@ -53,7 +53,9 @@ def infer_paper_key(source: str | None, *, fallback: str = "paper") -> str:
     return Path(token).expanduser().stem or fallback
 
 
-def materialize_paper_pdf(source: str | Path, destination_dir: str | Path, *, paper_key: str = "") -> PaperInput:
+def materialize_paper_pdf(
+    source: str | Path, destination_dir: str | Path, *, paper_key: str = ""
+) -> PaperInput:
     raw_source = str(source).strip()
     if not raw_source:
         raise ValueError("paper PDF input is required")

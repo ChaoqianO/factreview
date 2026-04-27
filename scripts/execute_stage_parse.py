@@ -27,7 +27,9 @@ def main() -> None:
     args = parse_args()
     run_dir = Path(args.run_dir).resolve()
     paper_key = (args.paper_key or "").strip() or infer_paper_key(args.paper_pdf)
-    paper_input = materialize_paper_pdf(args.paper_pdf, run_dir / "inputs" / "source_pdf", paper_key=paper_key)
+    paper_input = materialize_paper_pdf(
+        args.paper_pdf, run_dir / "inputs" / "source_pdf", paper_key=paper_key
+    )
     result = run_parse_stage(
         repo_root=ROOT,
         run_dir=run_dir,

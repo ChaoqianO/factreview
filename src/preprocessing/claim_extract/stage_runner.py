@@ -54,7 +54,7 @@ def run_claim_extract_stage(
     if has_annotations_file:
         annotations_payload = read_json_file(annotations)
     else:
-        # factreview-own completed jobs can legitimately have zero annotations and no annotations.json.
+        # Agent runtime can legitimately complete a job with zero annotations and no annotations.json.
         annotations_payload = []
 
     facts_out = claim_extract_stage_dir(run_dir) / "facts.json"

@@ -37,14 +37,14 @@ logger = logging.getLogger(__name__)
 
 PAGE_WIDTH, PAGE_HEIGHT = A4
 
-FONT_MONO_NAME = 'Courier'
-FONT_MONO_UNICODE_NAME = 'DS-DejaVuSansMono'
-FONT_OVERLAY_MONO_UNICODE_NAME = 'DS-DejaVuSansMono-Overlay'
-FONT_CHINESE_FALLBACK_NAME = 'STSong-Light'
+FONT_MONO_NAME = "Courier"
+FONT_MONO_UNICODE_NAME = "DS-DejaVuSansMono"
+FONT_OVERLAY_MONO_UNICODE_NAME = "DS-DejaVuSansMono-Overlay"
+FONT_CHINESE_FALLBACK_NAME = "STSong-Light"
 
 FONT_MONO_UNICODE_CANDIDATES = (
-    Path('/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf'),
-    Path('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'),
+    Path("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"),
+    Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"),
 )
 
 
@@ -63,116 +63,116 @@ _OVERLAY_FONT_FILE_BY_NAME: dict[str, str] = {}
 _FITZ_FONT_METRICS_CACHE: dict[str, Any] = {}
 _FITZ_FONT_METRICS_CACHE_MISS = object()
 _FITZ_FONT_CANONICAL_ALIASES: dict[str, str] = {
-    'helvetica': 'helv',
-    'times': 'tiro',
-    'times-roman': 'tiro',
-    'courier': 'cour',
-    'stsong-light': 'china-s',
-    'stsonglight': 'china-s',
+    "helvetica": "helv",
+    "times": "tiro",
+    "times-roman": "tiro",
+    "courier": "cour",
+    "stsong-light": "china-s",
+    "stsonglight": "china-s",
 }
 
 _LATEX_COMMAND_REPLACEMENTS: dict[str, str] = {
-    'alpha': 'α',
-    'beta': 'β',
-    'gamma': 'γ',
-    'delta': 'δ',
-    'epsilon': 'ϵ',
-    'varepsilon': 'ε',
-    'zeta': 'ζ',
-    'eta': 'η',
-    'theta': 'θ',
-    'vartheta': 'ϑ',
-    'iota': 'ι',
-    'kappa': 'κ',
-    'lambda': 'λ',
-    'mu': 'μ',
-    'nu': 'ν',
-    'xi': 'ξ',
-    'pi': 'π',
-    'varpi': 'ϖ',
-    'rho': 'ρ',
-    'varrho': 'ϱ',
-    'sigma': 'σ',
-    'varsigma': 'ς',
-    'tau': 'τ',
-    'upsilon': 'υ',
-    'phi': 'ϕ',
-    'varphi': 'φ',
-    'chi': 'χ',
-    'psi': 'ψ',
-    'omega': 'ω',
-    'Gamma': 'Γ',
-    'Delta': 'Δ',
-    'Theta': 'Θ',
-    'Lambda': 'Λ',
-    'Xi': 'Ξ',
-    'Pi': 'Π',
-    'Sigma': 'Σ',
-    'Upsilon': 'Υ',
-    'Phi': 'Φ',
-    'Psi': 'Ψ',
-    'Omega': 'Ω',
-    'times': '×',
-    'cdot': '·',
-    'otimes': '⊗',
-    'oplus': '⊕',
-    'pm': '±',
-    'mp': '∓',
-    'leq': '≤',
-    'geq': '≥',
-    'neq': '≠',
-    'approx': '≈',
-    'sim': '∼',
-    'in': '∈',
-    'notin': '∉',
-    'subset': '⊂',
-    'subseteq': '⊆',
-    'supset': '⊃',
-    'supseteq': '⊇',
-    'cup': '∪',
-    'cap': '∩',
-    'forall': '∀',
-    'exists': '∃',
-    'neg': '¬',
-    'land': '∧',
-    'lor': '∨',
-    'to': '→',
-    'rightarrow': '→',
-    'leftarrow': '←',
-    'leftrightarrow': '↔',
-    'mapsto': '↦',
-    'implies': '⇒',
-    'iff': '⇔',
-    'nabla': '∇',
-    'partial': '∂',
-    'infty': '∞',
-    'sum': '∑',
-    'prod': '∏',
-    'int': '∫',
-    'top': '⊤',
-    'bot': '⊥',
-    'perp': '⊥',
-    'ell': 'ℓ',
+    "alpha": "α",
+    "beta": "β",
+    "gamma": "γ",
+    "delta": "δ",
+    "epsilon": "ϵ",
+    "varepsilon": "ε",
+    "zeta": "ζ",
+    "eta": "η",
+    "theta": "θ",
+    "vartheta": "ϑ",
+    "iota": "ι",
+    "kappa": "κ",
+    "lambda": "λ",
+    "mu": "μ",
+    "nu": "ν",
+    "xi": "ξ",
+    "pi": "π",
+    "varpi": "ϖ",
+    "rho": "ρ",
+    "varrho": "ϱ",
+    "sigma": "σ",
+    "varsigma": "ς",
+    "tau": "τ",
+    "upsilon": "υ",
+    "phi": "ϕ",
+    "varphi": "φ",
+    "chi": "χ",
+    "psi": "ψ",
+    "omega": "ω",
+    "Gamma": "Γ",
+    "Delta": "Δ",
+    "Theta": "Θ",
+    "Lambda": "Λ",
+    "Xi": "Ξ",
+    "Pi": "Π",
+    "Sigma": "Σ",
+    "Upsilon": "Υ",
+    "Phi": "Φ",
+    "Psi": "Ψ",
+    "Omega": "Ω",
+    "times": "×",
+    "cdot": "·",
+    "otimes": "⊗",
+    "oplus": "⊕",
+    "pm": "±",
+    "mp": "∓",
+    "leq": "≤",
+    "geq": "≥",
+    "neq": "≠",
+    "approx": "≈",
+    "sim": "∼",
+    "in": "∈",
+    "notin": "∉",
+    "subset": "⊂",
+    "subseteq": "⊆",
+    "supset": "⊃",
+    "supseteq": "⊇",
+    "cup": "∪",
+    "cap": "∩",
+    "forall": "∀",
+    "exists": "∃",
+    "neg": "¬",
+    "land": "∧",
+    "lor": "∨",
+    "to": "→",
+    "rightarrow": "→",
+    "leftarrow": "←",
+    "leftrightarrow": "↔",
+    "mapsto": "↦",
+    "implies": "⇒",
+    "iff": "⇔",
+    "nabla": "∇",
+    "partial": "∂",
+    "infty": "∞",
+    "sum": "∑",
+    "prod": "∏",
+    "int": "∫",
+    "top": "⊤",
+    "bot": "⊥",
+    "perp": "⊥",
+    "ell": "ℓ",
 }
 
 _LATEX_SIMPLE_FORMATTING_COMMANDS = {
-    'text',
-    'textrm',
-    'mathrm',
-    'mathit',
-    'mathbf',
-    'mathsf',
-    'mathtt',
-    'operatorname',
-    'operatorname*',
+    "text",
+    "textrm",
+    "mathrm",
+    "mathit",
+    "mathbf",
+    "mathsf",
+    "mathtt",
+    "operatorname",
+    "operatorname*",
 }
 
 _LATEX_MATHBB_MAP = {
-    'N': 'ℕ',
-    'Z': 'ℤ',
-    'Q': 'ℚ',
-    'R': 'ℝ',
-    'C': 'ℂ',
+    "N": "ℕ",
+    "Z": "ℤ",
+    "Q": "ℚ",
+    "R": "ℝ",
+    "C": "ℂ",
 }
 
 
@@ -236,21 +236,21 @@ class PreparedOverlayRenderable:
 
 
 _OBJECT_TYPE_PALETTES: dict[str, OverlayPalette] = {
-    'issue': OverlayPalette(
+    "issue": OverlayPalette(
         stroke=(0.55, 0.45, 0.46),
         fill=(0.90, 0.86, 0.86),
         callout_border=(0.55, 0.45, 0.46),
         callout_fill=(0.95, 0.93, 0.93),
         label_fill=(0.84, 0.78, 0.78),
     ),
-    'suggestion': OverlayPalette(
+    "suggestion": OverlayPalette(
         stroke=(0.42, 0.49, 0.54),
         fill=(0.84, 0.88, 0.90),
         callout_border=(0.42, 0.49, 0.54),
         callout_fill=(0.92, 0.94, 0.95),
         label_fill=(0.78, 0.83, 0.86),
     ),
-    'verification': OverlayPalette(
+    "verification": OverlayPalette(
         stroke=(0.58, 0.49, 0.31),
         fill=(0.93, 0.90, 0.82),
         callout_border=(0.58, 0.49, 0.31),
@@ -268,17 +268,17 @@ CALLOUT_TEXT_PADDING = 5.0
 
 
 def _normalize_newlines(value: str) -> str:
-    return value.replace('\r\n', '\n').replace('\r', '\n')
+    return value.replace("\r\n", "\n").replace("\r", "\n")
 
 
 def _escape(value: Any) -> str:
-    return html.escape(_normalize_newlines(str(value or ''))).replace('\n', '<br/>')
+    return html.escape(_normalize_newlines(str(value or ""))).replace("\n", "<br/>")
 
 
 def _markdown_parser() -> MarkdownIt:
     global _MARKDOWN_PARSER
     if _MARKDOWN_PARSER is None:
-        _MARKDOWN_PARSER = MarkdownIt('gfm-like', {'linkify': False, 'typographer': False})
+        _MARKDOWN_PARSER = MarkdownIt("gfm-like", {"linkify": False, "typographer": False})
         _MARKDOWN_PARSER.use(
             dollarmath_plugin,
             allow_labels=False,
@@ -299,74 +299,68 @@ def _token_attr(token: Any, key: str) -> str | None:
     except Exception:
         pass
 
-    attrs = getattr(token, 'attrs', None)
+    attrs = getattr(token, "attrs", None)
     if isinstance(attrs, dict):
         value = attrs.get(key)
         return str(value) if value is not None else None
     if isinstance(attrs, (list, tuple)):
         for item in attrs:
-            if (
-                isinstance(item, (list, tuple))
-                and len(item) == 2
-                and str(item[0]) == key
-            ):
+            if isinstance(item, (list, tuple)) and len(item) == 2 and str(item[0]) == key:
                 return str(item[1])
     return None
 
 
 def _escape_attr(value: Any) -> str:
-    return html.escape(str(value or ''), quote=True)
+    return html.escape(str(value or ""), quote=True)
 
 
 def _looks_like_formula_text(value: str) -> bool:
-    text = str(value or '').strip()
+    text = str(value or "").strip()
     if not text:
         return False
-    if '$' in text:
+    if "$" in text:
         return True
-    if re.search(r'\\[A-Za-z]+', text):
+    if re.search(r"\\[A-Za-z]+", text):
         return True
-    if ('_' in text or '^' in text) and re.search(r'[A-Za-z0-9][_^]|[_^][A-Za-z0-9{\\(]', text):
+    if ("_" in text or "^" in text) and re.search(r"[A-Za-z0-9][_^]|[_^][A-Za-z0-9{\\(]", text):
         return True
-    if any(sym in text for sym in ('≤', '≥', '∈', '→', '↦', '⊤', '⊥', 'ℝ', 'ℓ', '⋅', '∑', '∫')):
-        return True
-    return False
+    return bool(any(sym in text for sym in ("≤", "≥", "∈", "→", "↦", "⊤", "⊥", "ℝ", "ℓ", "⋅", "∑", "∫")))
 
 
 def _consume_braced_segment(source: str, start: int) -> tuple[str, int]:
-    if start >= len(source) or source[start] != '{':
-        return '', start
+    if start >= len(source) or source[start] != "{":
+        return "", start
     depth = 0
     cursor = start
     parts: list[str] = []
     while cursor < len(source):
         token = source[cursor]
-        if token == '{':
+        if token == "{":
             depth += 1
             if depth > 1:
                 parts.append(token)
             cursor += 1
             continue
-        if token == '}':
+        if token == "}":
             depth -= 1
             if depth == 0:
-                return ''.join(parts), cursor + 1
+                return "".join(parts), cursor + 1
             parts.append(token)
             cursor += 1
             continue
         parts.append(token)
         cursor += 1
-    return ''.join(parts), cursor
+    return "".join(parts), cursor
 
 
 def _consume_script_segment(source: str, start: int) -> tuple[str, int]:
     if start >= len(source):
-        return '', start
+        return "", start
     token = source[start]
-    if token == '{':
+    if token == "{":
         return _consume_braced_segment(source, start)
-    if token == '\\':
-        command_match = re.match(r'\\([A-Za-z]+)', source[start:])
+    if token == "\\":
+        command_match = re.match(r"\\([A-Za-z]+)", source[start:])
         if command_match:
             command = command_match.group(1)
             return _LATEX_COMMAND_REPLACEMENTS.get(command, command), start + len(command_match.group(0))
@@ -376,65 +370,59 @@ def _consume_script_segment(source: str, start: int) -> tuple[str, int]:
 
 
 def _normalize_latex_text(value: str) -> str:
-    text = _normalize_newlines(str(value or '')).strip()
+    text = _normalize_newlines(str(value or "")).strip()
     if not text:
-        return ''
-    text = (
-        text.replace('−', '-')
-        .replace('–', '-')
-        .replace('—', '-')
-        .replace('⋅', '·')
-        .replace('×', '×')
-    )
-    text = re.sub(r'\\left\s*', '', text)
-    text = re.sub(r'\\right\s*', '', text)
-    text = re.sub(r'\\,|\\;|\\!|\\\s', ' ', text)
-    text = re.sub(r'\\mathbb\{([A-Za-z])\}', lambda m: _LATEX_MATHBB_MAP.get(m.group(1), m.group(1)), text)
-    text = re.sub(r'\\mathbf\{([^{}]+)\}', r'\1', text)
-    text = re.sub(r'\\boldsymbol\{([^{}]+)\}', r'\1', text)
-    text = re.sub(r'\\textbf\{([^{}]+)\}', r'\1', text)
-    text = re.sub(r'\\emph\{([^{}]+)\}', r'\1', text)
+        return ""
+    text = text.replace("−", "-").replace("–", "-").replace("—", "-").replace("⋅", "·").replace("×", "×")
+    text = re.sub(r"\\left\s*", "", text)
+    text = re.sub(r"\\right\s*", "", text)
+    text = re.sub(r"\\,|\\;|\\!|\\\s", " ", text)
+    text = re.sub(r"\\mathbb\{([A-Za-z])\}", lambda m: _LATEX_MATHBB_MAP.get(m.group(1), m.group(1)), text)
+    text = re.sub(r"\\mathbf\{([^{}]+)\}", r"\1", text)
+    text = re.sub(r"\\boldsymbol\{([^{}]+)\}", r"\1", text)
+    text = re.sub(r"\\textbf\{([^{}]+)\}", r"\1", text)
+    text = re.sub(r"\\emph\{([^{}]+)\}", r"\1", text)
 
     for command in _LATEX_SIMPLE_FORMATTING_COMMANDS:
-        pattern = rf'\\{re.escape(command)}\{{([^{{}}]+)\}}'
-        text = re.sub(pattern, r'\1', text)
+        pattern = rf"\\{re.escape(command)}\{{([^{{}}]+)\}}"
+        text = re.sub(pattern, r"\1", text)
 
     def _replace_command(match: re.Match[str]) -> str:
         command = match.group(1)
         return _LATEX_COMMAND_REPLACEMENTS.get(command, command)
 
-    text = re.sub(r'\\([A-Za-z]+)', _replace_command, text)
-    text = text.replace('\\_', '_').replace('\\^', '^')
-    text = text.replace('{', '{').replace('}', '}')
+    text = re.sub(r"\\([A-Za-z]+)", _replace_command, text)
+    text = text.replace("\\_", "_").replace("\\^", "^")
+    text = text.replace("{", "{").replace("}", "}")
     return text
 
 
 def _render_latex_markup(value: str) -> str:
     source = _normalize_latex_text(value)
     if not source:
-        return ''
+        return ""
 
     cursor = 0
     parts: list[str] = []
     while cursor < len(source):
         token = source[cursor]
-        if token in {'^', '_'}:
+        if token in {"^", "_"}:
             segment, next_cursor = _consume_script_segment(source, cursor + 1)
             if segment:
-                tag = 'super' if token == '^' else 'sub'
-                parts.append(f'<{tag}>{_render_latex_markup(segment)}</{tag}>')
+                tag = "super" if token == "^" else "sub"
+                parts.append(f"<{tag}>{_render_latex_markup(segment)}</{tag}>")
             cursor = max(next_cursor, cursor + 1)
             continue
-        if token == '{':
+        if token == "{":
             segment, next_cursor = _consume_braced_segment(source, cursor)
             if segment:
                 parts.append(_render_latex_markup(segment))
             cursor = max(next_cursor, cursor + 1)
             continue
-        if token == '}':
+        if token == "}":
             cursor += 1
             continue
-        if token == '\\':
+        if token == "\\":
             if cursor + 1 < len(source):
                 parts.append(_escape(source[cursor + 1]))
                 cursor += 2
@@ -443,28 +431,28 @@ def _render_latex_markup(value: str) -> str:
             continue
         parts.append(_escape(token))
         cursor += 1
-    return ''.join(parts)
+    return "".join(parts)
 
 
 def _render_formula_chunk(value: str, *, formula_font: str | None) -> str:
     markup = _render_latex_markup(value)
     if not markup:
         return _escape(value)
-    font_token = str(formula_font or '').strip()
+    font_token = str(formula_font or "").strip()
     if font_token:
         return f'<font name="{_escape_attr(font_token)}">{markup}</font>'
     return markup
 
 
 def _render_formula_aware_text(value: str, *, formula_font: str | None) -> str:
-    text = str(value or '')
+    text = str(value or "")
     if not _looks_like_formula_text(text):
         return _escape(text)
 
     parts: list[str] = []
-    tokens = re.split(r'(\s+)', text)
-    trailing_punctuation = '.,;:!?，。；：！？'
-    leading_punctuation = ''
+    tokens = re.split(r"(\s+)", text)
+    trailing_punctuation = ".,;:!?，。；：！？"
+    leading_punctuation = ""
 
     for token in tokens:
         if not token:
@@ -474,8 +462,8 @@ def _render_formula_aware_text(value: str, *, formula_font: str | None) -> str:
             continue
 
         core = token
-        leading = ''
-        trailing = ''
+        leading = ""
+        trailing = ""
         while core and core[0] in leading_punctuation:
             leading += core[0]
             core = core[1:]
@@ -489,11 +477,11 @@ def _render_formula_aware_text(value: str, *, formula_font: str | None) -> str:
         else:
             parts.append(_escape(token))
 
-    return ''.join(parts)
+    return "".join(parts)
 
 
 def _font_available(font_name: str | None) -> bool:
-    token = str(font_name or '').strip()
+    token = str(font_name or "").strip()
     if not token:
         return False
     cached = _FONT_AVAILABLE_CACHE.get(token)
@@ -509,11 +497,11 @@ def _font_available(font_name: str | None) -> bool:
 
 
 def _contains_non_ascii(value: str) -> bool:
-    return any(ord(char) > 127 for char in str(value or ''))
+    return any(ord(char) > 127 for char in str(value or ""))
 
 
 def _contains_cjk(value: str) -> bool:
-    for char in str(value or ''):
+    for char in str(value or ""):
         code = ord(char)
         if (
             0x4E00 <= code <= 0x9FFF  # CJK Unified Ideographs
@@ -525,7 +513,7 @@ def _contains_cjk(value: str) -> bool:
 
 
 def _register_overlay_measure_font(font_name: str | None, font_path: Path | None) -> None:
-    token = str(font_name or '').strip()
+    token = str(font_name or "").strip()
     if not token or font_path is None:
         return
     try:
@@ -539,7 +527,7 @@ def _register_overlay_measure_font(font_name: str | None, font_path: Path | None
 
 
 def _resolve_fitz_measure_font(font_name: str | None):
-    token = str(font_name or '').strip()
+    token = str(font_name or "").strip()
     if not token:
         return None
 
@@ -557,13 +545,13 @@ def _resolve_fitz_measure_font(font_name: str | None):
     candidate_specs: list[tuple[str, str]] = []
     cached_path = _OVERLAY_FONT_FILE_BY_NAME.get(token)
     if cached_path:
-        candidate_specs.append(('fontfile', cached_path))
+        candidate_specs.append(("fontfile", cached_path))
 
     token_lower = token.lower()
     alias = _FITZ_FONT_CANONICAL_ALIASES.get(token_lower)
     if alias:
-        candidate_specs.append(('fontname', alias))
-    candidate_specs.append(('fontname', token))
+        candidate_specs.append(("fontname", alias))
+    candidate_specs.append(("fontname", token))
 
     visited: set[tuple[str, str]] = set()
     for mode, value in candidate_specs:
@@ -572,7 +560,7 @@ def _resolve_fitz_measure_font(font_name: str | None):
             continue
         visited.add(candidate_key)
         try:
-            if mode == 'fontfile':
+            if mode == "fontfile":
                 font_obj = fitz.Font(fontfile=value)
             else:
                 font_obj = fitz.Font(fontname=value)
@@ -586,7 +574,7 @@ def _resolve_fitz_measure_font(font_name: str | None):
 
 
 def _resolve_markdown_emphasis_font(base_font: str | None, *, bold: bool, italic: bool) -> str:
-    token = str(base_font or '').strip()
+    token = str(base_font or "").strip()
     cache_key = (token, bool(bold), bool(italic))
     cached = _MARKDOWN_EMPHASIS_FONT_CACHE.get(cache_key)
     if cached is not None:
@@ -597,11 +585,11 @@ def _resolve_markdown_emphasis_font(base_font: str | None, *, bold: bool, italic
         return token
 
     if bold and italic:
-        fallback = 'Helvetica-BoldOblique'
+        fallback = "Helvetica-BoldOblique"
     elif bold:
-        fallback = 'Helvetica-Bold'
+        fallback = "Helvetica-Bold"
     else:
-        fallback = 'Helvetica-Oblique'
+        fallback = "Helvetica-Oblique"
 
     if not token:
         _MARKDOWN_EMPHASIS_FONT_CACHE[cache_key] = fallback
@@ -611,26 +599,26 @@ def _resolve_markdown_emphasis_font(base_font: str | None, *, bold: bool, italic
     if bold and italic:
         candidates.extend(
             [
-                f'{token}-BoldItalic',
-                f'{token}-BoldOblique',
-                f'{token} Bold Italic',
-                f'{token} Bold Oblique',
+                f"{token}-BoldItalic",
+                f"{token}-BoldOblique",
+                f"{token} Bold Italic",
+                f"{token} Bold Oblique",
             ]
         )
     elif bold:
         candidates.extend(
             [
-                f'{token}-Bold',
-                f'{token} Bold',
+                f"{token}-Bold",
+                f"{token} Bold",
             ]
         )
     else:
         candidates.extend(
             [
-                f'{token}-Italic',
-                f'{token}-Oblique',
-                f'{token} Italic',
-                f'{token} Oblique',
+                f"{token}-Italic",
+                f"{token}-Oblique",
+                f"{token} Italic",
+                f"{token} Oblique",
             ]
         )
 
@@ -648,7 +636,7 @@ def _find_closing_markdown_token(tokens: list[Any], start_index: int, open_type:
     depth = 1
     cursor = start_index + 1
     while cursor < len(tokens):
-        token_type = str(getattr(tokens[cursor], 'type', ''))
+        token_type = str(getattr(tokens[cursor], "type", ""))
         if token_type == open_type:
             depth += 1
         elif token_type == close_type:
@@ -667,7 +655,7 @@ def _render_markdown_inline_children(
     formula_font: str | None = None,
 ) -> str:
     if not children:
-        return ''
+        return ""
 
     parts: list[str] = []
     link_depth = 0
@@ -675,21 +663,21 @@ def _render_markdown_inline_children(
     italic_depth = 0
     strike_depth = 0
     color_depth = 0
-    base_font = str(body_font or '').strip()
-    effective_formula_font = str(formula_font or inline_code_font or body_font or '').strip()
+    base_font = str(body_font or "").strip()
+    effective_formula_font = str(formula_font or inline_code_font or body_font or "").strip()
 
     def _apply_strike(markup: str) -> str:
         if not markup:
-            return ''
+            return ""
         if strike_depth > 0:
-            return f'<strike>{markup}</strike>'
+            return f"<strike>{markup}</strike>"
         return markup
 
     for token in children:
-        token_type = str(getattr(token, 'type', '') or '').strip().lower()
-        token_content = str(getattr(token, 'content', '') or '')
+        token_type = str(getattr(token, "type", "") or "").strip().lower()
+        token_content = str(getattr(token, "content", "") or "")
 
-        if token_type == 'text':
+        if token_type == "text":
             escaped_text = _render_formula_aware_text(
                 token_content,
                 formula_font=effective_formula_font or None,
@@ -704,55 +692,62 @@ def _render_markdown_inline_children(
                     emphasis_font
                     and emphasis_font != base_font
                     and not (
-                        _contains_non_ascii(token_content)
-                        and emphasis_font.lower().startswith('helvetica')
+                        _contains_non_ascii(token_content) and emphasis_font.lower().startswith("helvetica")
                     )
                 ):
                     parts.append(
-                        _apply_strike(
-                            f'<font name="{_escape_attr(emphasis_font)}">{escaped_text}</font>'
-                        )
+                        _apply_strike(f'<font name="{_escape_attr(emphasis_font)}">{escaped_text}</font>')
                     )
                 else:
                     parts.append(_apply_strike(escaped_text))
             else:
                 parts.append(_apply_strike(escaped_text))
             continue
-        if token_type in {'softbreak', 'hardbreak'}:
-            parts.append('<br/>')
+        if token_type in {"softbreak", "hardbreak"}:
+            parts.append("<br/>")
             continue
-        if token_type == 'code_inline':
+        if token_type == "code_inline":
             if _looks_like_formula_text(token_content):
-                parts.append(_apply_strike(
-                    _render_formula_aware_text(
-                        token_content,
-                        formula_font=effective_formula_font or None,
+                parts.append(
+                    _apply_strike(
+                        _render_formula_aware_text(
+                            token_content,
+                            formula_font=effective_formula_font or None,
+                        )
                     )
-                ))
+                )
             else:
                 escaped_code = _escape(token_content)
-                inline_font = str(inline_code_font or '').strip()
+                inline_font = str(inline_code_font or "").strip()
                 if _contains_non_ascii(token_content):
-                    inline_font = str(body_font or inline_code_font or '').strip()
+                    inline_font = str(body_font or inline_code_font or "").strip()
                 if inline_font:
-                    parts.append(_apply_strike(
-                        f'<font name="{_escape_attr(inline_font)}">{escaped_code}</font>'
-                    ))
+                    parts.append(
+                        _apply_strike(f'<font name="{_escape_attr(inline_font)}">{escaped_code}</font>')
+                    )
                 else:
                     parts.append(_apply_strike(escaped_code))
             continue
-        if token_type == 'math_inline':
+        if token_type == "math_inline":
             parts.append(
                 _apply_strike(
                     _render_formula_chunk(token_content, formula_font=effective_formula_font or None)
                 )
             )
             continue
-        if token_type == 'html_inline':
-            raw_html = str(token_content or '').strip()
-            open_green = re.match(r'^<span\s+style\s*=\s*"\s*color\s*:\s*(green|#16a34a)\s*;?\s*"\s*>$', raw_html, flags=re.IGNORECASE)
-            open_red = re.match(r'^<span\s+style\s*=\s*"\s*color\s*:\s*(red|#dc2626)\s*;?\s*"\s*>$', raw_html, flags=re.IGNORECASE)
-            close_span = re.match(r'^</span>$', raw_html, flags=re.IGNORECASE)
+        if token_type == "html_inline":
+            raw_html = str(token_content or "").strip()
+            open_green = re.match(
+                r'^<span\s+style\s*=\s*"\s*color\s*:\s*(green|#16a34a)\s*;?\s*"\s*>$',
+                raw_html,
+                flags=re.IGNORECASE,
+            )
+            open_red = re.match(
+                r'^<span\s+style\s*=\s*"\s*color\s*:\s*(red|#dc2626)\s*;?\s*"\s*>$',
+                raw_html,
+                flags=re.IGNORECASE,
+            )
+            close_span = re.match(r"^</span>$", raw_html, flags=re.IGNORECASE)
             if open_green:
                 parts.append('<font color="#16A34A">')
                 color_depth += 1
@@ -762,54 +757,54 @@ def _render_markdown_inline_children(
                 color_depth += 1
                 continue
             if close_span and color_depth > 0:
-                parts.append('</font>')
+                parts.append("</font>")
                 color_depth -= 1
                 continue
             # Ignore unsupported inline HTML markup to keep PDF text clean.
             continue
-        if token_type == 'strong_open':
+        if token_type == "strong_open":
             strong_depth += 1
             continue
-        if token_type == 'strong_close':
+        if token_type == "strong_close":
             strong_depth = max(0, strong_depth - 1)
             continue
-        if token_type == 'em_open':
+        if token_type == "em_open":
             italic_depth += 1
             continue
-        if token_type == 'em_close':
+        if token_type == "em_close":
             italic_depth = max(0, italic_depth - 1)
             continue
-        if token_type in {'s_open', 'strikethrough_open', 'del_open'}:
+        if token_type in {"s_open", "strikethrough_open", "del_open"}:
             strike_depth += 1
             continue
-        if token_type in {'s_close', 'strikethrough_close', 'del_close'}:
+        if token_type in {"s_close", "strikethrough_close", "del_close"}:
             strike_depth = max(0, strike_depth - 1)
             continue
-        if token_type == 'link_open':
-            href = _token_attr(token, 'href') or ''
+        if token_type == "link_open":
+            href = _token_attr(token, "href") or ""
             href = href.strip()
             if href:
                 parts.append(f'<a href="{_escape_attr(href)}">')
                 link_depth += 1
             continue
-        if token_type == 'link_close':
+        if token_type == "link_close":
             if link_depth > 0:
-                parts.append('</a>')
+                parts.append("</a>")
                 link_depth -= 1
             continue
-        if token_type == 'image':
-            alt_text = _token_attr(token, 'alt') or token_content or 'image'
-            parts.append(_apply_strike(_escape(f'[Image: {alt_text}]')))
+        if token_type == "image":
+            alt_text = _token_attr(token, "alt") or token_content or "image"
+            parts.append(_apply_strike(_escape(f"[Image: {alt_text}]")))
             continue
 
         if token_content:
             parts.append(_apply_strike(_escape(token_content)))
 
     if link_depth > 0:
-        parts.extend(['</a>'] * link_depth)
+        parts.extend(["</a>"] * link_depth)
     if color_depth > 0:
-        parts.extend(['</font>'] * color_depth)
-    return ''.join(parts).strip()
+        parts.extend(["</font>"] * color_depth)
+    return "".join(parts).strip()
 
 
 def _wrap_markdown_code_lines(
@@ -830,19 +825,12 @@ def _wrap_markdown_code_lines(
         and isinstance(max_width_pt, (int, float))
         and float(max_width_pt) > 0
     )
-    fallback_char_width = None
-    if use_pdf_width_wrap:
-        try:
-            fallback_char_width = max(1.0, pdfmetrics.stringWidth('M', font_name, float(font_size)) * 0.62)
-        except Exception:
-            fallback_char_width = max(1.0, float(font_size) * 0.62)
-
     for raw_line in lines:
-        line = str(raw_line or '').replace('\t', '    ')
+        line = str(raw_line or "").replace("\t", "    ")
         if not line:
-            wrapped_lines.append('')
+            wrapped_lines.append("")
             continue
-        normalized = _normalize_newlines(line).replace('\n', '')
+        normalized = _normalize_newlines(line).replace("\n", "")
         if use_pdf_width_wrap:
             max_line_width = max(60.0, float(max_width_pt) - 6.0)
             split_lines = _wrap_code_line_by_points(
@@ -851,7 +839,7 @@ def _wrap_markdown_code_lines(
                 font_name=str(font_name),
                 font_size=float(font_size),
             )
-            wrapped_lines.extend(split_lines or [''])
+            wrapped_lines.extend(split_lines or [""])
         else:
             chunks = textwrap.wrap(
                 normalized,
@@ -861,9 +849,9 @@ def _wrap_markdown_code_lines(
                 break_long_words=True,
                 break_on_hyphens=False,
             )
-            wrapped_lines.extend(chunks or [''])
+            wrapped_lines.extend(chunks or [""])
 
-    return '\n'.join(wrapped_lines)
+    return "\n".join(wrapped_lines)
 
 
 def _wrap_code_line_by_points(
@@ -873,25 +861,25 @@ def _wrap_code_line_by_points(
     font_name: str,
     font_size: float,
 ) -> list[str]:
-    line = str(text_line or '')
+    line = str(text_line or "")
     if not line:
-        return ['']
+        return [""]
 
-    tokens = re.findall(r'\s+|\S+', line)
+    tokens = re.findall(r"\s+|\S+", line)
     wrapped: list[str] = []
-    current = ''
+    current = ""
 
     def _flush_current() -> None:
         nonlocal current
         if current:
             wrapped.append(current.rstrip())
-            current = ''
+            current = ""
 
     for token in tokens:
         if not token:
             continue
 
-        candidate = f'{current}{token}'
+        candidate = f"{current}{token}"
         if _measure_text_width(candidate, font_name=font_name, font_size=font_size) <= max_width_points:
             current = candidate
             continue
@@ -927,7 +915,7 @@ def _wrap_code_line_by_points(
     if current:
         wrapped.append(current.rstrip())
 
-    return wrapped or ['']
+    return wrapped or [""]
 
 
 def _safe_file(path: Path | None) -> Path | None:
@@ -947,9 +935,9 @@ def _register_ttf_font(font_name: str, font_path: Path, *, quiet: bool = False) 
         return True
     except Exception as exc:
         if quiet:
-            logger.info('Skipped PDF font %s from %s: %s', font_name, font_path, exc)
+            logger.info("Skipped PDF font %s from %s: %s", font_name, font_path, exc)
         else:
-            logger.warning('Failed to register PDF font %s from %s: %s', font_name, font_path, exc)
+            logger.warning("Failed to register PDF font %s from %s: %s", font_name, font_path, exc)
         return False
 
 
@@ -965,8 +953,8 @@ def _resolve_report_fonts() -> ReportFonts:
     if _FONTS_CACHE is not None:
         return _FONTS_CACHE
 
-    heading_font = 'Helvetica-Bold'
-    body_font = 'Times-Roman'
+    heading_font = "Helvetica-Bold"
+    body_font = "Times-Roman"
 
     if FONT_CHINESE_FALLBACK_NAME in pdfmetrics.getRegisteredFontNames():
         body_font = FONT_CHINESE_FALLBACK_NAME
@@ -978,7 +966,7 @@ def _resolve_report_fonts() -> ReportFonts:
             heading_font = FONT_CHINESE_FALLBACK_NAME
         except Exception as exc:
             logger.warning(
-                'Failed to register fallback Chinese PDF font %s: %s',
+                "Failed to register fallback Chinese PDF font %s: %s",
                 FONT_CHINESE_FALLBACK_NAME,
                 exc,
             )
@@ -998,7 +986,7 @@ def _resolve_report_fonts() -> ReportFonts:
 
 def _resolve_overlay_font_resource() -> tuple[str, Path | None]:
     """Overlay text uses ReportLab's built-in ``china-s`` CID font."""
-    return 'china-s', None
+    return "china-s", None
 
 
 def _resolve_overlay_mono_font_resource() -> tuple[str, Path | None]:
@@ -1006,7 +994,7 @@ def _resolve_overlay_mono_font_resource() -> tuple[str, Path | None]:
         mono_path = _safe_file(mono_source)
         if mono_path is not None:
             return FONT_OVERLAY_MONO_UNICODE_NAME, mono_path
-    return 'cour', None
+    return "cour", None
 
 
 def _ensure_overlay_font(
@@ -1015,7 +1003,7 @@ def _ensure_overlay_font(
     font_name: str,
     font_path: Path | None,
 ) -> str:
-    token = str(font_name or '').strip() or 'china-s'
+    token = str(font_name or "").strip() or "china-s"
     _register_overlay_measure_font(token, font_path)
     if font_path is None:
         return token
@@ -1024,15 +1012,15 @@ def _ensure_overlay_font(
         _register_overlay_measure_font(token, font_path)
         return token
     except Exception as exc:
-        logger.debug('Failed to register overlay font %s from %s: %s', token, font_path, exc)
-        return 'china-s'
+        logger.debug("Failed to register overlay font %s from %s: %s", token, font_path, exc)
+        return "china-s"
 
 
 def _safe_canvas_font(canvas, font_name: str, size: float) -> None:
     candidates = [
-        str(font_name or '').strip(),
+        str(font_name or "").strip(),
         FONT_CHINESE_FALLBACK_NAME,
-        'Helvetica',
+        "Helvetica",
     ]
     for candidate in candidates:
         if not candidate:
@@ -1053,26 +1041,26 @@ def _iter_text_sections(payload: dict[str, Any], keys: Iterable[str]) -> list[tu
         text = str(value).strip()
         if not text:
             continue
-        rows.append((key.replace('_', ' ').title(), text))
+        rows.append((key.replace("_", " ").title(), text))
     return rows
 
 
 def _split_paragraphs(text: str) -> list[str]:
-    blocks = [part.strip() for part in re.split(r'\n\s*\n', text or '')]
+    blocks = [part.strip() for part in re.split(r"\n\s*\n", text or "")]
     return [item for item in blocks if item]
 
 
 def _format_decision(decision: str | None) -> str:
     if not decision:
-        return 'Pending'
-    normalized = str(decision).strip().replace('_', ' ')
+        return "Pending"
+    normalized = str(decision).strip().replace("_", " ")
     if not normalized:
-        return 'Pending'
+        return "Pending"
     return normalized.title()
 
 
 def _format_datetime(dt: datetime) -> str:
-    return dt.strftime('%Y-%m-%d %H:%M:%S UTC')
+    return dt.strftime("%Y-%m-%d %H:%M:%S UTC")
 
 
 def _build_styles(fonts: ReportFonts) -> StyleSheet1:
@@ -1080,149 +1068,149 @@ def _build_styles(fonts: ReportFonts) -> StyleSheet1:
 
     styles.add(
         ParagraphStyle(
-            name='CoverBrand',
-            parent=styles['Normal'],
+            name="CoverBrand",
+            parent=styles["Normal"],
             fontName=fonts.heading,
             fontSize=12,
             leading=14,
-            textColor=colors.HexColor('#9F1D1D'),
+            textColor=colors.HexColor("#9F1D1D"),
             alignment=1,
             spaceAfter=3,
         )
     )
     styles.add(
         ParagraphStyle(
-            name='CoverTitle',
-            parent=styles['Heading1'],
+            name="CoverTitle",
+            parent=styles["Heading1"],
             fontName=fonts.heading,
             fontSize=24,
             leading=30,
-            textColor=colors.HexColor('#111827'),
+            textColor=colors.HexColor("#111827"),
             alignment=1,
             spaceAfter=5,
         )
     )
     styles.add(
         ParagraphStyle(
-            name='CoverWorkspaceTitle',
-            parent=styles['Heading2'],
+            name="CoverWorkspaceTitle",
+            parent=styles["Heading2"],
             fontName=fonts.body,
             fontSize=13,
             leading=18,
-            textColor=colors.HexColor('#1F2937'),
+            textColor=colors.HexColor("#1F2937"),
             alignment=1,
             spaceAfter=2,
         )
     )
     styles.add(
         ParagraphStyle(
-            name='CoverMeta',
-            parent=styles['Normal'],
+            name="CoverMeta",
+            parent=styles["Normal"],
             fontName=fonts.body,
             fontSize=9.5,
             leading=14,
-            textColor=colors.HexColor('#4B5563'),
+            textColor=colors.HexColor("#4B5563"),
             alignment=1,
         )
     )
     styles.add(
         ParagraphStyle(
-            name='SectionTitle',
-            parent=styles['Heading2'],
+            name="SectionTitle",
+            parent=styles["Heading2"],
             fontName=fonts.heading,
             fontSize=14,
             leading=19,
-            textColor=colors.HexColor('#111827'),
+            textColor=colors.HexColor("#111827"),
             spaceBefore=8,
             spaceAfter=4,
         )
     )
     styles.add(
         ParagraphStyle(
-            name='SectionSubtitle',
-            parent=styles['Normal'],
+            name="SectionSubtitle",
+            parent=styles["Normal"],
             fontName=fonts.body,
             fontSize=9,
             leading=13,
-            textColor=colors.HexColor('#6B7280'),
+            textColor=colors.HexColor("#6B7280"),
             spaceAfter=6,
         )
     )
     styles.add(
         ParagraphStyle(
-            name='BodyTextEnterprise',
-            parent=styles['Normal'],
+            name="BodyTextEnterprise",
+            parent=styles["Normal"],
             fontName=fonts.body,
             fontSize=10.5,
             leading=16,
-            textColor=colors.HexColor('#111827'),
+            textColor=colors.HexColor("#111827"),
             spaceAfter=3,
-            wordWrap='CJK',
+            wordWrap="CJK",
         )
     )
     styles.add(
         ParagraphStyle(
-            name='LabelText',
-            parent=styles['Normal'],
+            name="LabelText",
+            parent=styles["Normal"],
             fontName=fonts.heading,
             fontSize=10,
             leading=13,
-            textColor=colors.HexColor('#1F2937'),
+            textColor=colors.HexColor("#1F2937"),
             spaceBefore=3,
             spaceAfter=1,
         )
     )
     styles.add(
         ParagraphStyle(
-            name='SmallMutedText',
-            parent=styles['Normal'],
+            name="SmallMutedText",
+            parent=styles["Normal"],
             fontName=fonts.body,
             fontSize=8.8,
             leading=12,
-            textColor=colors.HexColor('#6B7280'),
-            wordWrap='CJK',
+            textColor=colors.HexColor("#6B7280"),
+            wordWrap="CJK",
         )
     )
     styles.add(
         ParagraphStyle(
-            name='AppendixRawText',
-            parent=styles['Normal'],
+            name="AppendixRawText",
+            parent=styles["Normal"],
             fontName=fonts.body,
             fontSize=9.2,
             leading=13,
-            textColor=colors.HexColor('#1F2937'),
-            wordWrap='CJK',
+            textColor=colors.HexColor("#1F2937"),
+            wordWrap="CJK",
             spaceAfter=2,
         )
     )
     styles.add(
         ParagraphStyle(
-            name='MarkdownHeadingL2',
-            parent=styles['Heading3'],
+            name="MarkdownHeadingL2",
+            parent=styles["Heading3"],
             fontName=fonts.heading,
             fontSize=12,
             leading=16,
-            textColor=colors.HexColor('#111827'),
+            textColor=colors.HexColor("#111827"),
             spaceBefore=6,
             spaceAfter=3,
         )
     )
     styles.add(
         ParagraphStyle(
-            name='MarkdownHeadingL3',
-            parent=styles['Heading4'],
+            name="MarkdownHeadingL3",
+            parent=styles["Heading4"],
             fontName=fonts.heading,
             fontSize=10.5,
             leading=14,
-            textColor=colors.HexColor('#1F2937'),
+            textColor=colors.HexColor("#1F2937"),
             spaceBefore=4,
             spaceAfter=2,
         )
     )
     styles.add(
         ParagraphStyle(
-            name='MarkdownBullet',
-            parent=styles['BodyTextEnterprise'],
+            name="MarkdownBullet",
+            parent=styles["BodyTextEnterprise"],
             fontName=fonts.body,
             fontSize=10.1,
             leading=14.5,
@@ -1233,14 +1221,14 @@ def _build_styles(fonts: ReportFonts) -> StyleSheet1:
     )
     styles.add(
         ParagraphStyle(
-            name='MarkdownCode',
-            parent=styles['Normal'],
+            name="MarkdownCode",
+            parent=styles["Normal"],
             fontName=fonts.mono,
             fontSize=8.9,
             leading=11.2,
-            textColor=colors.HexColor('#111827'),
-            backColor=colors.HexColor('#F8FAFC'),
-            borderColor=colors.HexColor('#E5E7EB'),
+            textColor=colors.HexColor("#111827"),
+            backColor=colors.HexColor("#F8FAFC"),
+            borderColor=colors.HexColor("#E5E7EB"),
             borderWidth=0.6,
             borderPadding=6,
             leftIndent=2,
@@ -1251,44 +1239,44 @@ def _build_styles(fonts: ReportFonts) -> StyleSheet1:
     )
     styles.add(
         ParagraphStyle(
-            name='MarkdownMathBlock',
-            parent=styles['BodyTextEnterprise'],
+            name="MarkdownMathBlock",
+            parent=styles["BodyTextEnterprise"],
             fontName=fonts.mono,
             fontSize=10.2,
             leading=14.5,
             leftIndent=10,
             rightIndent=10,
             alignment=1,
-            textColor=colors.HexColor('#111827'),
-            backColor=colors.HexColor('#F8FAFC'),
-            borderColor=colors.HexColor('#E5E7EB'),
+            textColor=colors.HexColor("#111827"),
+            backColor=colors.HexColor("#F8FAFC"),
+            borderColor=colors.HexColor("#E5E7EB"),
             borderWidth=0.5,
             borderPadding=5,
             spaceBefore=2,
             spaceAfter=4,
-            wordWrap='CJK',
+            wordWrap="CJK",
         )
     )
     styles.add(
         ParagraphStyle(
-            name='MarkdownTableHeader',
-            parent=styles['BodyTextEnterprise'],
+            name="MarkdownTableHeader",
+            parent=styles["BodyTextEnterprise"],
             fontName=fonts.heading,
             fontSize=9.4,
             leading=12.5,
             spaceAfter=0,
-            wordWrap='CJK',
+            wordWrap="CJK",
         )
     )
     styles.add(
         ParagraphStyle(
-            name='MarkdownTableCell',
-            parent=styles['BodyTextEnterprise'],
+            name="MarkdownTableCell",
+            parent=styles["BodyTextEnterprise"],
             fontName=fonts.body,
             fontSize=9.3,
             leading=12.2,
             spaceAfter=0,
-            wordWrap='CJK',
+            wordWrap="CJK",
         )
     )
 
@@ -1302,15 +1290,15 @@ def _append_section_header(
     title: str,
     subtitle: str | None = None,
 ) -> None:
-    story.append(Paragraph(_escape(title), styles['SectionTitle']))
+    story.append(Paragraph(_escape(title), styles["SectionTitle"]))
     if subtitle:
-        story.append(Paragraph(_escape(subtitle), styles['SectionSubtitle']))
+        story.append(Paragraph(_escape(subtitle), styles["SectionSubtitle"]))
     story.append(
         HRFlowable(
-            width='100%',
+            width="100%",
             thickness=0.6,
-            color=colors.HexColor('#D1D5DB'),
-            lineCap='round',
+            color=colors.HexColor("#D1D5DB"),
+            lineCap="round",
             spaceBefore=1,
             spaceAfter=5,
         )
@@ -1325,31 +1313,31 @@ def _append_labeled_blocks(
     text: str,
     render_markdown: bool = False,
 ) -> None:
-    clean = str(text or '').strip()
+    clean = str(text or "").strip()
     if not clean:
         return
 
-    story.append(Paragraph(_escape(label), styles['LabelText']))
+    story.append(Paragraph(_escape(label), styles["LabelText"]))
     if render_markdown:
         _append_markdown_report(story, styles, markdown=clean)
         return
 
     for block in _split_paragraphs(clean):
-        story.append(Paragraph(_escape(block), styles['BodyTextEnterprise']))
+        story.append(Paragraph(_escape(block), styles["BodyTextEnterprise"]))
 
 
 def _looks_like_ascii_tree(line: str) -> bool:
     stripped = line.rstrip()
     if not stripped:
         return False
-    if stripped.lower().startswith('root:'):
+    if stripped.lower().startswith("root:"):
         return True
-    tree_tokens = ('|-', '`-', '+-', '└', '├', '│')
+    tree_tokens = ("|-", "`-", "+-", "└", "├", "│")
     return any(token in stripped for token in tree_tokens)
 
 
 def _append_markdown_report(story: list, styles: StyleSheet1, *, markdown: str) -> None:
-    clean = _normalize_newlines(str(markdown or '')).strip()
+    clean = _normalize_newlines(str(markdown or "")).strip()
     if not clean:
         return
 
@@ -1357,11 +1345,11 @@ def _append_markdown_report(story: list, styles: StyleSheet1, *, markdown: str) 
 
     def _list_style_for_depth(depth: int) -> ParagraphStyle:
         normalized_depth = max(0, int(depth))
-        style_name = f'MarkdownBulletDepth{normalized_depth}'
+        style_name = f"MarkdownBulletDepth{normalized_depth}"
         existing = styles.byName.get(style_name)
         if existing is not None:
             return existing
-        parent = styles['MarkdownBullet']
+        parent = styles["MarkdownBullet"]
         style = ParagraphStyle(
             name=style_name,
             parent=parent,
@@ -1373,27 +1361,23 @@ def _append_markdown_report(story: list, styles: StyleSheet1, *, markdown: str) 
         return style
 
     def _append_code_block(content: str, *, lang: str | None = None) -> None:
-        code_lines = _normalize_newlines(str(content or '')).split('\n')
-        code_style = styles['MarkdownCode']
+        code_lines = _normalize_newlines(str(content or "")).split("\n")
+        code_style = styles["MarkdownCode"]
         render_style = code_style
-        if _contains_non_ascii('\n'.join(code_lines)):
+        if _contains_non_ascii("\n".join(code_lines)):
             render_style = ParagraphStyle(
-                name='MarkdownCodeRuntimeCJK',
+                name="MarkdownCodeRuntimeCJK",
                 parent=code_style,
-                fontName=styles['BodyTextEnterprise'].fontName,
-                wordWrap='CJK',
+                fontName=styles["BodyTextEnterprise"].fontName,
+                wordWrap="CJK",
             )
-        border_padding = float(getattr(code_style, 'borderPadding', 0) or 0)
-        border_width = float(getattr(code_style, 'borderWidth', 0) or 0)
-        left_indent = float(getattr(code_style, 'leftIndent', 0) or 0)
-        right_indent = float(getattr(code_style, 'rightIndent', 0) or 0)
+        border_padding = float(getattr(code_style, "borderPadding", 0) or 0)
+        border_width = float(getattr(code_style, "borderWidth", 0) or 0)
+        left_indent = float(getattr(code_style, "leftIndent", 0) or 0)
+        right_indent = float(getattr(code_style, "rightIndent", 0) or 0)
         content_width = PAGE_WIDTH - (40 * mm)
         horizontal_deductions = (
-            left_indent
-            + right_indent
-            + (2.0 * border_padding)
-            + (2.0 * border_width)
-            + 2.0
+            left_indent + right_indent + (2.0 * border_padding) + (2.0 * border_width) + 2.0
         )
         max_text_width = max(120.0, content_width - horizontal_deductions)
         approx_width = max(36, int(max_text_width / max(1.0, float(code_style.fontSize) * 0.62)))
@@ -1413,25 +1397,25 @@ def _append_markdown_report(story: list, styles: StyleSheet1, *, markdown: str) 
         )
 
     def _append_math_block(content: str) -> None:
-        formula = _normalize_newlines(str(content or '')).strip()
+        formula = _normalize_newlines(str(content or "")).strip()
         if not formula:
             return
-        formula_font = str(styles['MarkdownCode'].fontName or '').strip()
+        formula_font = str(styles["MarkdownCode"].fontName or "").strip()
         if _contains_non_ascii(formula):
-            formula_font = str(styles['BodyTextEnterprise'].fontName or '').strip() or formula_font
-        story.append(Paragraph(_escape('Equation'), styles['LabelText']))
+            formula_font = str(styles["BodyTextEnterprise"].fontName or "").strip() or formula_font
+        story.append(Paragraph(_escape("Equation"), styles["LabelText"]))
         story.append(
             Paragraph(
                 _render_formula_chunk(
                     formula,
                     formula_font=formula_font or None,
                 ),
-                styles['MarkdownMathBlock'],
+                styles["MarkdownMathBlock"],
             )
         )
 
-    def _append_markdown_image(*, src: str, alt_text: str = 'image') -> bool:
-        image_src = str(src or '').strip()
+    def _append_markdown_image(*, src: str, alt_text: str = "image") -> bool:
+        image_src = str(src or "").strip()
         if not image_src:
             return False
         image_path = Path(image_src).expanduser()
@@ -1440,44 +1424,46 @@ def _append_markdown_report(story: list, styles: StyleSheet1, *, markdown: str) 
         max_width = PAGE_WIDTH - (40 * mm)
         max_height = 110 * mm
         try:
-            story.append(Image(str(image_path), width=max_width, height=max_height, kind='proportional'))
+            story.append(Image(str(image_path), width=max_width, height=max_height, kind="proportional"))
             story.append(Spacer(1, 2 * mm))
             return True
         except Exception:
             return False
 
     def _extract_standalone_image(inline_token: Any) -> tuple[str, str] | None:
-        if inline_token is None or str(getattr(inline_token, 'type', '')) != 'inline':
+        if inline_token is None or str(getattr(inline_token, "type", "")) != "inline":
             return None
-        children = list(getattr(inline_token, 'children', None) or [])
-        image_children = [child for child in children if str(getattr(child, 'type', '')) == 'image']
+        children = list(getattr(inline_token, "children", None) or [])
+        image_children = [child for child in children if str(getattr(child, "type", "")) == "image"]
         meaningful_non_image = []
         for child in children:
-            child_type = str(getattr(child, 'type', ''))
-            child_content = str(getattr(child, 'content', '') or '').strip()
-            if child_type == 'image':
+            child_type = str(getattr(child, "type", ""))
+            child_content = str(getattr(child, "content", "") or "").strip()
+            if child_type == "image":
                 continue
-            if child_type == 'text' and not child_content:
+            if child_type == "text" and not child_content:
                 continue
             meaningful_non_image.append(child)
         if len(image_children) != 1 or meaningful_non_image:
             return None
         image_token = image_children[0]
-        src = _token_attr(image_token, 'src') or ''
-        alt_text = _token_attr(image_token, 'alt') or str(getattr(image_token, 'content', '') or '') or 'image'
+        src = _token_attr(image_token, "src") or ""
+        alt_text = (
+            _token_attr(image_token, "alt") or str(getattr(image_token, "content", "") or "") or "image"
+        )
         if not src:
             return None
         return src, alt_text
 
     def _append_logic_tree(lines: list[str]) -> None:
-        normalized_lines = [str(line or '').rstrip() for line in lines if str(line or '').strip()]
+        normalized_lines = [str(line or "").rstrip() for line in lines if str(line or "").strip()]
         if not normalized_lines:
             return
-        story.append(Paragraph(_escape('Logic Tree'), styles['LabelText']))
+        story.append(Paragraph(_escape("Logic Tree"), styles["LabelText"]))
         story.append(
             Preformatted(
                 _wrap_markdown_code_lines(normalized_lines, width=94),
-                styles['MarkdownCode'],
+                styles["MarkdownCode"],
                 maxLineLength=94,
             )
         )
@@ -1490,47 +1476,47 @@ def _append_markdown_report(story: list, styles: StyleSheet1, *, markdown: str) 
 
         while cursor < len(tokens):
             token = tokens[cursor]
-            token_type = str(getattr(token, 'type', ''))
+            token_type = str(getattr(token, "type", ""))
 
-            if token_type == 'table_close':
+            if token_type == "table_close":
                 break
-            if token_type == 'thead_open':
+            if token_type == "thead_open":
                 in_header = True
                 cursor += 1
                 continue
-            if token_type == 'thead_close':
+            if token_type == "thead_close":
                 in_header = False
                 cursor += 1
                 continue
-            if token_type == 'tr_open':
+            if token_type == "tr_open":
                 current_row = []
                 cursor += 1
                 continue
-            if token_type in {'th_open', 'td_open'}:
-                close_type = 'th_close' if token_type == 'th_open' else 'td_close'
-                cell_markup = ''
+            if token_type in {"th_open", "td_open"}:
+                close_type = "th_close" if token_type == "th_open" else "td_close"
+                cell_markup = ""
                 inner_cursor = cursor + 1
                 while inner_cursor < len(tokens):
                     inner_token = tokens[inner_cursor]
-                    inner_type = str(getattr(inner_token, 'type', ''))
+                    inner_type = str(getattr(inner_token, "type", ""))
                     if inner_type == close_type:
                         break
-                    if inner_type == 'inline':
+                    if inner_type == "inline":
                         cell_markup += _render_markdown_inline_children(
-                            getattr(inner_token, 'children', None),
-                            inline_code_font=styles['MarkdownCode'].fontName,
+                            getattr(inner_token, "children", None),
+                            inline_code_font=styles["MarkdownCode"].fontName,
                             body_font=(
-                                styles['MarkdownTableHeader'].fontName
+                                styles["MarkdownTableHeader"].fontName
                                 if in_header
-                                else styles['MarkdownTableCell'].fontName
+                                else styles["MarkdownTableCell"].fontName
                             ),
-                            formula_font=styles['MarkdownCode'].fontName,
+                            formula_font=styles["MarkdownCode"].fontName,
                         )
                     inner_cursor += 1
                 current_row.append(cell_markup.strip())
                 cursor = inner_cursor + 1
                 continue
-            if token_type == 'tr_close':
+            if token_type == "tr_close":
                 if current_row:
                     rows.append((in_header, list(current_row)))
                 current_row = []
@@ -1550,34 +1536,34 @@ def _append_markdown_report(story: list, styles: StyleSheet1, *, markdown: str) 
                 for row_index, (is_header, cells) in enumerate(rows):
                     if is_header:
                         header_rows.append(row_index)
-                    padded = list(cells) + [''] * (max_cols - len(cells))
+                    padded = list(cells) + [""] * (max_cols - len(cells))
                     row_flowables = []
                     for cell in padded:
-                        style_name = 'MarkdownTableHeader' if is_header else 'MarkdownTableCell'
-                        content = cell or '&nbsp;'
+                        style_name = "MarkdownTableHeader" if is_header else "MarkdownTableCell"
+                        content = cell or "&nbsp;"
                         row_flowables.append(Paragraph(content, styles[style_name]))
                     table_data.append(row_flowables)
 
                 markdown_table = Table(
                     table_data,
                     colWidths=[col_width] * max_cols,
-                    hAlign='LEFT',
+                    hAlign="LEFT",
                     repeatRows=1 if header_rows else 0,
                 )
                 table_style = [
-                    ('BOX', (0, 0), (-1, -1), 0.6, colors.HexColor('#CBD5E1')),
-                    ('INNERGRID', (0, 0), (-1, -1), 0.45, colors.HexColor('#E5E7EB')),
-                    ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-                    ('LEFTPADDING', (0, 0), (-1, -1), 5),
-                    ('RIGHTPADDING', (0, 0), (-1, -1), 5),
-                    ('TOPPADDING', (0, 0), (-1, -1), 4),
-                    ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+                    ("BOX", (0, 0), (-1, -1), 0.6, colors.HexColor("#CBD5E1")),
+                    ("INNERGRID", (0, 0), (-1, -1), 0.45, colors.HexColor("#E5E7EB")),
+                    ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                    ("LEFTPADDING", (0, 0), (-1, -1), 5),
+                    ("RIGHTPADDING", (0, 0), (-1, -1), 5),
+                    ("TOPPADDING", (0, 0), (-1, -1), 4),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
                 ]
                 for row_index in header_rows:
                     table_style.extend(
                         [
-                            ('BACKGROUND', (0, row_index), (-1, row_index), colors.HexColor('#F8FAFC')),
-                            ('TEXTCOLOR', (0, row_index), (-1, row_index), colors.HexColor('#0F172A')),
+                            ("BACKGROUND", (0, row_index), (-1, row_index), colors.HexColor("#F8FAFC")),
+                            ("TEXTCOLOR", (0, row_index), (-1, row_index), colors.HexColor("#0F172A")),
                         ]
                     )
                 markdown_table.setStyle(TableStyle(table_style))
@@ -1588,11 +1574,11 @@ def _append_markdown_report(story: list, styles: StyleSheet1, *, markdown: str) 
 
     def _consume_list(start_index: int, *, depth: int) -> int:
         open_token = tokens[start_index]
-        open_type = str(getattr(open_token, 'type', ''))
-        close_type = 'ordered_list_close' if open_type == 'ordered_list_open' else 'bullet_list_close'
+        open_type = str(getattr(open_token, "type", ""))
+        close_type = "ordered_list_close" if open_type == "ordered_list_open" else "bullet_list_close"
         list_style = _list_style_for_depth(depth)
 
-        start_value = _token_attr(open_token, 'start')
+        start_value = _token_attr(open_token, "start")
         try:
             item_counter = int(start_value) if start_value else 1
         except Exception:
@@ -1601,14 +1587,16 @@ def _append_markdown_report(story: list, styles: StyleSheet1, *, markdown: str) 
         cursor = start_index + 1
         while cursor < len(tokens):
             token = tokens[cursor]
-            token_type = str(getattr(token, 'type', ''))
+            token_type = str(getattr(token, "type", ""))
             if token_type == close_type:
                 break
-            if token_type != 'list_item_open':
+            if token_type != "list_item_open":
                 cursor += 1
                 continue
 
-            item_close_index = _find_closing_markdown_token(tokens, cursor, 'list_item_open', 'list_item_close')
+            item_close_index = _find_closing_markdown_token(
+                tokens, cursor, "list_item_open", "list_item_close"
+            )
             item_cursor = cursor + 1
             item_paragraph_parts: list[str] = []
             item_rendered = False
@@ -1617,46 +1605,46 @@ def _append_markdown_report(story: list, styles: StyleSheet1, *, markdown: str) 
                 nonlocal item_paragraph_parts, item_rendered, item_counter
                 if not item_paragraph_parts:
                     return
-                prefix = f'{item_counter}. ' if open_type == 'ordered_list_open' else '• '
-                body = '<br/>'.join(item_paragraph_parts).strip()
+                prefix = f"{item_counter}. " if open_type == "ordered_list_open" else "• "  # noqa: B023 — closure is invoked synchronously within the iteration that defines it.
+                body = "<br/>".join(item_paragraph_parts).strip()
                 if body:
-                    story.append(Paragraph(f'{prefix}{body}', list_style))
+                    story.append(Paragraph(f"{prefix}{body}", list_style))
                     item_rendered = True
                 item_paragraph_parts = []
 
             while item_cursor < item_close_index:
                 item_token = tokens[item_cursor]
-                item_type = str(getattr(item_token, 'type', ''))
+                item_type = str(getattr(item_token, "type", ""))
 
-                if item_type == 'paragraph_open':
+                if item_type == "paragraph_open":
                     inline_token = tokens[item_cursor + 1] if item_cursor + 1 < len(tokens) else None
-                    if inline_token is not None and str(getattr(inline_token, 'type', '')) == 'inline':
+                    if inline_token is not None and str(getattr(inline_token, "type", "")) == "inline":
                         markup = _render_markdown_inline_children(
-                            getattr(inline_token, 'children', None),
-                            inline_code_font=styles['MarkdownCode'].fontName,
+                            getattr(inline_token, "children", None),
+                            inline_code_font=styles["MarkdownCode"].fontName,
                             body_font=list_style.fontName,
-                            formula_font=styles['MarkdownCode'].fontName,
+                            formula_font=styles["MarkdownCode"].fontName,
                         )
                         if markup:
                             item_paragraph_parts.append(markup)
                     item_cursor += 3
                     continue
 
-                if item_type in {'bullet_list_open', 'ordered_list_open'}:
+                if item_type in {"bullet_list_open", "ordered_list_open"}:
                     _render_current_item_paragraph()
                     item_cursor = _consume_list(item_cursor, depth=depth + 1)
                     continue
 
-                if item_type in {'fence', 'code_block'}:
+                if item_type in {"fence", "code_block"}:
                     _render_current_item_paragraph()
                     _append_code_block(
-                        str(getattr(item_token, 'content', '')),
-                        lang=str(getattr(item_token, 'info', '') or '').strip() or None,
+                        str(getattr(item_token, "content", "")),
+                        lang=str(getattr(item_token, "info", "") or "").strip() or None,
                     )
                     item_cursor += 1
                     continue
 
-                if item_type == 'table_open':
+                if item_type == "table_open":
                     _render_current_item_paragraph()
                     item_cursor = _consume_table(item_cursor)
                     continue
@@ -1667,7 +1655,7 @@ def _append_markdown_report(story: list, styles: StyleSheet1, *, markdown: str) 
             if not item_rendered and item_paragraph_parts:
                 _render_current_item_paragraph()
 
-            if open_type == 'ordered_list_open':
+            if open_type == "ordered_list_open":
                 item_counter += 1
             cursor = item_close_index + 1
 
@@ -1677,46 +1665,46 @@ def _append_markdown_report(story: list, styles: StyleSheet1, *, markdown: str) 
     cursor = 0
     while cursor < len(tokens):
         token = tokens[cursor]
-        token_type = str(getattr(token, 'type', ''))
+        token_type = str(getattr(token, "type", ""))
 
-        if token_type == 'heading_open':
+        if token_type == "heading_open":
             inline_token = tokens[cursor + 1] if cursor + 1 < len(tokens) else None
-            level_match = re.search(r'(\d+)', str(getattr(token, 'tag', '') or ''))
+            level_match = re.search(r"(\d+)", str(getattr(token, "tag", "") or ""))
             level = int(level_match.group(1)) if level_match else 2
             heading_body_font = (
-                styles['SectionTitle'].fontName
+                styles["SectionTitle"].fontName
                 if level <= 1
-                else styles['MarkdownHeadingL2'].fontName
+                else styles["MarkdownHeadingL2"].fontName
                 if level == 2
-                else styles['MarkdownHeadingL3'].fontName
+                else styles["MarkdownHeadingL3"].fontName
             )
             heading_text = _render_markdown_inline_children(
-                getattr(inline_token, 'children', None) if inline_token else None,
-                inline_code_font=styles['MarkdownCode'].fontName,
+                getattr(inline_token, "children", None) if inline_token else None,
+                inline_code_font=styles["MarkdownCode"].fontName,
                 body_font=heading_body_font,
-                formula_font=styles['MarkdownCode'].fontName,
+                formula_font=styles["MarkdownCode"].fontName,
             )
 
             if level <= 1:
-                story.append(Paragraph(heading_text or '&nbsp;', styles['SectionTitle']))
+                story.append(Paragraph(heading_text or "&nbsp;", styles["SectionTitle"]))
                 story.append(
                     HRFlowable(
-                        width='100%',
+                        width="100%",
                         thickness=0.45,
-                        color=colors.HexColor('#D1D5DB'),
-                        lineCap='round',
+                        color=colors.HexColor("#D1D5DB"),
+                        lineCap="round",
                         spaceBefore=1,
                         spaceAfter=4,
                     )
                 )
             elif level == 2:
-                story.append(Paragraph(heading_text or '&nbsp;', styles['MarkdownHeadingL2']))
+                story.append(Paragraph(heading_text or "&nbsp;", styles["MarkdownHeadingL2"]))
             else:
-                story.append(Paragraph(heading_text or '&nbsp;', styles['MarkdownHeadingL3']))
+                story.append(Paragraph(heading_text or "&nbsp;", styles["MarkdownHeadingL3"]))
             cursor += 3
             continue
 
-        if token_type == 'paragraph_open':
+        if token_type == "paragraph_open":
             inline_token = tokens[cursor + 1] if cursor + 1 < len(tokens) else None
             standalone_image = _extract_standalone_image(inline_token)
             if standalone_image is not None:
@@ -1725,8 +1713,8 @@ def _append_markdown_report(story: list, styles: StyleSheet1, *, markdown: str) 
                     cursor += 3
                     continue
 
-            raw_content = _normalize_newlines(str(getattr(inline_token, 'content', '') or ''))
-            paragraph_lines = [line.rstrip() for line in raw_content.split('\n') if line.strip()]
+            raw_content = _normalize_newlines(str(getattr(inline_token, "content", "") or ""))
+            paragraph_lines = [line.rstrip() for line in raw_content.split("\n") if line.strip()]
             looks_like_tree = len(paragraph_lines) >= 2 and any(
                 _looks_like_ascii_tree(line) for line in paragraph_lines
             )
@@ -1735,49 +1723,49 @@ def _append_markdown_report(story: list, styles: StyleSheet1, *, markdown: str) 
                 _append_logic_tree(paragraph_lines)
             else:
                 paragraph_markup = _render_markdown_inline_children(
-                    getattr(inline_token, 'children', None) if inline_token else None,
-                    inline_code_font=styles['MarkdownCode'].fontName,
-                    body_font=styles['BodyTextEnterprise'].fontName,
-                    formula_font=styles['MarkdownCode'].fontName,
+                    getattr(inline_token, "children", None) if inline_token else None,
+                    inline_code_font=styles["MarkdownCode"].fontName,
+                    body_font=styles["BodyTextEnterprise"].fontName,
+                    formula_font=styles["MarkdownCode"].fontName,
                 )
                 if paragraph_markup:
-                    story.append(Paragraph(paragraph_markup, styles['BodyTextEnterprise']))
+                    story.append(Paragraph(paragraph_markup, styles["BodyTextEnterprise"]))
             cursor += 3
             continue
 
-        if token_type in {'bullet_list_open', 'ordered_list_open'}:
+        if token_type in {"bullet_list_open", "ordered_list_open"}:
             cursor = _consume_list(cursor, depth=0)
             continue
 
-        if token_type == 'table_open':
+        if token_type == "table_open":
             cursor = _consume_table(cursor)
             continue
 
-        if token_type in {'fence', 'code_block'}:
+        if token_type in {"fence", "code_block"}:
             _append_code_block(
-                str(getattr(token, 'content', '')),
-                lang=str(getattr(token, 'info', '') or '').strip() or None,
+                str(getattr(token, "content", "")),
+                lang=str(getattr(token, "info", "") or "").strip() or None,
             )
             cursor += 1
             continue
 
-        if token_type == 'math_block':
-            _append_math_block(str(getattr(token, 'content', '')))
+        if token_type == "math_block":
+            _append_math_block(str(getattr(token, "content", "")))
             cursor += 1
             continue
 
-        if token_type == 'blockquote_open':
-            close_index = _find_closing_markdown_token(tokens, cursor, 'blockquote_open', 'blockquote_close')
+        if token_type == "blockquote_open":
+            close_index = _find_closing_markdown_token(tokens, cursor, "blockquote_open", "blockquote_close")
             inner_cursor = cursor + 1
             quote_parts: list[str] = []
             while inner_cursor < close_index:
                 inner_token = tokens[inner_cursor]
-                if str(getattr(inner_token, 'type', '')) == 'inline':
+                if str(getattr(inner_token, "type", "")) == "inline":
                     quote_markup = _render_markdown_inline_children(
-                        getattr(inner_token, 'children', None),
-                        inline_code_font=styles['MarkdownCode'].fontName,
-                        body_font=styles['BodyTextEnterprise'].fontName,
-                        formula_font=styles['MarkdownCode'].fontName,
+                        getattr(inner_token, "children", None),
+                        inline_code_font=styles["MarkdownCode"].fontName,
+                        body_font=styles["BodyTextEnterprise"].fontName,
+                        formula_font=styles["MarkdownCode"].fontName,
                     )
                     if quote_markup:
                         quote_parts.append(quote_markup)
@@ -1785,20 +1773,20 @@ def _append_markdown_report(story: list, styles: StyleSheet1, *, markdown: str) 
             if quote_parts:
                 story.append(
                     Paragraph(
-                        f'❝ {"<br/>".join(quote_parts)}',
-                        styles['BodyTextEnterprise'],
+                        f"❝ {'<br/>'.join(quote_parts)}",
+                        styles["BodyTextEnterprise"],
                     )
                 )
             cursor = close_index + 1
             continue
 
-        if token_type == 'hr':
+        if token_type == "hr":
             story.append(
                 HRFlowable(
-                    width='100%',
+                    width="100%",
                     thickness=0.4,
-                    color=colors.HexColor('#D1D5DB'),
-                    lineCap='round',
+                    color=colors.HexColor("#D1D5DB"),
+                    lineCap="round",
                     spaceBefore=2,
                     spaceAfter=3,
                 )
@@ -1813,7 +1801,7 @@ def _merge_with_pypdf(report_pdf_bytes: bytes, source_pdf_bytes: bytes) -> bytes
     try:
         from pypdf import PdfReader, PdfWriter
     except Exception as exc:
-        logger.warning('pypdf unavailable for source PDF appendix merge: %s', exc)
+        logger.warning("pypdf unavailable for source PDF appendix merge: %s", exc)
         return None
 
     try:
@@ -1824,11 +1812,11 @@ def _merge_with_pypdf(report_pdf_bytes: bytes, source_pdf_bytes: bytes) -> bytes
             writer.add_page(page)
 
         source_reader = PdfReader(io.BytesIO(source_pdf_bytes))
-        if getattr(source_reader, 'is_encrypted', False):
+        if getattr(source_reader, "is_encrypted", False):
             try:
-                source_reader.decrypt('')
+                source_reader.decrypt("")
             except Exception:
-                logger.warning('Source PDF is encrypted; skip source appendix merge.')
+                logger.warning("Source PDF is encrypted; skip source appendix merge.")
                 return None
 
         for page in source_reader.pages:
@@ -1838,7 +1826,7 @@ def _merge_with_pypdf(report_pdf_bytes: bytes, source_pdf_bytes: bytes) -> bytes
         writer.write(output)
         return output.getvalue()
     except Exception as exc:
-        logger.warning('Failed to merge source PDF with pypdf: %s', exc)
+        logger.warning("Failed to merge source PDF with pypdf: %s", exc)
         return None
 
 
@@ -1846,29 +1834,29 @@ def _merge_with_pymupdf(report_pdf_bytes: bytes, source_pdf_bytes: bytes) -> byt
     try:
         import pymupdf as fitz
     except Exception as exc:
-        logger.warning('PyMuPDF unavailable for source PDF appendix merge: %s', exc)
+        logger.warning("PyMuPDF unavailable for source PDF appendix merge: %s", exc)
         return None
 
     report_doc = None
     source_doc = None
     try:
-        report_doc = fitz.open(stream=report_pdf_bytes, filetype='pdf')
-        source_doc = fitz.open(stream=source_pdf_bytes, filetype='pdf')
+        report_doc = fitz.open(stream=report_pdf_bytes, filetype="pdf")
+        source_doc = fitz.open(stream=source_pdf_bytes, filetype="pdf")
 
         if source_doc.is_encrypted:
             authenticated = False
             try:
-                authenticated = bool(source_doc.authenticate(''))
+                authenticated = bool(source_doc.authenticate(""))
             except Exception:
                 authenticated = False
             if not authenticated:
-                logger.warning('Source PDF is encrypted; skip source appendix merge.')
+                logger.warning("Source PDF is encrypted; skip source appendix merge.")
                 return None
 
         report_doc.insert_pdf(source_doc)
         return report_doc.tobytes(garbage=3, deflate=True)
     except Exception as exc:
-        logger.warning('Failed to merge source PDF with PyMuPDF: %s', exc)
+        logger.warning("Failed to merge source PDF with PyMuPDF: %s", exc)
         return None
     finally:
         if source_doc is not None:
@@ -1878,21 +1866,21 @@ def _merge_with_pymupdf(report_pdf_bytes: bytes, source_pdf_bytes: bytes) -> byt
 
 
 def _normalize_overlay_object_type(value: object) -> str:
-    token = str(value or '').strip().lower()
-    if token == 'evidence':
-        return 'suggestion'
-    if token in {'verification', 'needs_verification', 'needs verification', 'verify', 'uncertain'}:
-        return 'verification'
-    if token in {'issue', 'suggestion'}:
+    token = str(value or "").strip().lower()
+    if token == "evidence":
+        return "suggestion"
+    if token in {"verification", "needs_verification", "needs verification", "verify", "uncertain"}:
+        return "verification"
+    if token in {"issue", "suggestion"}:
         return token
-    return 'suggestion'
+    return "suggestion"
 
 
 def _parse_hex_color(value: object) -> tuple[float, float, float] | None:
-    token = str(value or '').strip()
-    if not re.fullmatch(r'#?[0-9a-fA-F]{6}', token):
+    token = str(value or "").strip()
+    if not re.fullmatch(r"#?[0-9a-fA-F]{6}", token):
         return None
-    if token.startswith('#'):
+    if token.startswith("#"):
         token = token[1:]
     r = int(token[0:2], 16) / 255.0
     g = int(token[2:4], 16) / 255.0
@@ -1904,19 +1892,19 @@ def _coerce_overlay_rect(raw: object) -> dict[str, float] | None:
     if not isinstance(raw, dict):
         return None
     try:
-        x1 = float(raw.get('x1'))
-        y1 = float(raw.get('y1'))
-        x2 = float(raw.get('x2'))
-        y2 = float(raw.get('y2'))
+        x1 = float(raw.get("x1"))
+        y1 = float(raw.get("y1"))
+        x2 = float(raw.get("x2"))
+        y2 = float(raw.get("y2"))
     except (TypeError, ValueError):
         return None
 
     try:
-        width = float(raw.get('width', 100.0))
+        width = float(raw.get("width", 100.0))
     except (TypeError, ValueError):
         width = 100.0
     try:
-        height = float(raw.get('height', 100.0))
+        height = float(raw.get("height", 100.0))
     except (TypeError, ValueError):
         height = 100.0
 
@@ -1928,66 +1916,66 @@ def _coerce_overlay_rect(raw: object) -> dict[str, float] | None:
         height = 100.0
 
     return {
-        'x1': x1,
-        'y1': y1,
-        'x2': x2,
-        'y2': y2,
-        'width': width,
-        'height': height,
+        "x1": x1,
+        "y1": y1,
+        "x2": x2,
+        "y2": y2,
+        "width": width,
+        "height": height,
     }
 
 
 def _normalize_overlay_markdown_source(value: str) -> str:
-    text = _normalize_newlines(str(value or '')).strip()
+    text = _normalize_newlines(str(value or "")).strip()
     if not text:
-        return ''
+        return ""
 
-    table_splitter_re = re.compile(r'\s*\|\s*')
-    table_separator_re = re.compile(r'^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?\s*$')
+    table_splitter_re = re.compile(r"\s*\|\s*")
+    table_separator_re = re.compile(r"^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?\s*$")
 
     text = re.sub(
-        r'```[^\n`]*\n([\s\S]*?)\n```',
+        r"```[^\n`]*\n([\s\S]*?)\n```",
         lambda m: _normalize_newlines(m.group(1)),
         text,
     )
-    text = re.sub(r'```', '', text)
-    text = re.sub(r'!\[([^\]]*)\]\([^)]+\)', r'\1', text)
-    text = re.sub(r'\[([^\]]+)\]\([^)]+\)', r'\1', text)
-    text = re.sub(r'^\s{0,3}#{1,6}\s*', '', text, flags=re.MULTILINE)
-    text = re.sub(r'^\s*>\s?', '', text, flags=re.MULTILINE)
-    text = re.sub(r'^\s*[-*+]\s+', '• ', text, flags=re.MULTILINE)
-    text = re.sub(r'^\s*(\d+)\.\s+', r'\1) ', text, flags=re.MULTILINE)
+    text = re.sub(r"```", "", text)
+    text = re.sub(r"!\[([^\]]*)\]\([^)]+\)", r"\1", text)
+    text = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", text)
+    text = re.sub(r"^\s{0,3}#{1,6}\s*", "", text, flags=re.MULTILINE)
+    text = re.sub(r"^\s*>\s?", "", text, flags=re.MULTILINE)
+    text = re.sub(r"^\s*[-*+]\s+", "• ", text, flags=re.MULTILINE)
+    text = re.sub(r"^\s*(\d+)\.\s+", r"\1) ", text, flags=re.MULTILINE)
     normalized_lines: list[str] = []
-    for raw_line in text.split('\n'):
+    for raw_line in text.split("\n"):
         if table_separator_re.fullmatch(raw_line):
             continue
         stripped = raw_line.strip()
-        if stripped.startswith('|') and stripped.endswith('|') and stripped.count('|') >= 2:
-            cells = [cell.strip() for cell in table_splitter_re.split(stripped.strip('|')) if cell.strip()]
+        if stripped.startswith("|") and stripped.endswith("|") and stripped.count("|") >= 2:
+            cells = [cell.strip() for cell in table_splitter_re.split(stripped.strip("|")) if cell.strip()]
             if cells:
-                normalized_lines.append(' | '.join(cells))
+                normalized_lines.append(" | ".join(cells))
                 continue
         normalized_lines.append(raw_line)
-    text = '\n'.join(normalized_lines)
-    text = re.sub(r'[ \t]+', ' ', text)
-    text = re.sub(r'\n{3,}', '\n\n', text)
+    text = "\n".join(normalized_lines)
+    text = re.sub(r"[ \t]+", " ", text)
+    text = re.sub(r"\n{3,}", "\n\n", text)
     return text.strip()
 
 
 def _markdown_to_overlay_text(value: str) -> str:
     text = _normalize_overlay_markdown_source(value)
     if not text:
-        return ''
+        return ""
 
-    text = re.sub(r'`([^`]+)`', r'\1', text)
-    text = re.sub(r'\*\*(.+?)\*\*', r'\1', text)
-    text = re.sub(r'(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)', r'\1', text)
-    text = re.sub(r'~~(.+?)~~', r'\1', text)
+    text = re.sub(r"`([^`]+)`", r"\1", text)
+    text = re.sub(r"\*\*(.+?)\*\*", r"\1", text)
+    text = re.sub(r"(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)", r"\1", text)
+    text = re.sub(r"~~(.+?)~~", r"\1", text)
     return text.strip()
 
 
 def _parse_overlay_inline_runs(line: str) -> list[OverlayStyledRun]:
-    source = str(line or '')
+    source = str(line or "")
     if not source:
         return []
 
@@ -2003,7 +1991,7 @@ def _parse_overlay_inline_runs(line: str) -> list[OverlayStyledRun]:
         nonlocal buffer
         if not buffer:
             return
-        text = ''.join(buffer)
+        text = "".join(buffer)
         buffer = []
         if not text:
             return
@@ -2016,7 +2004,7 @@ def _parse_overlay_inline_runs(line: str) -> list[OverlayStyledRun]:
         ):
             previous = runs[-1]
             runs[-1] = OverlayStyledRun(
-                text=f'{previous.text}{text}',
+                text=f"{previous.text}{text}",
                 bold=previous.bold,
                 italic=previous.italic,
                 strike=previous.strike,
@@ -2034,12 +2022,12 @@ def _parse_overlay_inline_runs(line: str) -> list[OverlayStyledRun]:
         )
 
     while cursor < len(source):
-        if source.startswith('\\', cursor) and cursor + 1 < len(source):
+        if source.startswith("\\", cursor) and cursor + 1 < len(source):
             buffer.append(source[cursor + 1])
             cursor += 2
             continue
 
-        if not code and source.startswith('***', cursor):
+        if not code and source.startswith("***", cursor):
             _flush_buffer()
             if bold and italic:
                 bold = False
@@ -2050,25 +2038,25 @@ def _parse_overlay_inline_runs(line: str) -> list[OverlayStyledRun]:
             cursor += 3
             continue
 
-        if not code and source.startswith('~~', cursor):
+        if not code and source.startswith("~~", cursor):
             _flush_buffer()
             strike = not strike
             cursor += 2
             continue
 
-        if not code and source.startswith('**', cursor):
+        if not code and source.startswith("**", cursor):
             _flush_buffer()
             bold = not bold
             cursor += 2
             continue
 
-        if not code and source[cursor] == '*':
+        if not code and source[cursor] == "*":
             _flush_buffer()
             italic = not italic
             cursor += 1
             continue
 
-        if source[cursor] == '`':
+        if source[cursor] == "`":
             _flush_buffer()
             code = not code
             cursor += 1
@@ -2102,10 +2090,7 @@ def _overlay_run_font_name(
         bold=run.bold,
         italic=run.italic,
     )
-    if (
-        _contains_non_ascii(run.text)
-        and str(emphasis_font).lower().startswith('helvetica')
-    ):
+    if _contains_non_ascii(run.text) and str(emphasis_font).lower().startswith("helvetica"):
         return base_font
     return emphasis_font or base_font
 
@@ -2120,10 +2105,10 @@ def _wrap_overlay_markdown_lines(
 ) -> list[list[OverlayStyledRun]]:
     normalized = _normalize_overlay_markdown_source(markdown)
     if not normalized:
-        return [[OverlayStyledRun(text='(no text provided)')]]
+        return [[OverlayStyledRun(text="(no text provided)")]]
 
     wrapped_lines: list[list[OverlayStyledRun]] = []
-    for raw_line in normalized.split('\n'):
+    for raw_line in normalized.split("\n"):
         if not raw_line.strip():
             if wrapped_lines and wrapped_lines[-1]:
                 wrapped_lines.append([])
@@ -2135,10 +2120,10 @@ def _wrap_overlay_markdown_lines(
 
         token_runs: list[OverlayStyledRun] = []
         for run in line_runs:
-            normalized_text = str(run.text or '').replace('\u00a0', ' ').replace('\u3000', ' ')
+            normalized_text = str(run.text or "").replace("\u00a0", " ").replace("\u3000", " ")
             if not run.code:
-                normalized_text = re.sub(r'[ \t]+', ' ', normalized_text)
-            parts = re.findall(r'\s+|\S+', normalized_text)
+                normalized_text = re.sub(r"[ \t]+", " ", normalized_text)
+            parts = re.findall(r"\s+|\S+", normalized_text)
             if not parts:
                 continue
             token_runs.extend(
@@ -2247,60 +2232,57 @@ def _wrap_overlay_markdown_lines(
         if current_line:
             _flush_current_line()
 
-    return wrapped_lines or [[OverlayStyledRun(text='(no text provided)')]]
+    return wrapped_lines or [[OverlayStyledRun(text="(no text provided)")]]
 
 
 def _normalize_overlay_item(raw: dict[str, Any]) -> AnnotationOverlayItem | None:
     if not isinstance(raw, dict):
         return None
     try:
-        page_number = int(raw.get('page_number'))
+        page_number = int(raw.get("page_number"))
     except (TypeError, ValueError):
         return None
     if page_number < 1:
         return None
 
-    rects_raw = raw.get('rects') if isinstance(raw.get('rects'), list) else []
+    rects_raw = raw.get("rects") if isinstance(raw.get("rects"), list) else []
     rects = [value for value in (_coerce_overlay_rect(item) for item in rects_raw) if value is not None]
-    bounding_rect = _coerce_overlay_rect(raw.get('bounding_rect'))
+    bounding_rect = _coerce_overlay_rect(raw.get("bounding_rect"))
     if not rects and bounding_rect is not None:
         rects = [bounding_rect]
     if not rects:
         return None
 
     display_text_raw = str(
-        raw.get('display_text')
-        or raw.get('comment')
-        or raw.get('content_text')
-        or ''
+        raw.get("display_text") or raw.get("comment") or raw.get("content_text") or ""
     ).strip()
     display_markdown = _normalize_overlay_markdown_source(display_text_raw)
-    display_text = _markdown_to_overlay_text(display_text_raw) or '(no text provided)'
+    display_text = _markdown_to_overlay_text(display_text_raw) or "(no text provided)"
 
-    severity = str(raw.get('severity') or '').strip().lower() or None
-    if severity not in {'critical', 'major', 'minor'}:
+    severity = str(raw.get("severity") or "").strip().lower() or None
+    if severity not in {"critical", "major", "minor"}:
         severity = None
 
-    review_item_id = str(raw.get('review_item_id') or '').strip() or None
+    review_item_id = str(raw.get("review_item_id") or "").strip() or None
     if review_item_id and len(review_item_id) > 100:
         review_item_id = review_item_id[:100]
 
     return AnnotationOverlayItem(
-        annotation_id=str(raw.get('annotation_id') or '').strip() or 'unknown',
+        annotation_id=str(raw.get("annotation_id") or "").strip() or "unknown",
         page_number=page_number,
-        object_type=_normalize_overlay_object_type(raw.get('object_type')),
+        object_type=_normalize_overlay_object_type(raw.get("object_type")),
         severity=severity,
         review_item_id=review_item_id,
         display_markdown=display_markdown,
         display_text=display_text,
-        color=str(raw.get('color') or '').strip() or None,
+        color=str(raw.get("color") or "").strip() or None,
         rects=rects,
         bounding_rect=bounding_rect,
     )
 
 
 def _overlay_palette(item: AnnotationOverlayItem) -> OverlayPalette:
-    base = _OBJECT_TYPE_PALETTES.get(item.object_type, _OBJECT_TYPE_PALETTES['suggestion'])
+    base = _OBJECT_TYPE_PALETTES.get(item.object_type, _OBJECT_TYPE_PALETTES["suggestion"])
     custom = _parse_hex_color(item.color)
     if custom is None:
         return base
@@ -2331,13 +2313,13 @@ def _to_page_rect(page, rect: dict[str, float]):
     import pymupdf as fitz
 
     page_rect = page.rect
-    width_ref = rect.get('width', 100.0) or 100.0
-    height_ref = rect.get('height', 100.0) or 100.0
+    width_ref = rect.get("width", 100.0) or 100.0
+    height_ref = rect.get("height", 100.0) or 100.0
 
-    x1 = page_rect.x0 + (rect['x1'] / width_ref) * page_rect.width
-    y1 = page_rect.y0 + (rect['y1'] / height_ref) * page_rect.height
-    x2 = page_rect.x0 + (rect['x2'] / width_ref) * page_rect.width
-    y2 = page_rect.y0 + (rect['y2'] / height_ref) * page_rect.height
+    x1 = page_rect.x0 + (rect["x1"] / width_ref) * page_rect.width
+    y1 = page_rect.y0 + (rect["y1"] / height_ref) * page_rect.height
+    x2 = page_rect.x0 + (rect["x2"] / width_ref) * page_rect.width
+    y2 = page_rect.y0 + (rect["y2"] / height_ref) * page_rect.height
     return fitz.Rect(min(x1, x2), min(y1, y2), max(x1, x2), max(y1, y2))
 
 
@@ -2347,7 +2329,7 @@ def _measure_text_width(
     font_name: str,
     font_size: float,
 ) -> float:
-    text_value = str(text or '')
+    text_value = str(text or "")
     if not text_value:
         return 0.0
     normalized_font_size = max(1.0, float(font_size))
@@ -2355,9 +2337,7 @@ def _measure_text_width(
     try:
         import pymupdf as fitz
 
-        measured = float(
-            fitz.get_text_length(text_value, fontname=font_name, fontsize=normalized_font_size)
-        )
+        measured = float(fitz.get_text_length(text_value, fontname=font_name, fontsize=normalized_font_size))
         if measured > 0:
             return measured
     except Exception:
@@ -2410,9 +2390,9 @@ def _split_token_by_width(
         return []
 
     chunks: list[str] = []
-    current = ''
+    current = ""
     for char in token:
-        candidate = f'{current}{char}'
+        candidate = f"{current}{char}"
         if _measure_text_width(candidate, font_name=font_name, font_size=font_size) <= max_width_points:
             current = candidate
             continue
@@ -2421,7 +2401,7 @@ def _split_token_by_width(
             current = char
             continue
         chunks.append(char)
-        current = ''
+        current = ""
     if current:
         chunks.append(current)
     return chunks
@@ -2439,21 +2419,21 @@ def _build_callout_header(
         parts.append(marker)
 
     object_label = {
-        'issue': 'ISSUE',
-        'suggestion': 'SUGGESTION',
-        'verification': 'NEEDS VERIFICATION',
+        "issue": "ISSUE",
+        "suggestion": "SUGGESTION",
+        "verification": "NEEDS VERIFICATION",
     }.get(item.object_type, item.object_type.upper())
     label = object_label
     parts.append(label)
     if item.severity:
         parts.append(item.severity.upper())
     if item.review_item_id:
-        parts.append(f'#{item.review_item_id}')
+        parts.append(f"#{item.review_item_id}")
     if part_label:
         parts.append(part_label)
     if continued:
-        parts.append('CONT.')
-    return ' · '.join(parts)
+        parts.append("CONT.")
+    return " · ".join(parts)
 
 
 def _draw_callout(
@@ -2465,7 +2445,7 @@ def _draw_callout(
     styled_lines: list[list[OverlayStyledRun]] | None = None,
     palette: OverlayPalette,
     font_name: str,
-    mono_font_name: str = 'cour',
+    mono_font_name: str = "cour",
 ) -> None:
     import pymupdf as fitz
 
@@ -2479,7 +2459,7 @@ def _draw_callout(
         overlay=True,
     )
 
-    label_rect = box_rect + (0, 0, 0, -(box_rect.height - CALLOUT_LABEL_HEIGHT))
+    label_rect = (*box_rect, 0, 0, 0, -(box_rect.height - CALLOUT_LABEL_HEIGHT))
     page.draw_rect(
         label_rect,
         color=palette.callout_border,
@@ -2491,7 +2471,7 @@ def _draw_callout(
     )
 
     page.insert_textbox(
-        label_rect + (CALLOUT_TEXT_PADDING, 1, -CALLOUT_TEXT_PADDING, 0),
+        (*label_rect, CALLOUT_TEXT_PADDING, 1, -CALLOUT_TEXT_PADDING, 0),
         header_text,
         fontsize=8.0,
         color=(0.1, 0.1, 0.1),
@@ -2500,7 +2480,8 @@ def _draw_callout(
         overlay=True,
     )
 
-    text_rect = box_rect + (
+    text_rect = (
+        *box_rect,
         CALLOUT_TEXT_PADDING,
         CALLOUT_LABEL_HEIGHT + 2,
         -CALLOUT_TEXT_PADDING,
@@ -2509,7 +2490,7 @@ def _draw_callout(
     if styled_lines is None:
         page.insert_textbox(
             text_rect,
-            '\n'.join(lines),
+            "\n".join(lines),
             fontsize=7.6,
             color=(0.08, 0.08, 0.08),
             fontname=font_name,
@@ -2528,7 +2509,7 @@ def _draw_callout(
             cursor_y += CALLOUT_LINE_HEIGHT
             continue
         for run in line_runs:
-            run_text = str(run.text or '')
+            run_text = str(run.text or "")
             if not run_text:
                 continue
             run_font = _overlay_run_font_name(
@@ -2594,9 +2575,9 @@ def _draw_page_identity_tag(
     y1 = y0 + tag_height
     tag_rect = fitz.Rect(x0, y0, x1, y1)
 
-    label = f'PAGE ID: P{source_page_number:03d}'
+    label = f"PAGE ID: P{source_page_number:03d}"
     if continuation_page_no is not None:
-        label = f'{label}-C{continuation_page_no:02d}'
+        label = f"{label}-C{continuation_page_no:02d}"
 
     page.draw_rect(
         tag_rect,
@@ -2608,11 +2589,11 @@ def _draw_page_identity_tag(
         overlay=True,
     )
     page.insert_textbox(
-        tag_rect + (5.0, 2.0, -5.0, -1.0),
+        (*tag_rect, 5.0, 2.0, -5.0, -1.0),
         label,
         fontsize=7.8,
         color=(0.20, 0.22, 0.24),
-        fontname='helv',
+        fontname="helv",
         align=1,
         overlay=True,
     )
@@ -2621,7 +2602,7 @@ def _draw_page_identity_tag(
         label,
         fontsize=7.6,
         color=(0.20, 0.22, 0.24),
-        fontname='helv',
+        fontname="helv",
         overlay=True,
     )
 
@@ -2749,7 +2730,7 @@ def _draw_annotation_overlay_on_page(
     page,
     items: list[AnnotationOverlayItem],
     *,
-    font_name: str = 'china-s',
+    font_name: str = "china-s",
     font_path: Path | None = None,
 ) -> list[AnnotationContinuationItem]:
     if not items:
@@ -2789,14 +2770,14 @@ def _draw_annotation_overlay_on_page(
         items,
         key=lambda item: (
             item.page_number,
-            item.bounding_rect['y1'] if item.bounding_rect else item.rects[0]['y1'],
-            item.bounding_rect['x1'] if item.bounding_rect else item.rects[0]['x1'],
+            item.bounding_rect["y1"] if item.bounding_rect else item.rects[0]["y1"],
+            item.bounding_rect["x1"] if item.bounding_rect else item.rects[0]["x1"],
         ),
     )
 
     prepared_items: list[PreparedOverlayRenderable] = []
     for annotation_index, item in enumerate(sorted_items, start=1):
-        marker = f'#P{item.page_number:02d}-A{annotation_index:02d}'
+        marker = f"#P{item.page_number:02d}-A{annotation_index:02d}"
         palette = _overlay_palette(item)
         highlight_rects = [_to_page_rect(page, rect) for rect in item.rects]
         highlight_rects = [rect for rect in highlight_rects if rect.get_area() > 0]
@@ -2827,7 +2808,9 @@ def _draw_annotation_overlay_on_page(
 
         marker_width = 54.0
         marker_height = 11.0
-        marker_x0 = _clamp(union_rect.x1 - marker_width, page_rect.x0 + margin_x, highlight_max_x - marker_width)
+        marker_x0 = _clamp(
+            union_rect.x1 - marker_width, page_rect.x0 + margin_x, highlight_max_x - marker_width
+        )
         marker_y0 = _clamp(
             union_rect.y0 - marker_height - 1.0,
             page_rect.y0 + margin_y,
@@ -2910,7 +2893,7 @@ def _draw_annotation_overlay_on_page(
             overlay=True,
         )
         page.insert_textbox(
-            prepared.marker_rect + (3.0, 1.2, -3.0, -1.0),
+            (*prepared.marker_rect, 3.0, 1.2, -3.0, -1.0),
             prepared.marker,
             fontsize=6.8,
             color=(0.16, 0.16, 0.16),
@@ -2921,8 +2904,8 @@ def _draw_annotation_overlay_on_page(
 
         if page_overflow_mode:
             index_lines = [
-                f'Index ID: {prepared.marker}',
-                'Full text moved to continuation pages.',
+                f"Index ID: {prepared.marker}",
+                "Full text moved to continuation pages.",
             ]
             index_lines_to_draw, index_box_top = _find_best_callout_layout(
                 total_lines=len(index_lines),
@@ -2962,7 +2945,7 @@ def _draw_annotation_overlay_on_page(
                     header_text=_build_callout_header(
                         prepared.item,
                         marker=prepared.marker,
-                        part_label='INDEX',
+                        part_label="INDEX",
                         continued=True,
                     ),
                     lines=visible_index_lines,
@@ -3041,7 +3024,7 @@ def _draw_annotation_overlay_on_page(
             page,
             box_rect=box_rect,
             header_text=_build_callout_header(prepared.item, marker=prepared.marker),
-            lines=[''.join(run.text for run in line).strip() for line in visible_lines],
+            lines=["".join(run.text for run in line).strip() for line in visible_lines],
             styled_lines=visible_lines,
             palette=prepared.palette,
             font_name=overlay_font_name,
@@ -3093,15 +3076,15 @@ def _insert_internal_link(
 
         page.insert_link(
             {
-                'kind': fitz.LINK_GOTO,
-                'from': from_rect,
-                'page': int(target_page_index),
-                'to': fitz.Point(float(target_point[0]), float(target_point[1])),
-                'zoom': 0.0,
+                "kind": fitz.LINK_GOTO,
+                "from": from_rect,
+                "page": int(target_page_index),
+                "to": fitz.Point(float(target_point[0]), float(target_point[1])),
+                "zoom": 0.0,
             }
         )
     except Exception as exc:
-        logger.debug('Failed to insert internal PDF link: %s', exc)
+        logger.debug("Failed to insert internal PDF link: %s", exc)
 
 
 def _append_annotation_continuation_pages(
@@ -3111,7 +3094,7 @@ def _append_annotation_continuation_pages(
     continuation_items: list[AnnotationContinuationItem],
     insert_after_page_index: int,
     source_page_size: tuple[float, float],
-    font_name: str = 'china-s',
+    font_name: str = "china-s",
     font_path: Path | None = None,
 ) -> int:
     if not continuation_items:
@@ -3186,9 +3169,9 @@ def _append_annotation_continuation_pages(
             overlay=True,
         )
 
-        title = f'Annotation Continuation · Source Page {source_page_number}'
+        title = f"Annotation Continuation · Source Page {source_page_number}"
         if continuation_page_no > 1:
-            title = f'{title} (cont. {continuation_page_no})'
+            title = f"{title} (cont. {continuation_page_no})"
         page.insert_text(
             fitz.Point(banner_rect.x0 + 8.0, banner_rect.y0 + 14.0),
             title,
@@ -3198,8 +3181,8 @@ def _append_annotation_continuation_pages(
             overlay=True,
         )
         page.insert_textbox(
-            banner_rect + (8.0, 18.0, -8.0, -2.0),
-            'Continuation sheet linked to source highlights. Click marker headers to jump back to the paper region.',
+            (*banner_rect, 8.0, 18.0, -8.0, -2.0),
+            "Continuation sheet linked to source highlights. Click marker headers to jump back to the paper region.",
             fontsize=8.0,
             color=(0.42, 0.44, 0.46),
             fontname=overlay_font_name,
@@ -3262,7 +3245,7 @@ def _append_annotation_continuation_pages(
                 overlay=True,
             )
 
-            part_label = f'Part {continuation_item.next_part_index}'
+            part_label = f"Part {continuation_item.next_part_index}"
             continuation_item.next_part_index += 1
             header_text = _build_callout_header(
                 continuation_item.item,
@@ -3271,7 +3254,7 @@ def _append_annotation_continuation_pages(
                 continued=bool(continuation_item.remaining_lines),
             )
             page.insert_textbox(
-                label_rect + (6.0, 2.0, -6.0, -1.0),
+                (*label_rect, 6.0, 2.0, -6.0, -1.0),
                 header_text,
                 fontsize=8.2,
                 color=(0.08, 0.08, 0.08),
@@ -3290,7 +3273,7 @@ def _append_annotation_continuation_pages(
                     body_y += CALLOUT_LINE_HEIGHT
                     continue
                 for run in runs:
-                    run_text = str(run.text or '')
+                    run_text = str(run.text or "")
                     if not run_text:
                         continue
                     run_font = _overlay_run_font_name(
@@ -3363,7 +3346,7 @@ def _append_annotation_continuation_pages(
                         )
                     except Exception as exc:
                         logger.debug(
-                            'Failed to bind source-to-continuation link for %s: %s',
+                            "Failed to bind source-to-continuation link for %s: %s",
                             continuation_item.marker,
                             exc,
                         )
@@ -3374,7 +3357,7 @@ def _append_annotation_continuation_pages(
 
         if not rendered_any:
             logger.warning(
-                'Failed to layout annotation continuation content for source page %s; stopping append loop.',
+                "Failed to layout annotation continuation content for source page %s; stopping append loop.",
                 source_page_number,
             )
             break
@@ -3400,7 +3383,7 @@ def _render_annotated_source_pdf(
     try:
         import pymupdf as fitz
     except Exception as exc:
-        logger.warning('PyMuPDF unavailable for annotation overlay: %s', exc)
+        logger.warning("PyMuPDF unavailable for annotation overlay: %s", exc)
         return None
 
     overlay_items = _normalize_overlay_items(source_annotations)
@@ -3415,15 +3398,15 @@ def _render_annotated_source_pdf(
     source_doc = None
     output_doc = None
     try:
-        source_doc = fitz.open(stream=source_pdf_bytes, filetype='pdf')
+        source_doc = fitz.open(stream=source_pdf_bytes, filetype="pdf")
         if source_doc.is_encrypted:
             authenticated = False
             try:
-                authenticated = bool(source_doc.authenticate(''))
+                authenticated = bool(source_doc.authenticate(""))
             except Exception:
                 authenticated = False
             if not authenticated:
-                logger.warning('Source PDF encrypted; skip annotation overlay rendering.')
+                logger.warning("Source PDF encrypted; skip annotation overlay rendering.")
                 return None
 
         output_doc = fitz.open()
@@ -3464,7 +3447,7 @@ def _render_annotated_source_pdf(
 
         return output_doc.tobytes(garbage=3, deflate=True)
     except Exception as exc:
-        logger.warning('Failed to render annotated source PDF: %s', exc)
+        logger.warning("Failed to render annotated source PDF: %s", exc)
         return None
     finally:
         if output_doc is not None:
@@ -3510,7 +3493,6 @@ def _merge_report_with_annotated_source_pdf_pages(
     )
 
 
-
 def _draw_header_footer(
     canvas,
     doc,
@@ -3524,7 +3506,7 @@ def _draw_header_footer(
     top_line_y = PAGE_HEIGHT - 14 * mm
     bottom_line_y = 13.5 * mm
 
-    canvas.setStrokeColor(colors.HexColor('#D1D5DB'))
+    canvas.setStrokeColor(colors.HexColor("#D1D5DB"))
     canvas.setLineWidth(0.7)
     canvas.line(doc.leftMargin, top_line_y, PAGE_WIDTH - doc.rightMargin, top_line_y)
     canvas.line(doc.leftMargin, bottom_line_y, PAGE_WIDTH - doc.rightMargin, bottom_line_y)
@@ -3541,26 +3523,26 @@ def _draw_header_footer(
                 width=7 * mm,
                 height=7 * mm,
                 preserveAspectRatio=True,
-                mask='auto',
+                mask="auto",
             )
             cursor_x += 9.2 * mm
         except Exception as exc:
-            logger.warning('Failed to draw review PDF logo from %s: %s', logo_path, exc)
+            logger.warning("Failed to draw review PDF logo from %s: %s", logo_path, exc)
 
-    canvas.setFillColor(colors.HexColor('#B91C1C'))
+    canvas.setFillColor(colors.HexColor("#B91C1C"))
     _safe_canvas_font(canvas, fonts.heading, 9.2)
-    canvas.drawString(cursor_x, content_top_y + 2.6, 'DeepScientist')
+    canvas.drawString(cursor_x, content_top_y + 2.6, "FactReview")
 
     right_x = PAGE_WIDTH - doc.rightMargin
-    canvas.setFillColor(colors.HexColor('#111827'))
+    canvas.setFillColor(colors.HexColor("#111827"))
     _safe_canvas_font(canvas, fonts.body, 8.3)
-    canvas.drawRightString(right_x, content_top_y + 2.6, f'Document No. {document_no}')
+    canvas.drawRightString(right_x, content_top_y + 2.6, f"Document No. {document_no}")
 
     footer_y = 8.5 * mm
-    canvas.setFillColor(colors.HexColor('#6B7280'))
+    canvas.setFillColor(colors.HexColor("#6B7280"))
     _safe_canvas_font(canvas, fonts.body, 7.8)
-    canvas.drawString(doc.leftMargin, footer_y, 'Generated by DeepScientist · Structured AI Review Report')
-    canvas.drawRightString(right_x, footer_y, f'Page {canvas.getPageNumber()}')
+    canvas.drawString(doc.leftMargin, footer_y, "Generated by FactReview · Structured AI Review Report")
+    canvas.drawRightString(right_x, footer_y, f"Page {canvas.getPageNumber()}")
 
     canvas.restoreState()
 
@@ -3592,21 +3574,21 @@ def build_review_report_pdf(
     meta_review = meta_review if isinstance(meta_review, dict) else {}
 
     token_payload = token_usage if isinstance(token_usage, dict) else {}
-    token_requests = max(0, int(token_payload.get('requests') or 0))
-    token_input = max(0, int(token_payload.get('input_tokens') or 0))
-    token_output = max(0, int(token_payload.get('output_tokens') or 0))
-    token_total = max(0, int(token_payload.get('total_tokens') or 0))
+    token_requests = max(0, int(token_payload.get("requests") or 0))
+    token_input = max(0, int(token_payload.get("input_tokens") or 0))
+    token_output = max(0, int(token_payload.get("output_tokens") or 0))
+    token_total = max(0, int(token_payload.get("total_tokens") or 0))
     if token_total <= 0:
         token_total = max(0, token_input + token_output)
 
-    document_no_display = str(run_id or '').strip() or '-'
-    report_code = str(review_display_id or '').strip().upper()
-    if not re.fullmatch(r'DS-RV-[0-9A-Z]{9}', report_code):
-        fallback_token = re.sub(r'[^0-9A-Z]', '', str(run_id).upper())
+    document_no_display = str(run_id or "").strip() or "-"
+    report_code = str(review_display_id or "").strip().upper()
+    if not re.fullmatch(r"DS-RV-[0-9A-Z]{9}", report_code):
+        fallback_token = re.sub(r"[^0-9A-Z]", "", str(run_id).upper())
         if not fallback_token:
-            fallback_token = 'UNKN'
+            fallback_token = "UNKN"
         report_code = f"DS-RV-{fallback_token[:9].ljust(9, 'X')}"
-    model_display = str(agent_model or '').strip() or '-'
+    model_display = str(agent_model or "").strip() or "-"
 
     buffer = io.BytesIO()
     document = SimpleDocTemplate(
@@ -3616,9 +3598,9 @@ def build_review_report_pdf(
         rightMargin=20 * mm,
         topMargin=24 * mm,
         bottomMargin=20 * mm,
-        title='DeepScientist AI Review Report',
-        author='DeepScientist',
-        subject='Structured review report',
+        title="FactReview AI Review Report",
+        author="FactReview",
+        subject="Structured review report",
     )
 
     story: list = []
@@ -3627,64 +3609,64 @@ def build_review_report_pdf(
     story.append(Spacer(1, 20 * mm))
     if logo_path is not None:
         try:
-            story.append(Image(str(logo_path), width=30 * mm, height=30 * mm, kind='proportional'))
+            story.append(Image(str(logo_path), width=30 * mm, height=30 * mm, kind="proportional"))
             story.append(Spacer(1, 6 * mm))
         except Exception as exc:
-            logger.warning('Failed to render cover logo for review PDF: %s', exc)
+            logger.warning("Failed to render cover logo for review PDF: %s", exc)
 
-    story.append(Paragraph('DeepScientist', styles['CoverBrand']))
-    story.append(Paragraph('AI REVIEW REPORT', styles['CoverTitle']))
-    story.append(Paragraph(_escape(workspace_title or 'Review Workspace'), styles['CoverWorkspaceTitle']))
-    story.append(Paragraph(f'Source file: {_escape(source_pdf_name or "-")}', styles['CoverMeta']))
+    story.append(Paragraph("FactReview", styles["CoverBrand"]))
+    story.append(Paragraph("AI REVIEW REPORT", styles["CoverTitle"]))
+    story.append(Paragraph(_escape(workspace_title or "Review Workspace"), styles["CoverWorkspaceTitle"]))
+    story.append(Paragraph(f"Source file: {_escape(source_pdf_name or '-')}", styles["CoverMeta"]))
     story.append(Spacer(1, 9 * mm))
 
     cover_table_data = [
         [
-            Paragraph('<b>Document No.</b>', styles['BodyTextEnterprise']),
-            Paragraph(_escape(document_no_display), styles['BodyTextEnterprise']),
-            Paragraph('<b>Work ID</b>', styles['BodyTextEnterprise']),
-            Paragraph(_escape(report_code), styles['BodyTextEnterprise']),
+            Paragraph("<b>Document No.</b>", styles["BodyTextEnterprise"]),
+            Paragraph(_escape(document_no_display), styles["BodyTextEnterprise"]),
+            Paragraph("<b>Work ID</b>", styles["BodyTextEnterprise"]),
+            Paragraph(_escape(report_code), styles["BodyTextEnterprise"]),
         ],
         [
-            Paragraph('<b>Status</b>', styles['BodyTextEnterprise']),
-            Paragraph(_escape((status or 'unknown').title()), styles['BodyTextEnterprise']),
-            Paragraph('<b>Agent Model</b>', styles['BodyTextEnterprise']),
-            Paragraph(_escape(model_display), styles['BodyTextEnterprise']),
+            Paragraph("<b>Status</b>", styles["BodyTextEnterprise"]),
+            Paragraph(_escape((status or "unknown").title()), styles["BodyTextEnterprise"]),
+            Paragraph("<b>Agent Model</b>", styles["BodyTextEnterprise"]),
+            Paragraph(_escape(model_display), styles["BodyTextEnterprise"]),
         ],
         [
-            Paragraph('<b>Token Usage</b>', styles['BodyTextEnterprise']),
+            Paragraph("<b>Token Usage</b>", styles["BodyTextEnterprise"]),
             Paragraph(
-                _escape(f'Input {token_input} | Output {token_output} | Total {token_total}'),
-                styles['BodyTextEnterprise'],
+                _escape(f"Input {token_input} | Output {token_output} | Total {token_total}"),
+                styles["BodyTextEnterprise"],
             ),
-            Paragraph('<b>LLM Requests</b>', styles['BodyTextEnterprise']),
-            Paragraph(_escape(str(token_requests)), styles['BodyTextEnterprise']),
+            Paragraph("<b>LLM Requests</b>", styles["BodyTextEnterprise"]),
+            Paragraph(_escape(str(token_requests)), styles["BodyTextEnterprise"]),
         ],
         [
-            Paragraph('<b>Generated At</b>', styles['BodyTextEnterprise']),
-            Paragraph(_escape(_format_datetime(exported_at)), styles['BodyTextEnterprise']),
-            Paragraph('<b>Producer</b>', styles['BodyTextEnterprise']),
-            Paragraph('FactExtractioner 2.0', styles['BodyTextEnterprise']),
+            Paragraph("<b>Generated At</b>", styles["BodyTextEnterprise"]),
+            Paragraph(_escape(_format_datetime(exported_at)), styles["BodyTextEnterprise"]),
+            Paragraph("<b>Producer</b>", styles["BodyTextEnterprise"]),
+            Paragraph("FactReview", styles["BodyTextEnterprise"]),
         ],
     ]
 
     cover_table = Table(
         cover_table_data,
         colWidths=[30 * mm, 56 * mm, 30 * mm, 54 * mm],
-        hAlign='CENTER',
+        hAlign="CENTER",
     )
     cover_table.setStyle(
         TableStyle(
             [
-                ('BOX', (0, 0), (-1, -1), 0.8, colors.HexColor('#CBD5E1')),
-                ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#E2E8F0')),
-                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#F8FAFC')),
-                ('BACKGROUND', (0, 1), (-1, 1), colors.HexColor('#FCFCFD')),
-                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-                ('LEFTPADDING', (0, 0), (-1, -1), 6),
-                ('RIGHTPADDING', (0, 0), (-1, -1), 6),
-                ('TOPPADDING', (0, 0), (-1, -1), 4.5),
-                ('BOTTOMPADDING', (0, 0), (-1, -1), 4.5),
+                ("BOX", (0, 0), (-1, -1), 0.8, colors.HexColor("#CBD5E1")),
+                ("INNERGRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#E2E8F0")),
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#F8FAFC")),
+                ("BACKGROUND", (0, 1), (-1, 1), colors.HexColor("#FCFCFD")),
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 6),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+                ("TOPPADDING", (0, 0), (-1, -1), 4.5),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 4.5),
             ]
         )
     )
@@ -3693,20 +3675,20 @@ def build_review_report_pdf(
 
     story.append(
         Paragraph(
-            'This document is generated for professional review, archival, and collaborative decision making. '
-            'All conclusions should be interpreted with domain expertise and final human verification.',
-            styles['SmallMutedText'],
+            "This document is generated for professional review, archival, and collaborative decision making. "
+            "All conclusions should be interpreted with domain expertise and final human verification.",
+            styles["SmallMutedText"],
         )
     )
     story.append(PageBreak())
 
-    final_report_text = str(final_report_markdown or '').strip()
+    final_report_text = str(final_report_markdown or "").strip()
     if final_report_text:
         _append_section_header(
             story,
             styles,
-            title='Final Agent Report',
-            subtitle='Structured markdown synthesized by the annotation agent.',
+            title="Final Agent Report",
+            subtitle="Structured markdown synthesized by the annotation agent.",
         )
         _append_markdown_report(story, styles, markdown=final_report_text)
 
@@ -3715,32 +3697,32 @@ def build_review_report_pdf(
         _append_section_header(
             story,
             styles,
-            title='Appendix · Original Paper PDF',
-            subtitle='The following pages preserve source layout and include review annotations when available.',
+            title="Appendix · Original Paper PDF",
+            subtitle="The following pages preserve source layout and include review annotations when available.",
         )
         story.append(
             Paragraph(
-                'The appendix below attaches source paper pages and overlays review highlights for ISSUE / SUGGESTION / EVIDENCE objects.',
-                styles['BodyTextEnterprise'],
+                "The appendix below attaches source paper pages and overlays review highlights for ISSUE / SUGGESTION / EVIDENCE objects.",
+                styles["BodyTextEnterprise"],
             )
         )
         story.append(
             Paragraph(
-                'Callout boxes are placed near page margins to avoid covering core content and remain within page boundaries.',
-                styles['SmallMutedText'],
+                "Callout boxes are placed near page margins to avoid covering core content and remain within page boundaries.",
+                styles["SmallMutedText"],
             )
         )
 
     story.append(Spacer(1, 3 * mm))
     story.append(
         Paragraph(
-            'End of report · DeepScientist Review Export',
-            styles['SmallMutedText'],
+            "End of report · FactReview Export",
+            styles["SmallMutedText"],
         )
     )
 
     def _on_page(canvas, doc):
-        canvas.setProducer('FactExtractioner 2.0')
+        canvas.setProducer("FactReview")
         _draw_header_footer(
             canvas,
             doc,

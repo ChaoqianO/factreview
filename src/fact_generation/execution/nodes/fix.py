@@ -8,7 +8,7 @@ from typing import Any
 from llm.client import llm_json, resolve_llm_config
 from util.fs import ensure_dir, write_text
 from util.recorder import append_event
-from util.runner import persist_command_result, run_command
+from util.subprocess_runner import persist_command_result, run_command
 
 from ..tools.docker import docker_ensure_paper_image, docker_run_paper_image
 

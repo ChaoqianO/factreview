@@ -8,7 +8,7 @@ from typing import Any
 
 from util.fs import ensure_dir, safe_relpath, write_text
 from util.recorder import append_event
-from util.runner import persist_command_result, run_command
+from util.subprocess_runner import persist_command_result, run_command
 
 from ..tools.docker import docker_ensure_paper_image, docker_run_paper_image
 from ..tools.results_tables import maybe_summarize_metrics_tables
@@ -207,11 +207,11 @@ def run_node(state: dict[str, Any]) -> dict[str, Any]:
             continue
 
         env = os.environ.copy()
-        env["CODE_EVAL_RUN_DIR"] = str(run_dir)
-        env["CODE_EVAL_ARTIFACT_DIR"] = str(artifacts_dir)
-        env["CODE_EVAL_PAPER_ROOT"] = pr_host
-        env["CODE_EVAL_OUTPUT_DIR"] = str(run_dir / "outputs" / task_id)
-        env["CODE_EVAL_TASK_OUTPUT_DIR"] = str(run_dir / "outputs" / task_id)
+        env["EXECUTION_RUN_DIR"] = str(run_dir)
+        env["EXECUTION_ARTIFACT_DIR"] = str(artifacts_dir)
+        env["EXECUTION_PAPER_ROOT"] = pr_host
+        env["EXECUTION_OUTPUT_DIR"] = str(run_dir / "outputs" / task_id)
+        env["EXECUTION_TASK_OUTPUT_DIR"] = str(run_dir / "outputs" / task_id)
         (run_dir / "outputs" / task_id).mkdir(parents=True, exist_ok=True)
         artifact_paths = task.get("artifact_paths") or []
         if isinstance(artifact_paths, list):
@@ -242,16 +242,16 @@ def run_node(state: dict[str, Any]) -> dict[str, Any]:
                 cwd_container=cwd,
                 cmd=cmd,
                 env={
-                    "CODE_EVAL_OUTPUT_DIR": f"/workspace/run_dir/outputs/{task_id}",
-                    "CODE_EVAL_TASK_OUTPUT_DIR": f"/workspace/run_dir/outputs/{task_id}",
+                    "EXECUTION_OUTPUT_DIR": f"/workspace/run_dir/outputs/{task_id}",
+                    "EXECUTION_TASK_OUTPUT_DIR": f"/workspace/run_dir/outputs/{task_id}",
                 },
-                gpus=str(cfg.get("docker_gpus") or os.environ.get("CODE_EVAL_DOCKER_GPUS") or "").strip()
+                gpus=str(cfg.get("docker_gpus") or os.environ.get("EXECUTION_DOCKER_GPUS") or "").strip()
                 or None,
                 shm_size=str(
-                    cfg.get("docker_shm_size") or os.environ.get("CODE_EVAL_DOCKER_SHM_SIZE") or ""
+                    cfg.get("docker_shm_size") or os.environ.get("EXECUTION_DOCKER_SHM_SIZE") or ""
                 ).strip()
                 or None,
-                ipc=str(cfg.get("docker_ipc") or os.environ.get("CODE_EVAL_DOCKER_IPC") or "").strip()
+                ipc=str(cfg.get("docker_ipc") or os.environ.get("EXECUTION_DOCKER_IPC") or "").strip()
                 or None,
             )
             res = run_command(cmd=docker_cmd, cwd=str(run_dir), timeout_sec=timeout_sec, env=env)

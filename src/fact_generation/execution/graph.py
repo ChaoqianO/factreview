@@ -96,7 +96,7 @@ def _route_after_fix(state: State) -> str:
     return "run"
 
 
-class CodeEvalOrchestrator:
+class ExecutionOrchestrator:
     def __init__(
         self,
         run_root: str,
@@ -121,7 +121,7 @@ class CodeEvalOrchestrator:
         self.llm_provider = llm_provider
         self.llm_model = llm_model
         self.llm_base_url = llm_base_url
-        self.llm_judge_mode = (llm_judge_mode or os.getenv("CODE_EVAL_LLM_JUDGE_MODE", "assist")).strip()
+        self.llm_judge_mode = (llm_judge_mode or os.getenv("EXECUTION_LLM_JUDGE_MODE", "assist")).strip()
         self.dry_run = dry_run
         self.auto_tasks = auto_tasks
         self.auto_tasks_mode = auto_tasks_mode
@@ -192,7 +192,7 @@ class CodeEvalOrchestrator:
             "history": [],
         }
         final_state: State = await self._app.ainvoke(
-            initial, config={"configurable": {"thread_id": "code_evaluation"}}
+            initial, config={"configurable": {"thread_id": "execution"}}
         )
         exit_status = _compute_exit_status(final_state)
         return {

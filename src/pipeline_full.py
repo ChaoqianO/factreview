@@ -17,6 +17,7 @@ from preprocessing.claim_extract.stage_runner import run_claim_extract_stage
 from preprocessing.parse.stage_runner import run_parse_stage
 from review.report.stage_runner import run_report_stage
 from review.teaser.stage_runner import run_teaser_stage
+from schemas.execution import ExecutionPayload
 from schemas.stage import StageResult
 from util.paper_input import infer_paper_key, materialize_paper_pdf
 from util.run_layout import build_run_dir, ensure_run_subdirs, make_run_id
@@ -34,17 +35,26 @@ def _set_env_if_value(name: str, value: str | None) -> None:
 
 
 def _apply_cli_env_overrides(args: argparse.Namespace) -> None:
+    """Mirror CLI overrides into ``os.environ`` and invalidate the settings cache.
+
+    Must be called *before* the first ``get_settings()`` in the same process,
+    because ``get_settings`` is ``lru_cache``-d. The trailing ``cache_clear()``
+    only handles the case where ``get_settings()`` was called *during* this
+    function (e.g. inside ``_set_env_if_value``); subsequent in-process callers
+    that import ``common.config.get_settings`` directly will already see the
+    new env values on first call.
+    """
     llm_provider = str(getattr(args, "llm_provider", "") or "").strip()
     if llm_provider:
         os.environ["MODEL_PROVIDER"] = llm_provider
-        os.environ["CODE_EVAL_MODEL_PROVIDER"] = llm_provider
+        os.environ["EXECUTION_MODEL_PROVIDER"] = llm_provider
     _set_env_if_value("MINERU_API_TOKEN", getattr(args, "mineru_api_token", ""))
     _set_env_if_value("GEMINI_API_KEY", getattr(args, "gemini_api_key", ""))
 
     llm_model = str(getattr(args, "llm_model", "") or "").strip()
     if llm_model:
         os.environ["AGENT_MODEL"] = llm_model
-        os.environ["CODE_EVAL_OPENAI_MODEL"] = llm_model
+        os.environ["EXECUTION_OPENAI_MODEL"] = llm_model
         provider = str(getattr(args, "llm_provider", "") or os.getenv("MODEL_PROVIDER") or "").strip()
         if is_codex_provider(provider):
             os.environ["OPENAI_CODEX_MODEL"] = llm_model
@@ -73,7 +83,7 @@ def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
     )
     paper_pdf = paper_input.path
     init_full_pipeline_context(run_dir=run_dir)
-    run_execution = bool(getattr(args, "run_execution", False)) and not bool(args.skip_execution)
+    run_execution = bool(getattr(args, "run_execution", False))
 
     parse_result = run_parse_stage(
         repo_root=repo_root,
@@ -100,18 +110,14 @@ def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
         run_dir=run_dir,
     )
     if not run_execution:
-        execution_payload = {
-            "paper_key": paper_key,
-            "paper_pdf": str(paper_pdf),
-            "status": "skipped",
-            "success": False,
-            "exit_status": "skipped",
-            "run_dir": "",
-            "summary": {},
-            "alignment": {},
-        }
+        skipped_payload = ExecutionPayload(
+            paper_key=paper_key,
+            paper_pdf=str(paper_pdf),
+            status="skipped",
+            exit_status="skipped",
+        )
         execution_out = execution_stage_dir(run_dir) / "execution.json"
-        _write_json(execution_out, execution_payload)
+        _write_json(execution_out, skipped_payload.model_dump())
         execution_result = StageResult(
             status="skipped",
             outputs={"main": str(execution_out)},
@@ -145,6 +151,12 @@ def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
     }
     statuses = {name: r.status for name, r in results.items()}
     stage_errors = {name: r.error for name, r in results.items() if r.error}
+    # PDF render is best-effort within the report stage (markdown is canonical),
+    # so the stage stays status="ok" even when the PDF fails. Surface the cause
+    # at summary level so users don't have to open per-stage extras to find it.
+    report_pdf_error = str(report_result.extra.get("pdf_render_error") or "").strip()
+    if report_pdf_error and "report" not in stage_errors:
+        stage_errors["report_pdf"] = report_pdf_error
 
     outputs: dict[str, str] = {}
     for name in ("parse", "claim_extract", "refcheck", "positioning", "execution"):
@@ -229,12 +241,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument(
         "--run-execution",
         action="store_true",
-        help="Run the repository execution/code-evaluation stage. Disabled by default.",
-    )
-    p.add_argument(
-        "--skip-execution",
-        action="store_true",
-        help="Compatibility flag; execution is already skipped unless --run-execution is set.",
+        help="Run the repository execution stage. Disabled by default.",
     )
     p.add_argument("--max-attempts", type=int, default=5, help="Execution-stage max fix loop attempts")
     p.add_argument(

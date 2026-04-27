@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from .fs import ensure_dir, write_text
+from .verbose import is_verbose
 
 
 @dataclass(frozen=True)
@@ -17,11 +18,6 @@ class CommandResult:
     stdout: str
     stderr: str
     duration_sec: float
-
-
-def _is_verbose() -> bool:
-    v = (os.getenv("CODE_EVAL_VERBOSE") or "").strip().lower()
-    return v in {"1", "true", "yes", "y", "on"}
 
 
 def _tail(text: str, n: int = 2000) -> str:
@@ -38,11 +34,9 @@ def run_command(
     env: dict[str, str] | None = None,
 ) -> CommandResult:
     start = time.time()
-    if _is_verbose():
+    if is_verbose():
         try:
-            print(
-                f"[code_evaluation][exec] cwd={cwd} timeout_sec={timeout_sec} cmd={' '.join(cmd)}", flush=True
-            )
+            print(f"[execution][exec] cwd={cwd} timeout_sec={timeout_sec} cmd={' '.join(cmd)}", flush=True)
         except Exception:
             pass
     try:
@@ -67,13 +61,13 @@ def run_command(
         out = ""
         err = f"{type(e).__name__}: {e}"
     dur = time.time() - start
-    if _is_verbose():
+    if is_verbose():
         try:
-            print(f"[code_evaluation][exec_done] rc={rc} sec={dur:.3f}", flush=True)
+            print(f"[execution][exec_done] rc={rc} sec={dur:.3f}", flush=True)
             if rc != 0:
                 st = _tail(err or "", 2000).strip()
                 if st:
-                    print(f"[code_evaluation][stderr_tail]\n{st}\n", flush=True)
+                    print(f"[execution][stderr_tail]\n{st}\n", flush=True)
         except Exception:
             pass
     return CommandResult(
@@ -101,10 +95,10 @@ def persist_command_result(
     )
     write_text(out_path, result.stdout)
     write_text(err_path, result.stderr)
-    if _is_verbose():
+    if is_verbose():
         try:
             print(
-                f"[code_evaluation][logs] command={cmd_path} stdout={out_path} stderr={err_path}",
+                f"[execution][logs] command={cmd_path} stdout={out_path} stderr={err_path}",
                 flush=True,
             )
         except Exception:

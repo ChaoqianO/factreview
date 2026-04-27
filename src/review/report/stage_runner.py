@@ -21,15 +21,14 @@ from typing import Any
 
 from common.config import get_settings
 from common.pipeline_context import (
-    bootstrap_bridge_state,
     ensure_full_pipeline_context,
     execution_stage_dir,
-    load_bridge_state,
     load_job_state_snapshot,
     load_stage_assets_snapshot,
     read_json_file,
     refcheck_stage_dir,
     report_stage_dir,
+    require_bridge_state,
     resolve_artifact_path,
     write_json_file,
 )
@@ -45,9 +44,12 @@ def _read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8", errors="ignore")
 
 
-def _render_review_pdf(*, markdown_path: Path, pdf_path: Path, workspace_title: str, source_pdf_name: str) -> bool:
+def _render_review_pdf(
+    *, markdown_path: Path, pdf_path: Path, workspace_title: str, source_pdf_name: str
+) -> tuple[bool, str]:
+    """Render the review PDF. Returns ``(ok, error)``; ``error`` is empty on success."""
     if not markdown_path.exists() or not markdown_path.is_file():
-        return False
+        return False, f"markdown source not found at {markdown_path}"
     md_text = markdown_path.read_text(encoding="utf-8", errors="ignore")
     overview_path = markdown_path.parent / "overview_figure.jpg"
     if overview_path.exists() and overview_path.is_file():
@@ -76,14 +78,14 @@ def _render_review_pdf(*, markdown_path: Path, pdf_path: Path, workspace_title: 
         )
         pdf_path.parent.mkdir(parents=True, exist_ok=True)
         pdf_path.write_bytes(pdf_bytes)
-        return True
+        return True, ""
     except Exception as exc:
         # PDF rendering is best-effort; the markdown is the canonical artifact.
-        # Surface the cause so users can debug a missing PDF instead of guessing.
-        # Route to stderr so this never pollutes the JSON output that
-        # scripts/execute_stage_report.py writes to stdout.
-        print(f"[report] PDF render failed: {type(exc).__name__}: {exc}", file=sys.stderr)
-        return False
+        # Route the message to stderr so single-stage CLI stdout stays clean,
+        # and bubble it up to the caller so it can be surfaced in StageResult.
+        message = f"{type(exc).__name__}: {exc}"
+        print(f"[report] PDF render failed: {message}", file=sys.stderr)
+        return False, message
 
 
 def _absolutize_markdown_image_refs(*, markdown_path: Path, source_base_dirs: list[Path]) -> None:
@@ -143,20 +145,13 @@ def run_report_stage(
     *,
     repo_root: Path,
     run_dir: Path,
-    paper_pdf: Path | None = None,
-    paper_key: str = "",
-    reuse_job_id: str = "",
 ) -> StageResult:
     ensure_full_pipeline_context(run_dir=run_dir, allow_standalone=True, stage="report")
-    bridge = load_bridge_state(run_dir)
-    if bridge is None:
-        bridge = bootstrap_bridge_state(
-            repo_root=repo_root,
-            run_dir=run_dir,
-            paper_pdf=paper_pdf,
-            paper_key=paper_key,
-            reuse_job_id=reuse_job_id,
-        )
+    # Report is a pure consumer of the parse-stage snapshot. If the bridge
+    # state is missing we fail clean rather than silently re-running the agent
+    # runtime — keeping the documented invariant that every stage except
+    # ``parse`` works from the run dir alone.
+    bridge = require_bridge_state(run_dir=run_dir)
 
     job_state = load_job_state_snapshot(run_dir) or read_json_file(bridge.job_json_path)
     stage_assets = load_stage_assets_snapshot(run_dir)
@@ -197,6 +192,7 @@ def run_report_stage(
     reference_check_payload = _load_reference_check_payload(run_dir)
     reference_check_markdown = ""
     reference_check_appended = False
+    pdf_render_error = ""
 
     if md_ok:
         if final_md is not None and final_md.exists():
@@ -216,7 +212,7 @@ def run_report_stage(
             reference_check_appended = bool(reference_check_markdown.strip())
 
         source_name = bridge.paper_pdf.name if bridge.paper_pdf else "paper.pdf"
-        rendered_pdf_ok = _render_review_pdf(
+        rendered_pdf_ok, pdf_render_error = _render_review_pdf(
             markdown_path=review_md,
             pdf_path=pdf_path,
             workspace_title=bridge.paper_key,
@@ -249,7 +245,9 @@ def run_report_stage(
             "reference_check": reference_check_payload,
             "reference_check_markdown": reference_check_markdown,
             "final_markdown": _read_text(review_md) if md_ok else "",
-            "final_audit_path": str(final_audit_raw) if (final_audit is not None and final_audit.exists()) else "",
+            "final_audit_path": str(final_audit_raw)
+            if (final_audit is not None and final_audit.exists())
+            else "",
             "final_audit": read_json_file(review_audit) if audit_ok else {},
             "final_markdown_path": final_md_raw if (final_md is not None and final_md.exists()) else "",
             "final_pdf_path": final_pdf_raw if (final_pdf is not None and final_pdf.exists()) else "",
@@ -280,9 +278,18 @@ def run_report_stage(
             error = f"final review markdown not found at {final_md}"
         else:
             error = f"failed to copy final review markdown from {final_md} to {review_md}"
+
+    extra: dict[str, Any] = {}
+    if pdf_render_error:
+        # Markdown is the canonical artifact, so we keep status="ok" when it's
+        # written even if the PDF render failed; surface the cause in extra so
+        # the run summary records why no PDF exists.
+        extra["pdf_render_error"] = pdf_render_error
+
     return StageResult(
         status="ok" if md_ok else "failed",
         outputs=outputs,
+        extra=extra,
         error=error,
     )
 

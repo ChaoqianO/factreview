@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-import shutil
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -13,7 +13,8 @@ from common.pipeline_context import (
     read_json_file,
     write_json_file,
 )
-from schemas.stage import StageResult, StageStatus
+from schemas.execution import ExecutionExitStatus, ExecutionPayload, ExecutionStageStatus
+from schemas.stage import StageResult
 
 
 def _load_execution_artifacts(state: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any], str]:
@@ -24,14 +25,21 @@ def _load_execution_artifacts(state: dict[str, Any]) -> tuple[dict[str, Any], di
     return summary, alignment, str(run_dir) if run_dir else ""
 
 
-def _reset_fixed_execution_run_dir(*, stage_root: Path, execution_run_dir: Path) -> None:
+def _archive_prior_current_dir(*, stage_root: Path, current_dir: Path) -> None:
+    """Set up an empty ``current/`` workspace, preserving the prior attempt
+    by renaming it to ``current.<timestamp>`` instead of deleting outright.
+    A separate ``history/`` tree (passed as ``run_root`` to the orchestrator)
+    holds full per-attempt outputs; this archive only protects the most
+    recent in-place workspace from being silently wiped."""
     resolved_stage = stage_root.resolve()
-    resolved_run = execution_run_dir.resolve()
-    if resolved_run.parent != resolved_stage or resolved_run.name != "run":
-        raise RuntimeError(f"refusing to reset unexpected execution run dir: {resolved_run}")
-    if resolved_run.exists():
-        shutil.rmtree(resolved_run)
-    resolved_run.mkdir(parents=True, exist_ok=True)
+    resolved_current = current_dir.resolve()
+    if resolved_current.parent != resolved_stage or resolved_current.name != "current":
+        raise RuntimeError(f"refusing to reset unexpected execution current dir: {resolved_current}")
+    if resolved_current.exists():
+        timestamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
+        archived = resolved_current.with_name(f"current.{timestamp}")
+        resolved_current.rename(archived)
+    resolved_current.mkdir(parents=True, exist_ok=True)
 
 
 async def _run_orchestrator_async(
@@ -45,9 +53,9 @@ async def _run_orchestrator_async(
     execution_run_dir: Path | None = None,
     enable_refcheck: bool = False,
 ) -> dict[str, Any]:
-    from fact_generation.execution.graph import CodeEvalOrchestrator
+    from fact_generation.execution.graph import ExecutionOrchestrator
 
-    orchestrator = CodeEvalOrchestrator(
+    orchestrator = ExecutionOrchestrator(
         run_root=str(run_root),
         max_attempts=max_attempts,
         enable_refcheck=enable_refcheck,
@@ -89,12 +97,15 @@ def run_execution_stage(
 
     stage_root = execution_stage_dir(run_dir)
     stage_root.mkdir(parents=True, exist_ok=True)
-    execution_run_dir = stage_root / "run"
-    stage_run_root = stage_root / "runs"
-    _reset_fixed_execution_run_dir(stage_root=stage_root, execution_run_dir=execution_run_dir)
+    # ``current/`` = the in-place workspace the orchestrator scribbles into.
+    # ``history/`` = the orchestrator's per-attempt outputs root (one
+    # timestamped subdir per attempt). The names are intentionally distinct.
+    execution_run_dir = stage_root / "current"
+    stage_run_root = stage_root / "history"
+    _archive_prior_current_dir(stage_root=stage_root, current_dir=execution_run_dir)
     settings = get_settings()
     resolved_refcheck = bool(
-        settings.code_evaluation_enable_refcheck if enable_refcheck is None else enable_refcheck
+        settings.execution_enable_refcheck if enable_refcheck is None else enable_refcheck
     )
 
     run_result = asyncio.run(
@@ -112,9 +123,12 @@ def run_execution_stage(
 
     state = run_result.get("state") if isinstance(run_result.get("state"), dict) else {}
     summary, alignment, actual_run_dir = _load_execution_artifacts(state)
-    exit_status = str(run_result.get("exit_status") or "failed")
+    raw_exit = str(run_result.get("exit_status") or "failed")
+    exit_status: ExecutionExitStatus = (
+        raw_exit if raw_exit in ("success", "inconclusive", "failed", "skipped") else "failed"  # type: ignore[assignment]
+    )
 
-    stage_status: StageStatus = "failed"
+    stage_status: ExecutionStageStatus = "failed"
     if exit_status == "success":
         stage_status = "ok"
     elif exit_status == "inconclusive":
@@ -129,19 +143,19 @@ def run_execution_stage(
             else f"execution orchestrator exit_status={exit_status!r}"
         )
 
-    payload = {
-        "paper_key": resolved_key,
-        "paper_pdf": str(resolved_pdf),
-        "status": stage_status,
-        "success": bool(run_result.get("success")),
-        "exit_status": exit_status,
-        "run_dir": actual_run_dir,
-        "summary": summary,
-        "alignment": alignment,
-    }
+    payload = ExecutionPayload(
+        paper_key=resolved_key,
+        paper_pdf=str(resolved_pdf),
+        status=stage_status,
+        success=bool(run_result.get("success")),
+        exit_status=exit_status,
+        run_dir=actual_run_dir,
+        summary=summary,
+        alignment=alignment,
+    )
 
     output_path = stage_root / "execution.json"
-    write_json_file(output_path, payload)
+    write_json_file(output_path, payload.model_dump())
 
     return StageResult(
         status=stage_status,

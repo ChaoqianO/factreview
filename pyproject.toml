@@ -31,6 +31,8 @@ dependencies = [
   "numpy<2",
   "requests>=2.25.0",
   "tqdm>=4.60.0",
+  # Pulled in transitively by pandas/arxiv but pinned at the top to keep CI
+  # resolution stable; remove if those start owning the floor themselves.
   "python-dateutil>=2.8.0",
   "rich>=13.0",
 ]
@@ -42,27 +44,23 @@ llm = [
   "anthropic>=0.45.0",
 ]
 
-# ── preprocessing/parse backends (§3.1a — PDF → structured representation) ───
+# ── preprocessing/parse backend (PDF → structured representation) ────────────
+# Local MinerU CLI fallback for the execution stage's ``prepare`` node. Routine
+# users do not need this: the parse stage uses MinerU's cloud API by default.
+# These packages are not imported by FactReview itself; they are the model/
+# inference deps that the local ``mineru`` CLI pulls in when it runs.
 parse-mineru = [
   "magic-pdf",
   "ultralytics",
   "doclayout-yolo",
   "rapid-table",
 ]
-parse-grobid = ["lxml>=4.9"]
-parse-nougat = ["nougat-ocr"]
-parse-scienceparse = []          # external JAR; no python dep
-parse-llama = ["llama-index>=0.10"]
-parse = [
-  "factreview[parse-grobid]",
-  "factreview[parse-nougat]",
-  "factreview[parse-llama]",
-]
 
 # ── fact_generation/positioning (§3.2) ───────────────────────────────────────
+# Note: positioning/bibtex.py talks to Semantic Scholar via raw HTTP, not the
+# `semanticscholar` SDK, so no extra Python deps beyond bibtexparser are needed.
 positioning = [
   "bibtexparser>=1.4.0",
-  "semanticscholar>=0.8",
 ]
 
 # ── fact_generation/refcheck (reference-accuracy validation) ─────────────────
@@ -70,7 +68,6 @@ refcheck = [
   "numpy>=1.26.0,<2",
   "requests>=2.32.5",
   "beautifulsoup4>=4.12.0",
-  "pypdf>=4.0.0",
   "arxiv>=2.1.0",
   "python-dateutil>=2.9.0.post0",
   "tqdm>=4.67.0",
@@ -83,9 +80,10 @@ refcheck = [
 ]
 
 # ── fact_generation/execution (§3.3 code execution / verification) ───────────
-execution = [
-  "docker>=7.0",
-]
+# The execution stage drives Docker via subprocess CLI calls (`docker build`,
+# `docker run`), so no Python `docker` SDK is required. The only runtime
+# requirement is a working Docker daemon on the host.
+execution = []
 
 # ── agent_runtime (the OpenAI-Agents-based runtime + PDF rendering) ──────────
 runtime = [
@@ -114,7 +112,7 @@ dev = [
 # ── Meta ─────────────────────────────────────────────────────────────────────
 all = [
   "factreview[llm]",
-  "factreview[parse]",
+  "factreview[parse-mineru]",
   "factreview[positioning]",
   "factreview[refcheck]",
   "factreview[execution]",

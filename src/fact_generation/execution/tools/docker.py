@@ -6,7 +6,7 @@ import re
 from pathlib import Path
 
 from util.run_layout import slugify_run_key
-from util.runner import run_command
+from util.subprocess_runner import run_command
 
 
 def docker_cmd(args: list[str]) -> list[str]:
@@ -27,7 +27,7 @@ def docker_strategy(cfg: dict) -> str:
     # Always force per-paper image mode.
     # If an old env var/config sets something else, silently ignore and use paper_image.
     v = str(
-        cfg.get("docker_strategy") or os.environ.get("CODE_EVAL_DOCKER_STRATEGY") or "paper_image"
+        cfg.get("docker_strategy") or os.environ.get("EXECUTION_DOCKER_STRATEGY") or "paper_image"
     ).strip()
     return "paper_image" if v != "paper_image" else v
 
@@ -35,8 +35,8 @@ def docker_strategy(cfg: dict) -> str:
 def _paper_image_prefix(cfg: dict) -> str:
     return str(
         cfg.get("docker_paper_image_prefix")
-        or os.environ.get("CODE_EVAL_DOCKER_PAPER_IMAGE_PREFIX")
-        or "code-eval-paper"
+        or os.environ.get("EXECUTION_DOCKER_PAPER_IMAGE_PREFIX")
+        or "factreview-paper"
     ).strip()
 
 
@@ -294,7 +294,7 @@ def _paper_install_deps_py_text() -> str:
         "                if rc == 0:\n"
         "                    ok = True\n"
         "                    break\n"
-        "        allow = str(os.getenv('CODE_EVAL_ALLOW_TORCH_SCATTER_FALLBACK', '1')).strip().lower() in {'1', 'true', 'yes', 'y', 'on'}\n"
+        "        allow = str(os.getenv('EXECUTION_ALLOW_TORCH_SCATTER_FALLBACK', '1')).strip().lower() in {'1', 'true', 'yes', 'y', 'on'}\n"
         "        if (not ok) and allow:\n"
         "            ok = _install_torch_scatter_fallback()\n"
         "        if not ok:\n"
@@ -336,7 +336,7 @@ def docker_ensure_paper_image(
     py_tag = _normalize_python_spec_for_image(python_spec)
     python_image = str(
         cfg.get("docker_paper_python_image")
-        or os.environ.get("CODE_EVAL_DOCKER_PAPER_PYTHON_IMAGE")
+        or os.environ.get("EXECUTION_DOCKER_PAPER_PYTHON_IMAGE")
         or f"python:{py_tag}"
     ).strip()
     dockerfile_text = _paper_dockerfile_text(python_image=python_image)
@@ -428,13 +428,13 @@ def docker_run_paper_image(
             "-w",
             cwd_container,
             "-e",
-            f"CODE_EVAL_RUN_DIR={run_dir_container}",
+            f"EXECUTION_RUN_DIR={run_dir_container}",
             "-e",
-            f"CODE_EVAL_ARTIFACT_DIR={run_dir_container}/artifacts",
+            f"EXECUTION_ARTIFACT_DIR={run_dir_container}/artifacts",
             "-e",
-            f"CODE_EVAL_PAPER_DIR={paper_root_container}",
+            f"EXECUTION_PAPER_DIR={paper_root_container}",
             "-e",
-            f"CODE_EVAL_PAPER_ROOT={paper_root_container}",
+            f"EXECUTION_PAPER_ROOT={paper_root_container}",
         ]
     )
     for k, v in env.items():

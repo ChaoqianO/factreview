@@ -64,7 +64,9 @@ def test_validate_final_report_accepts_factreview_contract():
 
 
 def test_validate_final_report_rejects_bad_positioning_marks():
-    report = _valid_report().replace('| Related method | √ | × | × |', '| Related method | yes | no | maybe |')
+    report = _valid_report().replace(
+        "| Related method | √ | × | × |", "| Related method | yes | no | maybe |"
+    )
 
     result = validate_final_report(
         markdown=report,
@@ -74,12 +76,14 @@ def test_validate_final_report_rejects_bad_positioning_marks():
     )
 
     assert not result.ok
-    assert result.reason == 'final_report_logic_not_met'
-    assert 'niche-dimension cells' in result.message
+    assert result.reason == "final_report_logic_not_met"
+    assert "niche-dimension cells" in result.message
 
 
 def test_validate_final_report_rejects_missing_claim_assessment():
-    report = _valid_report().replace('| Claim | Evidence | Assessment | Location |', '| Claim | Evidence | Location |')
+    report = _valid_report().replace(
+        "| Claim | Evidence | Assessment | Location |", "| Claim | Evidence | Location |"
+    )
 
     result = validate_final_report(
         markdown=report,
@@ -89,5 +93,5 @@ def test_validate_final_report_rejects_missing_claim_assessment():
     )
 
     assert not result.ok
-    assert result.reason == 'final_report_logic_not_met'
-    assert 'assessment' in result.message.lower()
+    assert result.reason == "final_report_logic_not_met"
+    assert "assessment" in result.message.lower()

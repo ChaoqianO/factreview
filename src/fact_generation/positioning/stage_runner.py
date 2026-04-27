@@ -40,7 +40,11 @@ def run_positioning_stage(
 
     semantic_snapshot_raw = str(stage_assets.get("semantic_scholar_candidates_snapshot_path") or "").strip()
     semantic_snapshot = Path(semantic_snapshot_raw).resolve() if semantic_snapshot_raw else None
-    semantic_path = semantic_snapshot if (semantic_snapshot is not None and semantic_snapshot.exists()) else (bridge.job_dir / "semantic_scholar_candidates.json")
+    semantic_path = (
+        semantic_snapshot
+        if (semantic_snapshot is not None and semantic_snapshot.exists())
+        else (bridge.job_dir / "semantic_scholar_candidates.json")
+    )
     semantic_payload = read_json_file(semantic_path)
     if not semantic_payload:
         semantic_payload = {"success": False, "papers": []}

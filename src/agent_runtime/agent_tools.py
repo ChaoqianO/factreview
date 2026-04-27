@@ -17,31 +17,31 @@ from review.report.final_report import validate_final_report
 
 
 def _normalize_signature(text: str) -> str:
-    return ' '.join(str(text or '').strip().lower().split())
+    return " ".join(str(text or "").strip().lower().split())
 
 
 def _count_papers(result: dict[str, Any]) -> int:
-    direct = result.get('count')
+    direct = result.get("count")
     try:
         if int(direct or 0) > 0:
             return int(direct or 0)
     except Exception:
         pass
 
-    papers = result.get('papers')
+    papers = result.get("papers")
     if isinstance(papers, list):
         rows = [row for row in papers if isinstance(row, dict)]
         if rows:
             return len(rows)
 
-    question_results = result.get('question_results')
+    question_results = result.get("question_results")
     total = 0
     if isinstance(question_results, list):
         for row in question_results:
             if not isinstance(row, dict):
                 continue
             try:
-                total += max(0, int(row.get('count') or 0))
+                total += max(0, int(row.get("count") or 0))
             except Exception:
                 continue
     return total
@@ -50,24 +50,26 @@ def _count_papers(result: dict[str, Any]) -> int:
 _REVIEW_RECOMMENDED_ANNOTATION_MIN = 12
 _REVIEW_RECOMMENDED_ANNOTATION_MAX = 25
 _RETRIEVAL_DISABLED_AVAILABILITIES = {
-    'disabled_by_config',
-    'missing_base_url',
-    'health_check_failed',
-    'became_unavailable_during_run',
+    "disabled_by_config",
+    "missing_base_url",
+    "health_check_failed",
+    "became_unavailable_during_run",
 }
-_RETRIEVAL_DISABLED_FINAL_NOTE = (
-    'External literature search was not started in this run; novelty/comparison conclusions are deferred to manual verification.'
-)
+_RETRIEVAL_DISABLED_FINAL_NOTE = "External literature search was not started in this run; novelty/comparison conclusions are deferred to manual verification."
 _RETRIEVAL_DISABLED_REFERENCES_NOTE = (
-    'External literature search was not started in this run; no external references are listed.'
+    "External literature search was not started in this run; no external references are listed."
 )
-_FINAL_REPORT_SECTION_HEADING_PATTERN = re.compile(r'^\s{0,3}#{1,6}\s+(.+?)\s*$')
+_FINAL_REPORT_SECTION_HEADING_PATTERN = re.compile(r"^\s{0,3}#{1,6}\s+(.+?)\s*$")
 _REQUIRED_FINAL_REPORT_SECTIONS: list[tuple[str, str, tuple[str, ...]]] = [
-    ('metadata', '1. Metadata', ('1. metadata', 'metadata')),
-    ('technical_positioning', '2. Technical Positioning', ('2. technical positioning', 'technical positioning')),
-    ('claims', '3. Claims', ('3. claims', 'claims')),
-    ('summary', '4. Summary', ('4. summary', 'summary')),
-    ('experiment', '5. Experiment', ('5. experiment', 'experiment', 'experiments')),
+    ("metadata", "1. Metadata", ("1. metadata", "metadata")),
+    (
+        "technical_positioning",
+        "2. Technical Positioning",
+        ("2. technical positioning", "technical positioning"),
+    ),
+    ("claims", "3. Claims", ("3. claims", "claims")),
+    ("summary", "4. Summary", ("4. summary", "summary")),
+    ("experiment", "5. Experiment", ("5. experiment", "experiment", "experiments")),
 ]
 
 
@@ -75,21 +77,21 @@ def _paper_search_state_payload(state: Any) -> dict[str, Any]:
     if not isinstance(state, dict):
         return {}
     payload = dict(state)
-    payload['enabled'] = bool(payload.get('enabled'))
-    payload['started'] = bool(payload.get('started'))
-    payload['availability'] = str(payload.get('availability') or '').strip()
-    payload['base_url'] = str(payload.get('base_url') or '').strip() or None
-    payload['health_url'] = str(payload.get('health_url') or '').strip() or None
-    payload['error'] = str(payload.get('error') or '').strip() or None
+    payload["enabled"] = bool(payload.get("enabled"))
+    payload["started"] = bool(payload.get("started"))
+    payload["availability"] = str(payload.get("availability") or "").strip()
+    payload["base_url"] = str(payload.get("base_url") or "").strip() or None
+    payload["health_url"] = str(payload.get("health_url") or "").strip() or None
+    payload["error"] = str(payload.get("error") or "").strip() or None
     return payload
 
 
 def _paper_search_not_started(state: Any) -> bool:
     payload = _paper_search_state_payload(state)
-    availability = str(payload.get('availability') or '').strip()
+    availability = str(payload.get("availability") or "").strip()
     if availability in _RETRIEVAL_DISABLED_AVAILABILITIES:
         return True
-    return availability == 'not_started' or not bool(payload.get('started', True))
+    return availability == "not_started" or not bool(payload.get("started", True))
 
 
 def _build_annotation_gate_hint(
@@ -100,18 +102,18 @@ def _build_annotation_gate_hint(
 ) -> str:
     if retrieval_not_started:
         return (
-            'External paper search is not started for this run. '
-            'You can start paragraph-by-paragraph PDF annotation without paper_search calls.'
+            "External paper search is not started for this run. "
+            "You can start paragraph-by-paragraph PDF annotation without paper_search calls."
         )
     if total_calls >= required_calls:
         return (
-            f'paper_search total calls so far: {total_calls} (>= {required_calls}). '
-            'You can now start paragraph-by-paragraph PDF annotation.'
+            f"paper_search total calls so far: {total_calls} (>= {required_calls}). "
+            "You can now start paragraph-by-paragraph PDF annotation."
         )
     remaining = max(0, required_calls - total_calls)
     return (
-        f'paper_search total calls so far: {total_calls}. '
-        f'Run at least {remaining} more paper_search call(s) before starting pdf_annotate.'
+        f"paper_search total calls so far: {total_calls}. "
+        f"Run at least {remaining} more paper_search call(s) before starting pdf_annotate."
     )
 
 
@@ -125,22 +127,22 @@ def _build_annotation_progress_hint(
     if total_annotations < final_trigger_min:
         remaining = final_trigger_min - total_annotations
         return (
-            f'Current review annotations: {total_annotations}. '
-            f'Final-report gate requires >= {final_trigger_min}; add about {remaining} more.'
+            f"Current review annotations: {total_annotations}. "
+            f"Final-report gate requires >= {final_trigger_min}; add about {remaining} more."
         )
     if total_annotations < recommended_min:
         return (
-            f'Current review annotations: {total_annotations}. '
-            f'Final-report trigger is satisfied; usual quality range is {recommended_min}-{recommended_max}.'
+            f"Current review annotations: {total_annotations}. "
+            f"Final-report trigger is satisfied; usual quality range is {recommended_min}-{recommended_max}."
         )
     if total_annotations > recommended_max:
         return (
-            f'Current review annotations: {total_annotations} (> {recommended_max}). '
-            'Prefer consolidating high-impact findings and avoid low-value over-annotation.'
+            f"Current review annotations: {total_annotations} (> {recommended_max}). "
+            "Prefer consolidating high-impact findings and avoid low-value over-annotation."
         )
     return (
-        f'Current review annotations: {total_annotations} '
-        f'(within recommended range {recommended_min}-{recommended_max}).'
+        f"Current review annotations: {total_annotations} "
+        f"(within recommended range {recommended_min}-{recommended_max})."
     )
 
 
@@ -155,7 +157,7 @@ def _flatten_page_index(page_index: dict[int, list[str]]) -> list[tuple[int, int
 
 def _coerce_markdown_text(value: Any) -> str:
     if value is None:
-        return ''
+        return ""
     if isinstance(value, str):
         return value.strip()
     return str(value).strip()
@@ -171,25 +173,25 @@ def _coerce_items(value: Any) -> list[str]:
     text = str(value).strip()
     if not text:
         return []
-    if '\n' in text:
-        return [line.strip(' -\t') for line in text.splitlines() if line.strip(' -\t')]
-    if ';' in text:
-        return [line.strip(' -\t') for line in text.split(';') if line.strip(' -\t')]
+    if "\n" in text:
+        return [line.strip(" -\t") for line in text.splitlines() if line.strip(" -\t")]
+    if ";" in text:
+        return [line.strip(" -\t") for line in text.split(";") if line.strip(" -\t")]
     return [text]
 
 
 def _normalize_final_report_section_token(value: Any) -> str:
-    token = str(value or '').strip().lower()
+    token = str(value or "").strip().lower()
     if not token:
-        return ''
-    token = token.replace('&', ' and ')
-    token = token.replace('+', ' ')
-    token = token.replace('/', ' ')
-    token = token.replace('\\', ' ')
-    token = token.replace('_', ' ')
-    token = token.replace('-', ' ')
-    token = re.sub(r'[^0-9a-z\s]', ' ', token)
-    token = re.sub(r'\s+', ' ', token).strip()
+        return ""
+    token = token.replace("&", " and ")
+    token = token.replace("+", " ")
+    token = token.replace("/", " ")
+    token = token.replace("\\", " ")
+    token = token.replace("_", " ")
+    token = token.replace("-", " ")
+    token = re.sub(r"[^0-9a-z\s]", " ", token)
+    token = re.sub(r"\s+", " ", token).strip()
     return token
 
 
@@ -227,21 +229,21 @@ def _resolve_final_report_section_id(section_key: Any) -> str | None:
 
 def _coerce_section_markdown(value: Any, *, list_as_bullets: bool = True) -> str:
     if value is None:
-        return ''
+        return ""
     if isinstance(value, (list, tuple)):
         items = [str(item).strip() for item in value if str(item).strip()]
         if not items:
-            return ''
+            return ""
         if list_as_bullets:
-            return '\n'.join(f'- {item}' for item in items)
-        return '\n'.join(items)
+            return "\n".join(f"- {item}" for item in items)
+        return "\n".join(items)
     return str(value).strip()
 
 
 def _strip_leading_section_heading(*, section_id: str, content: str) -> str:
-    text = str(content or '').strip()
+    text = str(content or "").strip()
     if not text:
-        return ''
+        return ""
     lines = text.splitlines()
     if not lines:
         return text
@@ -255,7 +257,7 @@ def _strip_leading_section_heading(*, section_id: str, content: str) -> str:
     idx = 1
     while idx < len(lines) and not lines[idx].strip():
         idx += 1
-    return '\n'.join(lines[idx:]).strip()
+    return "\n".join(lines[idx:]).strip()
 
 
 def _normalize_final_report_sections(raw_sections: Any) -> dict[str, str]:
@@ -287,27 +289,27 @@ def _build_sections_from_legacy_fields(
 
     summary_text = _coerce_markdown_text(summary)
     if summary_text:
-        sections['summary'] = summary_text
+        sections["summary"] = summary_text
 
     strengths_text = _coerce_section_markdown(strengths, list_as_bullets=True)
     if strengths_text:
-        sections['strengths'] = strengths_text
+        sections["strengths"] = strengths_text
 
     weaknesses_text = _coerce_section_markdown(weaknesses, list_as_bullets=True)
     if weaknesses_text:
-        sections['weaknesses'] = weaknesses_text
+        sections["weaknesses"] = weaknesses_text
 
     issues_text = _coerce_section_markdown(issues, list_as_bullets=True)
     if issues_text:
-        sections['key_issues'] = issues_text
+        sections["key_issues"] = issues_text
 
     suggestions_text = _coerce_section_markdown(suggestions, list_as_bullets=True)
     if suggestions_text:
-        sections['actionable_suggestions'] = suggestions_text
+        sections["actionable_suggestions"] = suggestions_text
 
     storyline_text = _coerce_section_markdown(storylines, list_as_bullets=True)
     if storyline_text:
-        sections['storyline_options_writing_outlines'] = storyline_text
+        sections["storyline_options_writing_outlines"] = storyline_text
 
     return sections
 
@@ -315,7 +317,7 @@ def _build_sections_from_legacy_fields(
 def _extract_required_sections_from_markdown(markdown_text: str) -> dict[str, str]:
     section_buffers: dict[str, list[str]] = {}
     active_section_id: str | None = None
-    for raw_line in str(markdown_text or '').splitlines():
+    for raw_line in str(markdown_text or "").splitlines():
         heading_match = _FINAL_REPORT_SECTION_HEADING_PATTERN.match(raw_line)
         if heading_match:
             heading_text = heading_match.group(1)
@@ -328,7 +330,7 @@ def _extract_required_sections_from_markdown(markdown_text: str) -> dict[str, st
 
     extracted: dict[str, str] = {}
     for section_id, lines in section_buffers.items():
-        content = '\n'.join(lines).strip()
+        content = "\n".join(lines).strip()
         if content:
             extracted[section_id] = content
     return extracted
@@ -336,29 +338,29 @@ def _extract_required_sections_from_markdown(markdown_text: str) -> dict[str, st
 
 def _build_final_report_markdown_from_sections(sections: dict[str, str]) -> str:
     blocks: list[str] = []
-    title_line = ''
-    metadata = str(sections.get('metadata') or '').strip()
+    title_line = ""
+    metadata = str(sections.get("metadata") or "").strip()
     if metadata:
         for line in metadata.splitlines():
-            matched = re.match(r'^\s*[-*]\s*\*\*Title\*\*\s*:\s*(.+?)\s*$', line.strip(), flags=re.IGNORECASE)
+            matched = re.match(r"^\s*[-*]\s*\*\*Title\*\*\s*:\s*(.+?)\s*$", line.strip(), flags=re.IGNORECASE)
             if matched:
                 candidate = matched.group(1).strip()
                 if candidate:
                     title_line = candidate
                     break
     if title_line:
-        blocks.append(f'[{title_line}]')
+        blocks.append(f"[{title_line}]")
 
     title_map = _required_final_report_section_titles()
     for section_id in _required_final_report_section_order():
-        content = str(sections.get(section_id) or '').strip()
+        content = str(sections.get(section_id) or "").strip()
         if not content:
             continue
         heading = title_map.get(section_id, section_id)
-        blocks.append(f'## {heading}\n{content}')
+        blocks.append(f"## {heading}\n{content}")
     if not blocks:
-        return ''
-    return '\n\n'.join(blocks).strip()
+        return ""
+    return "\n\n".join(blocks).strip()
 
 
 def _apply_retrieval_disabled_report_defaults(
@@ -366,21 +368,21 @@ def _apply_retrieval_disabled_report_defaults(
     *,
     retrieval_not_started: bool,
 ) -> dict[str, str]:
-    normalized = {key: str(value or '').strip() for key, value in sections.items()}
+    normalized = {key: str(value or "").strip() for key, value in sections.items()}
     if not retrieval_not_started:
         return normalized
 
-    novelty_id = 'novelty_verification_related_work_matrix'
-    novelty_text = str(normalized.get(novelty_id) or '').strip()
+    novelty_id = "novelty_verification_related_work_matrix"
+    novelty_text = str(normalized.get(novelty_id) or "").strip()
     if _RETRIEVAL_DISABLED_FINAL_NOTE.lower() not in novelty_text.lower():
         normalized[novelty_id] = (
-            f'{novelty_text}\n\n{_RETRIEVAL_DISABLED_FINAL_NOTE}'.strip()
+            f"{novelty_text}\n\n{_RETRIEVAL_DISABLED_FINAL_NOTE}".strip()
             if novelty_text
             else _RETRIEVAL_DISABLED_FINAL_NOTE
         )
 
-    references_id = 'references'
-    if not str(normalized.get(references_id) or '').strip():
+    references_id = "references"
+    if not str(normalized.get(references_id) or "").strip():
         normalized[references_id] = _RETRIEVAL_DISABLED_REFERENCES_NOTE
 
     return normalized
@@ -388,7 +390,7 @@ def _apply_retrieval_disabled_report_defaults(
 
 def _section_descriptor(section_id: str) -> dict[str, str]:
     title_map = _required_final_report_section_titles()
-    return {'id': section_id, 'title': title_map.get(section_id, section_id)}
+    return {"id": section_id, "title": title_map.get(section_id, section_id)}
 
 
 def _section_descriptor_list(section_ids: list[str]) -> list[dict[str, str]]:
@@ -405,36 +407,36 @@ def _build_final_report_progress_payload(
     required_paper_search_calls: int,
     required_annotation_count: int,
     draft_version: int,
-    status: str = 'partial',
-    reason: str = 'required_sections_missing',
-    message: str = '',
+    status: str = "partial",
+    reason: str = "required_sections_missing",
+    message: str = "",
     retry_required: bool = True,
     next_steps: list[str] | None = None,
     current_section_id: str | None = None,
 ) -> dict[str, Any]:
     next_section_id = missing_section_ids[0] if missing_section_ids else None
     payload: dict[str, Any] = {
-        'status': status,
-        'reason': reason,
-        'message': message,
-        'task_completed': False,
-        'source': source,
-        'draft_version': max(1, int(draft_version or 1)),
-        'required_sections': _section_descriptor_list(_required_final_report_section_order()),
-        'completed_sections': _section_descriptor_list(completed_section_ids),
-        'missing_sections': _section_descriptor_list(missing_section_ids),
-        'next_required_section': _section_descriptor(next_section_id) if next_section_id else None,
-        'retry_required': bool(retry_required),
-        'retry_tool': 'review_final_markdown_write',
-        'annotation_count': max(0, int(annotation_count or 0)),
-        'required_annotation_count': max(1, int(required_annotation_count or 1)),
-        'paper_search_usage': paper_search_usage if isinstance(paper_search_usage, dict) else {},
-        'required_paper_search_calls': max(0, int(required_paper_search_calls or 0)),
+        "status": status,
+        "reason": reason,
+        "message": message,
+        "task_completed": False,
+        "source": source,
+        "draft_version": max(1, int(draft_version or 1)),
+        "required_sections": _section_descriptor_list(_required_final_report_section_order()),
+        "completed_sections": _section_descriptor_list(completed_section_ids),
+        "missing_sections": _section_descriptor_list(missing_section_ids),
+        "next_required_section": _section_descriptor(next_section_id) if next_section_id else None,
+        "retry_required": bool(retry_required),
+        "retry_tool": "review_final_markdown_write",
+        "annotation_count": max(0, int(annotation_count or 0)),
+        "required_annotation_count": max(1, int(required_annotation_count or 1)),
+        "paper_search_usage": paper_search_usage if isinstance(paper_search_usage, dict) else {},
+        "required_paper_search_calls": max(0, int(required_paper_search_calls or 0)),
     }
     if current_section_id:
-        payload['current_section'] = _section_descriptor(current_section_id)
+        payload["current_section"] = _section_descriptor(current_section_id)
     if isinstance(next_steps, list) and next_steps:
-        payload['next_steps'] = [str(item).strip() for item in next_steps if str(item).strip()]
+        payload["next_steps"] = [str(item).strip() for item in next_steps if str(item).strip()]
     return payload
 
 
@@ -475,23 +477,23 @@ class ReviewRuntimeContext:
             job.usage.paper_search = self.paper_search_usage
             job.annotation_count = self.annotation_count
             if token_usage is not None:
-                job.usage.token.requests = int(getattr(token_usage, 'requests', 0) or 0)
-                job.usage.token.input_tokens = int(getattr(token_usage, 'input_tokens', 0) or 0)
-                job.usage.token.output_tokens = int(getattr(token_usage, 'output_tokens', 0) or 0)
-                job.usage.token.total_tokens = int(getattr(token_usage, 'total_tokens', 0) or 0)
+                job.usage.token.requests = int(getattr(token_usage, "requests", 0) or 0)
+                job.usage.token.input_tokens = int(getattr(token_usage, "input_tokens", 0) or 0)
+                job.usage.token.output_tokens = int(getattr(token_usage, "output_tokens", 0) or 0)
+                job.usage.token.total_tokens = int(getattr(token_usage, "total_tokens", 0) or 0)
 
         mutate_job_state(self.job_id, apply)
 
     def persist_annotations(self, token_usage: Any | None = None) -> None:
         payload = {
-            'annotations': [item.model_dump(mode='json') for item in self.annotations],
-            'count': len(self.annotations),
+            "annotations": [item.model_dump(mode="json") for item in self.annotations],
+            "count": len(self.annotations),
         }
         write_json_atomic(annotations_path(self.job_id), payload)
         self.sync_state_usage(token_usage)
 
     def set_final_markdown(self, markdown: str) -> None:
-        final_path = self.job_dir / 'final_report.md'
+        final_path = self.job_dir / "final_report.md"
         write_text_atomic(final_path, markdown)
         self.final_markdown_text = markdown
 
@@ -513,24 +515,24 @@ def build_review_tools(runtime: ReviewRuntimeContext) -> list[Any]:
         todo: str | None = None,
     ) -> dict[str, Any]:
         rt = ctx.context
-        rt.record_tool('mcp_status_update')
+        rt.record_tool("mcp_status_update")
 
         row = {
-            'step': str(step or '').strip(),
-            'completed': str(completed or '').strip(),
-            'blocked': str(blocked or '').strip(),
-            'todo': str(todo or '').strip(),
+            "step": str(step or "").strip(),
+            "completed": str(completed or "").strip(),
+            "blocked": str(blocked or "").strip(),
+            "todo": str(todo or "").strip(),
         }
         rt.status_updates.append(row)
 
         def apply(job):
-            job.metadata['last_status_update'] = row
+            job.metadata["last_status_update"] = row
             job.message = f"Agent progress: {row['step'] or 'updating'}"
 
         mutate_job_state(rt.job_id, apply)
-        append_event(rt.job_id, 'agent_status_update', **row)
+        append_event(rt.job_id, "agent_status_update", **row)
         rt.sync_state_usage(ctx.usage)
-        return {'status': 'ok', 'status_update': row}
+        return {"status": "ok", "status_update": row}
 
     @function_tool(strict_mode=False)
     async def pdf_search(
@@ -539,14 +541,14 @@ def build_review_tools(runtime: ReviewRuntimeContext) -> list[Any]:
         top_k: int = 8,
     ) -> dict[str, Any]:
         rt = ctx.context
-        rt.record_tool('pdf_search')
+        rt.record_tool("pdf_search")
 
-        text = str(query or '').strip()
+        text = str(query or "").strip()
         if not text:
             rt.sync_state_usage(ctx.usage)
-            return {'status': 'error', 'reason': 'empty_query', 'message': 'query is required'}
+            return {"status": "error", "reason": "empty_query", "message": "query is required"}
 
-        tokens = [tok for tok in re.split(r'\s+', text.lower()) if tok]
+        tokens = [tok for tok in re.split(r"\s+", text.lower()) if tok]
         if not tokens:
             tokens = [text.lower()]
 
@@ -563,12 +565,12 @@ def build_review_tools(runtime: ReviewRuntimeContext) -> list[Any]:
 
         scored.sort(key=lambda item: (-item[0], item[1], item[2]))
         hits = [
-            {'page': p, 'line': ln, 'score': s, 'text': t}
+            {"page": p, "line": ln, "score": s, "text": t}
             for s, p, ln, t in scored[: max(1, min(50, int(top_k or 8)))]
         ]
 
         rt.sync_state_usage(ctx.usage)
-        return {'status': 'ok', 'query': text, 'count': len(hits), 'hits': hits}
+        return {"status": "ok", "query": text, "count": len(hits), "hits": hits}
 
     @function_tool(strict_mode=False)
     async def pdf_read_lines(
@@ -578,12 +580,12 @@ def build_review_tools(runtime: ReviewRuntimeContext) -> list[Any]:
         end_line: int,
     ) -> dict[str, Any]:
         rt = ctx.context
-        rt.record_tool('pdf_read_lines')
+        rt.record_tool("pdf_read_lines")
 
         lines = rt.page_index.get(int(page))
         if not lines:
             rt.sync_state_usage(ctx.usage)
-            return {'status': 'error', 'reason': 'page_not_found', 'message': f'Page {page} not found'}
+            return {"status": "error", "reason": "page_not_found", "message": f"Page {page} not found"}
 
         start = max(1, int(start_line))
         end = max(start, int(end_line))
@@ -593,12 +595,12 @@ def build_review_tools(runtime: ReviewRuntimeContext) -> list[Any]:
         snippet = lines[start_idx:end_idx]
         rt.sync_state_usage(ctx.usage)
         return {
-            'status': 'ok',
-            'page': int(page),
-            'start_line': start,
-            'end_line': end_idx,
-            'lines': [{'line': start + i, 'text': line} for i, line in enumerate(snippet)],
-            'text': '\n'.join(snippet),
+            "status": "ok",
+            "page": int(page),
+            "start_line": start,
+            "end_line": end_idx,
+            "lines": [{"line": start + i, "text": line} for i, line in enumerate(snippet)],
+            "text": "\n".join(snippet),
         }
 
     @function_tool(strict_mode=False)
@@ -607,20 +609,20 @@ def build_review_tools(runtime: ReviewRuntimeContext) -> list[Any]:
         page: int,
     ) -> dict[str, Any]:
         rt = ctx.context
-        rt.record_tool('pdf_jump')
+        rt.record_tool("pdf_jump")
 
         lines = rt.page_index.get(int(page))
         if not lines:
             rt.sync_state_usage(ctx.usage)
-            return {'status': 'error', 'reason': 'page_not_found', 'message': f'Page {page} not found'}
+            return {"status": "error", "reason": "page_not_found", "message": f"Page {page} not found"}
 
         preview = lines[:8]
         rt.sync_state_usage(ctx.usage)
         return {
-            'status': 'ok',
-            'page': int(page),
-            'line_count': len(lines),
-            'preview': preview,
+            "status": "ok",
+            "page": int(page),
+            "line_count": len(lines),
+            "preview": preview,
         }
 
     @function_tool(strict_mode=False)
@@ -631,11 +633,11 @@ def build_review_tools(runtime: ReviewRuntimeContext) -> list[Any]:
         end_line: int,
         comment: str,
         summary: str | None = None,
-        object_type: str = 'suggestion',
+        object_type: str = "suggestion",
         severity: str | None = None,
     ) -> dict[str, Any]:
         rt = ctx.context
-        rt.record_tool('pdf_annotate')
+        rt.record_tool("pdf_annotate")
         paper_search_state_payload = _paper_search_state_payload(rt.paper_search_runtime_state)
         retrieval_not_started = _paper_search_not_started(paper_search_state_payload)
         required_search_calls = (
@@ -647,27 +649,27 @@ def build_review_tools(runtime: ReviewRuntimeContext) -> list[Any]:
         if current_search_calls < required_search_calls:
             rt.sync_state_usage(ctx.usage)
             return {
-                'status': 'error',
-                'reason': 'paper_search_calls_not_met',
-                'message': (
-                    f'Cannot start pdf_annotate yet: paper_search total calls={current_search_calls}, '
-                    f'required >= {required_search_calls}.'
+                "status": "error",
+                "reason": "paper_search_calls_not_met",
+                "message": (
+                    f"Cannot start pdf_annotate yet: paper_search total calls={current_search_calls}, "
+                    f"required >= {required_search_calls}."
                 ),
-                'next_steps': [
-                    f'Run paper_search until total calls reach {required_search_calls}+.',
-                    'Then retry pdf_annotate on the same paragraph span.',
+                "next_steps": [
+                    f"Run paper_search until total calls reach {required_search_calls}+.",
+                    "Then retry pdf_annotate on the same paragraph span.",
                 ],
-                'retry_required': True,
-                'retry_tool': 'pdf_annotate',
-                'paper_search_usage': paper_search_usage_payload,
-                'paper_search_state': paper_search_state_payload,
-                'required_paper_search_calls': required_search_calls,
+                "retry_required": True,
+                "retry_tool": "pdf_annotate",
+                "paper_search_usage": paper_search_usage_payload,
+                "paper_search_state": paper_search_state_payload,
+                "required_paper_search_calls": required_search_calls,
             }
 
         lines = rt.page_index.get(int(page))
         if not lines:
             rt.sync_state_usage(ctx.usage)
-            return {'status': 'error', 'reason': 'page_not_found', 'message': f'Page {page} not found'}
+            return {"status": "error", "reason": "page_not_found", "message": f"Page {page} not found"}
 
         start = max(1, int(start_line))
         end = max(start, int(end_line))
@@ -675,19 +677,19 @@ def build_review_tools(runtime: ReviewRuntimeContext) -> list[Any]:
         end_idx = min(len(lines), end)
         snippet = lines[start_idx:end_idx]
 
-        text = '\n'.join(snippet).strip()
+        text = "\n".join(snippet).strip()
         if not text:
             rt.sync_state_usage(ctx.usage)
             return {
-                'status': 'error',
-                'reason': 'empty_span',
-                'message': 'Selected span is empty; choose a valid line range.',
+                "status": "error",
+                "reason": "empty_span",
+                "message": "Selected span is empty; choose a valid line range.",
             }
 
-        comment_text = str(comment or '').strip()
+        comment_text = str(comment or "").strip()
         if not comment_text:
             rt.sync_state_usage(ctx.usage)
-            return {'status': 'error', 'reason': 'comment_required', 'message': 'comment is required'}
+            return {"status": "error", "reason": "comment_required", "message": "comment is required"}
 
         ann = AnnotationItem(
             id=str(uuid4()),
@@ -697,7 +699,7 @@ def build_review_tools(runtime: ReviewRuntimeContext) -> list[Any]:
             text=text,
             comment=comment_text,
             summary=str(summary).strip() if summary else None,
-            object_type=str(object_type or 'suggestion').strip() or 'suggestion',
+            object_type=str(object_type or "suggestion").strip() or "suggestion",
             severity=str(severity).strip() if severity else None,
         )
         rt.annotations.append(ann)
@@ -705,7 +707,7 @@ def build_review_tools(runtime: ReviewRuntimeContext) -> list[Any]:
 
         append_event(
             rt.job_id,
-            'annotation_created',
+            "annotation_created",
             annotation_id=ann.id,
             page=ann.page,
             start_line=ann.start_line,
@@ -724,69 +726,68 @@ def build_review_tools(runtime: ReviewRuntimeContext) -> list[Any]:
         )
         can_start_final = total_annotations >= required_annotations
         pdf_annotate_usage = {
-            'total_calls': total_annotations,
-            'hard_minimum_calls_for_final_report': required_annotations,
-            'hard_minimum_met': can_start_final,
-            'can_start_final_consolidation': can_start_final,
-            'note': (
-                'Hard minimum is not sufficient by itself. '
-                'Use page-level coverage and quality judgment before final submission.'
+            "total_calls": total_annotations,
+            "hard_minimum_calls_for_final_report": required_annotations,
+            "hard_minimum_met": can_start_final,
+            "can_start_final_consolidation": can_start_final,
+            "note": (
+                "Hard minimum is not sufficient by itself. "
+                "Use page-level coverage and quality judgment before final submission."
             ),
         }
         if can_start_final:
             pdf_annotate_hint = (
-                f'pdf_annotate total calls so far: {total_annotations} (hard minimum >= {required_annotations} is met). '
-                'Do not decide final submission by count alone; self-check coverage and then decide.'
+                f"pdf_annotate total calls so far: {total_annotations} (hard minimum >= {required_annotations} is met). "
+                "Do not decide final submission by count alone; self-check coverage and then decide."
             )
         else:
             remaining_calls = required_annotations - total_annotations
             pdf_annotate_hint = (
-                f'pdf_annotate total calls so far: {total_annotations}. '
-                f'Continue step-by-step annotation for at least {remaining_calls} more call(s). '
-                f'After reaching the hard minimum, still self-check coverage before final submission.'
+                f"pdf_annotate total calls so far: {total_annotations}. "
+                f"Continue step-by-step annotation for at least {remaining_calls} more call(s). "
+                f"After reaching the hard minimum, still self-check coverage before final submission."
             )
 
         annotation_progress = {
-            'total_review_annotations': total_annotations,
-            'recommended_total_range': {
-                'min': _REVIEW_RECOMMENDED_ANNOTATION_MIN,
-                'max': _REVIEW_RECOMMENDED_ANNOTATION_MAX,
+            "total_review_annotations": total_annotations,
+            "recommended_total_range": {
+                "min": _REVIEW_RECOMMENDED_ANNOTATION_MIN,
+                "max": _REVIEW_RECOMMENDED_ANNOTATION_MAX,
             },
-            'ready_for_final_report': can_start_final,
-            'final_report_trigger_min': required_annotations,
+            "ready_for_final_report": can_start_final,
+            "final_report_trigger_min": required_annotations,
         }
         success_message = (
-            'Tool call succeeded: PDF annotation has been saved. '
-            f'{progress_hint} {pdf_annotate_hint}'
+            f"Tool call succeeded: PDF annotation has been saved. {progress_hint} {pdf_annotate_hint}"
         )
 
         return {
-            'status': 'ok',
-            'success': True,
-            'annotation_id': ann.id,
-            'annotation_count': total_annotations,
-            'message': success_message,
-            'created_message': f'Created highlight on page {page}',
-            'progress_hint': progress_hint,
-            'pdf_annotate_hint': pdf_annotate_hint,
-            'annotation_progress': annotation_progress,
-            'pdf_annotate_usage': pdf_annotate_usage,
-            'next_action': 'self_check_annotation_coverage_then_decide',
-            'completion_gate': {
-                'recommended_total_annotations': (
-                    f'{_REVIEW_RECOMMENDED_ANNOTATION_MIN}-{_REVIEW_RECOMMENDED_ANNOTATION_MAX}'
+            "status": "ok",
+            "success": True,
+            "annotation_id": ann.id,
+            "annotation_count": total_annotations,
+            "message": success_message,
+            "created_message": f"Created highlight on page {page}",
+            "progress_hint": progress_hint,
+            "pdf_annotate_hint": pdf_annotate_hint,
+            "annotation_progress": annotation_progress,
+            "pdf_annotate_usage": pdf_annotate_usage,
+            "next_action": "self_check_annotation_coverage_then_decide",
+            "completion_gate": {
+                "recommended_total_annotations": (
+                    f"{_REVIEW_RECOMMENDED_ANNOTATION_MIN}-{_REVIEW_RECOMMENDED_ANNOTATION_MAX}"
                 ),
-                'hard_minimum_final_report_annotations': required_annotations,
-                'main_body_annotations_per_page': '1-4',
-                'appendix_annotations_per_two_pages': '1',
-                'final_tool': 'review_final_markdown_write',
-                'ready_for_final_report': can_start_final,
+                "hard_minimum_final_report_annotations": required_annotations,
+                "main_body_annotations_per_page": "1-4",
+                "appendix_annotations_per_two_pages": "1",
+                "final_tool": "review_final_markdown_write",
+                "ready_for_final_report": can_start_final,
             },
-            'object_type': ann.object_type,
-            'severity': ann.severity,
-            'summary': ann.summary,
-            'paper_search_usage': paper_search_usage_payload,
-            'paper_search_state': paper_search_state_payload,
+            "object_type": ann.object_type,
+            "severity": ann.severity,
+            "summary": ann.summary,
+            "paper_search_usage": paper_search_usage_payload,
+            "paper_search_state": paper_search_state_payload,
         }
 
     @function_tool(strict_mode=False)
@@ -796,10 +797,10 @@ def build_review_tools(runtime: ReviewRuntimeContext) -> list[Any]:
         question_list: list[str] | str | None = None,
     ) -> dict[str, Any]:
         rt = ctx.context
-        rt.record_tool('paper_search')
+        rt.record_tool("paper_search")
 
         questions = normalize_question_list(question_list)
-        query_text = str(query or '').strip()
+        query_text = str(query or "").strip()
 
         try:
             result = await rt.paper_adapter.search(
@@ -809,41 +810,40 @@ def build_review_tools(runtime: ReviewRuntimeContext) -> list[Any]:
         except Exception as exc:
             runtime_state = (await rt.paper_adapter.get_search_runtime_state()).to_dict()
             result = {
-                'success': False,
-                'reason': 'paper_search_request_failed',
-                'error': f'{type(exc).__name__}: {exc}',
-                'message': 'Paper search request failed before a valid response was returned.',
-                'query': query_text,
-                'questions': questions,
-                'papers': [],
-                'count': 0,
-                'question_results': [],
-                'next_steps': [
-                    'Check paper search BASE_URL/ENDPOINT and API key settings.',
-                    'Retry paper_search with the same query once the backend is reachable.',
+                "success": False,
+                "reason": "paper_search_request_failed",
+                "error": f"{type(exc).__name__}: {exc}",
+                "message": "Paper search request failed before a valid response was returned.",
+                "query": query_text,
+                "questions": questions,
+                "papers": [],
+                "count": 0,
+                "question_results": [],
+                "next_steps": [
+                    "Check paper search BASE_URL/ENDPOINT and API key settings.",
+                    "Retry paper_search with the same query once the backend is reachable.",
                 ],
-                'retry_required': True,
-                'retry_tool': 'paper_search',
-                'paper_search_state': runtime_state,
+                "retry_required": True,
+                "retry_tool": "paper_search",
+                "paper_search_state": runtime_state,
             }
 
         runtime_state_payload = _paper_search_state_payload(
-            result.get('paper_search_state') or rt.paper_search_runtime_state
+            result.get("paper_search_state") or rt.paper_search_runtime_state
         )
         if runtime_state_payload:
             rt.paper_search_runtime_state = runtime_state_payload
 
             def apply_paper_search_state(job):
                 metadata = dict(job.metadata)
-                metadata['paper_search_runtime_state'] = dict(runtime_state_payload)
+                metadata["paper_search_runtime_state"] = dict(runtime_state_payload)
                 job.metadata = metadata
 
             mutate_job_state(rt.job_id, apply_paper_search_state)
 
-        retrieval_not_started = (
-            str(result.get('reason') or '').strip() == 'paper_search_not_started'
-            or _paper_search_not_started(runtime_state_payload)
-        )
+        retrieval_not_started = str(
+            result.get("reason") or ""
+        ).strip() == "paper_search_not_started" or _paper_search_not_started(runtime_state_payload)
 
         if not retrieval_not_started:
             if query_text:
@@ -852,26 +852,26 @@ def build_review_tools(runtime: ReviewRuntimeContext) -> list[Any]:
                 rt.paper_search_signatures.add(_normalize_signature(item))
 
             rt.paper_search_usage.total_calls += 1
-            if bool(result.get('success')):
+            if bool(result.get("success")):
                 rt.paper_search_usage.successful_calls += 1
 
         paper_count = _count_papers(result)
-        if not retrieval_not_started and bool(result.get('success')) and paper_count > 0:
+        if not retrieval_not_started and bool(result.get("success")) and paper_count > 0:
             rt.paper_search_usage.effective_calls += 1
             rt.paper_search_usage.papers_found += paper_count
 
         if not retrieval_not_started:
-            discovered = result.get('questions')
+            discovered = result.get("questions")
             if isinstance(discovered, list):
                 for q in discovered:
                     rt.paper_search_signatures.add(_normalize_signature(str(q)))
 
-            grouped = result.get('question_results')
+            grouped = result.get("question_results")
             if isinstance(grouped, list):
                 for row in grouped:
                     if not isinstance(row, dict):
                         continue
-                    q = str(row.get('question') or row.get('query') or '').strip()
+                    q = str(row.get("question") or row.get("query") or "").strip()
                     if q:
                         rt.paper_search_signatures.add(_normalize_signature(q))
 
@@ -880,22 +880,23 @@ def build_review_tools(runtime: ReviewRuntimeContext) -> list[Any]:
         rt.sync_state_usage(ctx.usage)
         append_event(
             rt.job_id,
-            'paper_search_called',
+            "paper_search_called",
             query=query_text,
             questions=questions,
-            success=bool(result.get('success')),
+            success=bool(result.get("success")),
             count=paper_count,
             search_started=not retrieval_not_started,
-            availability=runtime_state_payload.get('availability'),
+            availability=runtime_state_payload.get("availability"),
             distinct_queries=rt.paper_search_usage.distinct_queries,
-            reason=str(result.get('reason') or '').strip() or None,
-            message=str(result.get('message') or '').strip() or None,
+            reason=str(result.get("reason") or "").strip() or None,
+            message=str(result.get("message") or "").strip() or None,
         )
 
         result_payload = dict(result)
         usage_payload = rt.paper_search_usage.model_dump()
         required_for_annotate = (
-            0 if _paper_search_not_started(rt.paper_search_runtime_state)
+            0
+            if _paper_search_not_started(rt.paper_search_runtime_state)
             else max(0, int(rt.settings.min_paper_search_calls_for_pdf_annotate))
         )
         total_calls = max(0, int(rt.paper_search_usage.total_calls))
@@ -905,42 +906,42 @@ def build_review_tools(runtime: ReviewRuntimeContext) -> list[Any]:
             required_calls=required_for_annotate,
             retrieval_not_started=retrieval_not_started,
         )
-        result_payload['paper_search_usage'] = usage_payload
-        result_payload['paper_search_state'] = runtime_state_payload
-        result_payload['required_paper_search_calls_for_pdf_annotate'] = required_for_annotate
-        result_payload['can_start_pdf_annotate'] = can_start_pdf_annotate
-        result_payload['annotation_gate_hint'] = annotation_gate_hint
-        existing_message = str(result_payload.get('message') or '').strip()
+        result_payload["paper_search_usage"] = usage_payload
+        result_payload["paper_search_state"] = runtime_state_payload
+        result_payload["required_paper_search_calls_for_pdf_annotate"] = required_for_annotate
+        result_payload["can_start_pdf_annotate"] = can_start_pdf_annotate
+        result_payload["annotation_gate_hint"] = annotation_gate_hint
+        existing_message = str(result_payload.get("message") or "").strip()
         if retrieval_not_started:
             pass
-        elif bool(result_payload.get('success')) or not existing_message:
-            result_payload['message'] = annotation_gate_hint
-        result_payload['next_action'] = (
-            'enter_retrieval_disabled_mode'
+        elif bool(result_payload.get("success")) or not existing_message:
+            result_payload["message"] = annotation_gate_hint
+        result_payload["next_action"] = (
+            "enter_retrieval_disabled_mode"
             if retrieval_not_started
-            else ('start_pdf_annotate' if can_start_pdf_annotate else 'continue_paper_search')
+            else ("start_pdf_annotate" if can_start_pdf_annotate else "continue_paper_search")
         )
         if retrieval_not_started:
-            result_payload['next_steps'] = [
-                'Proceed with manuscript-grounded review in Retrieval-Disabled Mode.',
-                'Do not keep retrying paper_search in this run.',
-                'State that novelty/comparison conclusions are deferred to manual verification.',
+            result_payload["next_steps"] = [
+                "Proceed with manuscript-grounded review in Retrieval-Disabled Mode.",
+                "Do not keep retrying paper_search in this run.",
+                "State that novelty/comparison conclusions are deferred to manual verification.",
             ]
         elif can_start_pdf_annotate:
-            result_payload['next_steps'] = [
-                'Start paragraph-by-paragraph annotation with `pdf_search -> pdf_read_lines -> pdf_annotate`.',
+            result_payload["next_steps"] = [
+                "Start paragraph-by-paragraph annotation with `pdf_search -> pdf_read_lines -> pdf_annotate`.",
                 (
-                    'Before each next annotation, perform detailed reasoning on the target text: '
-                    'confirm the issue is real and confirm it has a concrete fix path.'
+                    "Before each next annotation, perform detailed reasoning on the target text: "
+                    "confirm the issue is real and confirm it has a concrete fix path."
                 ),
-                'Create at least 10 section/paragraph annotations; usual target range is 12-25 before final report submission.',
+                "Create at least 10 section/paragraph annotations; usual target range is 12-25 before final report submission.",
             ]
         else:
-            result_payload['next_steps'] = [
-                f'Run more paper_search calls until total calls reach {required_for_annotate}+.',
+            result_payload["next_steps"] = [
+                f"Run more paper_search calls until total calls reach {required_for_annotate}+.",
                 (
-                    'After retrieval threshold is met, start step-by-step PDF annotations and '
-                    'for each next annotation first verify issue reality and fixability.'
+                    "After retrieval threshold is met, start step-by-step PDF annotations and "
+                    "for each next annotation first verify issue reality and fixability."
                 ),
             ]
         return result_payload
@@ -951,16 +952,18 @@ def build_review_tools(runtime: ReviewRuntimeContext) -> list[Any]:
         items: list[dict[str, Any]],
     ) -> dict[str, Any]:
         rt = ctx.context
-        rt.record_tool('read_paper')
+        rt.record_tool("read_paper")
 
         rows = [row for row in (items or []) if isinstance(row, dict)]
         if not rows:
             rt.sync_state_usage(ctx.usage)
-            return {'status': 'error', 'reason': 'empty_items', 'message': 'items is required'}
+            return {"status": "error", "reason": "empty_items", "message": "items is required"}
 
         result = await rt.paper_adapter.read_papers(items=rows)
         rt.sync_state_usage(ctx.usage)
-        append_event(rt.job_id, 'read_paper_called', item_count=len(rows), success=bool(result.get('success')))
+        append_event(
+            rt.job_id, "read_paper_called", item_count=len(rows), success=bool(result.get("success"))
+        )
         return result
 
     @function_tool(strict_mode=False)
@@ -970,13 +973,13 @@ def build_review_tools(runtime: ReviewRuntimeContext) -> list[Any]:
         options: list[str] | None = None,
     ) -> dict[str, Any]:
         rt = ctx.context
-        rt.record_tool('question_prompt')
+        rt.record_tool("question_prompt")
         rt.sync_state_usage(ctx.usage)
         return {
-            'status': 'not_available',
-            'message': 'No interactive question channel is available in this CLI backend mode.',
-            'question': str(question or '').strip(),
-            'options': [str(x).strip() for x in options or [] if str(x).strip()],
+            "status": "not_available",
+            "message": "No interactive question channel is available in this CLI backend mode.",
+            "question": str(question or "").strip(),
+            "options": [str(x).strip() for x in options or [] if str(x).strip()],
         }
 
     @function_tool(strict_mode=False)
@@ -995,8 +998,8 @@ def build_review_tools(runtime: ReviewRuntimeContext) -> list[Any]:
         source: str | None = None,
     ) -> dict[str, Any]:
         rt = ctx.context
-        rt.record_tool('review_final_markdown_write')
-        attempt_no = int(rt.tool_counts.get('review_final_markdown_write', 0))
+        rt.record_tool("review_final_markdown_write")
+        attempt_no = int(rt.tool_counts.get("review_final_markdown_write", 0))
         usage = rt.paper_search_usage
         section_order = _required_final_report_section_order()
         enforce_final_gates = bool(rt.settings.enable_final_gates)
@@ -1009,49 +1012,49 @@ def build_review_tools(runtime: ReviewRuntimeContext) -> list[Any]:
             0 if retrieval_not_started else max(0, int(rt.settings.min_distinct_paper_queries_for_final))
         )
         required_annotations = max(1, int(rt.settings.min_annotations_for_final))
-        normalized_source = str(source or '').strip() or 'review_annotation_agent'
+        normalized_source = str(source or "").strip() or "review_annotation_agent"
 
         # Hard short-circuit: once final report is persisted, do not allow repeated rewrite loops.
         if rt.final_markdown_text:
             completed_section_ids = [
                 section_key
                 for section_key in section_order
-                if str(rt.final_report_draft_sections.get(section_key) or '').strip()
+                if str(rt.final_report_draft_sections.get(section_key) or "").strip()
             ]
             rt.sync_state_usage(ctx.usage)
             return {
-                'status': 'ok',
-                'task_completed': True,
-                'final_report_persisted': True,
-                'message': (
-                    'Final report is already persisted. '
-                    'Stop calling review_final_markdown_write and end this run now.'
+                "status": "ok",
+                "task_completed": True,
+                "final_report_persisted": True,
+                "message": (
+                    "Final report is already persisted. "
+                    "Stop calling review_final_markdown_write and end this run now."
                 ),
-                'annotation_count': rt.annotation_count,
-                'paper_search_usage': usage.model_dump(),
-                'paper_search_state': paper_search_state_payload,
-                'required_paper_search_calls': required_paper_calls,
-                'completed_sections': _section_descriptor_list(completed_section_ids),
-                'missing_sections': [],
-                'next_required_section': None,
+                "annotation_count": rt.annotation_count,
+                "paper_search_usage": usage.model_dump(),
+                "paper_search_state": paper_search_state_payload,
+                "required_paper_search_calls": required_paper_calls,
+                "completed_sections": _section_descriptor_list(completed_section_ids),
+                "missing_sections": [],
+                "next_required_section": None,
             }
 
         def _return_final_write_failure(payload: dict[str, Any]) -> dict[str, Any]:
             payload = dict(payload)
-            payload['paper_search_state'] = paper_search_state_payload
+            payload["paper_search_state"] = paper_search_state_payload
             rt.sync_state_usage(ctx.usage)
             append_event(
                 rt.job_id,
-                'final_report_write_failed',
+                "final_report_write_failed",
                 attempt=attempt_no,
-                reason=str(payload.get('reason') or '').strip(),
-                message=str(payload.get('message') or '').strip(),
+                reason=str(payload.get("reason") or "").strip(),
+                message=str(payload.get("message") or "").strip(),
                 annotation_count=rt.annotation_count,
                 paper_search_usage=usage.model_dump(),
-                missing_sections=payload.get('missing_sections'),
-                language=payload.get('language'),
-                english_words=payload.get('english_words'),
-                chinese_chars=payload.get('chinese_chars'),
+                missing_sections=payload.get("missing_sections"),
+                language=payload.get("language"),
+                english_words=payload.get("english_words"),
+                chinese_chars=payload.get("chinese_chars"),
             )
             return payload
 
@@ -1069,34 +1072,36 @@ def build_review_tools(runtime: ReviewRuntimeContext) -> list[Any]:
             incoming_sections.update(markdown_sections)
         elif raw_markdown_input and not incoming_sections:
             # Backward compatible fallback for a single raw markdown chunk.
-            incoming_sections['summary'] = raw_markdown_input
+            incoming_sections["summary"] = raw_markdown_input
 
         requested_section_id = _resolve_final_report_section_id(section_id or section_title)
         if (section_id or section_title) and not requested_section_id:
             return _return_final_write_failure(
                 {
-                    'status': 'error',
-                    'reason': 'section_id_invalid',
-                    'message': (
-                        'Unknown section_id/section_title. Use one required section id: '
-                        'metadata, technical_positioning, claims, summary, experiment.'
+                    "status": "error",
+                    "reason": "section_id_invalid",
+                    "message": (
+                        "Unknown section_id/section_title. Use one required section id: "
+                        "metadata, technical_positioning, claims, summary, experiment."
                     ),
-                    'retry_required': True,
-                    'retry_tool': 'review_final_markdown_write',
+                    "retry_required": True,
+                    "retry_tool": "review_final_markdown_write",
                 }
             )
         if requested_section_id and section_content is None and requested_section_id not in incoming_sections:
-            section_name = _required_final_report_section_titles().get(requested_section_id, requested_section_id)
+            section_name = _required_final_report_section_titles().get(
+                requested_section_id, requested_section_id
+            )
             return _return_final_write_failure(
                 {
-                    'status': 'error',
-                    'reason': 'section_content_required',
-                    'message': f"Section '{section_name}' was selected but section_content is empty.",
-                    'retry_required': True,
-                    'retry_tool': 'review_final_markdown_write',
-                    'retry_payload_hint': {
-                        'section_id': requested_section_id,
-                        'section_content': 'Write this section in markdown.',
+                    "status": "error",
+                    "reason": "section_content_required",
+                    "message": f"Section '{section_name}' was selected but section_content is empty.",
+                    "retry_required": True,
+                    "retry_tool": "review_final_markdown_write",
+                    "retry_payload_hint": {
+                        "section_id": requested_section_id,
+                        "section_content": "Write this section in markdown.",
                     },
                 }
             )
@@ -1107,14 +1112,16 @@ def build_review_tools(runtime: ReviewRuntimeContext) -> list[Any]:
                 content=requested_content,
             )
             if not requested_content:
-                section_name = _required_final_report_section_titles().get(requested_section_id, requested_section_id)
+                section_name = _required_final_report_section_titles().get(
+                    requested_section_id, requested_section_id
+                )
                 return _return_final_write_failure(
                     {
-                        'status': 'error',
-                        'reason': 'section_content_required',
-                        'message': f"Section '{section_name}' has empty content after normalization.",
-                        'retry_required': True,
-                        'retry_tool': 'review_final_markdown_write',
+                        "status": "error",
+                        "reason": "section_content_required",
+                        "message": f"Section '{section_name}' has empty content after normalization.",
+                        "retry_required": True,
+                        "retry_tool": "review_final_markdown_write",
                     }
                 )
             incoming_sections[requested_section_id] = requested_content
@@ -1131,18 +1138,18 @@ def build_review_tools(runtime: ReviewRuntimeContext) -> list[Any]:
         if not draft_sections:
             return _return_final_write_failure(
                 {
-                    'status': 'error',
-                    'reason': 'section_payload_required',
-                    'message': 'No report section content was provided and no draft exists.',
-                    'next_steps': [
-                        'Submit one section with section_id + section_content.',
-                        'Follow required section order until the tool returns status=ok.',
+                    "status": "error",
+                    "reason": "section_payload_required",
+                    "message": "No report section content was provided and no draft exists.",
+                    "next_steps": [
+                        "Submit one section with section_id + section_content.",
+                        "Follow required section order until the tool returns status=ok.",
                     ],
-                    'retry_required': True,
-                    'retry_tool': 'review_final_markdown_write',
-                    'retry_payload_hint': {
-                        'section_id': 'summary',
-                        'section_content': 'Write the summary section in markdown.',
+                    "retry_required": True,
+                    "retry_tool": "review_final_markdown_write",
+                    "retry_payload_hint": {
+                        "section_id": "summary",
+                        "section_content": "Write the summary section in markdown.",
                     },
                 }
             )
@@ -1154,7 +1161,7 @@ def build_review_tools(runtime: ReviewRuntimeContext) -> list[Any]:
         draft_version = int(rt.final_report_draft_version)
 
         completed_section_ids = [
-            section_key for section_key in section_order if str(draft_sections.get(section_key) or '').strip()
+            section_key for section_key in section_order if str(draft_sections.get(section_key) or "").strip()
         ]
         missing_section_ids = [
             section_key for section_key in section_order if section_key not in completed_section_ids
@@ -1169,8 +1176,8 @@ def build_review_tools(runtime: ReviewRuntimeContext) -> list[Any]:
 
         if missing_section_ids:
             progress_message = (
-                'Section draft saved. '
-                f'{len(missing_section_ids)} required section(s) are still missing. '
+                "Section draft saved. "
+                f"{len(missing_section_ids)} required section(s) are still missing. "
                 f"Next required section: {_required_final_report_section_titles().get(missing_section_ids[0], missing_section_ids[0])}."
             )
             progress_payload = _build_final_report_progress_payload(
@@ -1182,8 +1189,8 @@ def build_review_tools(runtime: ReviewRuntimeContext) -> list[Any]:
                 required_paper_search_calls=required_paper_calls,
                 required_annotation_count=required_annotations,
                 draft_version=draft_version,
-                status='partial',
-                reason='required_sections_missing',
+                status="partial",
+                reason="required_sections_missing",
                 message=progress_message,
                 retry_required=True,
                 next_steps=[
@@ -1192,21 +1199,21 @@ def build_review_tools(runtime: ReviewRuntimeContext) -> list[Any]:
                         "section_id='<next>', section_content='<markdown>')."
                     ),
                     (
-                        'Missing sections: '
-                        + ', '.join(
+                        "Missing sections: "
+                        + ", ".join(
                             _required_final_report_section_titles().get(section_key, section_key)
                             for section_key in missing_section_ids
                         )
-                        + '.'
+                        + "."
                     ),
                 ],
                 current_section_id=current_section_id,
             )
-            progress_payload['paper_search_state'] = paper_search_state_payload
+            progress_payload["paper_search_state"] = paper_search_state_payload
             rt.sync_state_usage(ctx.usage)
             append_event(
                 rt.job_id,
-                'final_report_draft_saved',
+                "final_report_draft_saved",
                 attempt=attempt_no,
                 source=normalized_source,
                 completed_sections=completed_section_ids,
@@ -1227,16 +1234,16 @@ def build_review_tools(runtime: ReviewRuntimeContext) -> list[Any]:
                     required_paper_search_calls=required_paper_calls,
                     required_annotation_count=required_annotations,
                     draft_version=draft_version,
-                    status='error',
-                    reason='paper_search_calls_not_met',
+                    status="error",
+                    reason="paper_search_calls_not_met",
                     message=(
-                        'Insufficient paper_search usage before final submission: '
-                        f'{usage.total_calls} call(s) found, {required_paper_calls}+ required.'
+                        "Insufficient paper_search usage before final submission: "
+                        f"{usage.total_calls} call(s) found, {required_paper_calls}+ required."
                     ),
                     retry_required=True,
                     next_steps=[
-                        f'Run paper_search until total calls reach at least {required_paper_calls}.',
-                        'After retrieval and comparison are complete, re-call review_final_markdown_write.',
+                        f"Run paper_search until total calls reach at least {required_paper_calls}.",
+                        "After retrieval and comparison are complete, re-call review_final_markdown_write.",
                     ],
                     current_section_id=current_section_id,
                 )
@@ -1253,22 +1260,22 @@ def build_review_tools(runtime: ReviewRuntimeContext) -> list[Any]:
                     required_paper_search_calls=required_paper_calls,
                     required_annotation_count=required_annotations,
                     draft_version=draft_version,
-                    status='error',
-                    reason='paper_search_distinct_queries_not_met',
+                    status="error",
+                    reason="paper_search_distinct_queries_not_met",
                     message=(
-                        'Insufficient distinct paper_search coverage before final submission: '
-                        f'{usage.distinct_queries} distinct query/question(s) found, '
-                        f'{required_distinct_queries}+ required.'
+                        "Insufficient distinct paper_search coverage before final submission: "
+                        f"{usage.distinct_queries} distinct query/question(s) found, "
+                        f"{required_distinct_queries}+ required."
                     ),
                     retry_required=True,
                     next_steps=[
                         (
-                            'Add non-duplicate paper_search queries/questions until distinct coverage '
-                            f'reaches {required_distinct_queries}.'
+                            "Add non-duplicate paper_search queries/questions until distinct coverage "
+                            f"reaches {required_distinct_queries}."
                         ),
                         (
-                            'Then re-call review_final_markdown_write after updating novelty and '
-                            'contribution judgment.'
+                            "Then re-call review_final_markdown_write after updating novelty and "
+                            "contribution judgment."
                         ),
                     ],
                     current_section_id=current_section_id,
@@ -1286,16 +1293,16 @@ def build_review_tools(runtime: ReviewRuntimeContext) -> list[Any]:
                     required_paper_search_calls=required_paper_calls,
                     required_annotation_count=required_annotations,
                     draft_version=draft_version,
-                    status='error',
-                    reason='annotation_count_not_met',
+                    status="error",
+                    reason="annotation_count_not_met",
                     message=(
-                        f'PDF annotation count is too low: {rt.annotation_count} found, '
-                        f'minimum {required_annotations} required.'
+                        f"PDF annotation count is too low: {rt.annotation_count} found, "
+                        f"minimum {required_annotations} required."
                     ),
                     retry_required=True,
                     next_steps=[
-                        f'Add annotations until count reaches at least {required_annotations}.',
-                        'Then re-call review_final_markdown_write to finalize the saved section draft.',
+                        f"Add annotations until count reaches at least {required_annotations}.",
+                        "Then re-call review_final_markdown_write to finalize the saved section draft.",
                     ],
                     current_section_id=current_section_id,
                 )
@@ -1305,11 +1312,11 @@ def build_review_tools(runtime: ReviewRuntimeContext) -> list[Any]:
         if not markdown_text:
             return _return_final_write_failure(
                 {
-                    'status': 'error',
-                    'reason': 'markdown_required',
-                    'message': 'Required sections are present but final markdown assembly is empty.',
-                    'retry_required': True,
-                    'retry_tool': 'review_final_markdown_write',
+                    "status": "error",
+                    "reason": "markdown_required",
+                    "message": "Required sections are present but final markdown assembly is empty.",
+                    "retry_required": True,
+                    "retry_tool": "review_final_markdown_write",
                 }
             )
 
@@ -1330,13 +1337,13 @@ def build_review_tools(runtime: ReviewRuntimeContext) -> list[Any]:
                     required_paper_search_calls=required_paper_calls,
                     required_annotation_count=required_annotations,
                     draft_version=draft_version,
-                    status='error',
-                    reason=str(validation.reason or 'final_report_validation_failed'),
-                    message=str(validation.message or 'Final report validation failed.'),
+                    status="error",
+                    reason=str(validation.reason or "final_report_validation_failed"),
+                    message=str(validation.message or "Final report validation failed."),
                     retry_required=True,
                     next_steps=[
-                        'Update final markdown quality and structure according to tool error.',
-                        'Re-call review_final_markdown_write after remediation.',
+                        "Update final markdown quality and structure according to tool error.",
+                        "Re-call review_final_markdown_write after remediation.",
                     ],
                     current_section_id=current_section_id,
                 )
@@ -1344,7 +1351,7 @@ def build_review_tools(runtime: ReviewRuntimeContext) -> list[Any]:
         if not validation.ok and not enforce_final_gates:
             append_event(
                 rt.job_id,
-                'final_report_validation_skipped',
+                "final_report_validation_skipped",
                 reason=validation.reason,
                 message=validation.message,
                 missing_sections=validation.missing_sections,
@@ -1359,7 +1366,7 @@ def build_review_tools(runtime: ReviewRuntimeContext) -> list[Any]:
 
         append_event(
             rt.job_id,
-            'final_report_persisted',
+            "final_report_persisted",
             source=normalized_source,
             annotation_count=rt.annotation_count,
             paper_search_usage=usage.model_dump(),
@@ -1368,44 +1375,44 @@ def build_review_tools(runtime: ReviewRuntimeContext) -> list[Any]:
         )
 
         def apply(job):
-            job.message = 'Final report persisted successfully.'
+            job.message = "Final report persisted successfully."
             metadata = dict(job.metadata)
-            metadata['final_report_source'] = normalized_source
-            metadata['status_updates_count'] = len(rt.status_updates)
-            metadata['final_report_sections_completed'] = completed_section_ids
-            metadata['final_report_draft_version'] = draft_version
-            metadata['final_report_draft'] = {
-                'sections': dict(draft_sections),
-                'section_order': section_order,
-                'completed_sections': completed_section_ids,
-                'missing_sections': [],
-                'next_required_section': None,
-                'status': 'completed',
-                'source': normalized_source,
+            metadata["final_report_source"] = normalized_source
+            metadata["status_updates_count"] = len(rt.status_updates)
+            metadata["final_report_sections_completed"] = completed_section_ids
+            metadata["final_report_draft_version"] = draft_version
+            metadata["final_report_draft"] = {
+                "sections": dict(draft_sections),
+                "section_order": section_order,
+                "completed_sections": completed_section_ids,
+                "missing_sections": [],
+                "next_required_section": None,
+                "status": "completed",
+                "source": normalized_source,
             }
             job.metadata = metadata
 
         mutate_job_state(rt.job_id, apply)
 
         return {
-            'status': 'ok',
-            'task_completed': True,
-            'final_report_persisted': True,
-            'auto_composed_from_sections': True,
-            'message': 'Final report persisted successfully. End execution now.',
-            'annotation_count': rt.annotation_count,
-            'paper_search_usage': usage.model_dump(),
-            'paper_search_state': paper_search_state_payload,
-            'required_paper_search_calls': required_paper_calls,
-            'source': normalized_source,
-            'draft_version': draft_version,
-            'completed_sections': _section_descriptor_list(completed_section_ids),
-            'missing_sections': [],
-            'next_required_section': None,
-            'language': validation.language_stats.primary_language,
-            'english_words': validation.language_stats.english_words,
-            'chinese_chars': validation.language_stats.chinese_chars,
-            'final_gates_enforced': enforce_final_gates,
+            "status": "ok",
+            "task_completed": True,
+            "final_report_persisted": True,
+            "auto_composed_from_sections": True,
+            "message": "Final report persisted successfully. End execution now.",
+            "annotation_count": rt.annotation_count,
+            "paper_search_usage": usage.model_dump(),
+            "paper_search_state": paper_search_state_payload,
+            "required_paper_search_calls": required_paper_calls,
+            "source": normalized_source,
+            "draft_version": draft_version,
+            "completed_sections": _section_descriptor_list(completed_section_ids),
+            "missing_sections": [],
+            "next_required_section": None,
+            "language": validation.language_stats.primary_language,
+            "english_words": validation.language_stats.english_words,
+            "chinese_chars": validation.language_stats.chinese_chars,
+            "final_gates_enforced": enforce_final_gates,
         }
 
     return [

@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from enum import Enum
+from enum import StrEnum
 
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class NoveltyType(str, Enum):
+class NoveltyType(StrEnum):
     """Paper §3.2: the role the submission plays relative to nearby work."""
 
     NEW_MECHANISM = "new_mechanism"

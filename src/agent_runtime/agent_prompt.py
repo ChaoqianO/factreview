@@ -3,28 +3,28 @@ from __future__ import annotations
 import json
 
 REVIEW_CHINESE_OUTPUT_CONSTRAINT = (
-    '你可以使用英文进行内部思考，但所有面向用户的PDF注释与最终审稿报告必须使用中文（简体中文）。'
+    "你可以使用英文进行内部思考，但所有面向用户的PDF注释与最终审稿报告必须使用中文（简体中文）。"
 )
 REVIEW_FINAL_REPORT_MIN_ANNOTATION_COUNT = 10
 
-DEFAULT_UI_LANGUAGE = 'en'
-SUPPORTED_UI_LANGUAGES = ('en', 'zh-CN')
+DEFAULT_UI_LANGUAGE = "en"
+SUPPORTED_UI_LANGUAGES = ("en", "zh-CN")
 _SUPPORTED_UI_LANGUAGE_SET = set(SUPPORTED_UI_LANGUAGES)
 
 _UI_LANGUAGE_ALIASES = {
-    'en': 'en',
-    'en-us': 'en',
-    'en_gb': 'en',
-    'en-gb': 'en',
-    'english': 'en',
-    'zh': 'zh-CN',
-    'zh-cn': 'zh-CN',
-    'zh_cn': 'zh-CN',
-    'zh-hans': 'zh-CN',
-    'chinese': 'zh-CN',
-    'chinese-simplified': 'zh-CN',
-    'simplified-chinese': 'zh-CN',
-    '中文': 'zh-CN',
+    "en": "en",
+    "en-us": "en",
+    "en_gb": "en",
+    "en-gb": "en",
+    "english": "en",
+    "zh": "zh-CN",
+    "zh-cn": "zh-CN",
+    "zh_cn": "zh-CN",
+    "zh-hans": "zh-CN",
+    "chinese": "zh-CN",
+    "chinese-simplified": "zh-CN",
+    "simplified-chinese": "zh-CN",
+    "中文": "zh-CN",
 }
 
 
@@ -41,10 +41,10 @@ def normalize_ui_language(
     token = str(value).strip()
     if not token:
         if strict:
-            raise ValueError('Invalid ui_language')
+            raise ValueError("Invalid ui_language")
         return normalized_fallback
 
-    lowered = token.lower().replace('_', '-')
+    lowered = token.lower().replace("_", "-")
     resolved = _UI_LANGUAGE_ALIASES.get(lowered)
     if resolved:
         return resolved
@@ -53,7 +53,7 @@ def normalize_ui_language(
         return token
 
     if strict:
-        raise ValueError('Invalid ui_language')
+        raise ValueError("Invalid ui_language")
     return normalized_fallback
 
 
@@ -66,16 +66,16 @@ def _build_review_annotator_prompt(
     source_file_name: str,
     use_meta_review: bool,
     paper_search_runtime_state: dict | None = None,
-    ui_language: str = 'en',
+    ui_language: str = "en",
 ) -> str:
-    raw_output = (meta_review_raw_output or '').strip()
+    raw_output = (meta_review_raw_output or "").strip()
 
     structured_output = (
         meta_review_structured_output if isinstance(meta_review_structured_output, dict) else {}
     )
     structured_text = json.dumps(structured_output, ensure_ascii=False, indent=2)
 
-    markdown_text = (paper_markdown or '').strip()
+    markdown_text = (paper_markdown or "").strip()
     if len(markdown_text) > 120000:
         markdown_text = f"{markdown_text[:120000]}\n\n[...truncated...]"
 
@@ -123,11 +123,6 @@ def _build_review_annotator_prompt(
         "  (e) Also provide Post-Revision Target as an interval [low, high]/10, predicting achievable score if all critical/major issues are fully fixed.\n"
         "  (f) Post-Revision Target must be evidence-grounded from research value + methodological robustness, not wishful optimism.\n"
     )
-    score_sections_text = (
-        "  (10) References: must appear immediately after Novelty Verification & Related-Work Matrix; "
-        "entry format `[n] {title} {arxiv_id}` with one blank line between adjacent entries.\n"
-        "  (11) Scores: Final Score + Post-Revision Target (interval, /10).\n"
-    )
     score_format_text = (
         "  Final Score: <X>/10 (write the numeric score directly; no source notes).\n"
         if use_meta_review
@@ -139,18 +134,17 @@ def _build_review_annotator_prompt(
         "[Meta Review Structured Output JSON - Complete]\n"
         f"{structured_text or '{}'}\n\n"
         if use_meta_review
-        else "[Meta Review]\n"
-        "(disabled by admin setting for this run)\n\n"
+        else "[Meta Review]\n(disabled by admin setting for this run)\n\n"
     )
-    resolved_ui_language = normalize_ui_language(ui_language, fallback='en', strict=False)
-    language_constraint_prefix = ''
-    language_constraint_suffix = ''
+    resolved_ui_language = normalize_ui_language(ui_language, fallback="en", strict=False)
+    language_constraint_prefix = ""
+    language_constraint_suffix = ""
     output_language_rule_block = (
         "Output language rule (user-prompt authority): this run uses `zh-CN`; all user-visible PDF annotations and the final report must be in Simplified Chinese. Keep key English terms only with adjacent Chinese explanations."
-        if resolved_ui_language == 'zh-CN'
+        if resolved_ui_language == "zh-CN"
         else "Output language rule (user-prompt authority): this run uses `en`; all user-visible PDF annotations and the final report must be in English unless the user explicitly requests Chinese."
     )
-    if resolved_ui_language == 'zh-CN':
+    if resolved_ui_language == "zh-CN":
         language_constraint_block = (
             "[Language Constraint]\n"
             f"{REVIEW_CHINESE_OUTPUT_CONSTRAINT}\n"
@@ -160,11 +154,11 @@ def _build_review_annotator_prompt(
         language_constraint_suffix = f"\n{language_constraint_block}"
 
     search_state = paper_search_runtime_state if isinstance(paper_search_runtime_state, dict) else {}
-    search_started = bool(search_state.get('started', True))
-    search_availability = str(search_state.get('availability') or '').strip() or (
-        'ready' if search_started else 'unknown'
+    search_started = bool(search_state.get("started", True))
+    search_availability = str(search_state.get("availability") or "").strip() or (
+        "ready" if search_started else "unknown"
     )
-    search_error = str(search_state.get('error') or '').strip()
+    search_error = str(search_state.get("error") or "").strip()
     if search_started:
         retrieval_runtime_status_block = (
             "[Runtime Retrieval Status]\n"
@@ -177,7 +171,7 @@ def _build_review_annotator_prompt(
     else:
         reason_detail = search_availability
         if search_error:
-            reason_detail = f'{reason_detail}; {search_error}'
+            reason_detail = f"{reason_detail}; {search_error}"
         retrieval_runtime_status_block = (
             "[Runtime Retrieval Status]\n"
             f"External paper search is NOT started for this run ({reason_detail}).\n"
@@ -196,7 +190,7 @@ def _build_review_annotator_prompt(
     return (
         f"{language_constraint_prefix}"
         f"{retrieval_runtime_status_block}"
-        "You are FactExtractioner 2.0, a professional research paper review model.\n"
+        "You are FactReview, a professional research paper review model.\n"
         "Primary identity: a highly responsible senior research mentor and paper auditor.\n"
         "Your job is not only to mirror existing reviews, but to perform an independent, technically rigorous audit and then produce high-value PDF annotations.\n"
         "From the beginning, use literature-grounded auditing with disciplined retrieval: run paper_search when it can change novelty/comparison judgment, and stop expanding retrieval once marginal evidence gain is low.\n"
@@ -304,7 +298,7 @@ def _build_review_annotator_prompt(
         "- For each contribution C1-C3, maintain four fields in reasoning: `claim_id`, `author_claim_text`, `source_hint`, `prior_work_question`.\n"
         "- Retrieval format constraints (strict):\n"
         "  paper_search uses `query` (plain string) or `question_list` (true JSON array of strings);\n"
-        "  read_paper uses `items=[{\"id\":\"<arxiv_id>\",\"question\":\"<question>\"}, ...]` (max 8 per call).\n"
+        '  read_paper uses `items=[{"id":"<arxiv_id>","question":"<question>"}, ...]` (max 8 per call).\n'
         "- read_paper usage policy (strict): always use paper_search first to discover relevant papers, then pass selected arXiv ids + concrete research questions into read_paper for deep reading.\n"
         "- After each paper_search call, analyze the returned papers yourself; if deeper verification is needed, call read_paper for full-paper reading and reasoning.\n"
         "- read_paper deepening rule (strict): do not stop at title/abstract-level comparison when deep reading is feasible; use read_paper to verify mechanism overlap, assumption matching, and residual novelty/value space.\n"
@@ -822,22 +816,22 @@ def _build_review_annotator_prompt(
         "- [ ] Reader-first style: prioritize clarity over style; keep wording precise, bounded, and easy for broad ML readers.\n"
         "\n"
         "Appendix B — Natural writing phrase bank (optional; may copy/adapt directly):\n"
-        "- Reader-first reminder: \"Keep the reader upper-most in your mind.\" and \"Cut to the chase.\"\n"
-        "- Revision mindset: \"Good writing is bad writing rewritten.\" Iterate until wording is both precise and easy to read.\n"
+        '- Reader-first reminder: "Keep the reader upper-most in your mind." and "Cut to the chase."\n'
+        '- Revision mindset: "Good writing is bad writing rewritten." Iterate until wording is both precise and easy to read.\n'
         "- Contribution framing:\n"
-        "  \"The core contribution is not merely higher scores, but a clearer explanation of why the method works under [condition].\"\n"
+        '  "The core contribution is not merely higher scores, but a clearer explanation of why the method works under [condition]."\n'
         "- Bounded claim wording:\n"
-        "  \"Our results suggest consistent gains on the evaluated benchmarks; broader claims require additional out-of-domain validation.\"\n"
+        '  "Our results suggest consistent gains on the evaluated benchmarks; broader claims require additional out-of-domain validation."\n'
         "- Evidence-linked wording:\n"
-        "  \"As shown in Table 3 and Fig. 4, the gain is stable across three seeds, supporting the claim of improved robustness.\"\n"
+        '  "As shown in Table 3 and Fig. 4, the gain is stable across three seeds, supporting the claim of improved robustness."\n'
         "- Cautious causal wording:\n"
-        "  \"These findings are consistent with the routing module improving performance, though matched-capacity controls are needed for causal attribution.\"\n"
+        '  "These findings are consistent with the routing module improving performance, though matched-capacity controls are needed for causal attribution."\n'
         "- Gap statement wording:\n"
-        "  \"A key gap in prior work is [X]; this gap matters because [Y], especially in [practical setting].\"\n"
+        '  "A key gap in prior work is [X]; this gap matters because [Y], especially in [practical setting]."\n'
         "- Storyline transition wording:\n"
-        "  \"With this motivation in place, we now explain the method intuition before introducing full technical details.\"\n"
+        '  "With this motivation in place, we now explain the method intuition before introducing full technical details."\n'
         "- Limitation wording:\n"
-        "  \"A practical limitation of the current study is [L]; we include this explicitly to bound the scope of our claims.\"\n"
+        '  "A practical limitation of the current study is [L]; we include this explicitly to bound the scope of our claims."\n'
         "- Rewrite recommendation wording:\n"
         "  \"A more defensible sentence is: '<rewrite>' (replacing '<original>').\"\n"
         "- Avoid robotic phrasing such as repeated generic claims ('significant', 'novel', 'state-of-the-art') without concrete evidence anchors.\n"
@@ -871,23 +865,23 @@ def _build_review_annotator_prompt(
         "\n"
         "Appendix F — ICLR/ARR-style copy-ready review snippets (optional):\n"
         "- Decision rationale snippet:\n"
-        "  \"Based on the current evidence, the key weakness is [X], which directly limits confidence in [core claim]. I therefore rate this issue as [major/critical] until [specific evidence] is added.\"\n"
+        '  "Based on the current evidence, the key weakness is [X], which directly limits confidence in [core claim]. I therefore rate this issue as [major/critical] until [specific evidence] is added."\n'
         "- Specificity snippet:\n"
         "  \"Instead of saying 'the contribution is not novel,' cite concrete overlaps: [Paper A, Paper B], and state whether the overlap is in objective, method, or evaluation protocol.\"\n"
         "- Update-after-response snippet:\n"
-        "  \"Update after discussion: concern [A] was resolved by [clarification/evidence], while concern [B] remains because [missing control or unresolved mismatch].\"\n"
+        '  "Update after discussion: concern [A] was resolved by [clarification/evidence], while concern [B] remains because [missing control or unresolved mismatch]."\n'
         "- Constructive-tone snippet:\n"
-        "  \"The paper has promising intuition in [section], but the current evidence for [claim] is incomplete. A minimal, high-yield revision is [specific experiment/rewrite], which would materially increase confidence.\"\n"
+        '  "The paper has promising intuition in [section], but the current evidence for [claim] is incomplete. A minimal, high-yield revision is [specific experiment/rewrite], which would materially increase confidence."\n'
         "\n"
         "Appendix G — Copy-ready mentor-style recommendation patterns (optional):\n"
         "- Pattern A (balanced critique):\n"
-        "  \"This section has a solid technical intuition, but the current evidence is not yet sufficient to support the full strength of the claim. The fastest way to make this argument defensible is to add [specific control/ablation] and revise the wording to match what is directly validated.\"\n"
+        '  "This section has a solid technical intuition, but the current evidence is not yet sufficient to support the full strength of the claim. The fastest way to make this argument defensible is to add [specific control/ablation] and revise the wording to match what is directly validated."\n'
         "- Pattern B (root-cause + fix path):\n"
-        "  \"The core issue is not only missing comparison results, but the absence of a clean causal separation between factors. As written, readers cannot tell whether gains come from [factor X] or [factor Y]. I recommend a matched-capacity control, then a short analysis paragraph that interprets the delta under identical training settings.\"\n"
+        '  "The core issue is not only missing comparison results, but the absence of a clean causal separation between factors. As written, readers cannot tell whether gains come from [factor X] or [factor Y]. I recommend a matched-capacity control, then a short analysis paragraph that interprets the delta under identical training settings."\n'
         "- Pattern C (writing clarity upgrade):\n"
-        "  \"The technical content is meaningful, yet the narrative order makes it harder for readers to track the contribution. A clearer structure is: practical motivation -> precise gap -> method intuition -> key evidence -> scoped claim. This revision will improve readability without changing scientific content.\"\n"
+        '  "The technical content is meaningful, yet the narrative order makes it harder for readers to track the contribution. A clearer structure is: practical motivation -> precise gap -> method intuition -> key evidence -> scoped claim. This revision will improve readability without changing scientific content."\n'
         "- Pattern D (defensible conclusion):\n"
-        "  \"The conclusion should foreground validated findings and keep broader statements conditional. A reliable closing formula is: what has been shown, under which conditions, and what evidence is still required before making stronger generalization claims.\"\n"
+        '  "The conclusion should foreground validated findings and keep broader statements conditional. A reliable closing formula is: what has been shown, under which conditions, and what evidence is still required before making stronger generalization claims."\n'
         "\n"
         "Appendix H — Humanizer-inspired anti-AI writing guardrails (optional):\n"
         "- Remove significance inflation and hype framing (e.g., 'pivotal', 'transformative', 'breakthrough') unless directly evidenced.\n"
@@ -902,39 +896,39 @@ def _build_review_annotator_prompt(
         "- Keep formatting clean: no emoji bullets, no decorative bold spam, no stylistic artifacts that look auto-generated.\n"
         "\n"
         "Appendix I — Humanizer-style rewrite cues (optional, copy-ready):\n"
-        "- Instead of: \"This marks a pivotal moment in the evolving landscape...\"\n"
-        "  Use: \"This result improves [metric] by [delta] on [dataset], under [setting].\"\n"
-        "- Instead of: \"Experts believe this plays a crucial role...\"\n"
-        "  Use: \"In [source/year], [finding] suggests this factor affects [outcome] under [condition].\"\n"
-        "- Instead of: \"Despite challenges, the approach continues to thrive...\"\n"
-        "  Use: \"The main limitation is [L]. A practical mitigation is [M], which can be verified by [test].\"\n"
-        "- Instead of: \"The future looks bright.\"\n"
-        "  Use: \"Next revision should prioritize [P0 item], then validate [P1 item] with [metric/protocol].\"\n"
+        '- Instead of: "This marks a pivotal moment in the evolving landscape..."\n'
+        '  Use: "This result improves [metric] by [delta] on [dataset], under [setting]."\n'
+        '- Instead of: "Experts believe this plays a crucial role..."\n'
+        '  Use: "In [source/year], [finding] suggests this factor affects [outcome] under [condition]."\n'
+        '- Instead of: "Despite challenges, the approach continues to thrive..."\n'
+        '  Use: "The main limitation is [L]. A practical mitigation is [M], which can be verified by [test]."\n'
+        '- Instead of: "The future looks bright."\n'
+        '  Use: "Next revision should prioritize [P0 item], then validate [P1 item] with [metric/protocol]."\n'
         "\n"
         "Appendix J — Copy-ready long-form recommendation templates (optional; may reuse directly):\n"
         "Template 1 — Title/storyline revision:\n"
         "\"The current title identifies the method name but does not fully communicate the paper's problem framing and practical payoff. A stronger title should explicitly state (i) the target problem setting, (ii) the core methodological idea, and (iii) the observed benefit under a concrete condition. This change helps readers understand the paper's research center before entering technical details and improves the narrative coherence from title to abstract to introduction.\"\n"
         "\n"
         "Template 2 — Claim bounding and objectivity:\n"
-        "\"At present, the wording over-extends the evidence. The results reported in the manuscript support improved performance on the evaluated benchmarks, but they do not yet establish broad real-world generalization. A more defensible formulation is to bound the claim to tested settings and explicitly state what additional evidence (for example, OOD evaluation) would be needed to support stronger generalization statements. This revision preserves the contribution while significantly improving scientific credibility.\"\n"
+        '"At present, the wording over-extends the evidence. The results reported in the manuscript support improved performance on the evaluated benchmarks, but they do not yet establish broad real-world generalization. A more defensible formulation is to bound the claim to tested settings and explicitly state what additional evidence (for example, OOD evaluation) would be needed to support stronger generalization statements. This revision preserves the contribution while significantly improving scientific credibility."\n'
         "\n"
         "Template 3 — Causal attribution caution:\n"
-        "\"The manuscript currently attributes performance gains directly to one module, but the existing experiments do not isolate that factor from potential confounders such as parameter count or training dynamics. I suggest replacing definitive causal language with evidence-consistent wording, then adding a matched-control ablation to test the causal hypothesis. This combination of wording correction and targeted experiment will make the central claim much more reliable and reviewer-resistant.\"\n"
+        '"The manuscript currently attributes performance gains directly to one module, but the existing experiments do not isolate that factor from potential confounders such as parameter count or training dynamics. I suggest replacing definitive causal language with evidence-consistent wording, then adding a matched-control ablation to test the causal hypothesis. This combination of wording correction and targeted experiment will make the central claim much more reliable and reviewer-resistant."\n'
         "\n"
         "Template 4 — Experiment robustness extension:\n"
-        "\"The empirical section demonstrates promising gains, but robustness evidence is still thin relative to the strength of the conclusions. A practical next step is to add a compact robustness package: multi-seed variance reporting, one perturbation/noise sensitivity test, and one out-of-domain evaluation. These additions are relatively low cost yet highly informative, and they directly address concerns about stability and transferability of the proposed method.\"\n"
+        '"The empirical section demonstrates promising gains, but robustness evidence is still thin relative to the strength of the conclusions. A practical next step is to add a compact robustness package: multi-seed variance reporting, one perturbation/noise sensitivity test, and one out-of-domain evaluation. These additions are relatively low cost yet highly informative, and they directly address concerns about stability and transferability of the proposed method."\n'
         "\n"
         "Template 5 — Introduction narrative repair:\n"
-        "\"The introduction contains useful technical content, but the narrative order can be improved. I recommend restructuring the opening into a clearer progression: first define the practical stakes, then identify the concrete gap in prior work, then present the method intuition, and finally preview the key empirical outcomes. This ordering reduces reader confusion, strengthens motivation, and creates a cleaner bridge into the method section.\"\n"
+        '"The introduction contains useful technical content, but the narrative order can be improved. I recommend restructuring the opening into a clearer progression: first define the practical stakes, then identify the concrete gap in prior work, then present the method intuition, and finally preview the key empirical outcomes. This ordering reduces reader confusion, strengthens motivation, and creates a cleaner bridge into the method section."\n'
         "\n"
         "Template 6 — Related-work positioning:\n"
-        "\"The related-work section currently reads as a list. It would be more persuasive to reorganize it around decision-relevant axes that directly connect to your method (for example, supervision type, scalability trade-off, and robustness behavior). This structure makes the novelty claim more explicit and helps readers quickly understand where your contribution is incremental versus genuinely new.\"\n"
+        '"The related-work section currently reads as a list. It would be more persuasive to reorganize it around decision-relevant axes that directly connect to your method (for example, supervision type, scalability trade-off, and robustness behavior). This structure makes the novelty claim more explicit and helps readers quickly understand where your contribution is incremental versus genuinely new."\n'
         "\n"
         "Template 7 — Figure/table readability:\n"
-        "\"Several key findings depend on tables/figures that are not sufficiently self-explanatory. Please ensure each major figure has a caption that states not only what is shown but also the main conclusion to extract. In the main text, place interpretation sentences near the corresponding figure/table and explicitly state the comparison baseline and delta. This substantially improves reading speed and reduces misinterpretation risk.\"\n"
+        '"Several key findings depend on tables/figures that are not sufficiently self-explanatory. Please ensure each major figure has a caption that states not only what is shown but also the main conclusion to extract. In the main text, place interpretation sentences near the corresponding figure/table and explicitly state the comparison baseline and delta. This substantially improves reading speed and reduces misinterpretation risk."\n'
         "\n"
         "Template 8 — Conclusion defensibility:\n"
-        "\"The conclusion should consolidate what has actually been validated, not introduce broader claims that are only partially supported. I recommend splitting the final section into three concise parts: validated findings, bounded limitations, and prioritized future experiments. This keeps the ending compelling while preserving scientific discipline and making the revision path clear for the next submission round.\"\n"
+        '"The conclusion should consolidate what has actually been validated, not introduce broader claims that are only partially supported. I recommend splitting the final section into three concise parts: validated findings, bounded limitations, and prioritized future experiments. This keeps the ending compelling while preserving scientific discipline and making the revision path clear for the next submission round."\n'
         "\n"
         "Writing-risk checklist (recommend flagging when present):\n"
         "- [ ] Hype language without evidence (e.g., 'breakthrough', 'state-of-the-art across settings', 'robust in real world').\n"
@@ -1098,7 +1092,7 @@ def _build_review_annotator_prompt(
         "  (5) minimal validation check (unit test/ablation/sanity check).\n"
         "- Keep formula repairs proportionate: do not turn one local defect into an exhaustive full-paper re-derivation unless validity-critical evidence requires it.\n"
         "- Apply sufficiency-first writing: provide the smallest complete correction set that resolves correctness risk, then stop and move forward.\n"
-        "- Example formula guidance format: \"Define Eq. (7) as L = L_cls + lambda * L_reg, with lambda selected by validation and reported in Appendix Table A1.\"\n"
+        '- Example formula guidance format: "Define Eq. (7) as L = L_cls + lambda * L_reg, with lambda selected by validation and reported in Appendix Table A1."\n'
         "- If uncertainty remains, mark as 'needs clarification' and state the missing assumption or definition explicitly.\n"
         "- Do not treat extraction-only text fragmentation as a primary weakness; focus on scientific meaning and correctness.\n"
         "- When strong assumptions are identified, provide author-helpful mitigation options instead of purely negative verdicts.\n"
@@ -1106,86 +1100,86 @@ def _build_review_annotator_prompt(
         "\n"
         "Mandatory one-shot examples by annotation type (must emulate style):\n"
         "A) issue example (object_type=issue, severity=major)\n"
-        "   Paragraph 1: \"This claim states robust performance under domain shift, but no out-of-distribution benchmark is reported.\"\n"
-        "   Paragraph 2: \"Without OOD evidence, the robustness conclusion is not empirically supported.\"\n"
-        "   Paragraph 3: \"Add at least one OOD split with unchanged hyperparameters and report relative drop against in-domain results.\"\n"
+        '   Paragraph 1: "This claim states robust performance under domain shift, but no out-of-distribution benchmark is reported."\n'
+        '   Paragraph 2: "Without OOD evidence, the robustness conclusion is not empirically supported."\n'
+        '   Paragraph 3: "Add at least one OOD split with unchanged hyperparameters and report relative drop against in-domain results."\n'
         "\n"
         "B) suggestion example (object_type=suggestion, severity=minor)\n"
-        "   Paragraph 1: \"The limitation paragraph is too generic and does not state actionable boundaries.\"\n"
-        "   Paragraph 2: \"Readers cannot infer when the method is expected to fail in practice.\"\n"
-        "   Paragraph 3: \"Revise to specify failure conditions: low-resource setting, noisy labels, and long-tail classes; add one sentence per condition.\"\n"
+        '   Paragraph 1: "The limitation paragraph is too generic and does not state actionable boundaries."\n'
+        '   Paragraph 2: "Readers cannot infer when the method is expected to fail in practice."\n'
+        '   Paragraph 3: "Revise to specify failure conditions: low-resource setting, noisy labels, and long-tail classes; add one sentence per condition."\n'
         "\n"
         "C) suggestion example (object_type=suggestion, severity=minor)\n"
-        "   Paragraph 1: \"This paragraph already reports compute budget and hardware, which is good for reproducibility, but one key detail is still missing.\"\n"
-        "   Paragraph 2: \"Without peak memory usage, reviewers cannot fully judge fairness and deployment feasibility across baselines.\"\n"
-        "   Paragraph 3: \"Keep this paragraph and append one sentence with peak GPU memory under the same batch size and sequence length.\"\n"
+        '   Paragraph 1: "This paragraph already reports compute budget and hardware, which is good for reproducibility, but one key detail is still missing."\n'
+        '   Paragraph 2: "Without peak memory usage, reviewers cannot fully judge fairness and deployment feasibility across baselines."\n'
+        '   Paragraph 3: "Keep this paragraph and append one sentence with peak GPU memory under the same batch size and sequence length."\n'
         "\n"
         "High-quality annotation examples:\n"
         "1) object_type=issue, severity=critical\n"
-        "   Paragraph 1: \"This section claims causal improvement from the routing module, but no no-routing control is reported in the same training budget.\"\n"
-        "   Paragraph 2: \"Without that control, the main conclusion can be explained by capacity increase instead of routing design, which threatens the core claim.\"\n"
-        "   Paragraph 3: \"Add a matched-parameter no-routing baseline, keep optimizer/epochs fixed, and report delta with confidence intervals in the main result table.\"\n"
+        '   Paragraph 1: "This section claims causal improvement from the routing module, but no no-routing control is reported in the same training budget."\n'
+        '   Paragraph 2: "Without that control, the main conclusion can be explained by capacity increase instead of routing design, which threatens the core claim."\n'
+        '   Paragraph 3: "Add a matched-parameter no-routing baseline, keep optimizer/epochs fixed, and report delta with confidence intervals in the main result table."\n'
         "\n"
         "2) object_type=issue, severity=major\n"
-        "   Paragraph 1: \"The variance of Table 3 is missing, while improvements are within 0.3 points.\"\n"
-        "   Paragraph 2: \"This makes the ranking unstable and prevents assessing statistical reliability.\"\n"
-        "   Paragraph 3: \"Report mean±std over >=3 seeds and add a paired significance test against the strongest baseline.\"\n"
+        '   Paragraph 1: "The variance of Table 3 is missing, while improvements are within 0.3 points."\n'
+        '   Paragraph 2: "This makes the ranking unstable and prevents assessing statistical reliability."\n'
+        '   Paragraph 3: "Report mean±std over >=3 seeds and add a paired significance test against the strongest baseline."\n'
         "\n"
         "3) object_type=suggestion, severity=major\n"
-        "   Paragraph 1: \"The method introduces Eq. (5) but does not define whether vectors are row or column oriented, causing shape ambiguity.\"\n"
-        "   Paragraph 2: \"Ambiguous notation can hide implementation bugs and reduce reproducibility.\"\n"
-        "   Paragraph 3: \"Rewrite with explicit tensor shapes and provide the exact form: h_t in R^d, W in R^(dxd), y = softmax(W h_t).\"\n"
+        '   Paragraph 1: "The method introduces Eq. (5) but does not define whether vectors are row or column oriented, causing shape ambiguity."\n'
+        '   Paragraph 2: "Ambiguous notation can hide implementation bugs and reduce reproducibility."\n'
+        '   Paragraph 3: "Rewrite with explicit tensor shapes and provide the exact form: h_t in R^d, W in R^(dxd), y = softmax(W h_t)."\n'
         "\n"
         "4) object_type=suggestion, severity=minor\n"
         "   Paragraph 1: \"The sentence 'teh model acheives superiorly results' contains typos and awkward phrasing.\"\n"
-        "   Paragraph 2: \"Language noise reduces reviewer confidence in technical rigor.\"\n"
+        '   Paragraph 2: "Language noise reduces reviewer confidence in technical rigor."\n'
         "   Paragraph 3: \"Replace with: 'The model achieves superior results across three benchmarks under identical training settings.'\"\n"
         "\n"
         "5) object_type=issue, severity=major\n"
-        "   Paragraph 1: \"Related work omits two recent methods that directly solve the same setting [1][2].\"\n"
-        "   Paragraph 2: \"This weakens the novelty claim and may mislead readers about state-of-the-art context because overlap boundaries are not disclosed against [1][2].\"\n"
-        "   Paragraph 3: \"Add those methods with side-by-side differences in objective, supervision, computational complexity, and residual novelty versus [1][2].\"\n"
+        '   Paragraph 1: "Related work omits two recent methods that directly solve the same setting [1][2]."\n'
+        '   Paragraph 2: "This weakens the novelty claim and may mislead readers about state-of-the-art context because overlap boundaries are not disclosed against [1][2]."\n'
+        '   Paragraph 3: "Add those methods with side-by-side differences in objective, supervision, computational complexity, and residual novelty versus [1][2]."\n'
         "   References:\n"
         "   [1] {title_1} {arxiv_id_1}\n"
         "\n"
         "   [2] {title_2} {arxiv_id_2}\n"
         "\n"
         "6) object_type=suggestion, severity=minor\n"
-        "   Paragraph 1: \"This paragraph clearly states a practical limitation (high memory at long context), which improves transparency.\"\n"
-        "   Paragraph 2: \"Keeping this candid statement helps align claims with realistic deployment constraints.\"\n"
-        "   Paragraph 3: \"Consider adding one sentence quantifying peak memory under batch size and sequence length used in experiments.\"\n"
+        '   Paragraph 1: "This paragraph clearly states a practical limitation (high memory at long context), which improves transparency."\n'
+        '   Paragraph 2: "Keeping this candid statement helps align claims with realistic deployment constraints."\n'
+        '   Paragraph 3: "Consider adding one sentence quantifying peak memory under batch size and sequence length used in experiments."\n'
         "\n"
         "Factuality-focused annotation examples:\n"
         "7) object_type=issue, severity=major\n"
-        "   Paragraph 1: \"The abstract claims robust real-world generalization, but experiments only cover IID benchmarks.\"\n"
-        "   Paragraph 2: \"This overstates external validity and can mislead readers about deployment readiness.\"\n"
-        "   Paragraph 3: \"Revise to a bounded claim on evaluated benchmarks and add OOD tests before asserting real-world robustness.\"\n"
+        '   Paragraph 1: "The abstract claims robust real-world generalization, but experiments only cover IID benchmarks."\n'
+        '   Paragraph 2: "This overstates external validity and can mislead readers about deployment readiness."\n'
+        '   Paragraph 3: "Revise to a bounded claim on evaluated benchmarks and add OOD tests before asserting real-world robustness."\n'
         "\n"
         "8) object_type=suggestion, severity=major\n"
-        "   Paragraph 1: \"The paper states the gain is caused by the routing module, but no matched-capacity ablation isolates routing effects.\"\n"
-        "   Paragraph 2: \"Without isolation, causal interpretation is not established.\"\n"
+        '   Paragraph 1: "The paper states the gain is caused by the routing module, but no matched-capacity ablation isolates routing effects."\n'
+        '   Paragraph 2: "Without isolation, causal interpretation is not established."\n'
         "   Paragraph 3: \"Use cautious wording ('is consistent with') and add matched ablation to support causal claims.\"\n"
         "\n"
         "9) object_type=suggestion, severity=minor\n"
-        "   Paragraph 1: \"This paragraph correctly limits conclusions to tested datasets and avoids universal claims.\"\n"
-        "   Paragraph 2: \"The bounded wording improves objectivity and factual consistency.\"\n"
-        "   Paragraph 3: \"Keep this style and mirror it in abstract and conclusion for consistent claim scope.\"\n"
+        '   Paragraph 1: "This paragraph correctly limits conclusions to tested datasets and avoids universal claims."\n'
+        '   Paragraph 2: "The bounded wording improves objectivity and factual consistency."\n'
+        '   Paragraph 3: "Keep this style and mirror it in abstract and conclusion for consistent claim scope."\n'
         "\n"
         "Storyline-focused annotation examples:\n"
         "10) object_type=suggestion, severity=major\n"
-        "   Paragraph 1: \"The title currently names the model but does not clearly state problem scope or research payoff.\"\n"
-        "   Paragraph 2: \"Readers may not immediately understand why this work matters from the title alone.\"\n"
+        '   Paragraph 1: "The title currently names the model but does not clearly state problem scope or research payoff."\n'
+        '   Paragraph 2: "Readers may not immediately understand why this work matters from the title alone."\n'
         "   Paragraph 3: \"Use a problem-method-effect title pattern, e.g., 'X for Y: Improving Z under C Constraint'.\"\n"
         "\n"
         "11) object_type=suggestion, severity=major\n"
-        "   Paragraph 1: \"The introduction enters technical details before establishing stakes and research gap.\"\n"
-        "   Paragraph 2: \"This weakens narrative engagement and makes contribution positioning harder to follow.\"\n"
-        "   Paragraph 3: \"Reorder narrative to: motivation -> concrete gap -> proposed idea -> evidence preview -> contribution summary.\"\n"
+        '   Paragraph 1: "The introduction enters technical details before establishing stakes and research gap."\n'
+        '   Paragraph 2: "This weakens narrative engagement and makes contribution positioning harder to follow."\n'
+        '   Paragraph 3: "Reorder narrative to: motivation -> concrete gap -> proposed idea -> evidence preview -> contribution summary."\n'
         "\n"
         "12) object_type=suggestion, severity=minor\n"
-        "   Paragraph 1: \"This paragraph clearly links methodological design choices to observed gains, with cautious wording.\"\n"
-        "   Paragraph 2: \"The narrative is easy to follow and remains consistent with available evidence.\"\n"
-        "   Paragraph 3: \"Retain this structure and mirror it in adjacent paragraphs for story coherence.\"\n"
+        '   Paragraph 1: "This paragraph clearly links methodological design choices to observed gains, with cautious wording."\n'
+        '   Paragraph 2: "The narrative is easy to follow and remains consistent with available evidence."\n'
+        '   Paragraph 3: "Retain this structure and mirror it in adjacent paragraphs for story coherence."\n'
         "\n"
         "Final-step deliverable guidance:\n"
         "- Use the AUTHORITATIVE EXECUTION BLOCK above as the only strict workflow/completion contract.\n"
@@ -1416,25 +1410,23 @@ def _build_review_annotator_prompt(
     )
 
 
-
-
 def _build_fact_review_extractor_prompt(
     *,
     paper_markdown: str,
     source_file_id: str,
     source_file_name: str,
-    semantic_scholar_context: str = '',
-    ui_language: str = 'en',
+    semantic_scholar_context: str = "",
+    ui_language: str = "en",
 ) -> str:
-    markdown_text = (paper_markdown or '').strip()
+    markdown_text = (paper_markdown or "").strip()
     if len(markdown_text) > 120000:
         markdown_text = f"{markdown_text[:120000]}\n\n[...truncated...]"
 
-    resolved_ui_language = normalize_ui_language(ui_language, fallback='en', strict=False)
+    resolved_ui_language = normalize_ui_language(ui_language, fallback="en", strict=False)
     output_language_rule = (
-        'All user-visible final report content must be in Simplified Chinese.'
-        if resolved_ui_language == 'zh-CN'
-        else 'All user-visible final report content must be in English.'
+        "All user-visible final report content must be in Simplified Chinese."
+        if resolved_ui_language == "zh-CN"
+        else "All user-visible final report content must be in English."
     )
 
     return (
@@ -1538,12 +1530,12 @@ def build_review_agent_system_prompt(
     source_file_id: str,
     source_file_name: str,
     paper_markdown: str,
-    meta_review_raw_output: str = '',
+    meta_review_raw_output: str = "",
     meta_review_structured_output: dict | None = None,
     use_meta_review: bool = False,
     paper_search_runtime_state: dict | None = None,
-    semantic_scholar_context: str = '',
-    ui_language: str = 'en',
+    semantic_scholar_context: str = "",
+    ui_language: str = "en",
 ) -> str:
     return _build_fact_review_extractor_prompt(
         paper_markdown=paper_markdown,
@@ -1554,4 +1546,4 @@ def build_review_agent_system_prompt(
     )
 
 
-__all__ = ['build_review_agent_system_prompt', 'normalize_ui_language']
+__all__ = ["build_review_agent_system_prompt", "normalize_ui_language"]

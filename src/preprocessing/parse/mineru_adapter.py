@@ -56,7 +56,7 @@ class MineruAdapter:
                 )
             return self._local_fallback(
                 pdf_bytes,
-                warning='MinerU is not configured; used local pypdf parser fallback.',
+                warning="MinerU is not configured; used local pypdf parser fallback.",
             )
 
         try:
@@ -70,7 +70,7 @@ class MineruAdapter:
                 ) from exc
             return self._local_fallback(
                 pdf_bytes,
-                warning=f'MinerU parse failed; used local pypdf parser fallback. reason={type(exc).__name__}: {exc}',
+                warning=f"MinerU parse failed; used local pypdf parser fallback. reason={type(exc).__name__}: {exc}",
             )
 
     async def _parse_via_mineru(
@@ -82,12 +82,12 @@ class MineruAdapter:
     ) -> MineruParseResult:
         assert self.cfg.api_token is not None
         headers = {
-            'Content-Type': 'application/json',
-            'Authorization': f'Bearer {self.cfg.api_token}',
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.cfg.api_token}",
         }
         payload = {
-            'files': [{'name': pdf_path.name, 'data_id': data_id}],
-            'model_version': self.cfg.model_version,
+            "files": [{"name": pdf_path.name, "data_id": data_id}],
+            "model_version": self.cfg.model_version,
         }
 
         upload_url = self._build_url(self.cfg.upload_endpoint)
@@ -98,33 +98,35 @@ class MineruAdapter:
             response.raise_for_status()
             apply_result = response.json()
 
-            if int(apply_result.get('code', -1)) != 0:
+            if int(apply_result.get("code", -1)) != 0:
                 raise RuntimeError(f"MinerU apply upload URL failed: {apply_result}")
 
-            data = apply_result.get('data') or {}
-            batch_id = str(data.get('batch_id') or '').strip() or None
-            urls = data.get('file_urls')
+            data = apply_result.get("data") or {}
+            batch_id = str(data.get("batch_id") or "").strip() or None
+            urls = data.get("file_urls")
             if not isinstance(urls, list) or not urls:
-                raise RuntimeError(f'MinerU response missing file_urls: {apply_result}')
+                raise RuntimeError(f"MinerU response missing file_urls: {apply_result}")
 
             for url in urls:
                 if not isinstance(url, str) or not url.strip():
-                    raise RuntimeError(f'Invalid upload URL in MinerU response: {url!r}')
+                    raise RuntimeError(f"Invalid upload URL in MinerU response: {url!r}")
                 put_resp = await client.put(url, content=pdf_bytes)
                 if put_resp.status_code != 200:
-                    raise RuntimeError(f'MinerU upload failed ({put_resp.status_code}) for {url}')
+                    raise RuntimeError(f"MinerU upload failed ({put_resp.status_code}) for {url}")
 
             if not batch_id:
-                raise RuntimeError('MinerU response missing batch_id')
+                raise RuntimeError("MinerU response missing batch_id")
 
             raw_result = await self._poll_batch_result(
                 client=client,
                 batch_id=batch_id,
                 apply_payload=apply_result,
             )
-            markdown, content_list, image_files = await self._extract_outputs(client=client, payload=raw_result)
+            markdown, content_list, image_files = await self._extract_outputs(
+                client=client, payload=raw_result
+            )
             if not markdown.strip():
-                raise RuntimeError('MinerU returned empty markdown result')
+                raise RuntimeError("MinerU returned empty markdown result")
 
         return MineruParseResult(
             markdown=markdown,
@@ -132,7 +134,7 @@ class MineruAdapter:
             image_files=image_files,
             batch_id=batch_id,
             raw_result=raw_result,
-            provider='mineru_v4',
+            provider="mineru_v4",
         )
 
     async def _poll_batch_result(
@@ -147,12 +149,14 @@ class MineruAdapter:
 
         status_urls = self._build_status_urls(batch_id=batch_id, apply_payload=apply_payload)
         if not status_urls:
-            raise RuntimeError('No MinerU status polling URL available')
+            raise RuntimeError("No MinerU status polling URL available")
 
         while asyncio.get_event_loop().time() < deadline:
             for status_url in status_urls:
                 try:
-                    resp = await client.get(status_url, headers={'Authorization': f'Bearer {self.cfg.api_token}'})
+                    resp = await client.get(
+                        status_url, headers={"Authorization": f"Bearer {self.cfg.api_token}"}
+                    )
                 except Exception:
                     continue
 
@@ -169,15 +173,15 @@ class MineruAdapter:
                 if self._is_terminal_success(payload):
                     return payload
                 if self._is_terminal_failure(payload):
-                    raise RuntimeError(f'MinerU batch failed: {json.dumps(payload, ensure_ascii=False)}')
+                    raise RuntimeError(f"MinerU batch failed: {json.dumps(payload, ensure_ascii=False)}")
 
             await asyncio.sleep(max(0.8, float(self.cfg.poll_interval_seconds)))
 
         if last_payload is not None:
             raise TimeoutError(
-                f'MinerU batch polling timeout: batch_id={batch_id}, last={json.dumps(last_payload, ensure_ascii=False)}'
+                f"MinerU batch polling timeout: batch_id={batch_id}, last={json.dumps(last_payload, ensure_ascii=False)}"
             )
-        raise TimeoutError(f'MinerU batch polling timeout without payload: batch_id={batch_id}')
+        raise TimeoutError(f"MinerU batch polling timeout without payload: batch_id={batch_id}")
 
     async def _extract_outputs(
         self,
@@ -189,20 +193,20 @@ class MineruAdapter:
         content_list = self._extract_content_list_from_payload(payload)
         image_files: dict[str, bytes] | None = None
 
-        md_url = self._extract_first_url(payload, keys=('markdown_url', 'md_url', 'full_md_url', 'full_md'))
+        md_url = self._extract_first_url(payload, keys=("markdown_url", "md_url", "full_md_url", "full_md"))
         if not markdown and md_url:
             markdown = await self._download_text(client, md_url)
 
         content_url = self._extract_first_url(
             payload,
-            keys=('content_list_url', 'content_list_json_url', 'content_list_json'),
+            keys=("content_list_url", "content_list_json_url", "content_list_json"),
         )
         if content_list is None and content_url:
             content_list = await self._download_json_list(client, content_url)
 
         zip_url = self._extract_first_url(
             payload,
-            keys=('full_zip_url', 'zip_url', 'result_zip_url', 'download_url'),
+            keys=("full_zip_url", "zip_url", "result_zip_url", "download_url"),
         )
         if zip_url and (not markdown or content_list is None):
             md_from_zip, content_from_zip, images_from_zip = await self._download_from_zip(client, zip_url)
@@ -214,50 +218,50 @@ class MineruAdapter:
                 image_files = images_from_zip
 
         if not markdown:
-            nested = payload.get('data') if isinstance(payload.get('data'), dict) else payload
-            files = nested.get('files') if isinstance(nested, dict) else None
+            nested = payload.get("data") if isinstance(payload.get("data"), dict) else payload
+            files = nested.get("files") if isinstance(nested, dict) else None
             if isinstance(files, list):
                 md_parts: list[str] = []
                 for item in files:
                     if not isinstance(item, dict):
                         continue
-                    for key in ('markdown', 'md', 'full_md'):
+                    for key in ("markdown", "md", "full_md"):
                         value = item.get(key)
                         if isinstance(value, str) and value.strip():
                             md_parts.append(value.strip())
-                markdown = '\n\n---\n\n'.join(md_parts)
+                markdown = "\n\n---\n\n".join(md_parts)
 
-        return markdown or '', content_list, image_files
+        return markdown or "", content_list, image_files
 
     def _extract_markdown_from_payload(self, payload: dict[str, Any]) -> str:
         candidate_dicts: list[dict[str, Any]] = []
         if isinstance(payload, dict):
             candidate_dicts.append(payload)
-            data = payload.get('data')
+            data = payload.get("data")
             if isinstance(data, dict):
                 candidate_dicts.append(data)
-                result = data.get('result')
+                result = data.get("result")
                 if isinstance(result, dict):
                     candidate_dicts.append(result)
 
         for data in candidate_dicts:
-            for key in ('markdown', 'md', 'full_md', 'full_markdown'):
+            for key in ("markdown", "md", "full_md", "full_markdown"):
                 value = data.get(key)
                 if isinstance(value, str) and value.strip():
                     return value.strip()
 
-        return ''
+        return ""
 
     def _extract_content_list_from_payload(self, payload: dict[str, Any]) -> list[dict[str, Any]] | None:
         candidate_dicts: list[dict[str, Any]] = []
         if isinstance(payload, dict):
             candidate_dicts.append(payload)
-            data = payload.get('data')
+            data = payload.get("data")
             if isinstance(data, dict):
                 candidate_dicts.append(data)
 
         for data in candidate_dicts:
-            for key in ('content_list', 'content_list_json', 'mineru_content_list'):
+            for key in ("content_list", "content_list_json", "mineru_content_list"):
                 value = data.get(key)
                 if isinstance(value, list):
                     rows = [row for row in value if isinstance(row, dict)]
@@ -305,26 +309,26 @@ class MineruAdapter:
         content_list: list[dict[str, Any]] | None = None
         image_files: dict[str, bytes] = {}
 
-        with zipfile.ZipFile(BytesIO(resp.content), 'r') as zf:
+        with zipfile.ZipFile(BytesIO(resp.content), "r") as zf:
             for name in zf.namelist():
                 lower = name.lower()
-                if lower.endswith('.md'):
+                if lower.endswith(".md"):
                     try:
-                        markdown_parts.append(zf.read(name).decode('utf-8', errors='ignore'))
+                        markdown_parts.append(zf.read(name).decode("utf-8", errors="ignore"))
                     except Exception:
                         continue
-                if lower.endswith('_content_list.json') and content_list is None:
+                if lower.endswith("_content_list.json") and content_list is None:
                     try:
-                        payload = json.loads(zf.read(name).decode('utf-8', errors='ignore'))
+                        payload = json.loads(zf.read(name).decode("utf-8", errors="ignore"))
                     except Exception:
                         payload = None
                     if isinstance(payload, list):
                         content_list = [row for row in payload if isinstance(row, dict)]
-                if lower.startswith('images/') and (
-                    lower.endswith('.jpg')
-                    or lower.endswith('.jpeg')
-                    or lower.endswith('.png')
-                    or lower.endswith('.webp')
+                if lower.startswith("images/") and (
+                    lower.endswith(".jpg")
+                    or lower.endswith(".jpeg")
+                    or lower.endswith(".png")
+                    or lower.endswith(".webp")
                 ):
                     try:
                         image_files[name] = zf.read(name)
@@ -332,7 +336,7 @@ class MineruAdapter:
                         continue
 
         return (
-            '\n\n---\n\n'.join(part.strip() for part in markdown_parts if part.strip()),
+            "\n\n---\n\n".join(part.strip() for part in markdown_parts if part.strip()),
             content_list,
             image_files or None,
         )
@@ -347,15 +351,15 @@ class MineruAdapter:
             if resolved and resolved not in urls:
                 urls.append(resolved)
 
-        data = apply_payload.get('data') if isinstance(apply_payload.get('data'), dict) else {}
+        data = apply_payload.get("data") if isinstance(apply_payload.get("data"), dict) else {}
         if isinstance(data, dict):
-            for key in ('status_url', 'result_url', 'batch_status_url', 'batch_result_url'):
+            for key in ("status_url", "result_url", "batch_status_url", "batch_result_url"):
                 raw = data.get(key)
                 if isinstance(raw, str):
                     add(raw)
 
         for template in self.cfg.poll_endpoint_templates:
-            if '{batch_id}' not in template:
+            if "{batch_id}" not in template:
                 continue
             add(template.format(batch_id=batch_id))
 
@@ -366,31 +370,31 @@ class MineruAdapter:
             return True
 
         state = self._extract_state(payload)
-        if state in {'done', 'completed', 'success', 'succeeded', 'finished'}:
+        if state in {"done", "completed", "success", "succeeded", "finished"}:
             return True
 
-        code = payload.get('code')
+        code = payload.get("code")
         if isinstance(code, int) and code == 0:
-            data = payload.get('data')
+            data = payload.get("data")
             if isinstance(data, dict):
-                if data.get('full_zip_url') or data.get('markdown') or data.get('md'):
+                if data.get("full_zip_url") or data.get("markdown") or data.get("md"):
                     return True
-                extract_result = data.get('extract_result')
+                extract_result = data.get("extract_result")
                 if isinstance(extract_result, list):
                     for item in extract_result:
                         if not isinstance(item, dict):
                             continue
-                        item_state = str(item.get('state') or '').strip().lower()
-                        if item_state in {'done', 'completed', 'success', 'succeeded', 'finished'}:
+                        item_state = str(item.get("state") or "").strip().lower()
+                        if item_state in {"done", "completed", "success", "succeeded", "finished"}:
                             if (
-                                item.get('full_zip_url')
-                                or item.get('zip_url')
-                                or item.get('result_zip_url')
-                                or item.get('markdown_url')
-                                or item.get('md_url')
-                                or item.get('full_md_url')
-                                or item.get('markdown')
-                                or item.get('md')
+                                item.get("full_zip_url")
+                                or item.get("zip_url")
+                                or item.get("result_zip_url")
+                                or item.get("markdown_url")
+                                or item.get("md_url")
+                                or item.get("full_md_url")
+                                or item.get("markdown")
+                                or item.get("md")
                             ):
                                 return True
 
@@ -398,40 +402,40 @@ class MineruAdapter:
 
     def _is_terminal_failure(self, payload: dict[str, Any]) -> bool:
         state = self._extract_state(payload)
-        if state in {'failed', 'error', 'aborted'}:
+        if state in {"failed", "error", "aborted"}:
             return True
 
-        code = payload.get('code')
+        code = payload.get("code")
         if isinstance(code, int) and code != 0:
-            msg = str(payload.get('msg') or payload.get('message') or '').lower()
+            msg = str(payload.get("msg") or payload.get("message") or "").lower()
             # MinerU may return "task not found or expire" on one polling endpoint
             # while another endpoint still has valid progress/result for the same batch.
             # Treat this known pattern as non-terminal so the caller can keep polling.
-            if code == -60012 and ('task not found' in msg or 'expire' in msg):
+            if code == -60012 and ("task not found" in msg or "expire" in msg):
                 return False
-            if msg and 'processing' not in msg and 'running' not in msg:
+            if msg and "processing" not in msg and "running" not in msg:
                 return True
 
         return False
 
     def _extract_state(self, payload: dict[str, Any]) -> str:
         candidates: list[Any] = [payload]
-        data = payload.get('data') if isinstance(payload.get('data'), dict) else None
+        data = payload.get("data") if isinstance(payload.get("data"), dict) else None
         if isinstance(data, dict):
             candidates.append(data)
-            result = data.get('result')
+            result = data.get("result")
             if isinstance(result, dict):
                 candidates.append(result)
 
         for item in candidates:
             if not isinstance(item, dict):
                 continue
-            for key in ('state', 'status', 'task_state', 'batch_state'):
+            for key in ("state", "status", "task_state", "batch_state"):
                 value = item.get(key)
                 if isinstance(value, str) and value.strip():
                     return value.strip().lower()
 
-        return ''
+        return ""
 
     def _local_fallback(self, pdf_bytes: bytes, *, warning: str | None = None) -> MineruParseResult:
         parsed: MarkdownParseResult = parse_pdf_locally(pdf_bytes)
@@ -449,10 +453,10 @@ class MineruAdapter:
         return f"{self.cfg.base_url.rstrip('/')}/{endpoint.lstrip('/')}"
 
     def _resolve_possible_url(self, value: str) -> str:
-        token = str(value or '').strip()
+        token = str(value or "").strip()
         if not token:
-            return ''
-        if token.startswith('http://') or token.startswith('https://'):
+            return ""
+        if token.startswith("http://") or token.startswith("https://"):
             return token
         return self._build_url(token)
 

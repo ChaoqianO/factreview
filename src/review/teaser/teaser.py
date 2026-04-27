@@ -171,8 +171,8 @@ def _template_reference_png_bytes(scale: float = 0.9) -> bytes | None:
             return png_path.read_bytes()
         with Image.open(png_path) as image:
             image = image.convert("RGB")
-            width = max(1, int(round(image.width * scale)))
-            height = max(1, int(round(image.height * scale)))
+            width = max(1, round(image.width * scale))
+            height = max(1, round(image.height * scale))
             resized = image.resize((width, height), Image.LANCZOS)
             buffer = io.BytesIO()
             resized.save(buffer, format="PNG")
@@ -216,7 +216,9 @@ def _template_visual_anchor_summary() -> str:
         except ValueError:
             relative = _template_png_path()
         return f"Reference template image: {relative}; rely on the attached template image and fixed module constraints."
-    lines = ["Exact visual anchors extracted from the template image (normalized coordinates on a 16:9 canvas):"]
+    lines = [
+        "Exact visual anchors extracted from the template image (normalized coordinates on a 16:9 canvas):"
+    ]
     for anchor in anchors:
         lines.append(f"- {anchor.name}: bbox={_format_bbox(anchor.bbox)}; text={anchor.text}")
     return "\n".join(lines)
@@ -242,23 +244,32 @@ def _template_reference_image() -> Image.Image | None:
 
 def _crop_normalized(image: Image.Image, bbox: tuple[float, float, float, float]) -> Image.Image:
     width, height = image.size
-    left = max(0, min(width, int(round(bbox[0] * width))))
-    top = max(0, min(height, int(round(bbox[1] * height))))
-    right = max(left + 1, min(width, int(round(bbox[2] * width))))
-    bottom = max(top + 1, min(height, int(round(bbox[3] * height))))
+    left = max(0, min(width, round(bbox[0] * width)))
+    top = max(0, min(height, round(bbox[1] * height)))
+    right = max(left + 1, min(width, round(bbox[2] * width)))
+    bottom = max(top + 1, min(height, round(bbox[3] * height)))
     return image.crop((left, top, right, bottom))
 
 
-def _grid_similarity(template_image: Image.Image, generated_image: Image.Image, *, cols: int, rows: int) -> float:
+def _grid_similarity(
+    template_image: Image.Image, generated_image: Image.Image, *, cols: int, rows: int
+) -> float:
     template_grid = np.asarray(template_image.resize((cols, rows), Image.BILINEAR), dtype=np.float32)
     generated_grid = np.asarray(generated_image.resize((cols, rows), Image.BILINEAR), dtype=np.float32)
     mae = float(np.abs(template_grid - generated_grid).mean() / 255.0)
     return max(0.0, min(1.0, 1.0 - mae))
 
 
-def _edge_similarity(template_image: Image.Image, generated_image: Image.Image, *, cols: int, rows: int) -> float:
-    template_gray = np.asarray(template_image.convert("L").resize((cols, rows), Image.BILINEAR), dtype=np.float32) / 255.0
-    generated_gray = np.asarray(generated_image.convert("L").resize((cols, rows), Image.BILINEAR), dtype=np.float32) / 255.0
+def _edge_similarity(
+    template_image: Image.Image, generated_image: Image.Image, *, cols: int, rows: int
+) -> float:
+    template_gray = (
+        np.asarray(template_image.convert("L").resize((cols, rows), Image.BILINEAR), dtype=np.float32) / 255.0
+    )
+    generated_gray = (
+        np.asarray(generated_image.convert("L").resize((cols, rows), Image.BILINEAR), dtype=np.float32)
+        / 255.0
+    )
     template_edges = np.concatenate(
         [
             np.abs(np.diff(template_gray, axis=1)).reshape(-1),
@@ -318,7 +329,9 @@ def _validate_generated_teaser_image(image_path: str | Path) -> dict[str, Any]:
             "reason": "Template image unavailable; skipped strict validation.",
         }
 
-    generated = Image.open(_coerce_path(image_path)).convert("RGB").resize(template_image.size, Image.BILINEAR)
+    generated = (
+        Image.open(_coerce_path(image_path)).convert("RGB").resize(template_image.size, Image.BILINEAR)
+    )
     color_similarity = _grid_similarity(template_image, generated, cols=24, rows=14)
     edge_similarity = _edge_similarity(template_image, generated, cols=24, rows=14)
     region_scores: list[dict[str, Any]] = []
@@ -335,9 +348,7 @@ def _validate_generated_teaser_image(image_path: str | Path) -> dict[str, Any]:
     core_floor = float(os.getenv("TEASER_TEMPLATE_CORE_REGION_MIN") or "0.66")
     weak_regions = [item for item in region_scores if float(item["similarity"]) < max(0.74, threshold - 0.04)]
     core_ok = all(
-        float(item["similarity"]) >= core_floor
-        for item in region_scores
-        if str(item["name"]) in core_regions
+        float(item["similarity"]) >= core_floor for item in region_scores if str(item["name"]) in core_regions
     )
     region_similarity = {str(item["name"]): float(item["similarity"]) for item in region_scores}
     required_region_mins = {
@@ -347,8 +358,7 @@ def _validate_generated_teaser_image(image_path: str | Path) -> dict[str, Any]:
         "technical_panel": float(os.getenv("TEASER_REQUIRED_TECHNICAL_MIN") or "0.70"),
     }
     required_regions_ok = all(
-        region_similarity.get(name, 0.0) >= float(min_v)
-        for name, min_v in required_region_mins.items()
+        region_similarity.get(name, 0.0) >= float(min_v) for name, min_v in required_region_mins.items()
     )
 
     summary_density = _region_edge_density(generated, _TEMPLATE_REGION_BBOXES["summary_panel"])
@@ -516,7 +526,17 @@ def _metric_is_lower_better(metric_value: str) -> bool:
     return any(tok in metric for tok in lower_tokens)
 
 
-def _main_result_row_value(row: list[str], *, task_idx: int, dataset_idx: int, metric_idx: int, baseline_idx: int, paper_idx: int, diff_idx: int, status_idx: int) -> tuple[float, int, float]:
+def _main_result_row_value(
+    row: list[str],
+    *,
+    task_idx: int,
+    dataset_idx: int,
+    metric_idx: int,
+    baseline_idx: int,
+    paper_idx: int,
+    diff_idx: int,
+    status_idx: int,
+) -> tuple[float, int, float]:
     metric_text = row[metric_idx] if 0 <= metric_idx < len(row) else ""
     lower_better = _metric_is_lower_better(metric_text)
     delta = _first_number(row[diff_idx]) if 0 <= diff_idx < len(row) else None
@@ -845,7 +865,11 @@ def _extract_experiment_subsection(body: str, label: str) -> tuple[str, TableBlo
 
 def _row_to_dict(table: TableBlock, row: list[str]) -> dict[str, str]:
     normalized = row[: len(table.headers)] + [""] * max(0, len(table.headers) - len(row))
-    return {header: re.sub(r"\s+", " ", str(value or "")).strip() or "Not found in manuscript" for header, value in zip(table.headers, normalized)}
+    return {
+        header: re.sub(r"\s+", " ", str(value or "")).strip() or "Not found in manuscript"
+        for header, value in zip(table.headers, normalized, strict=False)
+    }
+
 
 def _select_claim_rows(table: TableBlock | None, limit: int = 3) -> list[dict[str, str]]:
     if table is None:
@@ -920,7 +944,9 @@ def extract_teaser_figure_payload(markdown_text: str) -> TeaserFigurePayload:
     )
 
 
-def extract_teaser_figure_payload_from_latest_extraction(latest_extraction_path: str | Path) -> TeaserFigurePayload:
+def extract_teaser_figure_payload_from_latest_extraction(
+    latest_extraction_path: str | Path,
+) -> TeaserFigurePayload:
     path = Path(latest_extraction_path)
     return extract_teaser_figure_payload(_read_text(path))
 
@@ -932,8 +958,16 @@ def build_teaser_figure_prompt(
     attempt_index: int = 1,
 ) -> str:
     status_text = "; ".join(payload.status_legend) if payload.status_legend else "Not found in manuscript"
-    strengths_text = "\n".join(f"- {item}" for item in payload.strengths) if payload.strengths else "- Not found in manuscript"
-    weaknesses_text = "\n".join(f"- {item}" for item in payload.weaknesses) if payload.weaknesses else "- Not found in manuscript"
+    strengths_text = (
+        "\n".join(f"- {item}" for item in payload.strengths)
+        if payload.strengths
+        else "- Not found in manuscript"
+    )
+    weaknesses_text = (
+        "\n".join(f"- {item}" for item in payload.weaknesses)
+        if payload.weaknesses
+        else "- Not found in manuscript"
+    )
     selected_claims_text = _format_selected_claims(payload.selected_claim_rows)
     anchor_summary = _template_visual_anchor_summary()
     region_constraints = _template_region_constraints()
@@ -1111,10 +1145,7 @@ def _resolve_image_request(
     api_key = str(api_key_override or os.getenv("GEMINI_API_KEY") or "").strip()
     if not api_key and base_url:
         api_key = str(
-            os.getenv("OPENROUTER_API_KEY")
-            or os.getenv("OPENAI_API_KEY")
-            or os.getenv("API_KEY")
-            or ""
+            os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY") or os.getenv("API_KEY") or ""
         ).strip()
     model = str(
         model_override
@@ -1357,7 +1388,9 @@ def generate_teaser_figure(
             template_image_png_bytes=template_image_png_bytes,
             technical_image_png_bytes=technical_image_png_bytes,
         )
-        attempt_response_path = final_output_dir / f"teaser_figure_gemini_response_attempt_{attempt_index}.json"
+        attempt_response_path = (
+            final_output_dir / f"teaser_figure_gemini_response_attempt_{attempt_index}.json"
+        )
         _write_json(attempt_response_path, attempt_response)
 
         image_bytes = _extract_inline_image_bytes(attempt_response)
@@ -1391,7 +1424,9 @@ def generate_teaser_figure(
         }
         attempt_summaries.append(attempt_summary)
 
-        if best_attempt is None or float(validation.get("score", 0.0)) > float(best_attempt["validation"].get("score", 0.0)):
+        if best_attempt is None or float(validation.get("score", 0.0)) > float(
+            best_attempt["validation"].get("score", 0.0)
+        ):
             best_attempt = {
                 "attempt": attempt_index,
                 "prompt": attempt_prompt,

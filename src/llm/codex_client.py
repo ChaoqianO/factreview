@@ -122,7 +122,7 @@ def invoke_codex(prompt: str, system: str, *, auth: CodexAuth, model: str, base_
     for key, value in codex_headers(auth).items():
         request.add_header(key, value)
     request.add_header("Accept", "text/event-stream")
-    request.add_header("User-Agent", "ai_review/code_evaluation")
+    request.add_header("User-Agent", "factreview/execution")
 
     try:
         with urllib.request.urlopen(request, timeout=120) as response:

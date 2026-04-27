@@ -12,17 +12,14 @@ from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
 
 
 def _contains_cjk(text: str) -> bool:
-    for ch in text:
-        if '\u4e00' <= ch <= '\u9fff':
-            return True
-    return False
+    return any("一" <= ch <= "鿿" for ch in text)
 
 
 def _pick_font(markdown_text: str, preferred: str) -> str:
     if _contains_cjk(markdown_text):
         try:
-            pdfmetrics.registerFont(UnicodeCIDFont('STSong-Light'))
-            return 'STSong-Light'
+            pdfmetrics.registerFont(UnicodeCIDFont("STSong-Light"))
+            return "STSong-Light"
         except Exception:
             return preferred
     return preferred
@@ -32,7 +29,7 @@ def _flush_bullets(story: list, bullets: list[str], bullet_style: ParagraphStyle
     if not bullets:
         return
     for item in bullets:
-        story.append(Paragraph('• ' + escape(item), bullet_style))
+        story.append(Paragraph("• " + escape(item), bullet_style))
     story.append(Spacer(1, 2 * mm))
     bullets.clear()
 
@@ -41,7 +38,7 @@ def markdown_to_pdf(
     *,
     markdown_text: str,
     output_path: Path,
-    font_name: str = 'Helvetica',
+    font_name: str = "Helvetica",
     title_font_size: int = 15,
     body_font_size: int = 10,
     margin: int = 48,
@@ -52,16 +49,16 @@ def markdown_to_pdf(
     styles = getSampleStyleSheet()
 
     normal = ParagraphStyle(
-        'DRBody',
-        parent=styles['Normal'],
+        "DRBody",
+        parent=styles["Normal"],
         fontName=font,
         fontSize=body_font_size,
         leading=max(13, int(body_font_size * 1.45)),
         spaceAfter=4,
     )
     h1 = ParagraphStyle(
-        'DRH1',
-        parent=styles['Heading1'],
+        "DRH1",
+        parent=styles["Heading1"],
         fontName=font,
         fontSize=title_font_size,
         leading=max(18, int(title_font_size * 1.35)),
@@ -69,8 +66,8 @@ def markdown_to_pdf(
         spaceAfter=6,
     )
     h2 = ParagraphStyle(
-        'DRH2',
-        parent=styles['Heading2'],
+        "DRH2",
+        parent=styles["Heading2"],
         fontName=font,
         fontSize=max(12, int(title_font_size * 0.82)),
         leading=max(14, int(title_font_size * 1.1)),
@@ -78,8 +75,8 @@ def markdown_to_pdf(
         spaceAfter=4,
     )
     h3 = ParagraphStyle(
-        'DRH3',
-        parent=styles['Heading3'],
+        "DRH3",
+        parent=styles["Heading3"],
         fontName=font,
         fontSize=max(11, int(title_font_size * 0.72)),
         leading=max(13, int(title_font_size * 1.0)),
@@ -87,7 +84,7 @@ def markdown_to_pdf(
         spaceAfter=3,
     )
     bullet_style = ParagraphStyle(
-        'DRBullet',
+        "DRBullet",
         parent=normal,
         leftIndent=12,
         firstLineIndent=0,
@@ -107,22 +104,22 @@ def markdown_to_pdf(
             story.append(Spacer(1, 2 * mm))
             continue
 
-        if stripped.startswith('# '):
+        if stripped.startswith("# "):
             _flush_bullets(story, bullets, bullet_style)
             story.append(Paragraph(escape(stripped[2:].strip()), h1))
             continue
 
-        if stripped.startswith('## '):
+        if stripped.startswith("## "):
             _flush_bullets(story, bullets, bullet_style)
             story.append(Paragraph(escape(stripped[3:].strip()), h2))
             continue
 
-        if stripped.startswith('### '):
+        if stripped.startswith("### "):
             _flush_bullets(story, bullets, bullet_style)
             story.append(Paragraph(escape(stripped[4:].strip()), h3))
             continue
 
-        if stripped.startswith('- ') or stripped.startswith('* '):
+        if stripped.startswith("- ") or stripped.startswith("* "):
             bullets.append(stripped[2:].strip())
             continue
 
@@ -132,7 +129,7 @@ def markdown_to_pdf(
     _flush_bullets(story, bullets, bullet_style)
 
     if not story:
-        story.append(Paragraph('Empty report', normal))
+        story.append(Paragraph("Empty report", normal))
 
     doc = SimpleDocTemplate(
         str(output_path),
@@ -141,7 +138,7 @@ def markdown_to_pdf(
         rightMargin=margin,
         topMargin=margin,
         bottomMargin=margin,
-        title='FactExtractioner Final Report',
+        title="FactReview Final Report",
     )
     doc.build(story)
 
@@ -150,12 +147,12 @@ def markdown_file_to_pdf(
     *,
     markdown_path: Path,
     output_path: Path,
-    font_name: str = 'Helvetica',
+    font_name: str = "Helvetica",
     title_font_size: int = 15,
     body_font_size: int = 10,
     margin: int = 48,
 ) -> None:
-    markdown_text = markdown_path.read_text(encoding='utf-8')
+    markdown_text = markdown_path.read_text(encoding="utf-8")
     markdown_to_pdf(
         markdown_text=markdown_text,
         output_path=output_path,

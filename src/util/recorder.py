@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 import json
-import os
 import time
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
 from .fs import ensure_dir, write_text
+from .verbose import is_verbose
 
 
 @dataclass
@@ -15,11 +15,6 @@ class Event:
     ts: float
     kind: str
     data: dict[str, Any]
-
-
-def _is_verbose() -> bool:
-    v = (os.getenv("CODE_EVAL_VERBOSE") or "").strip().lower()
-    return v in {"1", "true", "yes", "y", "on"}
 
 
 def _short_path(path: str | Path, keep_parts: int = 3) -> str:
@@ -179,7 +174,7 @@ def append_event(run_dir: str | Path, kind: str, data: dict[str, Any]) -> None:
     line = json.dumps(asdict(ev), ensure_ascii=False)
     with open(path, "a", encoding="utf-8") as f:
         f.write(line + "\n")
-    if _is_verbose():
+    if is_verbose():
         try:
             print(_console_event_line(kind, data, d), flush=True)
         except Exception:

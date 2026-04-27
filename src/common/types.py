@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
@@ -12,15 +12,15 @@ def utcnow() -> datetime:
     return datetime.now(UTC)
 
 
-class JobStatus(str, Enum):
-    queued = 'queued'
-    pdf_uploading_to_mineru = 'pdf_uploading_to_mineru'
-    pdf_parsing = 'pdf_parsing'
-    agent_running = 'agent_running'
-    final_report_persisting = 'final_report_persisting'
-    pdf_exporting = 'pdf_exporting'
-    completed = 'completed'
-    failed = 'failed'
+class JobStatus(StrEnum):
+    queued = "queued"
+    pdf_uploading_to_mineru = "pdf_uploading_to_mineru"
+    pdf_parsing = "pdf_parsing"
+    agent_running = "agent_running"
+    final_report_persisting = "final_report_persisting"
+    pdf_exporting = "pdf_exporting"
+    completed = "completed"
+    failed = "failed"
 
 
 class TokenUsage(BaseModel):
@@ -58,7 +58,7 @@ class AnnotationItem(BaseModel):
     text: str
     comment: str
     summary: str | None = None
-    object_type: str = 'suggestion'
+    object_type: str = "suggestion"
     severity: str | None = None
     created_at: datetime = Field(default_factory=utcnow)
 
@@ -82,7 +82,7 @@ class JobState(BaseModel):
     source_pdf_name: str
 
     status: JobStatus = JobStatus.queued
-    message: str = 'Job queued.'
+    message: str = "Job queued."
     error: str | None = None
 
     created_at: datetime = Field(default_factory=utcnow)

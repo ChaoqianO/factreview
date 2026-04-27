@@ -180,7 +180,10 @@ def _source_issue_entries(entry: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 def _issue_type(entry: dict[str, Any]) -> str:
-    return _clean_text(entry.get("error_type") or entry.get("warning_type") or entry.get("info_type")) or "unknown"
+    return (
+        _clean_text(entry.get("error_type") or entry.get("warning_type") or entry.get("info_type"))
+        or "unknown"
+    )
 
 
 def _issue_details(entry: dict[str, Any]) -> str:
@@ -275,7 +278,9 @@ def format_reference_check_markdown(result: dict[str, Any], *, max_issues: int =
     lines.append("## Reference Check")
     lines.append("")
     if not result.get("ok"):
-        message = _clean_text(result.get("error_message"), max_chars=1200) or "Reference check did not complete."
+        message = (
+            _clean_text(result.get("error_message"), max_chars=1200) or "Reference check did not complete."
+        )
         lines.append("RefChecker was enabled, but the run did not complete successfully.")
         lines.append("")
         lines.append(f"- Error: {message}")

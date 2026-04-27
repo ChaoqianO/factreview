@@ -1,22 +1,16 @@
 """Title-to-BibTeX lookup via Semantic Scholar Graph API.
 
-Derived from the standalone s2-title-to-bibtex tool.  Provides a
-library-level API so that other parts of code_evaluation can resolve
-paper titles to BibTeX without shelling out to an external CLI.
+Library-level API used by the positioning stage to resolve paper titles to
+BibTeX records without shelling out to an external CLI.
 
-Usage (library)::
+Usage::
 
-    from src.tools.bibtex import lookup_bibtex
+    from fact_generation.positioning.bibtex import lookup_bibtex
 
     result = lookup_bibtex("Attention Is All You Need")
     # result -> {"matched_title": "...", "bibtex": "@article{...}", "exact": True}
 
     results = lookup_bibtex_batch(["Title A", "Title B"])
-
-Usage (CLI, from code_evaluation/)::
-
-    python -m src.tools.bibtex "Attention Is All You Need"
-    printf "Title A\\nTitle B" | python -m src.tools.bibtex --stdin
 
 Environment:
     SEMANTIC_SCHOLAR_API_KEY  (preferred) or S2_API_KEY
@@ -88,7 +82,7 @@ def _http_get_json(url: str, headers: dict[str, str], timeout_s: int = 20, retri
 def _make_headers(api_key: str) -> dict[str, str]:
     return {
         "accept": "application/json",
-        "user-agent": "code_evaluation-bibtex/1.0",
+        "user-agent": "factreview-bibtex/1.0",
         "x-api-key": api_key,
     }
 
