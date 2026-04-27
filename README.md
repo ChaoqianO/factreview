@@ -29,10 +29,11 @@ cp .env.example .env
 If `codex` is not on your PATH, install the Codex CLI first, then rerun
 `codex login`.
 
-Run the bundled CompGCN demo to verify your install:
+Run the pipeline against the bundled CompGCN PDF to verify your install — no
+need to supply your own paper:
 
 ```bash
-python demos/compgcn/run.py
+python scripts/execute_review_pipeline.py demos/compgcn/paper.pdf
 ```
 
 Once the demo works, see [Running](#running) below for arbitrary PDFs and

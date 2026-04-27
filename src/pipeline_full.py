@@ -3,6 +3,9 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import sys
+import time
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -26,6 +29,25 @@ from util.run_layout import build_run_dir, ensure_run_subdirs, make_run_id
 def _write_json(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+_TOTAL_STAGES = 7
+
+
+def _log(msg: str) -> None:
+    print(msg, flush=True, file=sys.stderr)
+
+
+def _run_stage(index: int, name: str, fn: Callable[[], StageResult]) -> StageResult:
+    _log(f"[{index}/{_TOTAL_STAGES}] {name}: starting...")
+    t0 = time.monotonic()
+    result = fn()
+    dt = time.monotonic() - t0
+    status = result.status
+    err = (result.error or "").strip()
+    suffix = f" — {err}" if err else ""
+    _log(f"[{index}/{_TOTAL_STAGES}] {name}: {status} ({dt:.1f}s){suffix}")
+    return result
 
 
 def _set_env_if_value(name: str, value: str | None) -> None:
@@ -85,31 +107,53 @@ def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
     init_full_pipeline_context(run_dir=run_dir)
     run_execution = bool(getattr(args, "run_execution", False))
 
-    parse_result = run_parse_stage(
-        repo_root=repo_root,
-        run_dir=run_dir,
-        paper_pdf=paper_pdf,
-        paper_key=paper_key,
-        reuse_job_id=str(args.reuse_job_id or "").strip(),
-        materialize_execution_extract=run_execution,
+    _log("FactReview pipeline starting")
+    _log(f"  paper_key : {paper_key}")
+    _log(f"  paper_pdf : {paper_pdf}")
+    _log(f"  run_dir   : {run_dir}")
+
+    parse_result = _run_stage(
+        1,
+        "parse",
+        lambda: run_parse_stage(
+            repo_root=repo_root,
+            run_dir=run_dir,
+            paper_pdf=paper_pdf,
+            paper_key=paper_key,
+            reuse_job_id=str(args.reuse_job_id or "").strip(),
+            materialize_execution_extract=run_execution,
+        ),
     )
-    claim_extract_result = run_claim_extract_stage(
-        repo_root=repo_root,
-        run_dir=run_dir,
+    claim_extract_result = _run_stage(
+        2,
+        "claim_extract",
+        lambda: run_claim_extract_stage(
+            repo_root=repo_root,
+            run_dir=run_dir,
+        ),
     )
     enable_refcheck = bool(getattr(args, "enable_refcheck", False) or settings.reference_check_enabled)
-    refcheck_result = run_refcheck_stage(
-        repo_root=repo_root,
-        run_dir=run_dir,
-        paper_pdf=paper_pdf,
-        paper_key=paper_key,
-        enable_refcheck=enable_refcheck,
+    refcheck_result = _run_stage(
+        3,
+        "refcheck",
+        lambda: run_refcheck_stage(
+            repo_root=repo_root,
+            run_dir=run_dir,
+            paper_pdf=paper_pdf,
+            paper_key=paper_key,
+            enable_refcheck=enable_refcheck,
+        ),
     )
-    positioning_result = run_positioning_stage(
-        repo_root=repo_root,
-        run_dir=run_dir,
+    positioning_result = _run_stage(
+        4,
+        "positioning",
+        lambda: run_positioning_stage(
+            repo_root=repo_root,
+            run_dir=run_dir,
+        ),
     )
     if not run_execution:
+        _log(f"[5/{_TOTAL_STAGES}] execution: skipped (use --run-execution to enable)")
         skipped_payload = ExecutionPayload(
             paper_key=paper_key,
             paper_pdf=str(paper_pdf),
@@ -124,21 +168,30 @@ def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
             extra={"run_dir": ""},
         )
     else:
-        execution_result = run_execution_stage(
-            run_dir=run_dir,
-            paper_pdf=paper_pdf,
-            paper_key=paper_key,
-            paper_extracted_dir=str(
-                (parse_result.extra.get("shared_execution_extract") or {}).get("paper_extracted_dir") or ""
+        execution_result = _run_stage(
+            5,
+            "execution",
+            lambda: run_execution_stage(
+                run_dir=run_dir,
+                paper_pdf=paper_pdf,
+                paper_key=paper_key,
+                paper_extracted_dir=str(
+                    (parse_result.extra.get("shared_execution_extract") or {}).get("paper_extracted_dir")
+                    or ""
+                ),
+                max_attempts=int(args.max_attempts),
+                no_pdf_extract=bool(args.no_pdf_extract),
             ),
-            max_attempts=int(args.max_attempts),
-            no_pdf_extract=bool(args.no_pdf_extract),
         )
-    report_result = run_report_stage(
-        repo_root=repo_root,
-        run_dir=run_dir,
+    report_result = _run_stage(
+        6,
+        "report",
+        lambda: run_report_stage(
+            repo_root=repo_root,
+            run_dir=run_dir,
+        ),
     )
-    teaser_result = run_teaser_stage(run_dir=run_dir)
+    teaser_result = _run_stage(7, "teaser", lambda: run_teaser_stage(run_dir=run_dir))
 
     results: dict[str, StageResult] = {
         "parse": parse_result,
@@ -194,6 +247,19 @@ def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
 
     summary_path = run_dir / "full_pipeline_summary.json"
     _write_json(summary_path, summary)
+
+    failed = [name for name, status in statuses.items() if status == "failed"]
+    if failed:
+        _log(f"Pipeline finished with failures in: {', '.join(failed)}")
+        for name in failed:
+            reason = stage_errors.get(name) or "(no reason recorded)"
+            _log(f"  - {name}: {reason}")
+    else:
+        _log("Pipeline finished successfully.")
+    review_md = outputs.get("report_md")
+    if review_md:
+        _log(f"Final review: {review_md}")
+    _log(f"Summary: {summary_path}")
     return summary
 
 
