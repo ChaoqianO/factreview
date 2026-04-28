@@ -974,6 +974,27 @@ def _hard_validate_experiment_tables(
     return text[: sec.start("body")] + body + text[sec.end("body") :]
 
 
+def _demote_experiment_child_headings(markdown_text: str) -> str:
+    text = str(markdown_text or "")
+    if not text.strip():
+        return text
+    sec = re.search(
+        r"(?ims)^##\s+(?:\*\*)?5\.\s+Experiment(?:\*\*)?\s*$\n"
+        r"(?P<body>.*?)(?=^##\s+(?:\*\*)?(?:1\.|2\.|3\.|4\.|5\.)|\Z)",
+        text,
+    )
+    if not sec:
+        return text
+    body = sec.group("body")
+    body = re.sub(
+        r"(?im)^\s{0,3}#{1,6}\s+(?:\*\*)?(Main Result|Ablation Result)(?:\*\*)?\s*$",
+        r"### \1",
+        body,
+    )
+    body = re.sub(r"\n{3,}", "\n\n", body).strip("\n") + "\n\n"
+    return text[: sec.start("body")] + body + text[sec.end("body") :]
+
+
 def _read_json_file(path: Path) -> dict[str, Any]:
     try:
         payload = read_json(path)
@@ -997,7 +1018,10 @@ def _global_eval_status(summary: dict[str, Any], alignment: dict[str, Any]) -> t
 
 
 def _metric_higher_is_better(metric: str) -> bool:
-    return _norm_metric_key(metric) != "mr"
+    key = _norm_metric_key(metric)
+    if key in {"mr", "error", "loss", "wer", "cer", "perplexity"}:
+        return False
+    return True
 
 
 def _norm_metric_key(metric: str) -> str:
@@ -1014,6 +1038,16 @@ def _norm_metric_key(metric: str) -> str:
         return "hits@1"
     if "acc" in s:
         return "accuracy"
+    if "wer" in s:
+        return "wer"
+    if "cer" in s:
+        return "cer"
+    if "perplex" in s or "ppl" in s:
+        return "perplexity"
+    if "loss" in s:
+        return "loss"
+    if "error" in s or "err" in s:
+        return "error"
     return ""
 
 
@@ -1565,7 +1599,7 @@ def _augment_experiment_with_eval_status(
 
     # Main table
     main_match = re.search(
-        r"(?ims)^(\|\s*Task\s*\|.*?Difference\s*\(Δ\)\s*\|)\n(\|[-:\| ]+\|)\n(?P<rows>(?:\|[^\n]*\|\n?)*)",
+        r"(?im)^(\|\s*Task\s*\|[^\n]*Difference\s*\(Δ\)\s*\|)\n(\|[-:\| ]+\|)\n(?P<rows>(?:\|[^\n]*\|\n?)*)",
         body,
     )
     if main_match:
@@ -1606,7 +1640,7 @@ def _augment_experiment_with_eval_status(
             )
 
     abl_match = re.search(
-        r"(?ims)^(\|\s*Ablation Dimension\s*\|.*?Difference\s*\(Δ\)\s*\|)\n(\|[-:\| ]+\|)\n(?P<rows>(?:\|.*\|\n?)*)",
+        r"(?im)^(\|\s*Ablation Dimension\s*\|[^\n]*Difference\s*\(Δ\)\s*\|)\n(\|[-:\| ]+\|)\n(?P<rows>(?:\|[^\n]*\|\n?)*)",
         body,
     )
     if abl_match:
@@ -1897,35 +1931,6 @@ def _normalize_experiment_tables_in_block(block: str) -> tuple[str, list[str]]:
             status_idx = len(headers) - 1
             for row in rows:
                 row.append("Inconclusive")
-
-        # Ablation table normalization: use the best achievable value as Full Model anchor.
-        # This avoids inconsistent cases where ablations appear better than the reported full model.
-        if is_ablation_table and full_model_idx >= 0 and paper_result_idx >= 0:
-            higher_is_better = _metric_higher_is_better(table_metric_hint)
-            candidates: list[float] = []
-            for row in rows:
-                if paper_result_idx < len(row):
-                    v = _metric_aware_value(row[paper_result_idx], metric_hint=table_metric_hint)
-                    if v is not None:
-                        candidates.append(v)
-                if full_model_idx < len(row):
-                    v = _metric_aware_value(row[full_model_idx], metric_hint=table_metric_hint)
-                    if v is not None:
-                        candidates.append(v)
-            if candidates:
-                best_full = max(candidates) if higher_is_better else min(candidates)
-                for ridx, row in enumerate(rows):
-                    if len(row) < len(headers):
-                        row = row + [""] * (len(headers) - len(row))
-                    row[full_model_idx] = _format_metric_value_for_cell(
-                        best_full, metric_hint=table_metric_hint
-                    )
-                    if diff_idx >= 0 and diff_idx < len(row) and paper_result_idx < len(row):
-                        paper_val = _metric_aware_value(row[paper_result_idx], metric_hint=table_metric_hint)
-                        if paper_val is not None:
-                            delta = paper_val - best_full
-                            row[diff_idx] = f"{delta:+.3f}".rstrip("0").rstrip(".")
-                    rows[ridx] = row
 
         for ridx, row in enumerate(rows):
             if len(row) < len(headers):
@@ -2249,24 +2254,16 @@ def _compact_technical_positioning_reference_labels(markdown_text: str, *, job_d
         if cells[0].lower() != "research domain" or cells[1].lower() != "method":
             continue
         new_cells = cells[:2]
-        r_index = 1
         for c in cells[2:]:
-            rid_match = re.match(r"^(R\d+)", c)
+            rid_match = re.match(r"^\s*(R\d+)(?::\s*(.*))?$", c)
             if rid_match:
                 rid = rid_match.group(1)
-                short = ref_map.get(rid, rid)
-                new_cells.append(short)
+                explicit_label = str(rid_match.group(2) or "").strip()
+                new_cells.append(explicit_label or ref_map.get(rid, rid))
             else:
-                # Handle already-prefixed forms like "R1:Something".
-                alt = re.sub(r"^\s*R\d+\s*:\s*", "", c).strip()
-                if alt and alt != c:
-                    new_cells.append(alt)
-                    r_index += 1
-                    continue
-                rid = f"R{r_index}"
-                short = ref_map.get(rid, _compact_ref_label_from_title(title=c, year=None, rid=rid))
-                new_cells.append(short)
-            r_index += 1
+                # Plain niche/capability labels are already the desired output.
+                # Do not reinterpret them as R1/R2 columns from Semantic Scholar.
+                new_cells.append(c)
         cleaned[i] = "| " + " | ".join(new_cells) + " |"
         break
 
@@ -2291,6 +2288,113 @@ def _extract_title_method_hint(markdown_text: str) -> str:
         if len(t) >= 4:
             return t
     return ""
+
+
+def _extract_paper_method_hint(markdown_text: str) -> str:
+    text = str(markdown_text or "")
+    if not text.strip():
+        return ""
+
+    def _is_valid_method_token(token: str) -> bool:
+        t = str(token or "").strip()
+        if len(t) < 3:
+            return False
+        low = t.lower()
+        banned = {
+            "title",
+            "task",
+            "code",
+            "table",
+            "figure",
+            "dataset",
+            "appendix",
+            "method",
+            "model",
+            "approach",
+            "architecture",
+            "research",
+            "domain",
+            "this",
+            "work",
+            "paper",
+            "main",
+            "result",
+            "ablation",
+            "baseline",
+            "train",
+            "training",
+            "test",
+            "testing",
+            "val",
+            "validation",
+            "mrr",
+            "mr",
+            "accuracy",
+            "auc",
+            "f1",
+            "bleu",
+            "rouge",
+            "error",
+            "loss",
+            "imagenet",
+            "mnist",
+            "cifar",
+            "pascal",
+            "voc",
+            "caltech",
+            "jft",
+            "for",
+            "and",
+            "or",
+            "of",
+            "with",
+            "using",
+            "based",
+        }
+        if low in banned:
+            return False
+        # Ignore retrieval-id like R1/R2.
+        if re.fullmatch(r"R\d+", t, flags=re.IGNORECASE):
+            return False
+        return True
+
+    # Strong cue patterns from manuscript/report body.
+    cue_patterns = (
+        r"(?i)\bwe\s+(?:propose|present|introduce|develop)\s+([A-Za-z][A-Za-z0-9\-]{2,})\b",
+        r"(?i)\bour\s+(?:method|model|approach)\s+([A-Za-z][A-Za-z0-9\-]{2,})\b",
+        r"(?i)\bcalled\s+([A-Za-z][A-Za-z0-9\-]{2,})\b",
+    )
+    for pattern in cue_patterns:
+        m = re.search(pattern, text)
+        if not m:
+            continue
+        cand = str(m.group(1) or "").strip()
+        if _is_valid_method_token(cand):
+            return cand
+
+    # Fallback: score frequent method-like tokens in body context.
+    scores: dict[str, int] = {}
+    method_like = re.compile(r"\b[A-Z][A-Za-z0-9\-]{2,}\b")
+    for raw_line in text.splitlines():
+        line = str(raw_line or "").strip()
+        if not line:
+            continue
+        low = line.lower()
+        context_bonus = 0
+        if re.search(r"(?i)\b(propose|proposed|introduce|our method|our model|our approach)\b", low):
+            context_bonus += 3
+        if re.search(r"(?i)\b(method|model|approach|architecture)\b", low):
+            context_bonus += 1
+        for m in method_like.finditer(line):
+            cand = str(m.group(0) or "").strip()
+            if not _is_valid_method_token(cand):
+                continue
+            scores[cand] = int(scores.get(cand, 0)) + 1 + context_bonus
+
+    if not scores:
+        return ""
+    ranked = sorted(scores.items(), key=lambda kv: (-int(kv[1]), len(kv[0]), kv[0].lower()))
+    return str(ranked[0][0] or "").strip()
 
 
 def _extract_report_title_text(markdown_text: str) -> str:
@@ -2341,7 +2445,8 @@ def _normalize_technical_positioning_layout(markdown_text: str) -> str:
     if not sec:
         return text
 
-    method_hint = _extract_title_method_hint(text).strip().lower()
+    method_hint_raw = _extract_paper_method_hint(text).strip()
+    method_hint = method_hint_raw.lower()
     report_title = _extract_report_title_text(text).strip()
     body = sec.group("body")
 
@@ -2367,7 +2472,7 @@ def _normalize_technical_positioning_layout(markdown_text: str) -> str:
             image_idx = idx
             break
     if image_idx >= 0:
-        method_hint = _extract_title_method_hint(text).strip() or "the proposed method"
+        caption_method = method_hint_raw or "the proposed method"
         # Remove existing short overview caption variants around image.
         filtered: list[str] = []
         for i, raw in enumerate(lines):
@@ -2388,7 +2493,7 @@ def _normalize_technical_positioning_layout(markdown_text: str) -> str:
             # Keep image as a standalone markdown paragraph so PDF renderer can load it as an image,
             # not inline text fallback.
             lines.insert(image_idx + 1, "")
-            lines.insert(image_idx + 2, f"Overview of {method_hint}.")
+            lines.insert(image_idx + 2, f"Overview of {caption_method}.")
             lines.insert(image_idx + 3, "")
 
     table_start = -1
@@ -2502,8 +2607,34 @@ def _normalize_technical_positioning_layout(markdown_text: str) -> str:
                 if len(source_row) < len(header):
                     source_row = source_row + ["×"] * (len(header) - len(source_row))
                 source_row = source_row[: len(header)]
-                source_row[0] = source_row[0].strip() or "Current paper"
-                source_row[1] = "This Work"
+                inferred_method = str(source_row[1] if len(source_row) > 1 else "").strip()
+                inferred_method_low = inferred_method.lower()
+                source_domain = str(source_row[0] if len(source_row) > 0 else "").strip()
+                if inferred_method_low in {
+                    "this work",
+                    "this paper",
+                    "our work",
+                    "our method",
+                    "our approach",
+                    "proposed method",
+                    "proposed approach",
+                    "ours",
+                }:
+                    source_domain_low = source_domain.lower()
+                    if source_domain and source_domain_low not in {
+                        "this work",
+                        "this paper",
+                        "our work",
+                        "current paper",
+                    }:
+                        inferred_method = source_domain
+                    else:
+                        inferred_method = ""
+                paper_method = inferred_method or method_hint_raw or "Not found in manuscript"
+                # Product requirement: keep the final self row fixed to
+                # Research domain = This Work, Method = paper method.
+                source_row[0] = "This Work"
+                source_row[1] = paper_method
                 source_row[2:] = [_normalize_niche_mark(c) for c in source_row[2:]]
                 normalized_this_work_rows.append(source_row)
 
@@ -2679,6 +2810,7 @@ def _render_report_pdf(
         job_dir=final_md_path.parent,
     )
     final_report_markdown = _normalize_technical_positioning_layout(final_report_markdown)
+    final_report_markdown = _demote_experiment_child_headings(final_report_markdown)
     final_report_markdown = _hard_validate_experiment_tables(
         final_report_markdown,
         content_list=content_list,
