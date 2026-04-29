@@ -48,6 +48,7 @@ Location: Table 2
 
 | Ablation Dimension | Configuration | Full Model | Paper Result | Difference (Δ) |
 |---|---|---|---|---|
+| Optimal setup | Full Model | 0.91 | 0.91 | 0 |
 | Module | w/o M | 0.91 | 0.87 | -0.04 |
 """
 

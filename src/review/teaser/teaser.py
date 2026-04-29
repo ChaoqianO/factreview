@@ -664,6 +664,11 @@ def _ablation_row_effect_with_reference(
     return _ablation_row_effect(row, full_idx=full_idx, paper_idx=paper_idx, diff_idx=diff_idx)
 
 
+def _is_ablation_anchor_row(row: list[str], dimension_idx: int) -> bool:
+    dim = row[dimension_idx].strip().lower() if dimension_idx < len(row) else ""
+    return dim == "optimal setup"
+
+
 def _compress_ablation_table(table: TableBlock | None) -> TableBlock | None:
     if table is None or not table.rows:
         return table
@@ -681,8 +686,13 @@ def _compress_ablation_table(table: TableBlock | None) -> TableBlock | None:
         config_idx=config_idx,
     )
 
+    anchor_rows: list[list[str]] = []
     grouped: dict[str, list[str]] = {}
     for row in table.rows:
+        # Always preserve the "Optimal setup" anchor row — never compress it away.
+        if _is_ablation_anchor_row(row, dimension_idx):
+            anchor_rows.append(row)
+            continue
         dim = row[dimension_idx].strip() if dimension_idx < len(row) else ""
         key = _normalize_header_token(dim) or "_"
         prev = grouped.get(key)
@@ -709,7 +719,7 @@ def _compress_ablation_table(table: TableBlock | None) -> TableBlock | None:
         if (current_effect, current_status) > (prev_effect, prev_status):
             grouped[key] = row
 
-    selected_rows = [grouped[key] for key in grouped]
+    selected_rows = anchor_rows + [grouped[key] for key in grouped]
     return TableBlock(headers=table.headers, rows=selected_rows)
 
 
@@ -896,6 +906,25 @@ def _select_claim_rows(table: TableBlock | None, limit: int = 3) -> list[dict[st
     return selected
 
 
+def _derive_claims_aggregate_status(rows: list[dict[str, str]]) -> str:
+    statuses = [_strip_inline_markup(row.get("Status", "")).lower() for row in rows]
+    has_reproduced_supported = any(
+        s.startswith("supported") or s.startswith("✓") or "✓" in s
+        for s in statuses
+    )
+    has_reproduced_conflict = any(
+        "in conflict" in s or s.startswith("✗") or "✗" in s
+        for s in statuses
+    )
+    if has_reproduced_supported and has_reproduced_conflict:
+        return "⚠ Partially supported"
+    if has_reproduced_supported:
+        return "✓ Supported"
+    if has_reproduced_conflict:
+        return "✗ In conflict"
+    return "⚠ Inconclusive"
+
+
 def _format_selected_claims(rows: list[dict[str, str]]) -> str:
     if not rows:
         return "1. **Claim:** **Not found in manuscript**"
@@ -958,6 +987,7 @@ def build_teaser_figure_prompt(
     attempt_index: int = 1,
 ) -> str:
     status_text = "; ".join(payload.status_legend) if payload.status_legend else "Not found in manuscript"
+    claims_aggregate_status = _derive_claims_aggregate_status(payload.selected_claim_rows)
     strengths_text = (
         "\n".join(f"- {item}" for item in payload.strengths)
         if payload.strengths
@@ -1017,8 +1047,12 @@ def build_teaser_figure_prompt(
         "background RGB(172,215,142).\n"
         "- Paper-supported: text color RGB(46,84,161); left icon is a boxed check mark where the box color is "
         "RGB(65,105,225) and the internal check mark is white; rounded-rectangle background RGB(182,199,234).\n"
-        "- Partially supported/Inconclusive: text color RGB(182,140,2); left icon is a warning symbol whose border color "
-        "is RGB(184,134,11) and internal exclamation mark is white; rounded-rectangle background RGB(254,230,149).\n"
+        "- Partially supported: used when reproduction was performed but results are mixed (some claims Supported, some In conflict); "
+        "text color RGB(182,140,2); left icon is a warning symbol whose border color is RGB(184,134,11) and internal "
+        "exclamation mark is white; rounded-rectangle background RGB(254,230,149).\n"
+        "- Inconclusive: used when no reproduction was performed (all claims are Inconclusive or Paper-supported); "
+        "text color RGB(182,140,2); left icon is a warning symbol whose border color is RGB(184,134,11) and internal "
+        "exclamation mark is white; rounded-rectangle background RGB(254,230,149).\n"
         "- In conflict: text color RGB(200,29,49); left icon is an X with RGB(139,0,0); rounded-rectangle background "
         "RGB(239,148,158).\n"
         "- Improvement: text color RGB(86,133,44); rounded-rectangle background RGB(117,189,66).\n"
@@ -1026,6 +1060,7 @@ def build_teaser_figure_prompt(
         "\n"
         "[Fixed Content Rules]\n"
         "- The task label area at the top-right has no text-length restriction.\n"
+        "- The top-right status badge area must show exactly the label provided in 'Claims aggregate status badge' from [Report Content]; do not re-derive this label from the individual claim rows.\n"
         "- The claims section should show exactly 3 claim rows, and they must be dynamically extracted from the report's claims table using the Claim, Evidence, and Status information.\n"
         "- In the claims module, each claim sentence must be visually bold in the figure.\n"
         "- Each claim row has no fixed text-length requirement; wrap and resize based on content for the cleanest layout.\n"
@@ -1052,6 +1087,7 @@ def build_teaser_figure_prompt(
         f"Title: {payload.title}\n"
         f"Task: {payload.task}\n"
         f"Status legend: {status_text}\n"
+        f"Claims aggregate status badge: {claims_aggregate_status}\n"
         "\n"
         "[Technical Positioning]\n"
         f"Caption: {payload.technical_positioning_caption}\n"
