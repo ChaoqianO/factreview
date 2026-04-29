@@ -146,6 +146,22 @@ def _validate_experiment(markdown: str) -> str | None:
     tables = _parse_markdown_tables(body)
     if not tables:
         return "Experiment section must contain tables for reported experimental results."
+    ablation_match = re.search(
+        r"(?ims)^###?\s+(?:\*\*)?Ablation Result(?:\*\*)?\s*$\n(?P<ablation>.*?)(?=^##\s+|\Z)",
+        body,
+    )
+    if ablation_match:
+        ablation_body = str(ablation_match.group("ablation") or "")
+        ablation_tables = _parse_markdown_tables(ablation_body)
+        for _headers, rows in ablation_tables:
+            if rows and _normalize_cell(rows[0][0]).lower() in {"optimal setup", "not found in manuscript"}:
+                break
+        else:
+            if ablation_tables:
+                return (
+                    "Each ablation table must begin with an 'Optimal setup' anchor row "
+                    "(Ablation Dimension = 'Optimal setup', Difference (Δ) = 0)."
+                )
     return None
 
 

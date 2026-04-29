@@ -260,6 +260,25 @@ def _strip_leading_section_heading(*, section_id: str, content: str) -> str:
     return "\n".join(lines[idx:]).strip()
 
 
+def _normalize_experiment_section_content(content: str) -> str:
+    text = str(content or "").strip()
+    if not text:
+        return ""
+    normalized_lines: list[str] = []
+    for raw in text.splitlines():
+        match = re.match(
+            r"^\s{0,3}#{1,6}\s+(?:\*\*)?(Main Result|Ablation Result)(?:\*\*)?\s*$",
+            raw.strip(),
+            flags=re.IGNORECASE,
+        )
+        if match:
+            label = match.group(1)
+            normalized_lines.append(f"### {label}")
+            continue
+        normalized_lines.append(raw)
+    return "\n".join(normalized_lines).strip()
+
+
 def _normalize_final_report_sections(raw_sections: Any) -> dict[str, str]:
     normalized: dict[str, str] = {}
     if not isinstance(raw_sections, dict):
@@ -270,6 +289,8 @@ def _normalize_final_report_sections(raw_sections: Any) -> dict[str, str]:
             continue
         content = _coerce_section_markdown(raw_value, list_as_bullets=True).strip()
         if content:
+            if section_id == "experiment":
+                content = _normalize_experiment_section_content(content)
             normalized[section_id] = content
     return normalized
 
@@ -321,9 +342,21 @@ def _extract_required_sections_from_markdown(markdown_text: str) -> dict[str, st
         heading_match = _FINAL_REPORT_SECTION_HEADING_PATTERN.match(raw_line)
         if heading_match:
             heading_text = heading_match.group(1)
-            active_section_id = _resolve_final_report_section_id(heading_text)
-            if active_section_id and active_section_id not in section_buffers:
-                section_buffers[active_section_id] = []
+            resolved_section_id = _resolve_final_report_section_id(heading_text)
+            if resolved_section_id:
+                active_section_id = resolved_section_id
+                if active_section_id not in section_buffers:
+                    section_buffers[active_section_id] = []
+                continue
+            if active_section_id == "experiment" and re.fullmatch(
+                r"(?:\*\*)?(Main Result|Ablation Result)(?:\*\*)?",
+                heading_text.strip(),
+                flags=re.IGNORECASE,
+            ):
+                label = re.sub(r"\*", "", heading_text).strip()
+                section_buffers.setdefault(active_section_id, []).append(f"### {label}")
+                continue
+            active_section_id = None
             continue
         if active_section_id:
             section_buffers.setdefault(active_section_id, []).append(raw_line)
@@ -356,6 +389,8 @@ def _build_final_report_markdown_from_sections(sections: dict[str, str]) -> str:
         content = str(sections.get(section_id) or "").strip()
         if not content:
             continue
+        if section_id == "experiment":
+            content = _normalize_experiment_section_content(content)
         heading = title_map.get(section_id, section_id)
         blocks.append(f"## {heading}\n{content}")
     if not blocks:
