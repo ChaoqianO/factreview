@@ -2336,6 +2336,18 @@ def _extract_paper_method_hint(markdown_text: str) -> str:
             "voc",
             "caltech",
             "jft",
+            "coco",
+            "flickr",
+            "ucf",
+            "tacos",
+            "kinetics",
+            "charades",
+            "ava",
+            "nuswide",
+            "fb15k",
+            "wn18",
+            "wn18rr",
+            "fb15k237",
             "for",
             "and",
             "or",
@@ -2430,6 +2442,34 @@ def _looks_like_self_title_variant(*, report_title: str, candidate: str) -> bool
     return inter >= 4 and (inter / union) >= 0.8
 
 
+def _extract_method_acronym_from_title(report_title: str, text: str) -> str:
+    """Find the paper's method acronym by trying initial-letter subsequences of title words.
+
+    Splits the title on spaces and hyphens, keeps only uppercase-starting non-stop words,
+    then tries every consecutive subsequence of their initials (length 2-7) and returns
+    the one that appears most frequently in ``text`` (requires >= 2 occurrences).
+    """
+    if not report_title or not text:
+        return ""
+    stop = {
+        "a", "an", "and", "as", "at", "by", "end", "for", "from", "in", "into",
+        "is", "its", "of", "on", "or", "the", "to", "using", "via", "with",
+    }
+    words = re.split(r"[\s\-]+", report_title)
+    sig = [w for w in words if w and w[:1].isupper() and w.lower() not in stop and len(w) >= 2]
+    if len(sig) < 2:
+        return ""
+    initials = [w[0].upper() for w in sig]
+    best_cand, best_count = "", 0
+    for start in range(len(initials)):
+        for length in range(2, min(8, len(initials) - start + 1)):
+            candidate = "".join(initials[start : start + length])
+            count = len(re.findall(r"\b" + re.escape(candidate) + r"\b", text))
+            if count > best_count or (count == best_count and len(candidate) > len(best_cand)):
+                best_cand, best_count = candidate, count
+    return best_cand if best_count >= 2 else ""
+
+
 def _normalize_technical_positioning_layout(markdown_text: str) -> str:
     text = str(markdown_text or "")
     if not text.strip():
@@ -2465,7 +2505,8 @@ def _normalize_technical_positioning_layout(markdown_text: str) -> str:
             image_idx = idx
             break
     if image_idx >= 0:
-        caption_method = method_hint_raw or "the proposed method"
+        title_acronym = _extract_method_acronym_from_title(report_title, text)
+        caption_method = title_acronym or method_hint_raw or "the proposed method"
         # Remove existing short overview caption variants around image.
         filtered: list[str] = []
         for i, raw in enumerate(lines):

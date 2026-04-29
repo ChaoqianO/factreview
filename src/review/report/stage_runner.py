@@ -44,6 +44,58 @@ def _read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8", errors="ignore")
 
 
+def _strip_experiment_eval_status(text: str) -> str:
+    """Remove Evaluation Status column and its legend from experiment tables."""
+    sec = re.search(
+        r"(?ims)(^##\s+(?:\*\*)?5\.\s+Experiment(?:\*\*)?\s*$\n)(.*?)(?=^##\s+|\Z)",
+        text,
+    )
+    if not sec:
+        return text
+
+    body = sec.group(2)
+
+    # Remove colored status-legend lines added by _augment_experiment_with_eval_status.
+    body = re.sub(r"(?m)^\(Status legend:.*\)\s*$\n?", "", body)
+
+    def _strip_last_col(line: str) -> str:
+        stripped = line.rstrip("\n")
+        if not (stripped.startswith("|") and stripped.endswith("|")):
+            return line
+        parts = stripped.split("|")
+        # parts: ['', col1, col2, ..., colN, '']
+        # Remove the second-to-last non-empty slot (the last column cell).
+        if len(parts) >= 4:
+            parts = parts[:-2] + parts[-1:]
+        return "|".join(parts) + "\n"
+
+    lines = body.splitlines(keepends=True)
+    result: list[str] = []
+    i = 0
+    while i < len(lines):
+        header = lines[i].rstrip()
+        if i + 1 < len(lines) and header.startswith("|") and header.endswith("|"):
+            sep = lines[i + 1].rstrip()
+            if re.fullmatch(r"\|[ :\-|]+\|", sep):
+                # Check if last header column is "Evaluation Status".
+                cols = [c.strip().strip("*") for c in header.strip("|").split("|")]
+                if cols and cols[-1].lower() == "evaluation status":
+                    j = i + 2
+                    while j < len(lines) and lines[j].rstrip().startswith("|"):
+                        j += 1
+                    result.append(_strip_last_col(lines[i]))
+                    result.append(_strip_last_col(lines[i + 1]))
+                    for k in range(i + 2, j):
+                        result.append(_strip_last_col(lines[k]))
+                    i = j
+                    continue
+        result.append(lines[i])
+        i += 1
+
+    new_body = "".join(result)
+    return text[: sec.start(2)] + new_body + text[sec.end(2) :]
+
+
 def _render_review_pdf(
     *, markdown_path: Path, pdf_path: Path, workspace_title: str, source_pdf_name: str
 ) -> tuple[bool, str]:
@@ -202,6 +254,16 @@ def run_report_stage(
             )
         # Always snapshot the clean (no-refcheck) version for the teaser sub-stage.
         shutil.copy2(review_md, review_md_clean)
+
+        # When execution was skipped, strip the Evaluation Status column so the
+        # report and the teaser figure do not display all-Inconclusive placeholders.
+        exec_payload_early = read_json_file(execution_stage_dir(run_dir) / "execution.json")
+        if exec_payload_early.get("status") == "skipped":
+            for md_path in (review_md, review_md_clean):
+                stripped = _strip_experiment_eval_status(
+                    md_path.read_text(encoding="utf-8", errors="ignore")
+                )
+                md_path.write_text(stripped, encoding="utf-8")
 
         if reference_check_payload.get("enabled"):
             reference_check_markdown = _append_reference_check_section(

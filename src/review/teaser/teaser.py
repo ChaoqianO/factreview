@@ -91,7 +91,7 @@ _TEMPLATE_REGION_BBOXES: dict[str, tuple[float, float, float, float]] = {
 
 _TEMPLATE_REGION_PROMPT_HINTS: dict[str, str] = {
     "title_banner": "Restore the dark top banner spanning nearly the full width, with the title and TL;DR left-aligned inside it.",
-    "task_badge": "Keep the task label as a light rounded badge anchored at the top-right corner inside the header area.",
+    "task_badge": "Place the task label as a rounded badge right-aligned at the top-right corner, directly above the status badge row. Its width must auto-fit the text content — do not fix or extend the left edge to fill the full bbox width. Right edge stays pinned at the right margin; only the left edge floats with content length.",
     "status_badges": "Preserve the top-right status badge strip as a tight horizontal run of rounded badges with the original ordering and spacing.",
     "delta_badges": "Keep the Improvement and Reduction badges on their own lower row directly beneath the status badges.",
     "main_canvas": "Preserve the large light-gray body shell under the header; do not switch to a flat white or fully reflowed canvas.",
@@ -985,9 +985,9 @@ def build_teaser_figure_prompt(
     *,
     correction_hints: list[str] | None = None,
     attempt_index: int = 1,
+    execution_skipped: bool = False,
 ) -> str:
     status_text = "; ".join(payload.status_legend) if payload.status_legend else "Not found in manuscript"
-    claims_aggregate_status = _derive_claims_aggregate_status(payload.selected_claim_rows)
     strengths_text = (
         "\n".join(f"- {item}" for item in payload.strengths)
         if payload.strengths
@@ -1043,25 +1043,42 @@ def build_teaser_figure_prompt(
         f"{anchor_summary}\n"
         "\n"
         "[Fixed Badge Styles]\n"
+        "- Task: text color RGB(30,40,80); rounded-rectangle background RGB(235,238,248); "
+        "right-aligned directly above the status badge row; width auto-fits content (do not stretch to full row width).\n"
         "- Supported: text color RGB(88,144,78); left icon is a check mark with RGB(0,150,100); rounded-rectangle "
         "background RGB(172,215,142).\n"
         "- Paper-supported: text color RGB(46,84,161); left icon is a boxed check mark where the box color is "
         "RGB(65,105,225) and the internal check mark is white; rounded-rectangle background RGB(182,199,234).\n"
-        "- Partially supported: used when reproduction was performed but results are mixed (some claims Supported, some In conflict); "
-        "text color RGB(182,140,2); left icon is a warning symbol whose border color is RGB(184,134,11) and internal "
-        "exclamation mark is white; rounded-rectangle background RGB(254,230,149).\n"
-        "- Inconclusive: used when no reproduction was performed (all claims are Inconclusive or Paper-supported); "
-        "text color RGB(182,140,2); left icon is a warning symbol whose border color is RGB(184,134,11) and internal "
-        "exclamation mark is white; rounded-rectangle background RGB(254,230,149).\n"
+        "- Partially supported / Inconclusive (top-right area only — do NOT use this combined label in claims rows): "
+        "text color RGB(182,140,2); left icon is a triangular warning symbol (⚠) — do NOT use a circle, question mark, "
+        "or any other icon; the triangle border is RGB(184,134,11) with a white internal exclamation mark; "
+        "rounded-rectangle background RGB(254,230,149).\n"
+        "- Partially supported (claims row badge): text color RGB(182,140,2); left icon is a triangular warning "
+        "symbol (⚠) — same icon as above; rounded-rectangle background RGB(254,230,149). Label reads '⚠ Partially supported'.\n"
+        "- Inconclusive (claims row badge): text color RGB(182,140,2); left icon is a triangular warning "
+        "symbol (⚠) — same icon as above; rounded-rectangle background RGB(254,230,149). Label reads '⚠ Inconclusive'.\n"
         "- In conflict: text color RGB(200,29,49); left icon is an X with RGB(139,0,0); rounded-rectangle background "
         "RGB(239,148,158).\n"
         "- Improvement: text color RGB(86,133,44); rounded-rectangle background RGB(117,189,66).\n"
         "- Reduction: text color RGB(133,19,44); rounded-rectangle background RGB(229,76,94).\n"
         "\n"
         "[Fixed Content Rules]\n"
-        "- The task label area at the top-right has no text-length restriction.\n"
-        "- The top-right status badge area must show exactly the label provided in 'Claims aggregate status badge' from [Report Content]; do not re-derive this label from the individual claim rows.\n"
+        "- The task label badge must always appear right-aligned directly above the status badge row, "
+        "using fixed colors (background RGB(235,238,248), text RGB(30,40,80)); "
+        "its width auto-fits the text content — do not fix the left edge or stretch the badge to fill the row width; "
+        "its text is extracted from the 'Task' field in [Report Content].\n"
+        "- The top-right status badge area must always show exactly four fixed badges in this order: "
+        "'✓ Supported', '☑ Paper-supported', '⚠ Partially supported / Inconclusive', '✗ In conflict'. "
+        "These are fixed template elements; do not derive, replace, or omit any of them based on "
+        "claim row statuses or execution results. "
+        "The third badge must literally read '⚠ Partially supported / Inconclusive' with a triangular ⚠ icon.\n"
+        "- The Improvement and Reduction badges must always appear below the status badges with fixed "
+        "labels ('Improvement', 'Reduction'), fixed colors, and fixed positions — do not modify their "
+        "text or derive them from execution results.\n"
         "- The claims section should show exactly 3 claim rows, and they must be dynamically extracted from the report's claims table using the Claim, Evidence, and Status information.\n"
+        "- In claims rows, each claim's status badge must display the exact status label from the claim's Status field "
+        "(e.g., '⚠ Inconclusive', '⚠ Partially supported', '☑ Paper-supported', '✓ Supported', '✗ In conflict') — "
+        "do NOT substitute the combined top-right badge label '⚠ Partially supported / Inconclusive' for individual claim row badges.\n"
         "- In the claims module, each claim sentence must be visually bold in the figure.\n"
         "- Each claim row has no fixed text-length requirement; wrap and resize based on content for the cleanest layout.\n"
         "- The technical positioning module must directly use the extracted figure/image reference and table content.\n"
@@ -1072,7 +1089,12 @@ def build_teaser_figure_prompt(
         "- The Summary column is required: if Summary/Strengths/Weaknesses is missing or empty, the output is invalid.\n"
         "- All extracted report content below must be represented in the final figure modules; missing or truncated modules are invalid outputs.\n"
         "- Do not alter any extracted factual text/value: keep wording, numbers, status labels, and signs exactly as provided.\n"
-        "\n"
+        + (
+            "- No experiment execution was performed; the experiment tables do not contain an "
+            "Evaluation Status column — do not add, infer, or synthesize one.\n"
+            if execution_skipped else ""
+        )
+        + "\n"
         "[Rendering Guidance]\n"
         "- Make the figure as aesthetically balanced as possible.\n"
         "- Use adaptive typography, spacing, and box scaling automatically, but do not alter the fixed colors or the "
@@ -1087,7 +1109,6 @@ def build_teaser_figure_prompt(
         f"Title: {payload.title}\n"
         f"Task: {payload.task}\n"
         f"Status legend: {status_text}\n"
-        f"Claims aggregate status badge: {claims_aggregate_status}\n"
         "\n"
         "[Technical Positioning]\n"
         f"Caption: {payload.technical_positioning_caption}\n"
@@ -1328,11 +1349,12 @@ def generate_teaser_figure(
     gemini_model: str | None = None,
     timeout_seconds: int = 120,
     generate_image: bool = True,
+    execution_skipped: bool = False,
 ) -> TeaserFigureGenerationResult:
     _ensure_env_loaded()
     latest_path = _coerce_path(latest_extraction_path).resolve()
     teaser_payload = extract_teaser_figure_payload_from_latest_extraction(latest_path)
-    prompt = build_teaser_figure_prompt(teaser_payload)
+    prompt = build_teaser_figure_prompt(teaser_payload, execution_skipped=execution_skipped)
     final_output_dir = (
         _coerce_path(output_dir).resolve()
         if output_dir is not None
