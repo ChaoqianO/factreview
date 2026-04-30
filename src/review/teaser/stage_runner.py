@@ -14,6 +14,7 @@ from pathlib import Path
 
 from common.pipeline_context import (
     ensure_full_pipeline_context,
+    execution_stage_dir,
     read_json_file,
     report_stage_dir,
     teaser_stage_dir,
@@ -58,11 +59,15 @@ def run_teaser_stage(
             error=error_msg,
         )
 
+    execution_payload = read_json_file(execution_stage_dir(run_dir) / "execution.json")
+    execution_skipped = execution_payload.get("status") == "skipped"
+
     use_gemini = _env_true("TEASER_USE_GEMINI", default=True)
     teaser_result = generate_teaser_figure(
         source_md,
         output_dir=out_dir,
         generate_image=use_gemini,
+        execution_skipped=execution_skipped,
     )
     payload = {
         "status": teaser_result.status,
