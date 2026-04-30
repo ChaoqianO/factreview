@@ -9,7 +9,7 @@
 ## 2. Technical Positioning
 
 <figure align="center" style="text-align:center; margin:14px 0 18px 0;">
-  <img src="compgcn_demo.png" alt="Overview of CompGCN." style="max-width:100%; width:100%;">
+  <img src="overview.png" alt="Overview of CompGCN." style="max-width:100%; width:100%;">
   <figcaption style="font-size:0.9em; color:#57606A; margin-top:6px;"><strong>Figure:</strong> Overview of CompGCN.</figcaption>
 </figure>
 

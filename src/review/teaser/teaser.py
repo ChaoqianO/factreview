@@ -90,7 +90,7 @@ _TEMPLATE_REGION_BBOXES: dict[str, tuple[float, float, float, float]] = {
 }
 
 _TEMPLATE_REGION_PROMPT_HINTS: dict[str, str] = {
-    "title_banner": "Restore the dark top banner spanning nearly the full width, with the title and TL;DR left-aligned inside it.",
+    "title_banner": "Restore the dark top banner spanning nearly the full width, with the title left-aligned inside it, followed by the summary text — do not prefix the summary with 'TL;DR' or any other label.",
     "task_badge": "Place the task label as a rounded badge right-aligned at the top-right corner, directly above the status badge row. Its width must auto-fit the text content — do not fix or extend the left edge to fill the full bbox width. Right edge stays pinned at the right margin; only the left edge floats with content length.",
     "status_badges": "Preserve the top-right status badge strip as a tight horizontal run of rounded badges with the original ordering and spacing.",
     "delta_badges": "Keep the Improvement and Reduction badges on their own lower row directly beneath the status badges.",
@@ -521,9 +521,60 @@ def _status_rank(value: str) -> int:
 
 
 def _metric_is_lower_better(metric_value: str) -> bool:
-    metric = _normalize_header_token(metric_value)
-    lower_tokens = ("loss", "error", "wer", "cer", "perplexity", "mr")
-    return any(tok in metric for tok in lower_tokens)
+    s = _normalize_header_token(metric_value)
+    # MRR must be checked before MR to avoid substring false-match.
+    if "mrr" in s:
+        return False
+    if s in {"mr", "mean rank"} or "mean rank" in s:
+        return True
+    lower_tokens = ("loss", "error", "wer", "cer", "perplexity")
+    return any(tok in s for tok in lower_tokens)
+
+
+def _annotate_diff(raw: str, *, improved: bool | None) -> str:
+    clean = raw.strip()
+    if improved is None:
+        return clean
+    return f"[GREEN]{clean}[/GREEN]" if improved else f"[RED]{clean}[/RED]"
+
+
+def _colorize_main_diff(diff_text: str, metric_text: str) -> str:
+    delta = _first_number(diff_text)
+    if delta is None or abs(delta) <= 1e-12:
+        return diff_text.strip()
+    lower_better = _metric_is_lower_better(metric_text)
+    improved = delta < 0 if lower_better else delta > 0
+    return _annotate_diff(diff_text, improved=improved)
+
+
+def _colorize_ablation_diff(diff_text: str) -> str:
+    delta = _first_number(diff_text)
+    if delta is None or abs(delta) <= 1e-12:
+        return diff_text.strip()
+    return _annotate_diff(diff_text, improved=delta < 0)
+
+
+def _experiment_table_to_markdown(table: TableBlock | None, *, is_ablation: bool) -> str:
+    if table is None:
+        return "Not found in manuscript"
+    diff_idx = _find_header_index(table, ("difference", "delta", "Δ"))
+    metric_idx = _find_header_index(table, ("metric",))
+    dimension_idx = _find_header_index(table, ("ablation dimension", "dimension")) if is_ablation else -1
+    head = "| " + " | ".join(table.headers) + " |"
+    sep = "| " + " | ".join(["---"] * len(table.headers)) + " |"
+    rows_md: list[str] = []
+    for row in table.rows:
+        colored = list(row)
+        if 0 <= diff_idx < len(colored):
+            if is_ablation and _is_ablation_anchor_row(row, dimension_idx):
+                pass  # Optimal Setup is the reference row; ablation delta semantics don't apply.
+            elif is_ablation:
+                colored[diff_idx] = _colorize_ablation_diff(colored[diff_idx])
+            else:
+                metric_text = row[metric_idx] if 0 <= metric_idx < len(row) else ""
+                colored[diff_idx] = _colorize_main_diff(colored[diff_idx], metric_text)
+        rows_md.append("| " + " | ".join(colored) + " |")
+    return "\n".join([head, sep] + rows_md).strip()
 
 
 def _main_result_row_value(
@@ -1047,8 +1098,6 @@ def build_teaser_figure_prompt(
         "right-aligned directly above the status badge row; width auto-fits content (do not stretch to full row width).\n"
         "- Supported: text color RGB(88,144,78); left icon is a check mark with RGB(0,150,100); rounded-rectangle "
         "background RGB(172,215,142).\n"
-        "- Paper-supported: text color RGB(46,84,161); left icon is a boxed check mark where the box color is "
-        "RGB(65,105,225) and the internal check mark is white; rounded-rectangle background RGB(182,199,234).\n"
         "- Partially supported / Inconclusive (top-right area only — do NOT use this combined label in claims rows): "
         "text color RGB(182,140,2); left icon is a triangular warning symbol (⚠) — do NOT use a circle, question mark, "
         "or any other icon; the triangle border is RGB(184,134,11) with a white internal exclamation mark; "
@@ -1067,17 +1116,18 @@ def build_teaser_figure_prompt(
         "using fixed colors (background RGB(235,238,248), text RGB(30,40,80)); "
         "its width auto-fits the text content — do not fix the left edge or stretch the badge to fill the row width; "
         "its text is extracted from the 'Task' field in [Report Content].\n"
-        "- The top-right status badge area must always show exactly four fixed badges in this order: "
-        "'✓ Supported', '☑ Paper-supported', '⚠ Partially supported / Inconclusive', '✗ In conflict'. "
+        "- The top-right status badge area must always show exactly three fixed badges in this order: "
+        "'✓ Supported', '⚠ Partially supported / Inconclusive', '✗ In conflict'. "
         "These are fixed template elements; do not derive, replace, or omit any of them based on "
         "claim row statuses or execution results. "
-        "The third badge must literally read '⚠ Partially supported / Inconclusive' with a triangular ⚠ icon.\n"
+        "The second badge must literally read '⚠ Partially supported / Inconclusive' with a triangular ⚠ icon. "
+        "All three badges are right-aligned as a compact horizontal group; Supported shifts right accordingly.\n"
         "- The Improvement and Reduction badges must always appear below the status badges with fixed "
         "labels ('Improvement', 'Reduction'), fixed colors, and fixed positions — do not modify their "
         "text or derive them from execution results.\n"
         "- The claims section should show exactly 3 claim rows, and they must be dynamically extracted from the report's claims table using the Claim, Evidence, and Status information.\n"
         "- In claims rows, each claim's status badge must display the exact status label from the claim's Status field "
-        "(e.g., '⚠ Inconclusive', '⚠ Partially supported', '☑ Paper-supported', '✓ Supported', '✗ In conflict') — "
+        "(e.g., '⚠ Inconclusive', '⚠ Partially supported', '✓ Supported', '✗ In conflict') — "
         "do NOT substitute the combined top-right badge label '⚠ Partially supported / Inconclusive' for individual claim row badges.\n"
         "- In the claims module, each claim sentence must be visually bold in the figure.\n"
         "- Each claim row has no fixed text-length requirement; wrap and resize based on content for the cleanest layout.\n"
@@ -1089,6 +1139,9 @@ def build_teaser_figure_prompt(
         "- The Summary column is required: if Summary/Strengths/Weaknesses is missing or empty, the output is invalid.\n"
         "- All extracted report content below must be represented in the final figure modules; missing or truncated modules are invalid outputs.\n"
         "- Do not alter any extracted factual text/value: keep wording, numbers, status labels, and signs exactly as provided.\n"
+        "- In experiment tables, difference values annotated [GREEN]...[/GREEN] must be rendered in green text "
+        "(RGB(86,133,44)); values annotated [RED]...[/RED] must be rendered in red text (RGB(200,29,49)). "
+        "Strip the [GREEN]/[RED] annotation markers from the displayed text — show only the numeric value in color.\n"
         + (
             "- No experiment execution was performed; the experiment tables do not contain an "
             "Evaluation Status column — do not add, infer, or synthesize one.\n"
@@ -1133,11 +1186,11 @@ def build_teaser_figure_prompt(
         "[Experiments]\n"
         f"Main result location: {payload.experiment_main_location}\n"
         "Main result table:\n"
-        f"{_table_to_markdown(payload.experiment_main_table)}\n"
+        f"{_experiment_table_to_markdown(payload.experiment_main_table, is_ablation=False)}\n"
         "\n"
         f"Ablation result location: {payload.experiment_ablation_location}\n"
         "Ablation result table:\n"
-        f"{_table_to_markdown(payload.experiment_ablation_table)}\n"
+        f"{_experiment_table_to_markdown(payload.experiment_ablation_table, is_ablation=True)}\n"
     )
 
 

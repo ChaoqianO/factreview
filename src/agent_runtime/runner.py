@@ -1117,8 +1117,6 @@ def _status_with_symbol(text: str) -> str:
     lower = raw.lower()
     if lower.startswith("supported"):
         return f"✓ {raw}"
-    if lower.startswith("paper-supported"):
-        return f"☑ {raw}"
     if lower.startswith("partially supported"):
         return f"⚠ {raw}"
     if lower.startswith("inconclusive"):
@@ -1181,8 +1179,7 @@ def _claims_status_legend_colored() -> str:
     return (
         "(Status legend: "
         '<span style="color: green;">✓ Supported</span>, '
-        '<span style="color: #1E5EFF;">☑ Paper-supported</span>, '
-        '<span style="color: #E6B800;">⚠ Inconclusive</span>, '
+        '<span style="color: #E6B800;">⚠ Partially supported</span>, '
         '<span style="color: red;">✗ In conflict</span>.)'
     )
 
@@ -1259,8 +1256,106 @@ def _status_from_paper_observed(
     if performance_drop <= threshold:
         return ("Supported", note)
     if performance_drop <= (2.0 * threshold):
-        return ("Inconclusive", note)
+        return ("Partially supported", note)
     return ("In conflict", note)
+
+
+def _score_paper_evidence(*, claim: str, evidence: str, location: str, claim_type: str) -> tuple[int, list[str]]:
+    """Score how strongly the paper's own text supports a claim.
+
+    Returns (score, explanation_parts). Score >= 3 → strong, -1 < score < 3 → partial, <= -1 → conflict.
+    claim_type should be 'theoretical', 'methodological', or 'experimental'.
+    """
+    text = f"{claim}\n{evidence}\n{location}"
+    lower = text.lower()
+
+    has_location = bool(str(location or "").strip() and "not found in manuscript" not in lower)
+    has_missing_marker = bool(
+        re.search(r"(?i)\b(not found in manuscript|not provided|missing|unclear|unspecified)\b", text)
+    )
+    has_contradiction_marker = bool(
+        re.search(r"(?i)\b(contradict|inconsistent|does not hold|invalid|fails?)\b", text)
+    )
+
+    score = 0
+    parts: list[str] = []
+
+    if claim_type == "theoretical":
+        has_anchor = bool(
+            re.search(r"(?i)\b(theorem|proposition|lemma|corollary|proof|equation|derivation)\b", text)
+        )
+        has_signal = bool(
+            re.search(r"(?i)(\\[a-z]+|\bO\(|=|<=|>=|->|⇒|∇|argmin|argmax|loss|objective)", text)
+        )
+        if has_anchor:
+            score += 2
+            parts.append("The paper gives a formal anchor for the reasoning.")
+        else:
+            parts.append("The paper gives no clear theorem/proposition/proof anchor.")
+        if has_signal:
+            score += 1
+            parts.append("The evidence contains explicit mathematical derivation signals.")
+        else:
+            parts.append("The evidence lacks explicit derivation details.")
+    elif claim_type == "methodological":
+        has_design_anchor = bool(
+            re.search(
+                r"(?i)\b(module|architecture|algorithm|design|pipeline|encoder|decoder|attention|component)\b",
+                text,
+            )
+        )
+        has_impl_anchor = bool(
+            re.search(r"(?i)\b(section|table|figure|equation|appendix|implementation)\b", text)
+        )
+        if has_design_anchor:
+            score += 2
+            parts.append("The claim has concrete method-design anchors in the manuscript.")
+        else:
+            parts.append("The claim lacks explicit method-design anchors.")
+        if has_impl_anchor:
+            score += 1
+            parts.append("Supporting evidence references implementation-level manuscript artifacts.")
+        else:
+            parts.append("Supporting evidence lacks direct implementation-level anchors.")
+    else:  # experimental / no execution
+        has_data_anchor = bool(
+            re.search(
+                r"(?i)\b(table|figure|experiment|result|dataset|benchmark|baseline|ablation)\b", text
+            )
+        )
+        has_numeric = _first_float(text) is not None
+        if has_data_anchor:
+            score += 2
+            parts.append("The paper cites experimental tables or figures as evidence.")
+        else:
+            parts.append("The paper provides no direct experimental table or figure reference.")
+        if has_numeric:
+            score += 1
+            parts.append("Concrete numeric values are present in the evidence.")
+        else:
+            parts.append("No concrete numeric values found in the evidence.")
+
+    if has_location:
+        score += 1
+        parts.append(f"The cited location is {location.strip()}.")
+    else:
+        parts.append("No reliable manuscript location is provided.")
+    if has_missing_marker:
+        score -= 2
+        parts.append("The evidence indicates missing or incomplete support.")
+    if has_contradiction_marker:
+        score -= 2
+        parts.append("The evidence text suggests an unresolved inconsistency risk.")
+
+    return score, parts
+
+
+def _paper_status_from_score(score: int) -> str:
+    if score >= 3:
+        return "Supported"
+    if score <= -1:
+        return "In conflict"
+    return "Partially supported"
 
 
 def _build_experimental_claim_assessment(
@@ -1280,146 +1375,59 @@ def _build_experimental_claim_assessment(
     paper_val = _metric_aware_value(evidence, metric_hint=metric) or _metric_aware_value(
         claim, metric_hint=metric
     )
-    status, delta_note = _status_from_paper_observed(
-        paper_val=paper_val,
-        observed=observed,
-        metric=metric or "metric",
-    )
-    if paper_val is not None and observed is not None:
+
+    has_execution = bool(alignment)
+
+    if has_execution and paper_val is not None and observed is not None:
+        # Both paper value and reproduced value available — apply the 2×2 matrix.
+        exec_status, delta_note = _status_from_paper_observed(
+            paper_val=paper_val,
+            observed=observed,
+            metric=metric or "metric",
+        )
+        exec_passes = exec_status == "Supported"
+        paper_score, _ = _score_paper_evidence(
+            claim=claim, evidence=evidence, location=location, claim_type="experimental"
+        )
+        paper_strong = paper_score >= 3
+        paper_conflict = paper_score <= -1
         norm_metric = _norm_metric_key(metric)
-        assessment = (
+        base = (
             f"Claim mapped to {dataset} / {metric}. "
             f"Paper={_fmt_value(paper_val, metric_key=norm_metric)}, "
             f"Reproduced={_fmt_value(observed, metric_key=norm_metric)}. "
             f"{delta_note}."
         )
-        return assessment, status
-    missing_items: list[str] = []
-    if not dataset:
-        missing_items.append("dataset")
-    if not metric:
-        missing_items.append("metric")
-    if paper_val is None:
-        missing_items.append("paper numeric value")
-    if observed is None:
-        missing_items.append("aligned reproduced metric")
-    return (
-        "Experimental comparison is incomplete for this claim: missing " + ", ".join(missing_items) + ".",
-        "Inconclusive",
+        if paper_strong and exec_passes:
+            return base, "Supported"
+        if paper_strong and not exec_passes:
+            return base + " Paper evidence is strong but reproduction did not align.", "Partially supported"
+        if paper_conflict:
+            return base + " Paper evidence is internally inconsistent.", "In conflict"
+        # paper partial
+        if exec_passes:
+            return base + " Results reproduced but paper evidence is incomplete.", "Partially supported"
+        return base + " Incomplete paper evidence and reproduction did not align.", "In conflict"
+
+    # No execution data or values could not be extracted — fall back to paper-only scoring.
+    paper_score, parts = _score_paper_evidence(
+        claim=claim, evidence=evidence, location=location, claim_type="experimental"
     )
+    return " ".join(parts), _paper_status_from_score(paper_score)
 
 
 def _build_theoretical_claim_assessment(*, claim: str, evidence: str, location: str) -> tuple[str, str]:
-    text = f"{claim}\n{evidence}\n{location}"
-    lower = text.lower()
-    has_anchor = bool(
-        re.search(r"(?i)\b(theorem|proposition|lemma|corollary|proof|equation|derivation)\b", text)
+    score, parts = _score_paper_evidence(
+        claim=claim, evidence=evidence, location=location, claim_type="theoretical"
     )
-    has_math_signal = bool(
-        re.search(r"(?i)(\\[a-z]+|\bO\(|=|<=|>=|->|⇒|∇|argmin|argmax|loss|objective)", text)
-    )
-    has_location = bool(str(location or "").strip() and "not found in manuscript" not in lower)
-    has_missing_marker = bool(
-        re.search(r"(?i)\b(not found in manuscript|not provided|missing|unclear|unspecified)\b", text)
-    )
-    has_contradiction_marker = bool(
-        re.search(r"(?i)\b(contradict|inconsistent|does not hold|invalid|fails?)\b", text)
-    )
-
-    score = 0
-    if has_anchor:
-        score += 2
-    if has_math_signal:
-        score += 1
-    if has_location:
-        score += 1
-    if has_missing_marker:
-        score -= 2
-    if has_contradiction_marker:
-        score -= 2
-
-    parts: list[str] = []
-    if has_anchor:
-        parts.append("The paper gives a formal anchor for the reasoning.")
-    else:
-        parts.append("The paper gives no clear theorem/proposition/proof anchor.")
-    if has_math_signal:
-        parts.append("The evidence contains explicit mathematical derivation signals.")
-    else:
-        parts.append("The evidence lacks explicit derivation details.")
-    if has_location:
-        parts.append(f"The cited location is {location.strip()}.")
-    else:
-        parts.append("No reliable manuscript location is provided.")
-    if has_missing_marker:
-        parts.append("The evidence indicates missing or incomplete support.")
-    if has_contradiction_marker:
-        parts.append("The evidence text suggests an unresolved inconsistency risk.")
-
-    if score >= 3:
-        status = "Paper-supported"
-    elif score <= -1:
-        status = "In conflict"
-    else:
-        status = "Inconclusive"
-    return " ".join(parts), status
+    return " ".join(parts), _paper_status_from_score(score)
 
 
 def _build_methodological_claim_assessment(*, claim: str, evidence: str, location: str) -> tuple[str, str]:
-    text = f"{claim}\n{evidence}\n{location}"
-    lower = text.lower()
-    has_design_anchor = bool(
-        re.search(
-            r"(?i)\b(module|architecture|algorithm|design|pipeline|encoder|decoder|attention|component)\b",
-            text,
-        )
+    score, parts = _score_paper_evidence(
+        claim=claim, evidence=evidence, location=location, claim_type="methodological"
     )
-    has_implementation_anchor = bool(
-        re.search(r"(?i)\b(section|table|figure|equation|appendix|implementation)\b", text)
-    )
-    has_location = bool(str(location or "").strip() and "not found in manuscript" not in lower)
-    has_missing_marker = bool(
-        re.search(r"(?i)\b(not found in manuscript|not provided|missing|unclear|unspecified)\b", text)
-    )
-    has_contradiction_marker = bool(re.search(r"(?i)\b(contradict|inconsistent|invalid|fails?)\b", text))
-
-    score = 0
-    if has_design_anchor:
-        score += 2
-    if has_implementation_anchor:
-        score += 1
-    if has_location:
-        score += 1
-    if has_missing_marker:
-        score -= 2
-    if has_contradiction_marker:
-        score -= 2
-
-    parts: list[str] = []
-    if has_design_anchor:
-        parts.append("The claim has concrete method-design anchors in the manuscript.")
-    else:
-        parts.append("The claim lacks explicit method-design anchors.")
-    if has_implementation_anchor:
-        parts.append("Supporting evidence references implementation-level manuscript artifacts.")
-    else:
-        parts.append("Supporting evidence lacks direct implementation-level anchors.")
-    if has_location:
-        parts.append(f"The cited location is {location.strip()}.")
-    else:
-        parts.append("No reliable manuscript location is provided.")
-    if has_missing_marker:
-        parts.append("The evidence indicates missing or incomplete support.")
-    if has_contradiction_marker:
-        parts.append("The evidence text suggests unresolved inconsistency risk.")
-
-    if score >= 3:
-        status = "Paper-supported"
-    elif score <= -1:
-        status = "In conflict"
-    else:
-        status = "Inconclusive"
-    return " ".join(parts), status
+    return " ".join(parts), _paper_status_from_score(score)
 
 
 def _augment_claims_with_assessment_status(
@@ -1717,6 +1725,8 @@ def _as_status_label(value: str) -> str:
     raw = _strip_inline_formatting(value).lower()
     if "paper-supported" in raw or "paper supported" in raw or "supported by the paper" in raw:
         return "paper-supported"
+    if "partial" in raw:
+        return "Partially supported"
     if "support" in raw:
         return "Supported"
     if "conflict" in raw or "fail" in raw:
@@ -1825,6 +1835,8 @@ def _style_status_value(value: str) -> str:
         return '<span style="color: green;">✓ Supported</span>'
     if normalized == "paper-supported":
         return '<span style="color: #1E5EFF;">☑ Paper-supported</span>'
+    if normalized == "Partially supported":
+        return '<span style="color: #E6B800;">⚠ Partially supported</span>'
     if normalized == "In conflict":
         return '<span style="color: red;">✗ In conflict</span>'
     return '<span style="color: #E6B800;">⚠ Inconclusive</span>'

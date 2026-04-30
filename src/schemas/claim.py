@@ -21,13 +21,11 @@ class ClaimType(StrEnum):
 
 
 class ClaimLabel(StrEnum):
-    """The five verdicts from paper §3.4."""
+    """The three verdicts for claim assessment."""
 
     SUPPORTED = "supported"
-    SUPPORTED_BY_PAPER = "supported_by_paper"
     PARTIALLY_SUPPORTED = "partially_supported"
     IN_CONFLICT = "in_conflict"
-    INCONCLUSIVE = "inconclusive"
 
 
 class ClaimLocation(BaseModel):
