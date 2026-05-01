@@ -33,7 +33,7 @@ Run the pipeline against the bundled CompGCN PDF to verify your install — no
 need to supply your own paper:
 
 ```bash
-python scripts/execute_review_pipeline.py demos/Graph/compgcn/paper.pdf
+python scripts/execute_review_pipeline.py demos/compgcn/paper.pdf
 ```
 
 Once the demo works, see [Running](#running) below for arbitrary PDFs and
@@ -92,13 +92,6 @@ GEMINI_API_KEY=
 
 To force prompt-only output even when a Gemini key is configured, pass
 `--teaser-mode prompt` on the CLI (or set `TEASER_USE_GEMINI=false` in `.env`).
-
-### Semantic Scholar Retrieval
-
-Semantic Scholar is used for objective related-work retrieval in the positioning
-and review stages. It is enabled by default. Runs can work without an API key,
-but unauthenticated requests are more likely to hit rate limits; set
-`SEMANTIC_SCHOLAR_API_KEY` in `.env` for steadier results.
 
 ## Running
 
@@ -241,12 +234,9 @@ and writes its verdict into `stages/fact_generation/execution/execution.json`.
   Get a token from <https://mineru.net> (free tier is sufficient for most
   papers) and set it in `.env` or pass `--mineru-api-token`.
 - **`--enable-refcheck` errors with "tools/refchecker not found"** — RefChecker
-  lives at `tools/refchecker` and is a git submodule that fresh clones don't pull by default. Run
+  is a git submodule that fresh clones don't pull by default. Run
   `git submodule update --init --recursive` and `pip install -e ".[refcheck]"`.
-- **Technical positioning says "Objective retrieval unavailable"** — Semantic
-  Scholar lookup failed or was rate-limited. Set `SEMANTIC_SCHOLAR_API_KEY` in
-  `.env`, or set `SEMANTIC_SCHOLAR_ENABLED=false` if you intentionally want to
-  disable this retrieval.
+- **Positioning stage is slow or returns sparse results** — unauthenticated Semantic Scholar requests are rate-limited. Set `SEMANTIC_SCHOLAR_API_KEY` in `.env` (free key from <https://www.semanticscholar.org/product/api>).
 - **Teaser stage skips silently / no `teaser_figure.png`** — `GEMINI_API_KEY`
   is unset (this is the default). The prompt is still written to
   `stages/review/teaser/teaser_figure_prompt.txt` and copied to your
@@ -269,9 +259,7 @@ touch.
 | `OPENAI_AGENTS_DISABLE_TRACING` | Set to `0` to enable the openai-agents SDK trace exporter. Disabled (`1`) by default to avoid POSTing traces to the Agents tracing endpoint. |
 | `TEASER_USE_GEMINI` | Force prompt-only teaser output (`false`) even when a Gemini key is configured. Equivalent to `--teaser-mode prompt`. |
 | `OPENAI_CODEX_BASE_URL` | Point Codex at a different Codex-compatible endpoint (default: `https://chatgpt.com/backend-api/codex`). |
-| `SEMANTIC_SCHOLAR_ENABLED` | Enable or disable Semantic Scholar related-work retrieval (default: `true`). |
-| `SEMANTIC_SCHOLAR_API_KEY` | Optional Semantic Scholar API key; strongly recommended to avoid unauthenticated rate limits. |
-| `SEMANTIC_SCHOLAR_BASE_URL` | Override the Semantic Scholar API endpoint (default: `https://api.semanticscholar.org/graph/v1`). |
+| `SEMANTIC_SCHOLAR_API_KEY` | Recommended. Free API key from [Semantic Scholar](https://www.semanticscholar.org/product/api) for the positioning stage. Without it, unauthenticated requests may be rate-limited. |
 
 ## Development
 
