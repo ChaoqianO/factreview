@@ -1,6 +1,6 @@
 # sacn — code_evaluation report
 
-Generated: 2026-05-02T06:32:03+00:00
+Generated: 2026-05-02T12:36:51+00:00
 
 This report was produced by `tools/run_demos.py` running the full FactReview
 pipeline with `--run-execution` against `paper.pdf` in this directory. The
@@ -10,8 +10,8 @@ runner is paper-agnostic; this file is regenerated each time the demo is run.
 
 - Category: **Graph**
 - Paper key: `graph_sacn`
-- Wall time (subprocess): **17.7s**
-- Started: `2026-05-02T06:31:45+00:00`  ·  Finished: `2026-05-02T06:32:03+00:00`
+- Wall time (subprocess): **22.6s**
+- Started: `2026-05-02T12:36:29+00:00`  ·  Finished: `2026-05-02T12:36:51+00:00`
 - Pipeline exit code: `0`
 - Execution exit_status: `failed`
 - Coverage: no baseline checks were defined or evaluated.
@@ -37,10 +37,10 @@ _No execution tasks recorded._
 
 ## Artefacts (paths relative to this demo)
 
-- Execution payload: `_run/graph_sacn_2026-05-02_143146/stages/fact_generation/execution/execution.json`
-- Positioning: `_run/graph_sacn_2026-05-02_143146/stages/fact_generation/positioning/positioning.json`
-- Claim extraction: `_run/graph_sacn_2026-05-02_143146/stages/preprocessing/claim_extract/facts.json`
-- Parse output: `_run/graph_sacn_2026-05-02_143146/stages/preprocessing/parse/paper.json`
+- Execution payload: `_run/graph_sacn_2026-05-02_203630/stages/fact_generation/execution/execution.json`
+- Positioning: `_run/graph_sacn_2026-05-02_203630/stages/fact_generation/positioning/positioning.json`
+- Claim extraction: `_run/graph_sacn_2026-05-02_203630/stages/preprocessing/claim_extract/facts.json`
+- Parse output: `_run/graph_sacn_2026-05-02_203630/stages/preprocessing/parse/paper.json`
 
 ## Notes
 

@@ -1,0 +1,55 @@
+{
+  "source_pdf": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\beit\\_run\\image_beit_2026-05-02_203630\\inputs\\source_pdf\\paper.pdf",
+  "mineru_markdown_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\beit\\_run\\image_beit_2026-05-02_203630\\runtime\\jobs\\ecc8f792-88eb-492c-a138-6228f12110a1\\mineru_full.md",
+  "mineru_content_list_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\beit\\_run\\image_beit_2026-05-02_203630\\runtime\\jobs\\ecc8f792-88eb-492c-a138-6228f12110a1\\mineru_content_list.json",
+  "markdown_provider": "mineru_v4",
+  "mineru_batch_id": "abf4aeb5-58d1-4c12-8966-cc5f154cd0b2",
+  "parse_warning": null,
+  "job_id": "ecc8f792-88eb-492c-a138-6228f12110a1",
+  "job_json_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\beit\\_run\\image_beit_2026-05-02_203630\\runtime\\jobs\\ecc8f792-88eb-492c-a138-6228f12110a1\\job.json",
+  "shared_execution_extract": {
+    "paper_extracted_dir": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\beit\\_run\\image_beit_2026-05-02_203630\\inputs\\paper_extracted",
+    "paper_extracted_md_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\beit\\_run\\image_beit_2026-05-02_203630\\inputs\\paper_extracted\\paper.mineru.md",
+    "paper_extracted_content_list_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\beit\\_run\\image_beit_2026-05-02_203630\\inputs\\paper_extracted\\paper.mineru.content_list.json",
+    "paper_extracted_assets_dir": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\beit\\_run\\image_beit_2026-05-02_203630\\inputs\\paper_extracted\\mineru_assets",
+    "paper_extracted_tables_dir": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\beit\\_run\\image_beit_2026-05-02_203630\\inputs\\paper_extracted\\tables"
+  },
+  "annotation_count": 0,
+  "annotations_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\beit\\_run\\image_beit_2026-05-02_203630\\runtime\\jobs\\ecc8f792-88eb-492c-a138-6228f12110a1\\annotations.json",
+  "semantic_scholar_candidates_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\beit\\_run\\image_beit_2026-05-02_203630\\runtime\\jobs\\ecc8f792-88eb-492c-a138-6228f12110a1\\semantic_scholar_candidates.json",
+  "final_markdown_path": "",
+  "report_pdf_path": "",
+  "latest_output_md": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\beit\\_run\\image_beit_2026-05-02_203630\\runtime\\jobs\\ecc8f792-88eb-492c-a138-6228f12110a1\\latest_extraction.md",
+  "latest_output_pdf": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\beit\\_run\\image_beit_2026-05-02_203630\\runtime\\jobs\\ecc8f792-88eb-492c-a138-6228f12110a1\\latest_extraction.pdf",
+  "runtime_status": "failed",
+  "runtime_message": "Review pipeline failed.",
+  "runtime_error": "openai.BadRequestError: Error code: 400 - {'error': {'message': 'no available channels for model gpt-5.2-codex (request_id: chatcmpl-2b3f8e1228f243759c828b9b99c57949)', 'type': 'invalid_request_error'}}",
+  "usage": {
+    "token": {
+      "requests": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0
+    },
+    "tool": {
+      "total_calls": 0,
+      "distinct_tools": 0,
+      "per_tool": {}
+    },
+    "paper_search": {
+      "total_calls": 0,
+      "successful_calls": 0,
+      "effective_calls": 0,
+      "papers_found": 0,
+      "distinct_queries": 0
+    }
+  },
+  "paper_search_runtime_state": {
+    "enabled": true,
+    "started": false,
+    "availability": "missing_base_url",
+    "base_url": null,
+    "health_url": null,
+    "error": null
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "semantic_scholar": {
+    "enabled": true,
+    "query": "BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding",
+    "success": false,
+    "papers": [],
+    "message": "HTTPStatusError: Client error '429 ' for url 'https://api.semanticscholar.org/graph/v1/paper/search?query=BERT%3A+Pre-training+of+Deep+Bidirectional+Transformers+for+Language+Understanding&limit=24&fields=title%2Cyear%2CcitationCount%2Cvenue%2Curl%2Cauthors%2CexternalIds'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429"
+  },
+  "paper_search_runtime_state": {
+    "enabled": true,
+    "started": false,
+    "availability": "missing_base_url",
+    "base_url": null,
+    "health_url": null,
+    "error": null
+  },
+  "job_id": "8fc4b1c5-ccb4-4e4c-b025-3e1ab2d88b4c",
+  "job_json_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\bert\\_run\\text_bert_2026-05-02_203630\\runtime\\jobs\\8fc4b1c5-ccb4-4e4c-b025-3e1ab2d88b4c\\job.json"
+}

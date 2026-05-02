@@ -1,0 +1,19 @@
+{
+  "semantic_scholar": {
+    "enabled": true,
+    "query": "BEIT: BERT Pre-Training of Image Transformers",
+    "success": false,
+    "papers": [],
+    "message": "HTTPStatusError: Client error '429 ' for url 'https://api.semanticscholar.org/graph/v1/paper/search?query=BEIT%3A+BERT+Pre-Training+of+Image+Transformers&limit=24&fields=title%2Cyear%2CcitationCount%2Cvenue%2Curl%2Cauthors%2CexternalIds'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429"
+  },
+  "paper_search_runtime_state": {
+    "enabled": true,
+    "started": false,
+    "availability": "missing_base_url",
+    "base_url": null,
+    "health_url": null,
+    "error": null
+  },
+  "job_id": "ecc8f792-88eb-492c-a138-6228f12110a1",
+  "job_json_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\beit\\_run\\image_beit_2026-05-02_203630\\runtime\\jobs\\ecc8f792-88eb-492c-a138-6228f12110a1\\job.json"
+}

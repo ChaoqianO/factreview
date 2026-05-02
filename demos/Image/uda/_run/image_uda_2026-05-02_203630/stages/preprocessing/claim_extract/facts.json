@@ -1,0 +1,31 @@
+{
+  "annotation_count": 0,
+  "annotations_path": "",
+  "annotations": [],
+  "usage": {
+    "token": {
+      "requests": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0
+    },
+    "tool": {
+      "total_calls": 0,
+      "distinct_tools": 0,
+      "per_tool": {}
+    },
+    "paper_search": {
+      "total_calls": 0,
+      "successful_calls": 0,
+      "effective_calls": 0,
+      "papers_found": 0,
+      "distinct_queries": 0
+    }
+  },
+  "metadata": {
+    "final_report_sections_completed": [],
+    "final_report_source": null
+  },
+  "job_id": "fbd2c8ed-a3ba-4d99-bd6b-ead60245144b",
+  "job_json_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\uda\\_run\\image_uda_2026-05-02_203630\\runtime\\jobs\\fbd2c8ed-a3ba-4d99-bd6b-ead60245144b\\job.json"
+}

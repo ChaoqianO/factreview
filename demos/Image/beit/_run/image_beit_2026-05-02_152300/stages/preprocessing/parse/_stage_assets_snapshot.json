@@ -1,9 +1,0 @@
-{
-  "job_json_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\beit\\_run\\image_beit_2026-05-02_152300\\runtime\\jobs\\149e2746-cf31-4cd5-ac3f-073a0dcf906c\\job.json",
-  "job_dir": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\beit\\_run\\image_beit_2026-05-02_152300\\runtime\\jobs\\149e2746-cf31-4cd5-ac3f-073a0dcf906c",
-  "job_state_snapshot_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\beit\\_run\\image_beit_2026-05-02_152300\\stages\\preprocessing\\parse\\_job_state_snapshot.json",
-  "annotations_snapshot_path": "",
-  "final_markdown_snapshot_path": "",
-  "report_pdf_snapshot_path": "",
-  "semantic_scholar_candidates_snapshot_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\beit\\_run\\image_beit_2026-05-02_152300\\stages\\preprocessing\\parse\\snapshot_artifacts\\semantic_scholar_candidates.json"
-}

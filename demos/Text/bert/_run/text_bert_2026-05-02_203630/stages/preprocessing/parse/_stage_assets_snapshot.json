@@ -1,0 +1,9 @@
+{
+  "job_json_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\bert\\_run\\text_bert_2026-05-02_203630\\runtime\\jobs\\8fc4b1c5-ccb4-4e4c-b025-3e1ab2d88b4c\\job.json",
+  "job_dir": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\bert\\_run\\text_bert_2026-05-02_203630\\runtime\\jobs\\8fc4b1c5-ccb4-4e4c-b025-3e1ab2d88b4c",
+  "job_state_snapshot_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\bert\\_run\\text_bert_2026-05-02_203630\\stages\\preprocessing\\parse\\_job_state_snapshot.json",
+  "annotations_snapshot_path": "",
+  "final_markdown_snapshot_path": "",
+  "report_pdf_snapshot_path": "",
+  "semantic_scholar_candidates_snapshot_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\bert\\_run\\text_bert_2026-05-02_203630\\stages\\preprocessing\\parse\\snapshot_artifacts\\semantic_scholar_candidates.json"
+}

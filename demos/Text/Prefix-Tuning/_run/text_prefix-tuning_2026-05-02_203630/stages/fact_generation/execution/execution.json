@@ -1,0 +1,19 @@
+{
+  "paper_key": "text_Prefix-Tuning",
+  "paper_pdf": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\Prefix-Tuning\\_run\\text_prefix-tuning_2026-05-02_203630\\inputs\\source_pdf\\paper.pdf",
+  "status": "failed",
+  "exit_status": "failed",
+  "success": false,
+  "run_dir": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\Prefix-Tuning\\_run\\text_prefix-tuning_2026-05-02_203630\\stages\\fact_generation\\execution\\current",
+  "summary": {
+    "run_id": "2026-05-02_203645",
+    "status": "failed",
+    "attempts": 0,
+    "run_result": {},
+    "judge": {},
+    "artifacts": {
+      "files": []
+    }
+  },
+  "alignment": {}
+}
