@@ -1,0 +1,148 @@
+{
+  "paper_pdf": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Graph\\graphormer\\_run\\graph_graphormer_2026-05-02_232617\\inputs\\source_pdf\\paper.pdf",
+  "paper_key": "graph_graphormer",
+  "job_id": "bc6bb42e-8382-49e1-994b-f41f75b5e679",
+  "job_dir": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Graph\\graphormer\\_run\\graph_graphormer_2026-05-02_232617\\runtime\\jobs\\bc6bb42e-8382-49e1-994b-f41f75b5e679",
+  "job_json_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Graph\\graphormer\\_run\\graph_graphormer_2026-05-02_232617\\runtime\\jobs\\bc6bb42e-8382-49e1-994b-f41f75b5e679\\job.json",
+  "own_payload": {
+    "job_id": "bc6bb42e-8382-49e1-994b-f41f75b5e679",
+    "status": "completed",
+    "message": "Review pipeline completed.",
+    "error": null,
+    "artifacts": {
+      "source_pdf_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Graph\\graphormer\\_run\\graph_graphormer_2026-05-02_232617\\runtime\\jobs\\bc6bb42e-8382-49e1-994b-f41f75b5e679\\source.pdf",
+      "mineru_markdown_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Graph\\graphormer\\_run\\graph_graphormer_2026-05-02_232617\\runtime\\jobs\\bc6bb42e-8382-49e1-994b-f41f75b5e679\\mineru_full.md",
+      "mineru_content_list_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Graph\\graphormer\\_run\\graph_graphormer_2026-05-02_232617\\runtime\\jobs\\bc6bb42e-8382-49e1-994b-f41f75b5e679\\mineru_content_list.json",
+      "annotations_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Graph\\graphormer\\_run\\graph_graphormer_2026-05-02_232617\\runtime\\jobs\\bc6bb42e-8382-49e1-994b-f41f75b5e679\\annotations.json",
+      "final_markdown_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Graph\\graphormer\\_run\\graph_graphormer_2026-05-02_232617\\runtime\\jobs\\bc6bb42e-8382-49e1-994b-f41f75b5e679\\final_report.md",
+      "final_report_audit_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Graph\\graphormer\\_run\\graph_graphormer_2026-05-02_232617\\runtime\\jobs\\bc6bb42e-8382-49e1-994b-f41f75b5e679\\final_report_audit.json",
+      "report_pdf_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Graph\\graphormer\\_run\\graph_graphormer_2026-05-02_232617\\runtime\\jobs\\bc6bb42e-8382-49e1-994b-f41f75b5e679\\final_report.pdf",
+      "latest_output_md_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Graph\\graphormer\\_run\\graph_graphormer_2026-05-02_232617\\runtime\\jobs\\bc6bb42e-8382-49e1-994b-f41f75b5e679\\latest_extraction.md",
+      "latest_output_pdf_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Graph\\graphormer\\_run\\graph_graphormer_2026-05-02_232617\\runtime\\jobs\\bc6bb42e-8382-49e1-994b-f41f75b5e679\\latest_extraction.pdf",
+      "prompt_snapshot_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Graph\\graphormer\\_run\\graph_graphormer_2026-05-02_232617\\runtime\\jobs\\bc6bb42e-8382-49e1-994b-f41f75b5e679\\agent_prompt.txt"
+    },
+    "usage": {
+      "token": {
+        "requests": 5,
+        "input_tokens": 239935,
+        "output_tokens": 1746,
+        "total_tokens": 241681
+      },
+      "tool": {
+        "total_calls": 5,
+        "distinct_tools": 1,
+        "per_tool": {
+          "review_final_markdown_write": 5
+        }
+      },
+      "paper_search": {
+        "total_calls": 0,
+        "successful_calls": 0,
+        "effective_calls": 0,
+        "papers_found": 0,
+        "distinct_queries": 0
+      }
+    },
+    "metadata": {
+      "llm_api_mode": "chat_completions",
+      "markdown_provider": "mineru_v4",
+      "mineru_batch_id": "b6590186-c0d9-4946-9c18-863c53794a42",
+      "parse_warning": null,
+      "paper_search_runtime_state": {
+        "enabled": true,
+        "started": false,
+        "availability": "missing_base_url",
+        "base_url": null,
+        "health_url": null,
+        "error": null
+      },
+      "final_report_source": "review_annotation_agent",
+      "status_updates_count": 0,
+      "final_report_sections_completed": [
+        "metadata",
+        "technical_positioning",
+        "claims",
+        "summary",
+        "experiment"
+      ],
+      "final_report_draft_version": 5,
+      "final_report_draft": {
+        "sections": {
+          "metadata": "- **Title**: Do Transformers Really Perform Bad for Graph Representation?\n- **Task**: Graph representation learning; graph-level prediction (regression/classification) on PCQM4M-LSC, OGBG-MolPCBA, OGBG-MolHIV, and ZINC.\n- **Code**: https://github.com/Microsoft/Graphormer",
+          "technical_positioning": "Figure: Graphormer augments standard Transformer with centrality, shortest-path spatial, and edge attention-bias encodings for graph-level representation learning.\n\n| Research domain | Method | Standard Transformer backbone | Structural node centrality encoding | Shortest-path spatial bias in attention | Edge-feature encoding via attention bias |\n|---|---|---|---|---|---|\n| Graph representation learning | GT | √ | × | × | × |\n| Graph representation learning | GIN-vN | × | × | × | × |\n| Graph representation learning | DeeperGCN-vN | × | × | × | × |\n| This Work | Graphormer | √ | √ | √ | √ |\n\nGap: Objective retrieval returned only the same paper; external related-work coverage from retrieval is limited.",
+          "claims": "Paper scope: Standard-Transformer-based graph representation model with structural encodings and expressiveness analysis.\nEvaluation scope: Graph-level benchmarks (PCQM4M-LSC, MolPCBA, MolHIV, ZINC) and ablations on PCQM4M-LSC.\n\n| Claim | Evidence | Assessment | Location |\n|---|---|---|---|\n| Graphormer achieves state-of-the-art results on multiple graph-level benchmarks. | Table 1: Graphormer validate MAE 0.1234 vs prior best GIN-vN 0.1395 on PCQM4M-LSC. Tables 2/3/4: Graphormer-FLAG 31.39 AP (MolPCBA), 80.51 AUC (MolHIV), GraphormerSLIM 0.122 MAE (ZINC), each best in listed rows. | Experimental support is strong: direct numeric comparisons against external baselines across four datasets are provided. | Abstract; Sec. 1; Sec. 4.1 Table 1; Sec. 4.2 Tables 2–4 |\n| Structural encodings (centrality, spatial, edge attention bias) are effective for Transformer on graphs. | Table 5 ablation: no encoding 0.2276; +Laplacian PE 0.1483; +Spatial 0.1427; +Spatial+Centrality 0.1396; +edge via node 0.1328; +edge via Aggr 0.1327; +edge via attn bias 0.1304 (best). | Methodological claim is well supported by controlled ablations showing progressive MAE reductions and superiority of edge attention-bias variant. | Sec. 3.1; Sec. 4.3; Table 5 |\n| Graphormer can represent AGGREGATE/COMBINE of popular GNNs and can exceed 1-WL limits with SPD encoding. | Fact 1 states representability for GIN/GCN/GraphSAGE; proof sketch in Sec. 3.3 and details in Appendix A.2. Appendix A.1 (Figure 2) gives an example where SPD distinguishes graphs not distinguished by 1-WL. | Theoretical support is present via formalized facts, proof sketches, and appendix derivations/examples; rigorous details are mainly in appendix. | Sec. 3.3 (Fact 1); Appendix A.1–A.2; Figure 2 |",
+          "summary": "This paper presents Graphormer, a graph representation architecture built on standard Transformer layers plus three structural encodings (degree-based centrality, shortest-path spatial bias, and edge-feature attention bias). It also provides expressiveness arguments connecting Graphormer to popular GNN formulations and reports consistent gains on PCQM4M-LSC, MolPCBA, MolHIV, and ZINC benchmarks.\n\nStrengths:\n- Clear method design with explicit equations for each structural encoding and integration into attention.\n- Broad empirical evaluation across multiple public graph-level leaderboards with direct baseline comparisons.\n- Includes ablation studies isolating node-relation, centrality, and edge-encoding effects.\n- Provides theoretical positioning (Fact 1/Fact 2) with appendix proof sketches and examples.\n\nWeaknesses:\n- Strongest competition statement includes an ensemble system, while single-model and ensemble settings are mixed in narrative.\n- Full theoretical details are deferred to appendix; main text gives concise sketches.\n- Quadratic self-attention complexity is acknowledged as a scalability limitation for large graphs.\n- Some claims on over-smoothing are stated qualitatively without a dedicated quantitative table in the main sections.",
+          "experiment": "### Main Result\nLocation: Section 4.1 Table 1 (PCQM4M-LSC); Section 4.2 Tables 2–4 (MolPCBA, MolHIV, ZINC).\n\n| Task | Dataset | Metric | Best Baseline | Paper Result | Difference (Δ) |\n|---|---|---|---|---|---|\n| Graph-level regression | PCQM4M-LSC | validate MAE | GIN-vN: 0.1395 | Graphormer: 0.1234 | -0.0161 |\n| Graph-level regression | PCQM4M-LSC | validate MAE | GIN-vN: 0.1395 | GraphormerSMALL: 0.1264 | -0.0131 |\n| Graph-level classification | OGBG-MolPCBA | AP (%) | GINE-APPNP: 29.79±0.30 | Graphormer-FLAG: 31.39±0.32 | +1.60 |\n| Graph-level classification | OGBG-MolHIV | AUC (%) | DGN: 79.70±0.97 | Graphormer-FLAG: 80.51±0.53 | +0.81 |\n| Graph-level regression | ZINC | test MAE | SAN: 0.139±0.006 | GraphormerSLIM: 0.122±0.006 | -0.017 |\n\n### Ablation Result\nLocation: Section 4.3 Ablation Studies, Table 5 on PCQM4M-LSC (metric: valid MAE).\n\n| Ablation Dimension | Configuration | Full Model | Paper Result | Difference (Δ) |\n|---|---|---|---|---|\n| Optimal setup | Spatial + Centrality + via attn bias (Eq.7) | 0.1304 | 0.1304 | 0 |\n| Edge Encoding | via node | 0.1304 | 0.1328 | +0.0024 |\n| Edge Encoding | via Aggr | 0.1304 | 0.1327 | +0.0023 |\n| Centrality Encoding | remove centrality (Spatial only row) | 0.1304 | 0.1427 | +0.0123 |\n| Node Relation Encoding | Laplacian PE only | 0.1304 | 0.1483 | +0.0179 |\n| Structural encodings | none | 0.1304 | 0.2276 | +0.0972 |",
+          "novelty_verification_related_work_matrix": "External literature search was not started in this run; novelty/comparison conclusions are deferred to manual verification.",
+          "references": "External literature search was not started in this run; no external references are listed."
+        },
+        "section_order": [
+          "metadata",
+          "technical_positioning",
+          "claims",
+          "summary",
+          "experiment"
+        ],
+        "completed_sections": [
+          "metadata",
+          "technical_positioning",
+          "claims",
+          "summary",
+          "experiment"
+        ],
+        "missing_sections": [],
+        "next_required_section": null,
+        "status": "completed",
+        "source": "review_annotation_agent"
+      },
+      "final_report_audit": {
+        "enabled": true,
+        "applied": false,
+        "iterations_run": 1,
+        "max_iterations": 3,
+        "stop_reason": "revision_failed_validation",
+        "final_markdown": "[Do Transformers Really Perform Bad for Graph Representation?]\n\n## 1. Metadata\n- **Title**: Do Transformers Really Perform Bad for Graph Representation?\n- **Task**: Graph representation learning; graph-level prediction (regression/classification) on PCQM4M-LSC, OGBG-MolPCBA, OGBG-MolHIV, and ZINC.\n- **Code**: https://github.com/Microsoft/Graphormer\n\n## 2. Technical Positioning\nFigure: Graphormer augments standard Transformer with centrality, shortest-path spatial, and edge attention-bias encodings for graph-level representation learning.\n\n| Research domain | Method | Standard Transformer backbone | Structural node centrality encoding | Shortest-path spatial bias in attention | Edge-feature encoding via attention bias |\n|---|---|---|---|---|---|\n| Graph representation learning | GT | √ | × | × | × |\n| Graph representation learning | GIN-vN | × | × | × | × |\n| Graph representation learning | DeeperGCN-vN | × | × | × | × |\n| This Work | Graphormer | √ | √ | √ | √ |\n\nGap: Objective retrieval returned only the same paper; external related-work coverage from retrieval is limited.\n\n## 3. Claims\nPaper scope: Standard-Transformer-based graph representation model with structural encodings and expressiveness analysis.\nEvaluation scope: Graph-level benchmarks (PCQM4M-LSC, MolPCBA, MolHIV, ZINC) and ablations on PCQM4M-LSC.\n\n| Claim | Evidence | Assessment | Location |\n|---|---|---|---|\n| Graphormer achieves state-of-the-art results on multiple graph-level benchmarks. | Table 1: Graphormer validate MAE 0.1234 vs prior best GIN-vN 0.1395 on PCQM4M-LSC. Tables 2/3/4: Graphormer-FLAG 31.39 AP (MolPCBA), 80.51 AUC (MolHIV), GraphormerSLIM 0.122 MAE (ZINC), each best in listed rows. | Experimental support is strong: direct numeric comparisons against external baselines across four datasets are provided. | Abstract; Sec. 1; Sec. 4.1 Table 1; Sec. 4.2 Tables 2–4 |\n| Structural encodings (centrality, spatial, edge attention bias) are effective for Transformer on graphs. | Table 5 ablation: no encoding 0.2276; +Laplacian PE 0.1483; +Spatial 0.1427; +Spatial+Centrality 0.1396; +edge via node 0.1328; +edge via Aggr 0.1327; +edge via attn bias 0.1304 (best). | Methodological claim is well supported by controlled ablations showing progressive MAE reductions and superiority of edge attention-bias variant. | Sec. 3.1; Sec. 4.3; Table 5 |\n| Graphormer can represent AGGREGATE/COMBINE of popular GNNs and can exceed 1-WL limits with SPD encoding. | Fact 1 states representability for GIN/GCN/GraphSAGE; proof sketch in Sec. 3.3 and details in Appendix A.2. Appendix A.1 (Figure 2) gives an example where SPD distinguishes graphs not distinguished by 1-WL. | Theoretical support is present via formalized facts, proof sketches, and appendix derivations/examples; rigorous details are mainly in appendix. | Sec. 3.3 (Fact 1); Appendix A.1–A.2; Figure 2 |\n\n## 4. Summary\nThis paper presents Graphormer, a graph representation architecture built on standard Transformer layers plus three structural encodings (degree-based centrality, shortest-path spatial bias, and edge-feature attention bias). It also provides expressiveness arguments connecting Graphormer to popular GNN formulations and reports consistent gains on PCQM4M-LSC, MolPCBA, MolHIV, and ZINC benchmarks.\n\nStrengths:\n- Clear method design with explicit equations for each structural encoding and integration into attention.\n- Broad empirical evaluation across multiple public graph-level leaderboards with direct baseline comparisons.\n- Includes ablation studies isolating node-relation, centrality, and edge-encoding effects.\n- Provides theoretical positioning (Fact 1/Fact 2) with appendix proof sketches and examples.\n\nWeaknesses:\n- Strongest competition statement includes an ensemble system, while single-model and ensemble settings are mixed in narrative.\n- Full theoretical details are deferred to appendix; main text gives concise sketches.\n- Quadratic self-attention complexity is acknowledged as a scalability limitation for large graphs.\n- Some claims on over-smoothing are stated qualitatively without a dedicated quantitative table in the main sections.\n\n## 5. Experiment\n### Main Result\nLocation: Section 4.1 Table 1 (PCQM4M-LSC); Section 4.2 Tables 2–4 (MolPCBA, MolHIV, ZINC).\n\n| Task | Dataset | Metric | Best Baseline | Paper Result | Difference (Δ) |\n|---|---|---|---|---|---|\n| Graph-level regression | PCQM4M-LSC | validate MAE | GIN-vN: 0.1395 | Graphormer: 0.1234 | -0.0161 |\n| Graph-level regression | PCQM4M-LSC | validate MAE | GIN-vN: 0.1395 | GraphormerSMALL: 0.1264 | -0.0131 |\n| Graph-level classification | OGBG-MolPCBA | AP (%) | GINE-APPNP: 29.79±0.30 | Graphormer-FLAG: 31.39±0.32 | +1.60 |\n| Graph-level classification | OGBG-MolHIV | AUC (%) | DGN: 79.70±0.97 | Graphormer-FLAG: 80.51±0.53 | +0.81 |\n| Graph-level regression | ZINC | test MAE | SAN: 0.139±0.006 | GraphormerSLIM: 0.122±0.006 | -0.017 |\n\n### Ablation Result\nLocation: Section 4.3 Ablation Studies, Table 5 on PCQM4M-LSC (metric: valid MAE).\n\n| Ablation Dimension | Configuration | Full Model | Paper Result | Difference (Δ) |\n|---|---|---|---|---|\n| Optimal setup | Spatial + Centrality + via attn bias (Eq.7) | 0.1304 | 0.1304 | 0 |\n| Edge Encoding | via node | 0.1304 | 0.1328 | +0.0024 |\n| Edge Encoding | via Aggr | 0.1304 | 0.1327 | +0.0023 |\n| Centrality Encoding | remove centrality (Spatial only row) | 0.1304 | 0.1427 | +0.0123 |\n| Node Relation Encoding | Laplacian PE only | 0.1304 | 0.1483 | +0.0179 |\n| Structural encodings | none | 0.1304 | 0.2276 | +0.0972 |",
+        "iterations": [
+          {
+            "iteration": 1,
+            "audit_summary": "The review is largely faithful to the paper’s reported methods and results. I found one concrete mismatch in the technical positioning table regarding GT’s use of shortest-path spatial bias.",
+            "issues": [
+              {
+                "problem_type": "factual error",
+                "severity": "medium",
+                "section": "2. Technical Positioning",
+                "review_excerpt": "| Graph representation learning | GT | √ | × | × | × |",
+                "paper_evidence": "Section 5.1 states GT [13] uses graph structure constraints: \"attention mechanism ... should only aggregate the information from neighborhood (i.e., using adjacent matrix as attention mask)\" and Laplacian positional encoding. This is a form of structural/relative node-relation encoding, so marking GT as having no shortest-path/structural attention bias is over-simplified/inaccurate in this comparison table.",
+                "suggested_fix": "Revise the GT row to distinguish it from Graphormer more accurately (e.g., mark GT as using adjacency-mask/locality structural bias but not Graphormer’s SPD bias and edge-attention bias).",
+                "should_fix": true
+              }
+            ],
+            "issue_count": 1,
+            "high_severity_issue_count": 0,
+            "revised": true,
+            "accepted": false,
+            "validation_ok": false,
+            "validation_reason": "final_report_logic_not_met",
+            "validation_message": "Technical Positioning niche-dimension cells must contain only √ or ×.",
+            "compatibility_ok": true,
+            "compatibility_message": "ok",
+            "error": null
+          }
+        ],
+        "llm_provider": "openai",
+        "llm_model": "openai/gpt-5.3-codex",
+        "source_markdown_chars": 68792,
+        "source_markdown_chars_sent": 68792,
+        "report_markdown_chars_sent": 5549
+      }
+    },
+    "annotation_count": 0,
+    "final_report_ready": true,
+    "pdf_ready": true,
+    "job_json_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Graph\\graphormer\\_run\\graph_graphormer_2026-05-02_232617\\runtime\\jobs\\bc6bb42e-8382-49e1-994b-f41f75b5e679\\job.json",
+    "job_dir": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Graph\\graphormer\\_run\\graph_graphormer_2026-05-02_232617\\runtime\\jobs\\bc6bb42e-8382-49e1-994b-f41f75b5e679",
+    "latest_output_md": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Graph\\graphormer\\_run\\graph_graphormer_2026-05-02_232617\\runtime\\jobs\\bc6bb42e-8382-49e1-994b-f41f75b5e679\\latest_extraction.md",
+    "latest_output_pdf": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Graph\\graphormer\\_run\\graph_graphormer_2026-05-02_232617\\runtime\\jobs\\bc6bb42e-8382-49e1-994b-f41f75b5e679\\latest_extraction.pdf",
+    "final_report_audit_json": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Graph\\graphormer\\_run\\graph_graphormer_2026-05-02_232617\\runtime\\jobs\\bc6bb42e-8382-49e1-994b-f41f75b5e679\\final_report_audit.json"
+  }
+}

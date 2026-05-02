@@ -1,7 +1,0 @@
-{
-  "status": "failed",
-  "message": "no review markdown produced by the report stage (checked final_review_clean.md and final_review.md)",
-  "source_markdown_path": "",
-  "prompt_path": "",
-  "image_path": ""
-}

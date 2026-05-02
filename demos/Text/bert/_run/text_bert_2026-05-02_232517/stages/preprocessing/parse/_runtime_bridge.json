@@ -1,0 +1,234 @@
+{
+  "paper_pdf": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\bert\\_run\\text_bert_2026-05-02_232517\\inputs\\source_pdf\\paper.pdf",
+  "paper_key": "text_bert",
+  "job_id": "23637da0-5494-4005-a12d-6990c10959a3",
+  "job_dir": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\bert\\_run\\text_bert_2026-05-02_232517\\runtime\\jobs\\23637da0-5494-4005-a12d-6990c10959a3",
+  "job_json_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\bert\\_run\\text_bert_2026-05-02_232517\\runtime\\jobs\\23637da0-5494-4005-a12d-6990c10959a3\\job.json",
+  "own_payload": {
+    "job_id": "23637da0-5494-4005-a12d-6990c10959a3",
+    "status": "completed",
+    "message": "Review pipeline completed.",
+    "error": null,
+    "artifacts": {
+      "source_pdf_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\bert\\_run\\text_bert_2026-05-02_232517\\runtime\\jobs\\23637da0-5494-4005-a12d-6990c10959a3\\source.pdf",
+      "mineru_markdown_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\bert\\_run\\text_bert_2026-05-02_232517\\runtime\\jobs\\23637da0-5494-4005-a12d-6990c10959a3\\mineru_full.md",
+      "mineru_content_list_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\bert\\_run\\text_bert_2026-05-02_232517\\runtime\\jobs\\23637da0-5494-4005-a12d-6990c10959a3\\mineru_content_list.json",
+      "annotations_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\bert\\_run\\text_bert_2026-05-02_232517\\runtime\\jobs\\23637da0-5494-4005-a12d-6990c10959a3\\annotations.json",
+      "final_markdown_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\bert\\_run\\text_bert_2026-05-02_232517\\runtime\\jobs\\23637da0-5494-4005-a12d-6990c10959a3\\final_report.md",
+      "final_report_audit_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\bert\\_run\\text_bert_2026-05-02_232517\\runtime\\jobs\\23637da0-5494-4005-a12d-6990c10959a3\\final_report_audit.json",
+      "report_pdf_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\bert\\_run\\text_bert_2026-05-02_232517\\runtime\\jobs\\23637da0-5494-4005-a12d-6990c10959a3\\final_report.pdf",
+      "latest_output_md_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\bert\\_run\\text_bert_2026-05-02_232517\\runtime\\jobs\\23637da0-5494-4005-a12d-6990c10959a3\\latest_extraction.md",
+      "latest_output_pdf_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\bert\\_run\\text_bert_2026-05-02_232517\\runtime\\jobs\\23637da0-5494-4005-a12d-6990c10959a3\\latest_extraction.pdf",
+      "prompt_snapshot_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\bert\\_run\\text_bert_2026-05-02_232517\\runtime\\jobs\\23637da0-5494-4005-a12d-6990c10959a3\\agent_prompt.txt"
+    },
+    "usage": {
+      "token": {
+        "requests": 5,
+        "input_tokens": 228525,
+        "output_tokens": 2470,
+        "total_tokens": 230995
+      },
+      "tool": {
+        "total_calls": 5,
+        "distinct_tools": 1,
+        "per_tool": {
+          "review_final_markdown_write": 5
+        }
+      },
+      "paper_search": {
+        "total_calls": 0,
+        "successful_calls": 0,
+        "effective_calls": 0,
+        "papers_found": 0,
+        "distinct_queries": 0
+      }
+    },
+    "metadata": {
+      "llm_api_mode": "chat_completions",
+      "markdown_provider": "mineru_v4",
+      "mineru_batch_id": "72703022-db95-4be9-b8b2-8d4395308a53",
+      "parse_warning": null,
+      "paper_search_runtime_state": {
+        "enabled": true,
+        "started": false,
+        "availability": "missing_base_url",
+        "base_url": null,
+        "health_url": null,
+        "error": null
+      },
+      "final_report_source": "review_annotation_agent",
+      "status_updates_count": 0,
+      "final_report_sections_completed": [
+        "metadata",
+        "technical_positioning",
+        "claims",
+        "summary",
+        "experiment"
+      ],
+      "final_report_draft_version": 5,
+      "final_report_draft": {
+        "sections": {
+          "metadata": "- **Title**: BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding\n- **Task**: Language representation pre-training and fine-tuning for NLP tasks (GLUE, SQuAD v1.1/v2.0, SWAG, NER)\n- **Code**: https://github.com/google-research/bert",
+          "technical_positioning": "BERT uses a unified bidirectional Transformer with MLM+NSP pre-training and minimal-output-layer fine-tuning across sentence-level and token-level NLP tasks.\n\n| Research domain | Method | Deep bidirectional pre-training | Masked LM objective | Next Sentence Prediction | Unified fine-tuning across tasks |\n|---|---|---|---|---|---|\n| Contextual feature-based transfer learning | ELMo | × | × | × | × |\n| Fine-tuning language model transfer | OpenAI GPT | × | × | × | √ |\n| Semi-supervised sequence fine-tuning | ULMFiT | × | × | × | √ |\n| Fine-tuning bidirectional Transformer transfer | BERT | √ | √ | √ | √ |\n| This Work | Bidirectional Encoder Representations from Transformers | √ | √ | √ | √ |\n\nGap: Objective retrieval unavailable; only manuscript-declared related methods are included.",
+          "claims": "Paper scope: Pre-train deep bidirectional Transformer representations with MLM+NSP and fine-tune on diverse downstream NLP tasks.\nEvaluation scope: 11-task benchmark results (GLUE, SQuAD v1.1/v2.0, SWAG) and ablations on pre-training tasks/model size; additional NER comparison.\n\n| Claim | Evidence | Assessment | Location |\n|---|---|---|---|\n| BERT advances state of the art on 11 NLP tasks with large gains on GLUE, MultiNLI, and SQuAD. | Abstract reports GLUE 80.5 (+7.7), MultiNLI 86.7 (+4.6), SQuAD v1.1 test F1 93.2 (+1.5), SQuAD v2.0 test F1 83.1 (+5.1). Table 1/2/3 show BERTLARGE exceeds listed prior systems. | Experimental claim is strongly supported by benchmark tables with explicit numeric margins over prior listed systems. | Abstract; Sec. 4.1 Table 1; Sec. 4.2 Table 2; Sec. 4.3 Table 3 |\n| Bidirectional MLM+NSP pre-training is critical for downstream improvements. | Sec. 3.1 defines MLM+NSP; Table 5 ablation shows drops when removing NSP and larger drops for LTR & No NSP (e.g., SQuAD F1 88.5 to 77.8; MRPC 86.7 to 77.5). | Methodological claim is well-supported by controlled ablations using matched data/fine-tuning settings. | Sec. 3.1; Sec. 5.1; Table 5 |\n| A unified architecture with minimal task-specific additions can transfer across sentence and token tasks. | Figure 1 and Sec. 3.2 state same pre-trained parameters across tasks; only small output heads are added ([CLS] for classification, token-level heads for QA/tagging). | Methodological support is clear and traceable from architecture description to task formulations and experiments. | Figure 1; Sec. 3; Sec. 3.2; Sec. 4.1–4.4 |",
+          "summary": "BERT introduces deep bidirectional Transformer pre-training with masked language modeling and next sentence prediction, followed by end-to-end fine-tuning with minimal task-specific output layers. The paper reports broad gains across major NLP benchmarks and includes ablations linking performance to bidirectionality, pre-training objectives, and model scale.\n\nStrengths:\n- Clear motivation: identifies limitations of unidirectional pre-training for sentence- and token-level tasks.\n- Coherent method: MLM and NSP are explicitly designed to enable bidirectional contextualization and sentence-pair modeling.\n- Broad empirical evidence: results on GLUE, SQuAD v1.1/v2.0, SWAG, and NER.\n- Strong analysis support: dedicated ablations on pre-training objectives and model size.\n- Practical transfer setup: unified architecture and low task-specific modification burden.\n\nWeaknesses:\n- Some main comparisons rely on leaderboard systems with limited public training details, reducing strict comparability.\n- Cross-system fairness is constrained in places by differences in external data use (explicitly discussed for SQuAD).\n- Limited discussion of computational efficiency trade-offs beyond brief runtime/pre-training notes.",
+          "experiment": "### Main Result\nLocation: Section 4 Experiments — Table 1 (GLUE Test), Table 2 (SQuAD v1.1), Table 3 (SQuAD v2.0), Table 4 (SWAG).\n\n| Task | Dataset | Metric | Best Baseline | Paper Result | Difference (Δ) |\n|---|---|---|---|---|---|\n| NLI (matched) | GLUE MNLI-m | Accuracy | OpenAI GPT 82.1 | BERTLARGE 86.7 | +4.6 |\n| NLI (mismatched) | GLUE MNLI-mm | Accuracy | OpenAI GPT 81.4 | BERTLARGE 85.9 | +4.5 |\n| Paraphrase | GLUE QQP | F1 | OpenAI GPT 70.3 | BERTLARGE 72.1 | +1.8 |\n| QA-NLI | GLUE QNLI | Accuracy | OpenAI GPT 87.4 | BERTLARGE 92.7 | +5.3 |\n| Sentiment | GLUE SST-2 | Accuracy | Pre-OpenAI SOTA 93.2 | BERTLARGE 94.9 | +1.7 |\n| Linguistic acceptability | GLUE CoLA | Accuracy | OpenAI GPT 45.4 | BERTLARGE 60.5 | +15.1 |\n| Semantic similarity | GLUE STS-B | Spearman | Pre-OpenAI SOTA 81.0 | BERTLARGE 86.5 | +5.5 |\n| Paraphrase | GLUE MRPC | F1 | Pre-OpenAI SOTA 86.0 | BERTLARGE 89.3 | +3.3 |\n| Entailment | GLUE RTE | Accuracy | Pre-OpenAI SOTA 61.7 | BERTLARGE 70.1 | +8.4 |\n| Aggregate | GLUE (excluding WNLI) | Average | OpenAI GPT 75.1 | BERTLARGE 82.1 | +7.0 |\n| Extractive QA | SQuAD v1.1 Test | F1 | #1 Ensemble - nlnet 91.7 | BERTLARGE (Ens.+TriviaQA) 93.2 | +1.5 |\n| Extractive QA | SQuAD v2.0 Test | F1 | #1 Single - MIR-MRC (F-Net) 78.0 | BERTLARGE (Single) 83.1 | +5.1 |\n| Commonsense completion | SWAG Test | Accuracy | OpenAI GPT 78.0 | BERTLARGE 86.3 | +8.3 |\n\n### Ablation Result\nLocation: Section 5.1 Effect of Pre-training Tasks, Table 5; datasets: MNLI-m, QNLI, MRPC, SST-2, SQuAD v1.1.\n\n| Ablation Dimension | Configuration | Full Model | Paper Result | Difference (Δ) |\n|---|---|---|---|---|\n| Optimal setup | BERTBASE (MNLI-m) | 84.4 | 84.4 | 0 |\n| Pre-training objective (NSP) | No NSP | 84.4 | 83.9 | -0.5 |\n| Context direction + objective | LTR & No NSP | 84.4 | 82.1 | -2.3 |\n| Added top architecture | + BiLSTM | 84.4 | 82.1 | -2.3 |\n\n| Ablation Dimension | Configuration | Full Model | Paper Result | Difference (Δ) |\n|---|---|---|---|---|\n| Optimal setup | BERTBASE (QNLI) | 88.4 | 88.4 | 0 |\n| Pre-training objective (NSP) | No NSP | 88.4 | 84.9 | -3.5 |\n| Context direction + objective | LTR & No NSP | 88.4 | 84.3 | -4.1 |\n| Added top architecture | + BiLSTM | 88.4 | 84.1 | -4.3 |\n\n| Ablation Dimension | Configuration | Full Model | Paper Result | Difference (Δ) |\n|---|---|---|---|---|\n| Optimal setup | BERTBASE (MRPC) | 86.7 | 86.7 | 0 |\n| Pre-training objective (NSP) | No NSP | 86.7 | 86.5 | -0.2 |\n| Context direction + objective | LTR & No NSP | 86.7 | 77.5 | -9.2 |\n| Added top architecture | + BiLSTM | 86.7 | 75.7 | -11.0 |\n\n| Ablation Dimension | Configuration | Full Model | Paper Result | Difference (Δ) |\n|---|---|---|---|---|\n| Optimal setup | BERTBASE (SST-2) | 92.7 | 92.7 | 0 |\n| Pre-training objective (NSP) | No NSP | 92.7 | 92.6 | -0.1 |\n| Context direction + objective | LTR & No NSP | 92.7 | 92.1 | -0.6 |\n| Added top architecture | + BiLSTM | 92.7 | 91.6 | -1.1 |\n\n| Ablation Dimension | Configuration | Full Model | Paper Result | Difference (Δ) |\n|---|---|---|---|---|\n| Optimal setup | BERTBASE (SQuAD v1.1) | 88.5 | 88.5 | 0 |\n| Pre-training objective (NSP) | No NSP | 88.5 | 87.9 | -0.6 |\n| Context direction + objective | LTR & No NSP | 88.5 | 77.8 | -10.7 |\n| Added top architecture | + BiLSTM | 88.5 | 84.9 | -3.6 |",
+          "novelty_verification_related_work_matrix": "External literature search was not started in this run; novelty/comparison conclusions are deferred to manual verification.",
+          "references": "External literature search was not started in this run; no external references are listed."
+        },
+        "section_order": [
+          "metadata",
+          "technical_positioning",
+          "claims",
+          "summary",
+          "experiment"
+        ],
+        "completed_sections": [
+          "metadata",
+          "technical_positioning",
+          "claims",
+          "summary",
+          "experiment"
+        ],
+        "missing_sections": [],
+        "next_required_section": null,
+        "status": "completed",
+        "source": "review_annotation_agent"
+      },
+      "final_report_audit": {
+        "enabled": true,
+        "applied": true,
+        "iterations_run": 3,
+        "max_iterations": 3,
+        "stop_reason": "max_iterations_reached",
+        "final_markdown": "[BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding]\n\n## 1. Metadata\n- **Title**: BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding\n- **Task**: Language representation pre-training and fine-tuning for NLP tasks (main 11-task benchmark: GLUE, SQuAD v1.1/v2.0, SWAG; plus additional NER analysis in Sec. 5.3)\n- **Code**: https://github.com/google-research/bert\n\n## 2. Technical Positioning\nBERT uses a unified bidirectional Transformer with MLM+NSP pre-training and minimal-output-layer fine-tuning across sentence-level and token-level NLP tasks.\n\n| Research domain | Method | Deep bidirectional pre-training | Masked LM objective | Next Sentence Prediction | Unified fine-tuning across tasks |\n|---|---|---|---|---|---|\n| Contextual feature-based transfer learning | ELMo | × | × | × | × |\n| Fine-tuning language model transfer | OpenAI GPT | × | × | × | √ |\n| Semi-supervised sequence fine-tuning | ULMFiT | × | × | × | √ |\n| Fine-tuning bidirectional Transformer transfer | BERT | √ | √ | √ | √ |\n| This Work | Bidirectional Encoder Representations from Transformers | √ | √ | √ | √ |\n\n## 3. Claims\nPaper scope: Pre-train deep bidirectional Transformer representations with MLM+NSP and fine-tune on diverse downstream NLP tasks.\nEvaluation scope: 11-task benchmark results (GLUE, SQuAD v1.1/v2.0, SWAG) and ablations on pre-training tasks/model size; additional NER comparison.\n\n| Claim | Evidence | Assessment | Location |\n|---|---|---|---|\n| BERT advances state of the art on 11 NLP tasks with large gains on GLUE, MultiNLI, and SQuAD. | Abstract reports GLUE 80.5 (+7.7), MultiNLI 86.7 (+4.6), SQuAD v1.1 test F1 93.2 (+1.5), SQuAD v2.0 test F1 83.1 (+5.1). Table 1/2/3 show strong gains; for SQuAD v1.1, the top test result is BERTLARGE (Ens.+TriviaQA), while single-model performance is reported separately (e.g., BERTLARGE (Sgl.+TriviaQA) test F1 91.8). Sec. 4.2 also notes that top leaderboard systems lacked up-to-date public descriptions and could use any public training data, affecting strict comparability. | Experimental claim is strongly supported by benchmark tables with explicit numeric margins over prior listed systems, with SQuAD v1.1 gains conditioned on ensemble/TriviaQA settings as reported and with the paper’s stated leaderboard comparability caveat. | Abstract; Sec. 4.1 Table 1; Sec. 4.2 Table 2; Sec. 4.3 Table 3 |\n| Bidirectional MLM+NSP pre-training is critical for downstream improvements. | Sec. 3.1 defines MLM+NSP; Table 5 ablation shows drops when removing NSP and larger drops for LTR & No NSP (e.g., SQuAD F1 88.5 to 77.8; MRPC 86.7 to 77.5). | Methodological claim is well-supported by controlled ablations using matched data/fine-tuning settings. | Sec. 3.1; Sec. 5.1; Table 5 |\n| A unified architecture with minimal task-specific additions can transfer across sentence and token tasks. | Figure 1 and Sec. 3.2 state same pre-trained parameters across tasks; only small output heads are added ([CLS] for classification, token-level heads for QA/tagging). | Methodological support is clear and traceable from architecture description to task formulations and experiments. | Figure 1; Sec. 3; Sec. 3.2; Sec. 4.1–4.4 |\n\n## 4. Summary\nBERT introduces deep bidirectional Transformer pre-training with masked language modeling and next sentence prediction, followed by end-to-end fine-tuning with minimal task-specific output layers. The paper reports broad gains across major NLP benchmarks and includes ablations linking performance to bidirectionality, pre-training objectives, and model scale.\n\nStrengths:\n- Clear motivation: identifies limitations of unidirectional pre-training for sentence- and token-level tasks.\n- Coherent method: MLM and NSP are explicitly designed to enable bidirectional contextualization and sentence-pair modeling.\n- Broad empirical evidence: results on GLUE, SQuAD v1.1/v2.0, SWAG, and NER.\n- Strong analysis support: dedicated ablations on pre-training objectives and model size.\n- Practical transfer setup: unified architecture and low task-specific modification burden.\n\nWeaknesses:\n- Some main comparisons rely on leaderboard systems with limited public training details, reducing strict comparability.\n- Cross-system fairness is constrained in places by differences in external data use (explicitly discussed for SQuAD).\n- Limited discussion of computational efficiency trade-offs beyond brief runtime/pre-training notes.\n\n## 5. Experiment\n### Main Result\nLocation: Section 4 Experiments — Table 1 (GLUE Test), Table 2 (SQuAD v1.1), Table 3 (SQuAD v2.0), Table 4 (SWAG).\n\n| Task | Dataset | Metric | Best Baseline | Paper Result | Difference (Δ) |\n|---|---|---|---|---|---|\n| NLI (matched) | GLUE MNLI-m | Accuracy | OpenAI GPT 82.1 | BERTLARGE 86.7 | +4.6 |\n| NLI (mismatched) | GLUE MNLI-mm | Accuracy | OpenAI GPT 81.4 | BERTLARGE 85.9 | +4.5 |\n| Paraphrase | GLUE QQP | F1 | OpenAI GPT 70.3 | BERTLARGE 72.1 | +1.8 |\n| QA-NLI | GLUE QNLI | Accuracy | OpenAI GPT 87.4 | BERTLARGE 92.7 | +5.3 |\n| Sentiment | GLUE SST-2 | Accuracy | Pre-OpenAI SOTA 93.2 | BERTLARGE 94.9 | +1.7 |\n| Linguistic acceptability | GLUE CoLA | Accuracy | OpenAI GPT 45.4 | BERTLARGE 60.5 | +15.1 |\n| Semantic similarity | GLUE STS-B | Spearman | Pre-OpenAI SOTA 81.0 | BERTLARGE 86.5 | +5.5 |\n| Paraphrase | GLUE MRPC | F1 | Pre-OpenAI SOTA 86.0 | BERTLARGE 89.3 | +3.3 |\n| Entailment | GLUE RTE | Accuracy | Pre-OpenAI SOTA 61.7 | BERTLARGE 70.1 | +8.4 |\n| Aggregate | GLUE (excluding WNLI) | Average | OpenAI GPT 75.1 | BERTLARGE 82.1 | +7.0 |\n| Extractive QA | SQuAD v1.1 Test | F1 | #1 Ensemble - nlnet 91.7 | BERTLARGE (Ens.+TriviaQA) 93.2 | +1.5 |\n| Extractive QA | SQuAD v2.0 Test | F1 | #1 Single - MIR-MRC (F-Net) 78.0 | BERTLARGE (Single) 83.1 | +5.1 |\n| Commonsense completion | SWAG Test | Accuracy | OpenAI GPT 78.0 | BERTLARGE 86.3 | +8.3 |\n\n### Ablation Result\nLocation: Section 5.1 Effect of Pre-training Tasks, Table 5; datasets: MNLI-m, QNLI, MRPC, SST-2, SQuAD v1.1.\n\n| Ablation Dimension | Configuration | Full Model | Paper Result | Difference (Δ) |\n|---|---|---|---|---|\n| Optimal setup | BERTBASE (MNLI-m) | 84.4 | 84.4 | 0 |\n| Pre-training objective (NSP) | No NSP | 84.4 | 83.9 | -0.5 |\n| Context direction + objective | LTR & No NSP | 84.4 | 82.1 | -2.3 |\n| Added top architecture | + BiLSTM | 84.4 | 82.1 | -2.3 |\n\n| Ablation Dimension | Configuration | Full Model | Paper Result | Difference (Δ) |\n|---|---|---|---|---|\n| Optimal setup | BERTBASE (QNLI) | 88.4 | 88.4 | 0 |\n| Pre-training objective (NSP) | No NSP | 88.4 | 84.9 | -3.5 |\n| Context direction + objective | LTR & No NSP | 88.4 | 84.3 | -4.1 |\n| Added top architecture | + BiLSTM | 88.4 | 84.1 | -4.3 |\n\n| Ablation Dimension | Configuration | Full Model | Paper Result | Difference (Δ) |\n|---|---|---|---|---|\n| Optimal setup | BERTBASE (MRPC) | 86.7 | 86.7 | 0 |\n| Pre-training objective (NSP) | No NSP | 86.7 | 86.5 | -0.2 |\n| Context direction + objective | LTR & No NSP | 86.7 | 77.5 | -9.2 |\n| Added top architecture | + BiLSTM | 86.7 | 75.7 | -11.0 |\n\n| Ablation Dimension | Configuration | Full Model | Paper Result | Difference (Δ) |\n|---|---|---|---|---|\n| Optimal setup | BERTBASE (SST-2) | 92.7 | 92.7 | 0 |\n| Pre-training objective (NSP) | No NSP | 92.7 | 92.6 | -0.1 |\n| Context direction + objective | LTR & No NSP | 92.7 | 92.1 | -0.6 |\n| Added top architecture | + BiLSTM | 92.7 | 91.6 | -1.1 |\n\n| Ablation Dimension | Configuration | Full Model | Paper Result | Difference (Δ) |\n|---|---|---|---|---|\n| Optimal setup | BERTBASE (SQuAD v1.1) | 88.5 | 88.5 | 0 |\n| Pre-training objective (NSP) | No NSP | 88.5 | 87.9 | -0.6 |\n| Context direction + objective | LTR & No NSP | 88.5 | 77.8 | -10.7 |\n| Added top architecture | + BiLSTM | 88.5 | 84.9 | -3.6 |",
+        "iterations": [
+          {
+            "iteration": 1,
+            "audit_summary": "The review is largely faithful to the paper. I found a few evidence-grounded mismatches/overstatements around benchmark scope and one metric labeling issue.",
+            "issues": [
+              {
+                "problem_type": "wrong_setting_scope",
+                "severity": "medium",
+                "section": "2. Technical Positioning",
+                "review_excerpt": "Task: Language representation pre-training and fine-tuning for NLP tasks (GLUE, SQuAD v1.1/v2.0, SWAG, NER)",
+                "paper_evidence": "Section 4 states: \"we present BERT fine-tuning results on 11 NLP tasks\" (GLUE + SQuAD v1.1 + SQuAD v2.0 + SWAG). NER is discussed separately in Section 5.3 as a feature-based vs fine-tuning comparison on CoNLL-2003, not part of the 11-task main benchmark suite.",
+                "suggested_fix": "Clarify that the main 11-task benchmark is GLUE/SQuAD/SWAG, with NER included as an additional analysis in Sec. 5.3 rather than part of the 11-task headline suite.",
+                "should_fix": true
+              },
+              {
+                "problem_type": "wrong_metric",
+                "severity": "low",
+                "section": "5. Experiment (Main Result table)",
+                "review_excerpt": "Linguistic acceptability | GLUE CoLA | Accuracy",
+                "paper_evidence": "Table 1 note: \"F1 scores are reported for QQP and MRPC, Spearman correlations are reported for STS-B, and accuracy scores are reported for the other tasks.\" For CoLA, GLUE uses Matthews correlation (not accuracy) in the benchmark; BERT paper reports CoLA values consistent with that metric.",
+                "suggested_fix": "Replace CoLA metric label from \"Accuracy\" to \"Matthews corr.\" (or simply \"GLUE CoLA score\").",
+                "should_fix": true
+              },
+              {
+                "problem_type": "overclaim",
+                "severity": "low",
+                "section": "3. Claims (first claim assessment)",
+                "review_excerpt": "Table 1/2/3 show BERTLARGE exceeds listed prior systems.",
+                "paper_evidence": "For SQuAD v1.1 Table 2, the best test result is from \"BERTLARGE (Ens.+TriviaQA)\" (ensemble with TriviaQA pre-finetuning), while \"BERTLARGE (Single)\" has no test entry. The blanket phrase \"BERTLARGE exceeds listed prior systems\" is imprecise because gains there depend on single vs ensemble and TriviaQA augmentation conditions explicitly discussed in Sec. 4.2.",
+                "suggested_fix": "Qualify that SQuAD v1.1 top test gain is achieved by BERTLARGE ensemble with TriviaQA augmentation; single-model claim should reference the reported single setting explicitly.",
+                "should_fix": true
+              }
+            ],
+            "issue_count": 3,
+            "high_severity_issue_count": 0,
+            "revised": true,
+            "accepted": true,
+            "validation_ok": true,
+            "validation_reason": null,
+            "validation_message": "ok",
+            "compatibility_ok": true,
+            "compatibility_message": "ok",
+            "error": null
+          },
+          {
+            "iteration": 2,
+            "audit_summary": "The review is largely faithful to the paper, with a small number of concrete mismatches/overstatements around metric labeling and framing of baselines/comparisons.",
+            "issues": [
+              {
+                "problem_type": "factual error",
+                "severity": "medium",
+                "section": "5. Experiment → Main Result table (CoLA row)",
+                "review_excerpt": "Linguistic acceptability | GLUE CoLA | Matthews corr. | OpenAI GPT 45.4 | BERTLARGE 60.5 | +15.1",
+                "paper_evidence": "Table 1 reports CoLA with values 45.4 (OpenAI GPT) and 60.5 (BERTLARGE), and the paper states: \"F1 scores are reported for QQP and MRPC, Spearman correlations are reported for STS-B, and accuracy scores are reported for the other tasks.\" CoLA is therefore grouped under \"accuracy scores\" in the paper’s reporting description, not explicitly labeled as Matthews correlation there.",
+                "suggested_fix": "Align metric label with the paper’s table description (e.g., use the paper’s generic reporting convention) or avoid asserting a different metric name unless explicitly sourced in-paper.",
+                "should_fix": true
+              },
+              {
+                "problem_type": "overclaim",
+                "severity": "low",
+                "section": "2. Technical Positioning",
+                "review_excerpt": "Gap: Objective retrieval unavailable; only manuscript-declared related methods are included.",
+                "paper_evidence": "The source paper does not discuss any \"objective retrieval\" limitation or such a gap statement; this is external/meta commentary not grounded in the manuscript.",
+                "suggested_fix": "Remove this sentence or replace with a paper-grounded limitation explicitly stated by the authors.",
+                "should_fix": true
+              },
+              {
+                "problem_type": "understatement/missing condition",
+                "severity": "low",
+                "section": "3. Claims (first claim assessment)",
+                "review_excerpt": "Experimental claim is strongly supported by benchmark tables with explicit numeric margins over prior listed systems...",
+                "paper_evidence": "For SQuAD v1.1, the paper explicitly notes comparability caveats: \"The top results from the SQuAD leaderboard do not have up-to-date public system descriptions available, and are allowed to use any public data when training their systems. We therefore use modest data augmentation...\" This condition is important when asserting margins.",
+                "suggested_fix": "Add the explicit caveat that some leaderboard comparisons have limited methodological transparency and differing data-use allowances, as stated in Sec. 4.2.",
+                "should_fix": true
+              }
+            ],
+            "issue_count": 3,
+            "high_severity_issue_count": 0,
+            "revised": true,
+            "accepted": true,
+            "validation_ok": true,
+            "validation_reason": null,
+            "validation_message": "ok",
+            "compatibility_ok": true,
+            "compatibility_message": "ok",
+            "error": null
+          },
+          {
+            "iteration": 3,
+            "audit_summary": "The review is largely faithful to the paper. I found one concrete mismatch where the review overstates/overgeneralizes metric type for CoLA in GLUE.",
+            "issues": [
+              {
+                "problem_type": "factual error",
+                "severity": "low",
+                "section": "5. Experiment → Main Result table",
+                "review_excerpt": "Linguistic acceptability | GLUE CoLA | Score (reported under accuracy-grouped tasks)",
+                "paper_evidence": "Table 1 explicitly states: “F1 scores are reported for QQP and MRPC, Spearman correlations are reported for STS-B, and accuracy scores are reported for the other tasks.” CoLA is listed among GLUE tasks scored as accuracy in this table.",
+                "suggested_fix": "Change the metric label for CoLA to “Accuracy” (or explicitly note that in this paper’s Table 1 reporting, CoLA is treated under the accuracy-reported tasks).",
+                "should_fix": true
+              }
+            ],
+            "issue_count": 1,
+            "high_severity_issue_count": 0,
+            "revised": true,
+            "accepted": true,
+            "validation_ok": true,
+            "validation_reason": null,
+            "validation_message": "ok",
+            "compatibility_ok": true,
+            "compatibility_message": "ok",
+            "error": null
+          }
+        ],
+        "llm_provider": "openai",
+        "llm_model": "openai/gpt-5.3-codex",
+        "source_markdown_chars": 67650,
+        "source_markdown_chars_sent": 67650,
+        "report_markdown_chars_sent": 7368
+      }
+    },
+    "annotation_count": 0,
+    "final_report_ready": true,
+    "pdf_ready": true,
+    "job_json_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\bert\\_run\\text_bert_2026-05-02_232517\\runtime\\jobs\\23637da0-5494-4005-a12d-6990c10959a3\\job.json",
+    "job_dir": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\bert\\_run\\text_bert_2026-05-02_232517\\runtime\\jobs\\23637da0-5494-4005-a12d-6990c10959a3",
+    "latest_output_md": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\bert\\_run\\text_bert_2026-05-02_232517\\runtime\\jobs\\23637da0-5494-4005-a12d-6990c10959a3\\latest_extraction.md",
+    "latest_output_pdf": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\bert\\_run\\text_bert_2026-05-02_232517\\runtime\\jobs\\23637da0-5494-4005-a12d-6990c10959a3\\latest_extraction.pdf",
+    "final_report_audit_json": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\bert\\_run\\text_bert_2026-05-02_232517\\runtime\\jobs\\23637da0-5494-4005-a12d-6990c10959a3\\final_report_audit.json"
+  }
+}

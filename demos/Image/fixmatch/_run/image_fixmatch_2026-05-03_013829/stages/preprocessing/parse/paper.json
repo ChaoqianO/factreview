@@ -1,0 +1,57 @@
+{
+  "source_pdf": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\fixmatch\\_run\\image_fixmatch_2026-05-03_013829\\inputs\\source_pdf\\paper.pdf",
+  "mineru_markdown_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\fixmatch\\_run\\image_fixmatch_2026-05-03_013829\\runtime\\jobs\\942ff7f0-3621-4b31-92d3-84a89678f7c3\\mineru_full.md",
+  "mineru_content_list_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\fixmatch\\_run\\image_fixmatch_2026-05-03_013829\\runtime\\jobs\\942ff7f0-3621-4b31-92d3-84a89678f7c3\\mineru_content_list.json",
+  "markdown_provider": "mineru_v4",
+  "mineru_batch_id": "78b48421-c2fc-4eab-81af-3b0e5b96df5e",
+  "parse_warning": null,
+  "job_id": "942ff7f0-3621-4b31-92d3-84a89678f7c3",
+  "job_json_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\fixmatch\\_run\\image_fixmatch_2026-05-03_013829\\runtime\\jobs\\942ff7f0-3621-4b31-92d3-84a89678f7c3\\job.json",
+  "shared_execution_extract": {
+    "paper_extracted_dir": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\fixmatch\\_run\\image_fixmatch_2026-05-03_013829\\inputs\\paper_extracted",
+    "paper_extracted_md_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\fixmatch\\_run\\image_fixmatch_2026-05-03_013829\\inputs\\paper_extracted\\paper.mineru.md",
+    "paper_extracted_content_list_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\fixmatch\\_run\\image_fixmatch_2026-05-03_013829\\inputs\\paper_extracted\\paper.mineru.content_list.json",
+    "paper_extracted_assets_dir": "",
+    "paper_extracted_tables_dir": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\fixmatch\\_run\\image_fixmatch_2026-05-03_013829\\inputs\\paper_extracted\\tables"
+  },
+  "annotation_count": 0,
+  "annotations_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\fixmatch\\_run\\image_fixmatch_2026-05-03_013829\\runtime\\jobs\\942ff7f0-3621-4b31-92d3-84a89678f7c3\\annotations.json",
+  "semantic_scholar_candidates_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\fixmatch\\_run\\image_fixmatch_2026-05-03_013829\\runtime\\jobs\\942ff7f0-3621-4b31-92d3-84a89678f7c3\\semantic_scholar_candidates.json",
+  "final_markdown_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\fixmatch\\_run\\image_fixmatch_2026-05-03_013829\\runtime\\jobs\\942ff7f0-3621-4b31-92d3-84a89678f7c3\\final_report.md",
+  "report_pdf_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\fixmatch\\_run\\image_fixmatch_2026-05-03_013829\\runtime\\jobs\\942ff7f0-3621-4b31-92d3-84a89678f7c3\\final_report.pdf",
+  "latest_output_md": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\fixmatch\\_run\\image_fixmatch_2026-05-03_013829\\runtime\\jobs\\942ff7f0-3621-4b31-92d3-84a89678f7c3\\latest_extraction.md",
+  "latest_output_pdf": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\fixmatch\\_run\\image_fixmatch_2026-05-03_013829\\runtime\\jobs\\942ff7f0-3621-4b31-92d3-84a89678f7c3\\latest_extraction.pdf",
+  "runtime_status": "completed",
+  "runtime_message": "Review pipeline completed.",
+  "runtime_error": null,
+  "usage": {
+    "token": {
+      "requests": 5,
+      "input_tokens": 275425,
+      "output_tokens": 1941,
+      "total_tokens": 277366
+    },
+    "tool": {
+      "total_calls": 5,
+      "distinct_tools": 1,
+      "per_tool": {
+        "review_final_markdown_write": 5
+      }
+    },
+    "paper_search": {
+      "total_calls": 0,
+      "successful_calls": 0,
+      "effective_calls": 0,
+      "papers_found": 0,
+      "distinct_queries": 0
+    }
+  },
+  "paper_search_runtime_state": {
+    "enabled": true,
+    "started": false,
+    "availability": "missing_base_url",
+    "base_url": null,
+    "health_url": null,
+    "error": null
+  }
+}

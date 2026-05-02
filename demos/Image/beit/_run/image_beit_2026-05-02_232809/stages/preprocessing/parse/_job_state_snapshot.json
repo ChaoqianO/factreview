@@ -1,0 +1,165 @@
+{
+  "id": "18fe5c86-01c4-4ade-8f09-5f34986fd4e0",
+  "title": "image_beit",
+  "source_pdf_name": "paper.pdf",
+  "status": "completed",
+  "message": "Review pipeline completed.",
+  "error": null,
+  "created_at": "2026-05-02T15:28:13.723669Z",
+  "updated_at": "2026-05-02T15:29:54.509050Z",
+  "usage": {
+    "token": {
+      "requests": 6,
+      "input_tokens": 283718,
+      "output_tokens": 2425,
+      "total_tokens": 286143
+    },
+    "tool": {
+      "total_calls": 6,
+      "distinct_tools": 1,
+      "per_tool": {
+        "review_final_markdown_write": 6
+      }
+    },
+    "paper_search": {
+      "total_calls": 0,
+      "successful_calls": 0,
+      "effective_calls": 0,
+      "papers_found": 0,
+      "distinct_queries": 0
+    }
+  },
+  "annotation_count": 0,
+  "final_report_ready": true,
+  "pdf_ready": true,
+  "artifacts": {
+    "source_pdf_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\beit\\_run\\image_beit_2026-05-02_232809\\runtime\\jobs\\18fe5c86-01c4-4ade-8f09-5f34986fd4e0\\source.pdf",
+    "mineru_markdown_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\beit\\_run\\image_beit_2026-05-02_232809\\runtime\\jobs\\18fe5c86-01c4-4ade-8f09-5f34986fd4e0\\mineru_full.md",
+    "mineru_content_list_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\beit\\_run\\image_beit_2026-05-02_232809\\runtime\\jobs\\18fe5c86-01c4-4ade-8f09-5f34986fd4e0\\mineru_content_list.json",
+    "annotations_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\beit\\_run\\image_beit_2026-05-02_232809\\runtime\\jobs\\18fe5c86-01c4-4ade-8f09-5f34986fd4e0\\annotations.json",
+    "final_markdown_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\beit\\_run\\image_beit_2026-05-02_232809\\runtime\\jobs\\18fe5c86-01c4-4ade-8f09-5f34986fd4e0\\final_report.md",
+    "final_report_audit_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\beit\\_run\\image_beit_2026-05-02_232809\\runtime\\jobs\\18fe5c86-01c4-4ade-8f09-5f34986fd4e0\\final_report_audit.json",
+    "report_pdf_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\beit\\_run\\image_beit_2026-05-02_232809\\runtime\\jobs\\18fe5c86-01c4-4ade-8f09-5f34986fd4e0\\final_report.pdf",
+    "latest_output_md_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\beit\\_run\\image_beit_2026-05-02_232809\\runtime\\jobs\\18fe5c86-01c4-4ade-8f09-5f34986fd4e0\\latest_extraction.md",
+    "latest_output_pdf_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\beit\\_run\\image_beit_2026-05-02_232809\\runtime\\jobs\\18fe5c86-01c4-4ade-8f09-5f34986fd4e0\\latest_extraction.pdf",
+    "prompt_snapshot_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\beit\\_run\\image_beit_2026-05-02_232809\\runtime\\jobs\\18fe5c86-01c4-4ade-8f09-5f34986fd4e0\\agent_prompt.txt"
+  },
+  "metadata": {
+    "llm_api_mode": "chat_completions",
+    "markdown_provider": "mineru_v4",
+    "mineru_batch_id": "8f00b584-a16f-43c8-81f5-6784d27a98b4",
+    "parse_warning": null,
+    "paper_search_runtime_state": {
+      "enabled": true,
+      "started": false,
+      "availability": "missing_base_url",
+      "base_url": null,
+      "health_url": null,
+      "error": null
+    },
+    "final_report_source": "review_annotation_agent",
+    "status_updates_count": 0,
+    "final_report_sections_completed": [
+      "metadata",
+      "technical_positioning",
+      "claims",
+      "summary",
+      "experiment"
+    ],
+    "final_report_draft_version": 5,
+    "final_report_draft": {
+      "sections": {
+        "metadata": "- Title: BEIT: BERT Pre-Training of Image Transformers\n- Task: Self-supervised pre-training for vision Transformers; downstream image classification and semantic segmentation\n- Code: https://aka.ms/beit",
+        "technical_positioning": "BEIT pre-training uses masked image modeling with image patches as input and dVAE visual tokens as prediction targets.\n\n| Research domain | Method | Masked autoencoding objective | Discrete visual token prediction | Contrastive/self-distillation paradigm | VAE-theoretic formulation |\n|---|---|---|---|---|---|\n| Self-supervised vision Transformer | iGPT | √ | × | × | × |\n| Self-supervised vision Transformer | ViT masked patch prediction | √ | × | × | × |\n| Self-supervised vision Transformer | MoCo v3 | × | × | √ | × |\n| Self-supervised vision Transformer | DINO | × | × | √ | × |\n| This Work | masked image modeling (MIM) with dVAE visual tokens | √ | √ | × | √ |\n\nGap: Objective retrieval unavailable; potential missing high-impact related work cannot be expanded beyond manuscript-declared methods.",
+        "claims": "Paper scope: Self-supervised pre-training method (BEIT) for vision Transformers via masked image modeling with visual-token targets.\nEvaluation scope: Fine-tuning on image classification (ImageNet-1K) and semantic segmentation (ADE20K), plus ablations and attention-map analysis.\n\n| Claim | Evidence | Assessment | Location |\n|---|---|---|---|\n| BEIT improves performance over prior self-supervised Transformer methods on ImageNet-1K fine-tuning. | Table 1: BEiT384-B 84.6 vs DINO-B 82.8 and MoCo v3-B 83.2; BEiT384-L 86.3 vs MoCo v3-L 84.1. | Experimental support is strong for listed model/resolution settings, with clear numeric gains against named baselines in the same table. | Sec. 3.1, Table 1 |\n| Predicting discrete visual tokens is a key design; replacing with pixel recovery degrades results. | Table 4: BEiT (300 epochs) 82.86/44.65 (ImageNet/ADE20K) vs “- Visual tokens (recover masked pixels)” 81.04/41.38 and “- Visual tokens - Blockwise masking” 80.50/37.09. | Experimental ablation directly isolates design choices and shows consistent drops on both tasks, supporting the methodological claim. | Sec. 3.3, Table 4 |\n| The BEIT objective can be interpreted as two-stage VAE training with MIM as prior learning. | Sec. 2.4 derives ELBO form (Eq. 2) and rewrites objective into Stage 1 visual token reconstruction + Stage 2 masked image modeling term (Eq. 3). | Theoretical support is derivational: equations and variable mapping are explicit; no formal theorem/proof beyond the presented ELBO decomposition. | Sec. 2.4, Eq. (2), Eq. (3) |",
+        "summary": "The paper presents BEIT, a self-supervised pre-training framework for vision Transformers that masks image patches and predicts dVAE-based discrete visual tokens. It formulates the objective in a VAE perspective, pretrains on ImageNet-1K without labels, and reports downstream gains on ImageNet classification and ADE20K segmentation with additional ablations and attention-map analysis.\n\nStrengths:\n- Clear problem framing for data-hungry vision Transformers and a concrete BERT-style pre-training adaptation.\n- Method design is explicitly specified (two image views, masking strategy, token prediction objective, training setup).\n- Empirical evidence spans two downstream tasks with direct baseline comparisons (Table 1 and Table 3).\n- Ablation section (Table 4) links key components (visual tokens, blockwise masking, masking ratio behavior) to performance changes.\n- Includes a theoretical interpretation via ELBO decomposition (Eq. 2–3) and qualitative analysis of learned attention regions.\n\nWeaknesses:\n- Main comparisons in core sections are concentrated on selected baselines and settings; broader objective related-work coverage is limited here.\n- Some strong claims (e.g., efficiency/throughput advantages) are mainly supported in appendices rather than the main experimental section.\n- Theoretical part is an interpretation/derivation and does not provide formal guarantees beyond the presented formulation.\n- Several analyses are qualitative (attention maps) and do not include quantitative localization or boundary metrics in the main text.",
+        "experiment": "### Main Result\nLocation: Section 3.1 Table 1 (ImageNet-1K classification, top-1 accuracy); Section 3.2 Table 3 (ADE20K semantic segmentation, mIoU, single-scale inference).\n\n| Task | Dataset | Metric | Best Baseline | Paper Result | Difference (Δ) |\n|---|---|---|---|---|---|\n| Image classification | ImageNet-1K | Top-1 accuracy | DeiT-B 81.8 (training from scratch) | BEiT-B 83.2 | +1.4 |\n| Image classification | ImageNet-1K | Top-1 accuracy | DeiT384-B 83.1 (training from scratch) | BEiT384-B 84.6 | +1.5 |\n| Image classification | ImageNet-1K | Top-1 accuracy | ViT384-B 84.0 (supervised pre-training on ImageNet-22K) | BEiT384-B 84.6 | +0.6 |\n| Image classification | ImageNet-1K | Top-1 accuracy | ViT384-L 85.2 (supervised pre-training on ImageNet-22K) | BEiT384-L 86.3 | +1.1 |\n| Image classification | ImageNet-1K | Top-1 accuracy | MoCo v3-B 83.2 (self-supervised) | BEiT384-B 84.6 | +1.4 |\n| Image classification | ImageNet-1K | Top-1 accuracy | MoCo v3-L 84.1 (self-supervised) | BEiT384-L 86.3 | +2.2 |\n| Image classification | ImageNet-1K | Top-1 accuracy | DINO-B 82.8 (self-supervised) | BEiT384-B 84.6 | +1.8 |\n| Semantic segmentation | ADE20K | mIoU (single-scale) | Supervised pre-training on ImageNet 45.3 | BEiT 45.6 | +0.3 |\n| Semantic segmentation | ADE20K | mIoU (single-scale) | Supervised pre-training on ImageNet 45.3 | BEiT + Intermediate Fine-Tuning 47.7 | +2.4 |\n| Semantic segmentation | ADE20K | mIoU (single-scale) | DINO 44.1 | BEiT 45.6 | +1.5 |\n| Semantic segmentation | ADE20K | mIoU (single-scale) | DINO 44.1 | BEiT + Intermediate Fine-Tuning 47.7 | +3.6 |\n\n### Ablation Result\nLocation: Section 3.3 Ablation Studies, Table 4; datasets: ImageNet (top-1 accuracy) and ADE20K (mIoU).\n\n| Ablation Dimension | Configuration | Full Model | Paper Result | Difference (Δ) |\n|---|---|---|---|---|\n| Optimal setup | BEiT (300 Epochs) | 82.86 (ImageNet) | 82.86 (ImageNet) | 0 |\n| Blockwise masking | - Blockwise masking | 82.86 (ImageNet) | 82.77 (ImageNet) | -0.09 |\n| Visual token target | - Visual tokens (recover masked pixels) | 82.86 (ImageNet) | 81.04 (ImageNet) | -1.82 |\n| Visual token target + masking strategy | - Visual tokens - Blockwise masking | 82.86 (ImageNet) | 80.50 (ImageNet) | -2.36 |\n| Prediction coverage | + Recover 100% visual tokens | 82.86 (ImageNet) | 82.59 (ImageNet) | -0.27 |\n| Masking + prediction coverage | - Masking + Recover 100% visual tokens | 82.86 (ImageNet) | 81.67 (ImageNet) | -1.19 |\n| Training duration | Pretrain longer (800 epochs) | 82.86 (ImageNet) | 83.19 (ImageNet) | +0.33 |\n\n| Ablation Dimension | Configuration | Full Model | Paper Result | Difference (Δ) |\n|---|---|---|---|---|\n| Optimal setup | BEiT (300 Epochs) | 44.65 (ADE20K) | 44.65 (ADE20K) | 0 |\n| Blockwise masking | - Blockwise masking | 44.65 (ADE20K) | 42.93 (ADE20K) | -1.72 |\n| Visual token target | - Visual tokens (recover masked pixels) | 44.65 (ADE20K) | 41.38 (ADE20K) | -3.27 |\n| Visual token target + masking strategy | - Visual tokens - Blockwise masking | 44.65 (ADE20K) | 37.09 (ADE20K) | -7.56 |\n| Prediction coverage | + Recover 100% visual tokens | 44.65 (ADE20K) | 40.93 (ADE20K) | -3.72 |\n| Masking + prediction coverage | - Masking + Recover 100% visual tokens | 44.65 (ADE20K) | 36.73 (ADE20K) | -7.92 |\n| Training duration | Pretrain longer (800 epochs) | 44.65 (ADE20K) | 45.58 (ADE20K) | +0.93 |",
+        "novelty_verification_related_work_matrix": "External literature search was not started in this run; novelty/comparison conclusions are deferred to manual verification.",
+        "references": "External literature search was not started in this run; no external references are listed."
+      },
+      "section_order": [
+        "metadata",
+        "technical_positioning",
+        "claims",
+        "summary",
+        "experiment"
+      ],
+      "completed_sections": [
+        "metadata",
+        "technical_positioning",
+        "claims",
+        "summary",
+        "experiment"
+      ],
+      "missing_sections": [],
+      "next_required_section": null,
+      "status": "completed",
+      "source": "review_annotation_agent"
+    },
+    "final_report_audit": {
+      "enabled": true,
+      "applied": true,
+      "iterations_run": 2,
+      "max_iterations": 3,
+      "stop_reason": "llm_error",
+      "final_markdown": "## 1. Metadata\n- Title: BEIT: BERT Pre-Training of Image Transformers\n- Task: Self-supervised pre-training for vision Transformers; downstream image classification and semantic segmentation\n- Code: https://aka.ms/beit\n\n## 2. Technical Positioning\nBEIT pre-training uses masked image modeling with image patches as input and dVAE visual tokens as prediction targets.\n\n| Research domain | Method | Masked autoencoding objective | Discrete visual token prediction | Contrastive/self-distillation paradigm | VAE-theoretic formulation |\n|---|---|---|---|---|---|\n| Self-supervised vision Transformer | iGPT | √ | × | × | × |\n| Self-supervised vision Transformer | ViT masked patch prediction | √ | × | × | × |\n| Self-supervised vision Transformer | MoCo v3 | × | × | √ | × |\n| Self-supervised vision Transformer | DINO | × | × | √ | × |\n| This Work | masked image modeling (MIM) with dVAE visual tokens | √ | √ | × | √ |\n\nGap: Objective retrieval unavailable; potential missing high-impact related work cannot be expanded beyond manuscript-declared methods.\n\n## 3. Claims\nPaper scope: Self-supervised pre-training method (BEIT) for vision Transformers via masked image modeling with visual-token targets.\nEvaluation scope: Fine-tuning on image classification (ImageNet-1K) and semantic segmentation (ADE20K), plus ablations and attention-map analysis.\n\n| Claim | Evidence | Assessment | Location |\n|---|---|---|---|\n| BEIT matches or outperforms prior self-supervised Transformer methods on ImageNet-1K fine-tuning, with clear gains in several settings (especially higher resolution and larger models). | Table 1: BEiT-B (224) 83.2 ties MoCo v3-B (224) 83.2; BEiT384-B 84.6 > DINO-B 82.8 and MoCo v3-B 83.2; BEiT-L 85.2 and BEiT384-L 86.3 > MoCo v3-L 84.1. | Experimental support is strong but setting-dependent: results show ties in some matched settings and clear numeric gains in higher-resolution/larger-model configurations. | Sec. 3.1, Table 1 |\n| Predicting discrete visual tokens is a key design; replacing with pixel recovery degrades results. | Table 4: BEiT (300 epochs) 82.86/44.65 (ImageNet/ADE20K) vs “- Visual tokens (recover masked pixels)” 81.04/41.38 and “- Visual tokens - Blockwise masking” 80.50/37.09. | Experimental ablation directly isolates design choices and shows consistent drops on both tasks, supporting the methodological claim. | Sec. 3.3, Table 4 |\n| The BEIT objective can be interpreted as two-stage VAE training with MIM as prior learning. | Sec. 2.4 derives ELBO form (Eq. 2) and rewrites objective into Stage 1 visual token reconstruction + Stage 2 masked image modeling term (Eq. 3). | Theoretical support is derivational: equations and variable mapping are explicit; no formal theorem/proof beyond the presented ELBO decomposition. | Sec. 2.4, Eq. (2), Eq. (3) |\n\n## 4. Summary\nThe paper presents BEIT, a self-supervised pre-training framework for vision Transformers that masks image patches and predicts dVAE-based discrete visual tokens. It formulates the objective in a VAE perspective, pretrains on ImageNet-1K without labels, and reports downstream gains on ImageNet classification and ADE20K segmentation with additional ablations and attention-map analysis.\n\nStrengths:\n- Clear problem framing for data-hungry vision Transformers and a concrete BERT-style pre-training adaptation.\n- Method design is explicitly specified (two image views, masking strategy, token prediction objective, training setup).\n- Empirical evidence spans two downstream tasks with direct baseline comparisons (Table 1 and Table 3).\n- Ablation section (Table 4) links key components (visual tokens, blockwise masking, masking ratio behavior) to performance changes.\n- Includes a theoretical interpretation via ELBO decomposition (Eq. 2–3) and qualitative analysis of learned attention regions.\n\nWeaknesses:\n- Main comparisons in core sections are concentrated on selected baselines and settings; broader objective related-work coverage is limited here.\n- Some strong claims (e.g., efficiency/throughput advantages) are mainly supported in appendices rather than the main experimental section.\n- Theoretical part is an interpretation/derivation and does not provide formal guarantees beyond the presented formulation.\n- Several analyses are qualitative (attention maps) and do not include quantitative localization or boundary metrics in the main text.\n\n## 5. Experiment\n### Main Result\nLocation: Section 3.1 Table 1 (ImageNet-1K classification, top-1 accuracy); Section 3.2 Table 3 (ADE20K semantic segmentation, mIoU, single-scale inference).\n\n| Task | Dataset | Metric | Best Baseline | Paper Result | Difference (Δ) |\n|---|---|---|---|---|---|\n| Image classification | ImageNet-1K | Top-1 accuracy | DeiT-B 81.8 (training from scratch) | BEiT-B 83.2 | +1.4 |\n| Image classification | ImageNet-1K | Top-1 accuracy | DeiT384-B 83.1 (training from scratch) | BEiT384-B 84.6 | +1.5 |\n| Image classification | ImageNet-1K | Top-1 accuracy | ViT384-B 84.0 (supervised pre-training on ImageNet-22K) | BEiT384-B 84.6 | +0.6 |\n| Image classification | ImageNet-1K | Top-1 accuracy | ViT384-L 85.2 (supervised pre-training on ImageNet-22K) | BEiT384-L 86.3 | +1.1 |\n| Image classification | ImageNet-1K | Top-1 accuracy | MoCo v3-B 83.2 (self-supervised) | BEiT384-B 84.6 | +1.4 |\n| Image classification | ImageNet-1K | Top-1 accuracy | MoCo v3-L 84.1 (self-supervised) | BEiT384-L 86.3 | +2.2 |\n| Image classification | ImageNet-1K | Top-1 accuracy | DINO-B 82.8 (self-supervised) | BEiT384-B 84.6 | +1.8 |\n| Semantic segmentation | ADE20K | mIoU (single-scale) | Supervised pre-training on ImageNet 45.3 | BEiT 45.6 | +0.3 |\n| Semantic segmentation | ADE20K | mIoU (single-scale) | Supervised pre-training on ImageNet 45.3 | BEiT + Intermediate Fine-Tuning 47.7 | +2.4 |\n| Semantic segmentation | ADE20K | mIoU (single-scale) | DINO 44.1 | BEiT 45.6 | +1.5 |\n| Semantic segmentation | ADE20K | mIoU (single-scale) | DINO 44.1 | BEiT + Intermediate Fine-Tuning 47.7 | +3.6 |\n\n### Ablation Result\nLocation: Section 3.3 Ablation Studies, Table 4; datasets: ImageNet (top-1 accuracy) and ADE20K (mIoU).\n\n| Ablation Dimension | Configuration | Full Model | Paper Result | Difference (Δ) |\n|---|---|---|---|---|\n| Optimal setup | BEiT (300 Epochs) | 82.86 (ImageNet) | 82.86 (ImageNet) | 0 |\n| Blockwise masking | - Blockwise masking | 82.86 (ImageNet) | 82.77 (ImageNet) | -0.09 |\n| Visual token target | - Visual tokens (recover masked pixels) | 82.86 (ImageNet) | 81.04 (ImageNet) | -1.82 |\n| Visual token target + masking strategy | - Visual tokens - Blockwise masking | 82.86 (ImageNet) | 80.50 (ImageNet) | -2.36 |\n| Prediction coverage | + Recover 100% visual tokens | 82.86 (ImageNet) | 82.59 (ImageNet) | -0.27 |\n| Masking + prediction coverage | - Masking + Recover 100% visual tokens | 82.86 (ImageNet) | 81.67 (ImageNet) | -1.19 |\n| Training duration | Pretrain longer (800 epochs) | 82.86 (ImageNet) | 83.19 (ImageNet) | +0.33 |\n\n| Ablation Dimension | Configuration | Full Model | Paper Result | Difference (Δ) |\n|---|---|---|---|---|\n| Optimal setup | BEiT (300 Epochs) | 44.65 (ADE20K) | 44.65 (ADE20K) | 0 |\n| Blockwise masking | - Blockwise masking | 44.65 (ADE20K) | 42.93 (ADE20K) | -1.72 |\n| Visual token target | - Visual tokens (recover masked pixels) | 44.65 (ADE20K) | 41.38 (ADE20K) | -3.27 |\n| Visual token target + masking strategy | - Visual tokens - Blockwise masking | 44.65 (ADE20K) | 37.09 (ADE20K) | -7.56 |\n| Prediction coverage | + Recover 100% visual tokens | 44.65 (ADE20K) | 40.93 (ADE20K) | -3.72 |\n| Masking + prediction coverage | - Masking + Recover 100% visual tokens | 44.65 (ADE20K) | 36.73 (ADE20K) | -7.92 |\n| Training duration | Pretrain longer (800 epochs) | 44.65 (ADE20K) | 45.58 (ADE20K) | +0.93 |",
+      "iterations": [
+        {
+          "iteration": 1,
+          "audit_summary": "The review is largely faithful to the paper’s reported method and results. I found one concrete mismatch where a comparative claim is overstated relative to the exact numbers in Table 1.",
+          "issues": [
+            {
+              "problem_type": "factual error",
+              "severity": "medium",
+              "section": "3. Claims",
+              "review_excerpt": "BEIT improves performance over prior self-supervised Transformer methods on ImageNet-1K fine-tuning.",
+              "paper_evidence": "Table 1 shows BEiT-B (224) = 83.2 and MoCo v3-B (224) = 83.2, i.e., a tie rather than an improvement. BEiT does outperform DINO-B (82.8) and MoCo v3-L (84.1) in other listed settings, but not uniformly over all prior self-supervised Transformer methods/settings.",
+              "suggested_fix": "Qualify the claim to: BEIT matches or outperforms prior self-supervised Transformer baselines on ImageNet-1K, with clear gains in several settings (especially higher resolution and larger models).",
+              "should_fix": true
+            }
+          ],
+          "issue_count": 1,
+          "high_severity_issue_count": 0,
+          "revised": true,
+          "accepted": true,
+          "validation_ok": true,
+          "validation_reason": null,
+          "validation_message": "ok",
+          "compatibility_ok": true,
+          "compatibility_message": "ok",
+          "error": null
+        },
+        {
+          "iteration": 2,
+          "audit_summary": "The review is largely faithful to the paper’s reported method and results. One concrete mismatch is present in the technical-positioning table regarding iGPT’s objective/targets.",
+          "issues": [
+            {
+              "problem_type": "factual error",
+              "severity": "medium",
+              "section": "2. Technical Positioning (comparison table)",
+              "review_excerpt": "iGPT | Masked autoencoding objective: √ | Discrete visual token prediction: ×",
+              "paper_evidence": "Section 3.1 explicitly states: “iGPT uses clustered image tokens as both input and output for image GPT or image BERT.” Section 4 (Related Work) similarly says iGPT “creates a 9-bit color palette by k-means clustering RGB pixels, and then uses the clustered tokens to represent images.” This indicates discrete token prediction is part of iGPT’s pretraining setup.",
+              "suggested_fix": "Mark iGPT as using discrete token targets (at least for its BERT-style/image token pretraining variant), or qualify the table to distinguish BEIT’s dVAE tokens from iGPT’s k-means clustered tokens rather than marking iGPT as not using discrete token prediction.",
+              "should_fix": true
+            }
+          ],
+          "issue_count": 1,
+          "high_severity_issue_count": 0,
+          "revised": false,
+          "accepted": false,
+          "validation_ok": false,
+          "validation_reason": null,
+          "validation_message": null,
+          "compatibility_ok": false,
+          "compatibility_message": null,
+          "error": "RateLimitError: Error code: 429 - {'error': {'message': 'rate limit reached for TPM (request_id: chatcmpl-74b758b2575e4d7ba1dcae959ef605a9)', 'type': 'rate_limit_exceeded_error'}}"
+        }
+      ],
+      "llm_provider": "openai",
+      "llm_model": "openai/gpt-5.3-codex",
+      "source_markdown_chars": 67224,
+      "source_markdown_chars_sent": 67224,
+      "report_markdown_chars_sent": 7578
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "paper_key": "image_lrcn",
+  "paper_pdf": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\lrcn\\_run\\image_lrcn_2026-05-02_232205\\inputs\\source_pdf\\paper.pdf",
+  "status": "failed",
+  "exit_status": "failed",
+  "success": false,
+  "run_dir": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\lrcn\\_run\\image_lrcn_2026-05-02_232205\\stages\\fact_generation\\execution\\current",
+  "summary": {
+    "run_id": "2026-05-02_232350",
+    "status": "failed",
+    "attempts": 0,
+    "run_result": {},
+    "judge": {},
+    "artifacts": {
+      "files": []
+    }
+  },
+  "alignment": {}
+}

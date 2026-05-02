@@ -1,0 +1,9 @@
+{
+  "job_json_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\Prefix-Tuning\\_run\\text_prefix-tuning_2026-05-02_232205\\runtime\\jobs\\2b30b4a0-a346-40aa-bc96-5c2b82789218\\job.json",
+  "job_dir": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\Prefix-Tuning\\_run\\text_prefix-tuning_2026-05-02_232205\\runtime\\jobs\\2b30b4a0-a346-40aa-bc96-5c2b82789218",
+  "job_state_snapshot_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\Prefix-Tuning\\_run\\text_prefix-tuning_2026-05-02_232205\\stages\\preprocessing\\parse\\_job_state_snapshot.json",
+  "annotations_snapshot_path": "",
+  "final_markdown_snapshot_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\Prefix-Tuning\\_run\\text_prefix-tuning_2026-05-02_232205\\stages\\preprocessing\\parse\\snapshot_artifacts\\final_review.md",
+  "report_pdf_snapshot_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\Prefix-Tuning\\_run\\text_prefix-tuning_2026-05-02_232205\\stages\\preprocessing\\parse\\snapshot_artifacts\\final_review.pdf",
+  "semantic_scholar_candidates_snapshot_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\Prefix-Tuning\\_run\\text_prefix-tuning_2026-05-02_232205\\stages\\preprocessing\\parse\\snapshot_artifacts\\semantic_scholar_candidates.json"
+}

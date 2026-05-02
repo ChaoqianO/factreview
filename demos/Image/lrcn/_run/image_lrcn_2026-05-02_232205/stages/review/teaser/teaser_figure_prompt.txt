@@ -1,0 +1,138 @@
+Create a single polished teaser figure for an ML paper review summary.
+The output should read like a presentation-quality overview graphic, not a raw markdown rendering.
+Use the extracted report content below as authoritative content to place into the figure.
+Preserve factual wording, numeric values, and status labels from the source.
+Treat the following layout/style instructions as fixed constraints derived from the reference demos/compgcn/teaser_reference.png.
+Treat the attached reference image as a hard layout-and-style target, not as loose inspiration.
+If any conflict appears between content length and layout fidelity, preserve layout fidelity first and shrink or wrap text.
+Keep colors unchanged and keep the relative positions of all modules unchanged; only adjust module width/height slightly based on content length.
+All text should use Times New Roman.
+There is no strict text-length limit inside each module; automatically adjust font sizes, line breaks, spacing, and box sizes for the most visually balanced result.
+Do not invent any extra claims, metrics, or statuses.
+The Summary module is mandatory and must be visible on the right side with both Strengths and Weaknesses content.
+The Technical Positioning figure must reuse the provided technical reference image, not a substituted architecture image.
+Use final_review content as canonical source text and preserve wording exactly; do not paraphrase, merge, or drop any required module content.
+
+[Fixed Layout Instructions]
+- Keep the overall teaser layout structure and relative module positions consistent with the reference design.
+- The top-right area contains status badges; preserve their relative placement and badge style.
+- All status badges use rounded-rectangle backgrounds.
+- The lower row includes Improvement and Reduction badges; preserve their relative placement.
+- The right-side summary panel keeps Strengths above Weaknesses, with the specified bottom background colors.
+- Claim rows should be laid out adaptively based on content, with no fixed per-line text limit.
+
+[Template Geometry]
+Lock these structural regions to the template's geometry:
+- title_banner: bbox=(0.040,0.040)-(0.970,0.150). Restore the dark top banner spanning nearly the full width, with the title left-aligned inside it, followed by the summary text — do not prefix the summary with 'TL;DR' or any other label.
+- task_badge: bbox=(0.750,0.040)-(0.980,0.100). Place the task label as a rounded badge right-aligned at the top-right corner, directly above the status badge row. Its width must auto-fit the text content — do not fix or extend the left edge to fill the full bbox width. Right edge stays pinned at the right margin; only the left edge floats with content length.
+- status_badges: bbox=(0.670,0.080)-(0.980,0.145). Preserve the top-right status badge strip as a tight horizontal run of rounded badges with the original ordering and spacing.
+- delta_badges: bbox=(0.770,0.120)-(0.980,0.175). Keep the Improvement and Reduction badges on their own lower row directly beneath the status badges.
+- main_canvas: bbox=(0.040,0.150)-(0.970,0.920). Preserve the large light-gray body shell under the header; do not switch to a flat white or fully reflowed canvas.
+- technical_panel: bbox=(0.050,0.170)-(0.560,0.560). Keep the technical-positioning block on the left side of the body, occupying the largest panel width.
+- claims_panel: bbox=(0.560,0.170)-(0.800,0.560). Keep the claim/evidence rows in the middle-right column rather than moving them below the figure or into the summary panel.
+- summary_panel: bbox=(0.800,0.170)-(0.960,0.920). Keep the summary column docked on the far right with stacked Strengths and Weaknesses blocks.
+- strengths_panel: bbox=(0.800,0.580)-(0.960,0.750). Restore the green-tinted Strengths background in the upper part of the right summary column.
+- weaknesses_panel: bbox=(0.800,0.750)-(0.960,0.920). Restore the pink-tinted Weaknesses background in the lower part of the right summary column.
+- experiments_panel: bbox=(0.050,0.580)-(0.790,0.900). Keep the experiment/result tables across the lower-left and lower-middle area, below the technical and claims panels.
+
+[Template Visual Anchors]
+Reference template image: demos\compgcn\teaser_reference.png; rely on the attached template image and fixed module constraints.
+
+[Fixed Badge Styles]
+- Task: text color RGB(30,40,80); rounded-rectangle background RGB(235,238,248); right-aligned directly above the status badge row; width auto-fits content (do not stretch to full row width).
+- Supported: text color RGB(88,144,78); left icon is a check mark with RGB(0,150,100); rounded-rectangle background RGB(172,215,142).
+- Partially supported / Inconclusive (top-right area only — do NOT use this combined label in claims rows): text color RGB(182,140,2); left icon is a triangular warning symbol (⚠) — do NOT use a circle, question mark, or any other icon; the triangle border is RGB(184,134,11) with a white internal exclamation mark; rounded-rectangle background RGB(254,230,149).
+- Partially supported (claims row badge): text color RGB(182,140,2); left icon is a triangular warning symbol (⚠) — same icon as above; rounded-rectangle background RGB(254,230,149). Label reads '⚠ Partially supported'.
+- Inconclusive (claims row badge): text color RGB(182,140,2); left icon is a triangular warning symbol (⚠) — same icon as above; rounded-rectangle background RGB(254,230,149). Label reads '⚠ Inconclusive'.
+- In conflict: text color RGB(200,29,49); left icon is an X with RGB(139,0,0); rounded-rectangle background RGB(239,148,158).
+- Improvement: text color RGB(86,133,44); rounded-rectangle background RGB(117,189,66).
+- Reduction: text color RGB(133,19,44); rounded-rectangle background RGB(229,76,94).
+
+[Fixed Content Rules]
+- The task label badge must always appear right-aligned directly above the status badge row, using fixed colors (background RGB(235,238,248), text RGB(30,40,80)); its width auto-fits the text content — do not fix the left edge or stretch the badge to fill the row width; its text is extracted from the 'Task' field in [Report Content].
+- The top-right status badge area must always show exactly three fixed badges in this order: '✓ Supported', '⚠ Partially supported / Inconclusive', '✗ In conflict'. These are fixed template elements; do not derive, replace, or omit any of them based on claim row statuses or execution results. The second badge must literally read '⚠ Partially supported / Inconclusive' with a triangular ⚠ icon. All three badges are right-aligned as a compact horizontal group; Supported shifts right accordingly.
+- The Improvement and Reduction badges must always appear below the status badges with fixed labels ('Improvement', 'Reduction'), fixed colors, and fixed positions — do not modify their text or derive them from execution results.
+- The claims section should show exactly 3 claim rows, and they must be dynamically extracted from the report's claims table using the Claim, Evidence, and Status information.
+- In claims rows, each claim's status badge must display the exact status label from the claim's Status field (e.g., '⚠ Inconclusive', '⚠ Partially supported', '✓ Supported', '✗ In conflict') — do NOT substitute the combined top-right badge label '⚠ Partially supported / Inconclusive' for individual claim row badges.
+- In the claims module, each claim sentence must be visually bold in the figure.
+- Each claim row has no fixed text-length requirement; wrap and resize based on content for the cleanest layout.
+- The technical positioning module must directly use the extracted figure/image reference and table content.
+- The technical positioning visual must reuse the provided technical reference image faithfully (same subject/structure).
+- The experiment module must directly use the extracted main-result and ablation tables below.
+- For the Strengths section, use bottom background color RGB(200,229,179).
+- For the Weaknesses section, use bottom background color RGB(245,183,191).
+- The Summary column is required: if Summary/Strengths/Weaknesses is missing or empty, the output is invalid.
+- All extracted report content below must be represented in the final figure modules; missing or truncated modules are invalid outputs.
+- Do not alter any extracted factual text/value: keep wording, numbers, status labels, and signs exactly as provided.
+- In experiment tables, difference values annotated [GREEN]...[/GREEN] must be rendered in green text (RGB(86,133,44)); values annotated [RED]...[/RED] must be rendered in red text (RGB(200,29,49)). Strip the [GREEN]/[RED] annotation markers from the displayed text — show only the numeric value in color.
+
+[Rendering Guidance]
+- Make the figure as aesthetically balanced as possible.
+- Use adaptive typography, spacing, and box scaling automatically, but do not alter the fixed colors or the relative placement of modules.
+- Use clear visual hierarchy, concise labels, table-like alignment where needed, and publication-style spacing.
+- Match the original canvas composition literally: same dark header, same light body shell, same right-side stacked summary column, same lower experiments band.
+- This is a dynamic pipeline: for each run, first extract the teaser-display fields from the provided latest_extraction markdown, then compose the final teaser figure prompt from those extracted fields and the fixed style constraints above.
+- Only inject content that is meant to be displayed in the teaser figure; do not add extra extracted fields that are not part of the visible teaser modules.
+
+[Report Content]
+Title: Long-term Recurrent Convolutional Networks for Visual Recognition and Description
+Task: Activity recognition, image captioning, video description
+Status legend: <span style="color: green; ">✓ Supported</span>; <span style="color: #E6B800; ">⚠ Partially supported</span>; <span style="color: red; ">✗ In conflict</span>
+
+[Technical Positioning]
+Caption: Overview of LRCN.
+Image reference: E:\code\fastMCP\ai_review\.claude\worktrees\awesome-mirzakhani\demos\Image\lrcn\_run\image_lrcn_2026-05-02_232205\runtime\jobs\209e9be6-2826-4c90-aaa5-f9bd5b048612\technical_positioning_image.jpg
+Table:
+| Research domain | Method | End-to-end trainable | Temporal recurrence modeling | Variable-length input/output support |
+| --- | --- | --- | --- | --- |
+| Activity recognition | Two-stream CNN [4] | × | × | × |
+| Activity recognition | 3D CNN [1], [2] | × | × | × |
+| Video description | CRF + SMT [11] | × | × | √ |
+| Image captioning | m-RNN [27] | × | √ | √ |
+| This Work | Long-term Recurrent Convolutional Network (LRCN) | √ | √ | √ |
+
+[Claims]
+Selected 3 claim rows for direct layout use:
+1. **Claim:** **LRCN improves video activity recognition over a single-frame baseline.**; **Evidence:** Table 1 reports UCF101 average accuracy gains for LRCN-fc6 over single-frame: RGB 68.20 vs 67.37 (+0.83), Flow 77.28 vs 74.37 (+2.91), weighted 1/3,2/3: 82.34 vs 78.94 (+3.40).; **Status:** ✓ Supported
+2. **Claim:** **LRCN improves image-caption retrieval performance over prior methods on Flickr30k.**; **Evidence:** Table 4: for caption→image, LRCN2f R@1=17.5 vs best listed baseline 12.6 (m-RNN); for image→caption, R@1=23.6 vs best listed baseline 18.4 (m-RNN).; **Status:** ✓ Supported
+3. **Claim:** **LSTM decoder with CRF probabilities improves video description BLEU over SMT baselines on TACoS.**; **Evidence:** Table 9: SMT [48] (CRF prob) BLEU 26.9; LSTM decoder (CRF prob) BLEU 28.8.; **Status:** ✓ Supported
+
+Full claims table:
+| Claim | Evidence | Assessment | Status | Location |
+| --- | --- | --- | --- | --- |
+| LRCN improves video activity recognition over a single-frame baseline. | Table 1 reports UCF101 average accuracy gains for LRCN-fc6 over single-frame: RGB 68.20 vs 67.37 (+0.83), Flow 77.28 vs 74.37 (+2.91), weighted 1/3,2/3: 82.34 vs 78.94 (+3.40). | The paper cites experimental tables or figures as evidence. Concrete numeric values are present in the evidence. The cited location is Section 4.1, Table 1. | ✓ Supported | Section 4.1, Table 1 |
+| LRCN improves image-caption retrieval performance over prior methods on Flickr30k. | Table 4: for caption→image, LRCN2f R@1=17.5 vs best listed baseline 12.6 (m-RNN); for image→caption, R@1=23.6 vs best listed baseline 18.4 (m-RNN). | The paper cites experimental tables or figures as evidence. Concrete numeric values are present in the evidence. The cited location is Section 5.1.1, Table 4. | ✓ Supported | Section 5.1.1, Table 4 |
+| LSTM decoder with CRF probabilities improves video description BLEU over SMT baselines on TACoS. | Table 9: SMT [48] (CRF prob) BLEU 26.9; LSTM decoder (CRF prob) BLEU 28.8. | The paper cites experimental tables or figures as evidence. Concrete numeric values are present in the evidence. The cited location is Section 6.1, Table 9. | ✓ Supported | Section 6.1, Table 9 |
+
+[Summary]
+The manuscript introduces Long-term Recurrent Convolutional Networks (LRCN), a CNN+LSTM architecture family for visual recognition and description across three mapping types: sequential-to-static (activity recognition), static-to-sequential (image captioning), and sequential-to-sequential (video description). It reports empirical gains over single-frame and SMT-based baselines and competitive results against contemporary captioning systems.
+Strengths:
+- Unified architecture instantiated across three different task formulations.
+- Clear formulation of recurrent-convolutional integration and end-to-end training objective.
+- Quantitative improvements over explicit baselines on UCF101, Flickr30k, and TACoS.
+- Extensive captioning experiments covering retrieval, generation, decoding strategies, and backbone/finetuning effects.
+- Includes implementation note and public project link in manuscript.
+Weaknesses:
+- Strongest captioning numbers depend substantially on stronger CNN backbone and finetuning, complicating attribution to recurrent design alone.
+- Video description experiments rely on intermediate CRF-derived semantic inputs rather than fully end-to-end video-to-text training.
+- No dedicated ablation section title; analysis is distributed across evaluation subsections.
+- Some comparisons reference contemporaneous systems without uniform experimental controls across all settings.
+
+[Experiments]
+Main result location: Section 4.1 Table 1 (UCF101 activity recognition), Section 5.1.1 Table 4 (Flickr30k retrieval), Section 6.1 Table 9 (TACoS multilevel video description).
+Main result table:
+| Task | Dataset | Metric | Best Baseline | Paper Result | Difference (Δ) | Evaluation Status |
+| --- | --- | --- | --- | --- | --- | --- |
+| Activity recognition (RGB) | UCF101 | Accuracy (%) | 67.37(Single frame) | LRCN-fc6: 68.20 | [GREEN]+0.83[/GREEN] | ⚠() |
+| Activity recognition (Flow) | UCF101 | Accuracy (%) | 74.37(Single frame) | LRCN-fc6: 77.28 | [GREEN]+2.91[/GREEN] | ⚠() |
+| Activity recognition (Weighted avg 1/2,1/2) | UCF101 | Accuracy (%) | 75.46(Single frame) | LRCN-fc6: 80.90 | [GREEN]+5.44[/GREEN] | ⚠() |
+| Activity recognition (Weighted avg 1/3,2/3) | UCF101 | Accuracy (%) | 78.94(Single frame) | LRCN-fc6: 82.34 | [GREEN]+3.40[/GREEN] | ⚠() |
+| Caption to Image retrieval | Flickr30k | R@5 (%) | 34(ConvNet) | LRCN2f: 40.3 | [GREEN]+6.3[/GREEN] | ⚠() |
+| Image to Caption retrieval | Flickr30k | R@5 (%) | 40.2(DeFrag /m-RNN) | LRCN2f: 46.6 | [GREEN]+6.4[/GREEN] | ⚠() |
+| Video description | TACoS multilevel | BLEU-4 (%) | 26.9(SMT CRF prob) | LSTM Decoder (CRF prob): 28.8 | [GREEN]+1.9[/GREEN] | ⚠() |
+
+Ablation result location: Not found in manuscript (no section explicitly identified as Ablation Study/Ablation Analysis/Component Analysis/Analysis).
+Ablation result table:
+| Ablation Dimension | Configuration | Full Model | Paper Result | Difference (Δ) | Evaluation Status |
+| --- | --- | --- | --- | --- | --- |
+| Optimal setup | Not found in manuscript | Not found in manuscript | Not found in manuscript | 0 | ⚠() |

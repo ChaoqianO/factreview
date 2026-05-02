@@ -1,102 +1,32 @@
 {
-  "generated_at": "2026-05-02T12:36:57+00:00",
+  "generated_at": "2026-05-02T17:41:20+00:00",
   "demos_root": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos",
   "skipped": [
-    "compgcn"
+    "Prefix-Tuning",
+    "beit",
+    "bert",
+    "compgcn",
+    "graphormer",
+    "lrcn",
+    "sacn",
+    "uda"
   ],
-  "concurrency": 8,
+  "concurrency": 1,
   "paper_budget_sec": 600,
   "max_attempts": 1,
   "auto_tasks": true,
   "auto_tasks_mode": "smoke",
   "results": [
     {
-      "paper_key": "text_Prefix-Tuning",
-      "category": "Text",
-      "name": "Prefix-Tuning",
-      "started_at": "2026-05-02T12:36:29+00:00",
-      "finished_at": "2026-05-02T12:36:47+00:00",
-      "wall_sec": 17.94,
-      "return_code": 0,
-      "timed_out": false,
-      "run_dir": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\Prefix-Tuning\\_run\\text_prefix-tuning_2026-05-02_203630"
-    },
-    {
-      "paper_key": "image_lrcn",
-      "category": "Image",
-      "name": "lrcn",
-      "started_at": "2026-05-02T12:36:29+00:00",
-      "finished_at": "2026-05-02T12:36:49+00:00",
-      "wall_sec": 20.91,
-      "return_code": 0,
-      "timed_out": false,
-      "run_dir": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\lrcn\\_run\\image_lrcn_2026-05-02_203630"
-    },
-    {
-      "paper_key": "graph_graphormer",
-      "category": "Graph",
-      "name": "graphormer",
-      "started_at": "2026-05-02T12:36:29+00:00",
-      "finished_at": "2026-05-02T12:36:50+00:00",
-      "wall_sec": 21.31,
-      "return_code": 0,
-      "timed_out": false,
-      "run_dir": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Graph\\graphormer\\_run\\graph_graphormer_2026-05-02_203630"
-    },
-    {
-      "paper_key": "image_uda",
-      "category": "Image",
-      "name": "uda",
-      "started_at": "2026-05-02T12:36:29+00:00",
-      "finished_at": "2026-05-02T12:36:51+00:00",
-      "wall_sec": 21.88,
-      "return_code": 0,
-      "timed_out": false,
-      "run_dir": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\uda\\_run\\image_uda_2026-05-02_203630"
-    },
-    {
-      "paper_key": "text_bert",
-      "category": "Text",
-      "name": "bert",
-      "started_at": "2026-05-02T12:36:29+00:00",
-      "finished_at": "2026-05-02T12:36:51+00:00",
-      "wall_sec": 22.64,
-      "return_code": 0,
-      "timed_out": false,
-      "run_dir": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\bert\\_run\\text_bert_2026-05-02_203630"
-    },
-    {
-      "paper_key": "graph_sacn",
-      "category": "Graph",
-      "name": "sacn",
-      "started_at": "2026-05-02T12:36:29+00:00",
-      "finished_at": "2026-05-02T12:36:51+00:00",
-      "wall_sec": 22.64,
-      "return_code": 0,
-      "timed_out": false,
-      "run_dir": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Graph\\sacn\\_run\\graph_sacn_2026-05-02_203630"
-    },
-    {
-      "paper_key": "image_beit",
-      "category": "Image",
-      "name": "beit",
-      "started_at": "2026-05-02T12:36:29+00:00",
-      "finished_at": "2026-05-02T12:36:52+00:00",
-      "wall_sec": 23.56,
-      "return_code": 0,
-      "timed_out": false,
-      "run_dir": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\beit\\_run\\image_beit_2026-05-02_203630"
-    },
-    {
       "paper_key": "image_fixmatch",
       "category": "Image",
       "name": "fixmatch",
-      "started_at": "2026-05-02T12:36:29+00:00",
-      "finished_at": "2026-05-02T12:36:57+00:00",
-      "wall_sec": 27.86,
-      "return_code": 0,
+      "started_at": "2026-05-02T17:38:28+00:00",
+      "finished_at": "2026-05-02T17:41:20+00:00",
+      "wall_sec": 172.39,
+      "return_code": 1,
       "timed_out": false,
-      "run_dir": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\fixmatch\\_run\\image_fixmatch_2026-05-02_203630"
+      "run_dir": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\fixmatch\\_run\\image_fixmatch_2026-05-03_013829"
     }
   ]
 }

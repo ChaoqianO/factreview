@@ -1,0 +1,18 @@
+{
+  "enabled": true,
+  "query": "Do Transformers Really Perform Bad for Graph Representation?",
+  "success": true,
+  "papers": [
+    {
+      "id": "R1",
+      "title": "Do Transformers Really Perform Badly for Graph Representation?",
+      "year": 2021,
+      "citationCount": 1355,
+      "venue": "Neural Information Processing Systems",
+      "url": "https://www.semanticscholar.org/paper/acf87283fa8ae426f1a4987b345b401bf2913f61",
+      "firstAuthor": "Chengxuan Ying"
+    }
+  ],
+  "count": 1,
+  "message": null
+}

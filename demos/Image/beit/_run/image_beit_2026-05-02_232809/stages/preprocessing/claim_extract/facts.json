@@ -1,0 +1,39 @@
+{
+  "annotation_count": 0,
+  "annotations_path": "",
+  "annotations": [],
+  "usage": {
+    "token": {
+      "requests": 6,
+      "input_tokens": 283718,
+      "output_tokens": 2425,
+      "total_tokens": 286143
+    },
+    "tool": {
+      "total_calls": 6,
+      "distinct_tools": 1,
+      "per_tool": {
+        "review_final_markdown_write": 6
+      }
+    },
+    "paper_search": {
+      "total_calls": 0,
+      "successful_calls": 0,
+      "effective_calls": 0,
+      "papers_found": 0,
+      "distinct_queries": 0
+    }
+  },
+  "metadata": {
+    "final_report_sections_completed": [
+      "metadata",
+      "technical_positioning",
+      "claims",
+      "summary",
+      "experiment"
+    ],
+    "final_report_source": "review_annotation_agent"
+  },
+  "job_id": "18fe5c86-01c4-4ade-8f09-5f34986fd4e0",
+  "job_json_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\beit\\_run\\image_beit_2026-05-02_232809\\runtime\\jobs\\18fe5c86-01c4-4ade-8f09-5f34986fd4e0\\job.json"
+}

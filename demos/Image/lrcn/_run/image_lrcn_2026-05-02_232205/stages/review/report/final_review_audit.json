@@ -1,0 +1,49 @@
+{
+  "enabled": true,
+  "applied": false,
+  "iterations_run": 1,
+  "max_iterations": 3,
+  "stop_reason": "revision_failed_validation",
+  "final_markdown": "[Long-term Recurrent Convolutional Networks for Visual Recognition and Description]\n\n## 1. Metadata\n- **Title**: Long-term Recurrent Convolutional Networks for Visual Recognition and Description\n- **Task**: Activity recognition, image captioning, video description\n- **Code**: http://jeffdonahue.com/lrcn/\n\n## 2. Technical Positioning\nFigure: LRCN combines a CNN feature extractor and stacked LSTMs to map variable-length visual inputs to variable-length outputs for recognition and description.\n\n| Research domain | Method | End-to-end trainable | Temporal recurrence modeling | Variable-length input/output support |\n|---|---|---|---|---|\n| Activity recognition | Two-stream CNN [4] | × | × | × |\n| Activity recognition | 3D CNN [1], [2] | × | × | × |\n| Video description | CRF + SMT [11] | × | × | √ |\n| Image captioning | m-RNN [27] | × | √ | √ |\n| This Work | Long-term Recurrent Convolutional Network (LRCN) | √ | √ | √ |\n\nGap: Objective retrieval unavailable.\n\n## 3. Claims\nPaper scope: Unified recurrent-convolutional architecture (LRCN) for activity recognition, image captioning, and video description.\nEvaluation scope: UCF101, Flickr30k, COCO 2014, and TACoS multilevel benchmarks.\n\n| Claim | Evidence | Assessment | Location |\n|---|---|---|---|\n| LRCN improves video activity recognition over a single-frame baseline. | Table 1 reports UCF101 average accuracy gains for LRCN-fc6 over single-frame: RGB 68.20 vs 67.37 (+0.83), Flow 77.28 vs 74.37 (+2.91), weighted 1/3,2/3: 82.34 vs 78.94 (+3.40). | Strong experimental support with consistent gains across input settings and standard splits. | Section 4.1, Table 1 |\n| LRCN improves image-caption retrieval performance over prior methods on Flickr30k. | Table 4: for caption→image, LRCN2f R@1=17.5 vs best listed baseline 12.6 (m-RNN); for image→caption, R@1=23.6 vs best listed baseline 18.4 (m-RNN). | Experimental evidence is direct and multi-baseline, showing clear ranking gains. | Section 5.1.1, Table 4 |\n| LSTM decoder with CRF probabilities improves video description BLEU over SMT baselines on TACoS. | Table 9: SMT [48] (CRF prob) BLEU 26.9; LSTM decoder (CRF prob) BLEU 28.8. | Experimental support is clear on the same dataset/metric with +1.9 BLEU improvement over best SMT baseline shown. | Section 6.1, Table 9 |\n\n## 4. Summary\nThe manuscript introduces Long-term Recurrent Convolutional Networks (LRCN), a CNN+LSTM architecture family for visual recognition and description across three mapping types: sequential-to-static (activity recognition), static-to-sequential (image captioning), and sequential-to-sequential (video description). It reports empirical gains over single-frame and SMT-based baselines and competitive results against contemporary captioning systems.\n\nStrengths:\n- Unified architecture instantiated across three different task formulations.\n- Clear formulation of recurrent-convolutional integration and end-to-end training objective.\n- Quantitative improvements over explicit baselines on UCF101, Flickr30k, and TACoS.\n- Extensive captioning experiments covering retrieval, generation, decoding strategies, and backbone/finetuning effects.\n- Includes implementation note and public project link in manuscript.\n\nWeaknesses:\n- Strongest captioning numbers depend substantially on stronger CNN backbone and finetuning, complicating attribution to recurrent design alone.\n- Video description experiments rely on intermediate CRF-derived semantic inputs rather than fully end-to-end video-to-text training.\n- No dedicated ablation section title; analysis is distributed across evaluation subsections.\n- Some comparisons reference contemporaneous systems without uniform experimental controls across all settings.\n\n## 5. Experiment\n### Main Result\nLocation: Section 4.1 Table 1 (UCF101 activity recognition), Section 5.1.1 Table 4 (Flickr30k retrieval), Section 6.1 Table 9 (TACoS multilevel video description).\n\n| Task | Dataset | Metric | Best Baseline | Paper Result | Difference (Δ) |\n|---|---|---|---|---|---|\n| Activity recognition (RGB) | UCF101 | Accuracy (%) | Single frame: 67.37 | LRCN-fc6: 68.20 | +0.83 |\n| Activity recognition (Flow) | UCF101 | Accuracy (%) | Single frame: 74.37 | LRCN-fc6: 77.28 | +2.91 |\n| Activity recognition (Weighted avg 1/2,1/2) | UCF101 | Accuracy (%) | Single frame: 75.46 | LRCN-fc6: 80.90 | +5.44 |\n| Activity recognition (Weighted avg 1/3,2/3) | UCF101 | Accuracy (%) | Single frame: 78.94 | LRCN-fc6: 82.34 | +3.40 |\n| Caption to Image retrieval | Flickr30k | R@1 (%) | m-RNN [27]: 12.6 | LRCN2f: 17.5 | +4.9 |\n| Caption to Image retrieval | Flickr30k | R@5 (%) | ConvNet [31]: 34.0 | LRCN2f: 40.3 | +6.3 |\n| Caption to Image retrieval | Flickr30k | R@10 (%) | ConvNet [31]: 46.3 | LRCN2f: 50.8 | +4.5 |\n| Caption to Image retrieval | Flickr30k | Medr | DeFrag [28]: 13 | LRCN2f: 9 | -4 |\n| Image to Caption retrieval | Flickr30k | R@1 (%) | m-RNN [27]: 18.4 | LRCN2f: 23.6 | +5.2 |\n| Image to Caption retrieval | Flickr30k | R@5 (%) | DeFrag [28]/m-RNN [27]: 40.2 | LRCN2f: 46.6 | +6.4 |\n| Image to Caption retrieval | Flickr30k | R@10 (%) | DeFrag [28]: 54.7 | LRCN2f: 58.3 | +3.6 |\n| Image to Caption retrieval | Flickr30k | Medr | DeFrag [28]: 8 | LRCN2f: 7 | -1 |\n| Video description | TACoS multilevel | BLEU-4 (%) | SMT [48] (CRF prob): 26.9 | LSTM Decoder (CRF prob): 28.8 | +1.9 |\n\n### Ablation Result\nLocation: Not found in manuscript (no section explicitly identified as Ablation Study/Ablation Analysis/Component Analysis/Analysis).\n\n| Ablation Dimension | Configuration | Full Model | Paper Result | Difference (Δ) |\n|---|---|---|---|---|\n| Optimal setup | Not found in manuscript | Not found in manuscript | Not found in manuscript | 0 |",
+  "iterations": [
+    {
+      "iteration": 1,
+      "audit_summary": "The review is largely consistent with the provided paper content, but it includes at least one clear unsupported/mismatched claim and one over-strong statement about benchmark coverage. Most numeric results cited from UCF101 and Flickr30k Table 4 are accurate.",
+      "issues": [
+        {
+          "problem_type": "factual error",
+          "severity": "high",
+          "section": "3. Claims / 5. Experiment",
+          "review_excerpt": "LSTM decoder with CRF probabilities improves video description BLEU over SMT baselines on TACoS. | Table 9: SMT [48] (CRF prob) BLEU 26.9; LSTM decoder (CRF prob) BLEU 28.8.",
+          "paper_evidence": "In the provided markdown, Section 6 and Table 9 are not present (content is truncated before those details). The visible text does mention video description and prior SMT work [11], [48], but no TACoS BLEU numbers are available in the supplied source excerpt.",
+          "suggested_fix": "Remove or qualify the TACoS/Table 9 numeric claim unless the corresponding section/table is present in the source being audited. Restrict claims to evidence explicitly visible in the provided markdown.",
+          "should_fix": true
+        },
+        {
+          "problem_type": "overclaim",
+          "severity": "medium",
+          "section": "3. Claims",
+          "review_excerpt": "Evaluation scope: UCF101, Flickr30k, COCO 2014, and TACoS multilevel benchmarks.",
+          "paper_evidence": "UCF101, Flickr30k, and COCO 2014 are explicitly visible in Sections 4 and 5. TACoS multilevel is not visible in the provided excerpt (Section 6 details are missing/truncated).",
+          "suggested_fix": "State only datasets explicitly evidenced in the provided text (UCF101, Flickr30k, COCO 2014), or note TACoS only if supported by visible Section 6/Table content.",
+          "should_fix": true
+        }
+      ],
+      "issue_count": 2,
+      "high_severity_issue_count": 1,
+      "revised": true,
+      "accepted": false,
+      "validation_ok": false,
+      "validation_reason": "final_report_logic_not_met",
+      "validation_message": "Experiment section must not sample or truncate reported experiment results.",
+      "compatibility_ok": true,
+      "compatibility_message": "ok",
+      "error": null
+    }
+  ],
+  "llm_provider": "openai",
+  "llm_model": "openai/gpt-5.3-codex",
+  "source_markdown_chars": 95724,
+  "source_markdown_chars_sent": 79999,
+  "report_markdown_chars_sent": 5692
+}

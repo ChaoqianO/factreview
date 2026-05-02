@@ -1,6 +1,6 @@
 # lrcn — code_evaluation report
 
-Generated: 2026-05-02T12:36:49+00:00
+Generated: 2026-05-02T15:23:51+00:00
 
 This report was produced by `tools/run_demos.py` running the full FactReview
 pipeline with `--run-execution` against `paper.pdf` in this directory. The
@@ -10,9 +10,9 @@ runner is paper-agnostic; this file is regenerated each time the demo is run.
 
 - Category: **Image**
 - Paper key: `image_lrcn`
-- Wall time (subprocess): **20.9s**
-- Started: `2026-05-02T12:36:29+00:00`  ·  Finished: `2026-05-02T12:36:49+00:00`
-- Pipeline exit code: `0`
+- Wall time (subprocess): **1m 47s**
+- Started: `2026-05-02T15:22:03+00:00`  ·  Finished: `2026-05-02T15:23:51+00:00`
+- Pipeline exit code: `1`
 - Execution exit_status: `failed`
 - Coverage: no baseline checks were defined or evaluated.
 - LLM tokens (parse-stage agent): prompt=0 · completion=0 · total=0
@@ -26,8 +26,8 @@ runner is paper-agnostic; this file is regenerated each time the demo is run.
 | refcheck | skipped |  |
 | positioning | ok |  |
 | execution | failed | execution orchestrator exit_status='failed' |
-| report | failed | agent runner produced no final_markdown_path |
-| teaser | failed | no review markdown produced by the report stage (checked final_review_clean.md … |
+| report | ok |  |
+| teaser | ok |  |
 
 ## Execution attempts & tasks
 
@@ -37,11 +37,15 @@ _No execution tasks recorded._
 
 ## Artefacts (paths relative to this demo)
 
-- Execution payload: `_run/image_lrcn_2026-05-02_203630/stages/fact_generation/execution/execution.json`
-- Positioning: `_run/image_lrcn_2026-05-02_203630/stages/fact_generation/positioning/positioning.json`
-- Claim extraction: `_run/image_lrcn_2026-05-02_203630/stages/preprocessing/claim_extract/facts.json`
-- Parse output: `_run/image_lrcn_2026-05-02_203630/stages/preprocessing/parse/paper.json`
+- Final review (markdown): `_run/image_lrcn_2026-05-02_232205/stages/review/report/final_review.md`
+- Final review (PDF): `_run/image_lrcn_2026-05-02_232205/stages/review/report/final_review.pdf`
+- Execution payload: `_run/image_lrcn_2026-05-02_232205/stages/fact_generation/execution/execution.json`
+- Positioning: `_run/image_lrcn_2026-05-02_232205/stages/fact_generation/positioning/positioning.json`
+- Claim extraction: `_run/image_lrcn_2026-05-02_232205/stages/preprocessing/claim_extract/facts.json`
+- Parse output: `_run/image_lrcn_2026-05-02_232205/stages/preprocessing/parse/paper.json`
+- Teaser prompt: `_run/image_lrcn_2026-05-02_232205/stages/review/teaser/teaser_figure_prompt.txt`
 
 ## Notes
 
 - Execution failed: execution orchestrator exit_status='failed'
+- Pipeline subprocess exit code: 1

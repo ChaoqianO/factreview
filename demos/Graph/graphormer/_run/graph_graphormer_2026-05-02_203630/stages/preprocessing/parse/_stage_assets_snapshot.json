@@ -1,9 +1,0 @@
-{
-  "job_json_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Graph\\graphormer\\_run\\graph_graphormer_2026-05-02_203630\\runtime\\jobs\\f2fb996e-1462-4fb5-92b9-629d7fc38b72\\job.json",
-  "job_dir": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Graph\\graphormer\\_run\\graph_graphormer_2026-05-02_203630\\runtime\\jobs\\f2fb996e-1462-4fb5-92b9-629d7fc38b72",
-  "job_state_snapshot_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Graph\\graphormer\\_run\\graph_graphormer_2026-05-02_203630\\stages\\preprocessing\\parse\\_job_state_snapshot.json",
-  "annotations_snapshot_path": "",
-  "final_markdown_snapshot_path": "",
-  "report_pdf_snapshot_path": "",
-  "semantic_scholar_candidates_snapshot_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Graph\\graphormer\\_run\\graph_graphormer_2026-05-02_203630\\stages\\preprocessing\\parse\\snapshot_artifacts\\semantic_scholar_candidates.json"
-}

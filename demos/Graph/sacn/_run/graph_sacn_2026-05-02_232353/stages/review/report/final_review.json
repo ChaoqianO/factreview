@@ -1,0 +1,357 @@
+{
+  "paper_key": "graph_sacn",
+  "run_id": "graph_sacn_2026-05-02_232353",
+  "job_id": "6c6c38d7-2f63-4d9f-96de-fcb733c8b20d",
+  "status": "completed",
+  "message": "Review pipeline completed.",
+  "error": null,
+  "usage": {
+    "token": {
+      "requests": 5,
+      "input_tokens": 179462,
+      "output_tokens": 1638,
+      "total_tokens": 181100
+    },
+    "tool": {
+      "total_calls": 5,
+      "distinct_tools": 1,
+      "per_tool": {
+        "review_final_markdown_write": 5
+      }
+    },
+    "paper_search": {
+      "total_calls": 0,
+      "successful_calls": 0,
+      "effective_calls": 0,
+      "papers_found": 0,
+      "distinct_queries": 0
+    }
+  },
+  "metadata": {
+    "llm_api_mode": "chat_completions",
+    "markdown_provider": "mineru_v4",
+    "mineru_batch_id": "c8dd0696-aa03-44a3-adf2-c70b544f1cba",
+    "parse_warning": null,
+    "paper_search_runtime_state": {
+      "enabled": true,
+      "started": false,
+      "availability": "missing_base_url",
+      "base_url": null,
+      "health_url": null,
+      "error": null
+    },
+    "final_report_source": "review_annotation_agent",
+    "status_updates_count": 0,
+    "final_report_sections_completed": [
+      "metadata",
+      "technical_positioning",
+      "claims",
+      "summary",
+      "experiment"
+    ],
+    "final_report_draft_version": 5,
+    "final_report_draft": {
+      "sections": {
+        "metadata": "- **Title**: End-to-end Structure-Aware Convolutional Networks for Knowledge Base Completion\n- **Task**: Knowledge base completion (link prediction) via knowledge graph embedding\n- **Code**: Publicly available (URL Not found in manuscript)",
+        "technical_positioning": "Figure: SACN combines a WGCN encoder with a Conv-TransE decoder for end-to-end link prediction with structural and attribute information.\n\n| Research domain | Method | Graph structure encoding | Node attribute integration | Translational property | Convolutional decoding |\n|---|---|---|---|---|---|\n| Knowledge graph embedding | TransE | × | × | √ | × |\n| Knowledge graph embedding | DistMult | × | × | × | × |\n| Convolutional KG embedding | ConvE | × | × | × | √ |\n| Knowledge graph embedding + GCN | R-GCN | √ | × | × | × |\n| This Work | SACN | √ | √ | √ | √ |\n\nGap: Objective retrieval unavailable.",
+        "claims": "Paper scope: End-to-end SACN for knowledge base completion using WGCN encoder and Conv-TransE decoder.\nEvaluation scope: Link prediction on FB15k-237, WN18RR, and FB15k-237-Attr with Hits@1/3/10 and MRR.\n\n| Claim | Evidence | Assessment | Location |\n|---|---|---|---|\n| SACN improves over ConvE by about 10% relatively on key metrics. | Abstract and contribution text state about 10% relative improvement; Table 3 reports ConvE→SACN gains: FB15k-237 Hits@10 0.49→0.54, Hits@3 0.35→0.39, Hits@1 0.24→0.26; WN18RR Hits@10 0.48→0.54, Hits@3 0.43→0.48, Hits@1 0.39→0.43. | Experimental claim is supported by consistent metric improvements in Table 3 on two benchmarks; magnitude aligns with stated relative gains. | Abstract; Introduction contributions; Results (Link Prediction); Table 3 |\n| Conv-TransE preserves translational characteristics while improving ConvE performance. | Method states Conv-TransE is designed with translational property; Eq. (6) described as sum of subject and relation contributions; Table 3 shows Conv-TransE vs ConvE improvements on FB15k-237 (Hits@10 0.51 vs 0.49, Hits@3 0.37 vs 0.35) and WN18RR (0.52 vs 0.48, 0.47 vs 0.43). | Methodological claim is traceable to architecture/equations and supported by empirical gains; no formal proof theorem is provided. | Introduction; Conv-TransE section (Eq. 6–8); Results; Table 3 |\n| Modeling attributes as nodes further improves SACN. | Node Attributes subsection defines attribute nodes; FB15k-237-Attr construction adds 78,334 attribute triples and 203 attributes; Table 3 shows SACN using FB15k-237-Attr (0.55/0.40/0.27/0.36) above SACN without attributes (0.54/0.39/0.26/0.35) on FB15k-237 metrics. | Experimental support is present with incremental gains across reported metrics; evidence is limited to the constructed attribute dataset setting. | Weighted Graph Convolutional Layer (Node Attributes); Data Construction; Results; Table 3 |",
+        "summary": "This paper presents SACN, an end-to-end knowledge base completion model that combines a weighted GCN encoder with a Conv-TransE decoder. The method targets limitations of ConvE by adding graph structure and node-attribute information and by preserving translational behavior in decoding. Reported results on FB15k-237 and WN18RR show consistent improvements over strong baselines, with additional gains from an attribute-augmented dataset.\n\nStrengths:\n- Clear model decomposition (WGCN encoder + Conv-TransE decoder) with end-to-end training.\n- Method is supported by explicit formulations (Eq. 1–8) and dataset-construction details.\n- Empirical results show consistent improvements over ConvE and other baselines in Table 3.\n- Additional analyses (convergence, kernel size, node indegree) provide broader performance characterization.\n\nWeaknesses:\n- No formal theorem-level proof for translational-property claims; support is mainly derivational and empirical.\n- Some baseline reporting is incomplete for certain dataset/model cells (e.g., missing entries in Table 3).\n- Public code is claimed but repository URL is not provided in the manuscript text.\n- No explicitly labeled ablation-study section separating component-level causal analysis from general analysis.",
+        "experiment": "### Main Result\nLocation: Results section, Link Prediction, Table 3 (comparison against external baselines on FB15k-237 and WN18RR).\n\n| Task | Dataset | Metric | Best Baseline | Paper Result | Difference (Δ) |\n|---|---|---|---|---|---|\n| Link prediction | FB15k-237 | Hits@10 | ConvE (0.49) | SACN (0.54) | +0.05 |\n| Link prediction | FB15k-237 | Hits@3 | ConvE (0.35) | SACN (0.39) | +0.04 |\n| Link prediction | FB15k-237 | Hits@1 | ConvE (0.24) | SACN (0.26) | +0.02 |\n| Link prediction | FB15k-237 | MRR | ConvE (0.32) | SACN (0.35) | +0.03 |\n| Link prediction | WN18RR | Hits@10 | ComplEx (0.51) | SACN (0.54) | +0.03 |\n| Link prediction | WN18RR | Hits@3 | Conv-TransE (0.47) | SACN (0.48) | +0.01 |\n| Link prediction | WN18RR | Hits@1 | Conv-TransE (0.43) | SACN (0.43) | +0.00 |\n| Link prediction | WN18RR | MRR | ConvE/Conv-TransE (0.46) | SACN (0.47) | +0.01 |\n\n### Ablation Result\nLocation: Not found in manuscript (no section explicitly identified as Ablation Study/Ablation Analysis/Component Analysis/Analysis dedicated to ablation).\n\n| Ablation Dimension | Configuration | Full Model | Paper Result | Difference (Δ) |\n|---|---|---|---|---|\n| Optimal setup | Not found in manuscript | Not found in manuscript | Not found in manuscript | 0 |",
+        "novelty_verification_related_work_matrix": "External literature search was not started in this run; novelty/comparison conclusions are deferred to manual verification.",
+        "references": "External literature search was not started in this run; no external references are listed."
+      },
+      "section_order": [
+        "metadata",
+        "technical_positioning",
+        "claims",
+        "summary",
+        "experiment"
+      ],
+      "completed_sections": [
+        "metadata",
+        "technical_positioning",
+        "claims",
+        "summary",
+        "experiment"
+      ],
+      "missing_sections": [],
+      "next_required_section": null,
+      "status": "completed",
+      "source": "review_annotation_agent"
+    },
+    "final_report_audit": {
+      "enabled": true,
+      "applied": true,
+      "iterations_run": 3,
+      "max_iterations": 3,
+      "stop_reason": "max_iterations_reached",
+      "final_markdown": "[End-to-end Structure-Aware Convolutional Networks for Knowledge Base Completion]\n\n## 1. Metadata\n- **Title**: End-to-end Structure-Aware Convolutional Networks for Knowledge Base Completion\n- **Task**: Knowledge base completion (link prediction) via knowledge graph embedding\n- **Code**: Publicly available is claimed with a citation marker in the manuscript, but the URL is not visible in the provided markdown extract.\n\n## 2. Technical Positioning\nFigure: SACN combines a WGCN encoder with a Conv-TransE decoder for end-to-end link prediction with structural and attribute information.\n\n| Research domain | Method | Graph structure encoding | Node attribute integration | Translational property | Convolutional decoding |\n|---|---|---|---|---|---|\n| Knowledge graph embedding | TransE | × | × | √ | × |\n| Knowledge graph embedding | DistMult | × | × | × | × |\n| Convolutional KG embedding | ConvE | × | × | × | √ |\n| Knowledge graph embedding + GCN | R-GCN | √ | × | × | × |\n| This Work | SACN | √ | √ | √ | √ |\n\nObjectives and contributions are clearly stated in the Introduction, including explicit proposal text and a dedicated contributions summary.\n\n## 3. Claims\nPaper scope: End-to-end SACN for knowledge base completion using WGCN encoder and Conv-TransE decoder.\nEvaluation scope: Link prediction on FB15k-237, WN18RR, and FB15k-237-Attr with Hits@1/3/10 and MRR.\n\n| Claim | Evidence | Assessment | Location |\n|---|---|---|---|\n| SACN improves over ConvE by about 10% relatively on key metrics. | Abstract and contribution text state about 10% relative improvement; Table 3 reports ConvE→SACN gains: FB15k-237 Hits@10 0.49→0.54, Hits@3 0.35→0.39, Hits@1 0.24→0.26; WN18RR Hits@10 0.48→0.54, Hits@3 0.43→0.48, Hits@1 0.39→0.43. | Experimental claim is supported by consistent metric improvements in Table 3 on two benchmarks; magnitude aligns with stated relative gains. | Abstract; Introduction contributions; Results (Link Prediction); Table 3 |\n| Conv-TransE preserves translational characteristics while improving ConvE performance. | Method states Conv-TransE is designed with translational property; Eq. (6) is interpreted as summing subject and relation contributions; Table 3 shows Conv-TransE vs ConvE improvements on FB15k-237 (Hits@10 0.51 vs 0.49, Hits@3 0.37 vs 0.35) and WN18RR (0.52 vs 0.48, 0.47 vs 0.43). | Conv-TransE is designed to preserve translational characteristics and empirically outperforms ConvE on reported metrics; no formal proof or direct diagnostic test of preservation is provided. | Introduction; Conv-TransE section (Eq. 6–8); Results; Table 3 |\n| Modeling attributes as nodes further improves SACN. | Node Attributes subsection defines attribute nodes; FB15k-237-Attr is constructed by combining FB15k-237 training triples with 78,334 extracted attribute triples (203 attributes/attribute nodes). Table 2 reports “Entities” = 14,744 for FB15k-237-Attr, while Data Construction text describes 14,541 entity nodes plus 203 attribute nodes; Table 2 also reports 350,449 training edges. Table 3 shows SACN using FB15k-237-Attr (0.55/0.40/0.27/0.36) above SACN without attributes (0.54/0.39/0.26/0.35) on FB15k-237 metrics. | Experimental support is present with incremental gains across reported metrics; evidence is limited to the constructed attribute dataset setting. | Weighted Graph Convolutional Layer (Node Attributes); Data Construction; Table 2; Results; Table 3 |\n\n## 4. Summary\nThis paper presents SACN, an end-to-end knowledge base completion model that combines a weighted GCN encoder with a Conv-TransE decoder. The method targets limitations of ConvE by adding graph structure and node-attribute information and by preserving translational behavior in decoding. Reported results on FB15k-237 and WN18RR show consistent improvements over strong baselines, with additional gains from an attribute-augmented dataset.\n\nStrengths:\n- Clear model decomposition (WGCN encoder + Conv-TransE decoder) with end-to-end training.\n- Method is supported by explicit formulations (Eq. 1–8) and dataset-construction details.\n- Empirical results show consistent improvements over ConvE and other baselines in Table 3.\n- Additional analyses (convergence, kernel size, node indegree) provide broader performance characterization.\n\nWeaknesses:\n- No formal theorem-level proof for translational-property claims; support is mainly derivational and empirical.\n- Some baseline reporting is incomplete for certain dataset/model cells (e.g., missing entries in Table 3).\n- Public code availability is claimed with a citation marker, but the repository URL is not visible in the provided markdown extract.\n- No explicitly labeled ablation-study section separating component-level causal analysis from general analysis.\n\n## 5. Experiment\n### Main Result\nLocation: Results section, Link Prediction, Table 3 (comparison against external baselines on FB15k-237 and WN18RR).\n\n| Task | Dataset | Metric | Best Baseline | Paper Result | Difference (Δ) |\n|---|---|---|---|---|---|\n| Link prediction | FB15k-237 | Hits@10 | ConvE (0.49) | SACN (0.54) | +0.05 |\n| Link prediction | FB15k-237 | Hits@3 | ConvE (0.35) | SACN (0.39) | +0.04 |\n| Link prediction | FB15k-237 | Hits@1 | ConvE (0.24) | SACN (0.26) | +0.02 |\n| Link prediction | FB15k-237 | MRR | ConvE (0.32) | SACN (0.35) | +0.03 |\n| Link prediction | WN18RR | Hits@10 | ComplEx (0.51) | SACN (0.54) | +0.03 |\n| Link prediction | WN18RR | Hits@3 | Conv-TransE (0.47) | SACN (0.48) | +0.01 |\n| Link prediction | WN18RR | Hits@1 | Conv-TransE (0.43) | SACN (0.43) | +0.00 |\n| Link prediction | WN18RR | MRR | ConvE/Conv-TransE (0.46) | SACN (0.47) | +0.01 |\n\n### Ablation Result\nLocation: No section is explicitly titled as ablation, but the manuscript includes implicit ablation-style component comparisons (ConvE vs Conv-TransE vs SACN in Table 3, SACN with vs without attributes in Table 3, and kernel-size variants in Table 4).\n\n| Ablation Dimension | Configuration | Full Model | Paper Result | Difference (Δ) |\n|---|---|---|---|---|\n| Optimal setup | Not found in manuscript | Not found in manuscript | Not found in manuscript | 0 |",
+      "iterations": [
+        {
+          "iteration": 1,
+          "audit_summary": "The review is largely faithful to the paper. I found one concrete factual mismatch regarding dataset composition in FB15k-237-Attr. Other potential issues are mostly phrasing/interpretation and not clear factual contradictions.",
+          "issues": [
+            {
+              "problem_type": "factual error",
+              "severity": "medium",
+              "section": "3. Claims (attribute modeling claim evidence)",
+              "review_excerpt": "FB15k-237-Attr construction adds 78,334 attribute triples and 203 attributes",
+              "paper_evidence": "Data Construction states: “FB15k-237-Attr ... includes 14,541 entity nodes, 203 attribute nodes, 484 relation types. All the 78,334 attribute triples are combined with the training set of FB15k-237.” Table 2 also shows FB15k-237-Attr has 14,744 entities and 350,449 train edges.",
+              "suggested_fix": "Clarify that FB15k-237-Attr is not only added attribute triples; it is the combined training graph (original FB15k-237 training triples plus 78,334 attribute triples), with 14,744 total nodes/entities in the dataset statistics.",
+              "should_fix": true
+            }
+          ],
+          "issue_count": 1,
+          "high_severity_issue_count": 0,
+          "revised": true,
+          "accepted": true,
+          "validation_ok": true,
+          "validation_reason": null,
+          "validation_message": "ok",
+          "compatibility_ok": true,
+          "compatibility_message": "ok",
+          "error": null
+        },
+        {
+          "iteration": 2,
+          "audit_summary": "The review is largely consistent with the paper, but it contains a few concrete mismatches/overstatements about missing information and availability of objectives/ablations.",
+          "issues": [
+            {
+              "problem_type": "factual error",
+              "severity": "medium",
+              "section": "2. Technical Positioning",
+              "review_excerpt": "Gap: Objective retrieval unavailable.",
+              "paper_evidence": "The paper explicitly states objectives and contributions in multiple places, e.g., Introduction: “In this paper, we propose an end-to-end graph Structure-Aware Convolutional Networks (SACN)...” and “Our contributions are summarized as follows...”.",
+              "suggested_fix": "Replace with a statement reflecting that objectives/contributions are clearly stated in Introduction and contributions bullets.",
+              "should_fix": true
+            },
+            {
+              "problem_type": "factual error",
+              "severity": "low",
+              "section": "5. Experiment",
+              "review_excerpt": "Ablation Result ... Not found in manuscript (no section explicitly identified as Ablation Study/Ablation Analysis/Component Analysis/Analysis dedicated to ablation).",
+              "paper_evidence": "While no section is titled 'Ablation', the paper includes component/comparative analyses that function as ablations: Conv-TransE vs ConvE vs SACN (Table 3), SACN vs SACN using FB15k-237-Attr (Table 3), and kernel size analysis (Table 4).",
+              "suggested_fix": "State that there is no explicitly labeled ablation section, but the paper includes implicit ablation-style comparisons (decoder-only vs full model, with/without attributes, kernel-size variants).",
+              "should_fix": true
+            },
+            {
+              "problem_type": "understatement",
+              "severity": "low",
+              "section": "1. Metadata / 4. Summary",
+              "review_excerpt": "Code: Publicly available (URL Not found in manuscript) ... Public code is claimed but repository URL is not provided in the manuscript text.",
+              "paper_evidence": "Introduction says: “The code for our model and experiments is publicly available 1.” This indicates a provided reference marker (likely footnote/link in original formatting), though the markdown rendering omits the actual URL.",
+              "suggested_fix": "Soften wording to: code availability is claimed with a citation marker, but the URL is not visible in the provided markdown extract.",
+              "should_fix": true
+            }
+          ],
+          "issue_count": 3,
+          "high_severity_issue_count": 0,
+          "revised": true,
+          "accepted": true,
+          "validation_ok": true,
+          "validation_reason": null,
+          "validation_message": "ok",
+          "compatibility_ok": true,
+          "compatibility_message": "ok",
+          "error": null
+        },
+        {
+          "iteration": 3,
+          "audit_summary": "The review is largely faithful to the paper. I found one concrete factual mismatch in dataset/stat wording and one likely overstatement about causal evidence strength for translational-property preservation.",
+          "issues": [
+            {
+              "problem_type": "wrong number/dataset/setting",
+              "severity": "medium",
+              "section": "3. Claims (attributes claim)",
+              "review_excerpt": "FB15k-237-Attr is constructed by combining FB15k-237 training triples with 78,334 extracted attribute triples (203 attribute nodes/types), yielding dataset stats of 14,744 total nodes/entities and 350,449 training edges (Table 2)",
+              "paper_evidence": "Table 2 labels the row as \"Entities\" and gives FB15k-237-Attr = 14,744; separately \"Attributes\" = 203. In Data Construction text, they state FB15k-237-Attr includes \"14,541 entity nodes, 203 attribute nodes\".",
+              "suggested_fix": "Clarify that 14,744 is the entity count reported in Table 2 (per paper labeling), while the text also describes 14,541 entity nodes + 203 attribute nodes. Avoid calling 14,744 explicitly \"total nodes/entities\" unless disambiguated.",
+              "should_fix": true
+            },
+            {
+              "problem_type": "causal overreach",
+              "severity": "low",
+              "section": "3. Claims (Conv-TransE claim)",
+              "review_excerpt": "Conv-TransE preserves translational characteristics while improving ConvE performance... supported by empirical gains",
+              "paper_evidence": "The paper argues translational behavior via architecture/equation interpretation (Eq. 6 discussion: convolution amounts to a sum) and reports better metrics, but does not provide a formal proof or direct diagnostic test that translational property is preserved beyond design rationale.",
+              "suggested_fix": "Rephrase to: \"Conv-TransE is designed to preserve translational characteristics and empirically outperforms ConvE on reported metrics,\" avoiding strong causal wording that preservation is established by experiments.",
+              "should_fix": true
+            }
+          ],
+          "issue_count": 2,
+          "high_severity_issue_count": 0,
+          "revised": true,
+          "accepted": true,
+          "validation_ok": true,
+          "validation_reason": null,
+          "validation_message": "ok",
+          "compatibility_ok": true,
+          "compatibility_message": "ok",
+          "error": null
+        }
+      ],
+      "llm_provider": "openai",
+      "llm_model": "openai/gpt-5.3-codex",
+      "source_markdown_chars": 46372,
+      "source_markdown_chars_sent": 46372,
+      "report_markdown_chars_sent": 5455
+    }
+  },
+  "execution": {
+    "paper_key": "graph_sacn",
+    "paper_pdf": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Graph\\sacn\\_run\\graph_sacn_2026-05-02_232353\\inputs\\source_pdf\\paper.pdf",
+    "status": "failed",
+    "exit_status": "failed",
+    "success": false,
+    "run_dir": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Graph\\sacn\\_run\\graph_sacn_2026-05-02_232353\\stages\\fact_generation\\execution\\current",
+    "summary": {
+      "run_id": "2026-05-02_232608",
+      "status": "failed",
+      "attempts": 0,
+      "run_result": {},
+      "judge": {},
+      "artifacts": {
+        "files": []
+      }
+    },
+    "alignment": {}
+  },
+  "reference_check": {
+    "enabled": false,
+    "attempted": false
+  },
+  "reference_check_markdown": "",
+  "final_markdown": "[End-to-end Structure-Aware Convolutional Networks for Knowledge Base Completion]\n\n## **1. Metadata**\n- **Title**: End-to-end Structure-Aware Convolutional Networks for Knowledge Base Completion\n- **Task**: Knowledge base completion (link prediction) via knowledge graph embedding\n- **Code**: Publicly available is claimed with a citation marker in the manuscript, but the URL is not visible in the provided markdown extract.\n\n## **2. Technical Positioning**\n![](E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Graph\\sacn\\_run\\graph_sacn_2026-05-02_232353\\runtime\\jobs\\6c6c38d7-2f63-4d9f-96de-fcb733c8b20d\\technical_positioning_image.jpg)\n\nOverview of SACN.\n\nAn illustration of our end-to-end Structure-Aware Convolutional Networks model.\nSACN combines a WGCN encoder with a Conv-TransE decoder for end-to-end link prediction with structural and attribute information.\n| **Research domain** | **Method** | **Graph structure encoding** | **Node attribute integration** | **Translational property** | **Convolutional decoding** |\n| --- | --- | --- | --- | --- | --- |\n| Knowledge graph embedding | TransE | × | × | √ | × |\n| Knowledge graph embedding | DistMult | × | × | × | × |\n| Convolutional KG embedding | ConvE | × | × | × | √ |\n| Knowledge graph embedding + GCN | R-GCN | √ | × | × | × |\n| This Work | SACN | √ | √ | √ | √ |\n\nObjectives and contributions are clearly stated in the Introduction, including explicit proposal text and a dedicated contributions summary.\n\n## **3. Claims**\n**Paper scope:** End-to-end SACN for knowledge base completion using WGCN encoder and Conv-TransE decoder.\n**Evaluation scope:** Link prediction on FB15k-237, WN18RR, and FB15k-237-Attr with Hits@1/3/10 and MRR.\n(Status legend: <span style=\"color: green;\">✓ Supported</span>, <span style=\"color: #E6B800;\">⚠ Partially supported</span>, <span style=\"color: red;\">✗ In conflict</span>.)\n| **Claim** | **Evidence** | **Assessment** | **Status** | **Location** |\n|---|---|---|---|---|\n| SACN improves over ConvE by about 10% relatively on key metrics. | Abstract and contribution text state about 10% relative improvement; Table 3 reports ConvE→SACN gains: FB15k-237 Hits@10 0.49→0.54, Hits@3 0.35→0.39, Hits@1 0.24→0.26; WN18RR Hits@10 0.48→0.54, Hits@3 0.43→0.48, Hits@1 0.39→0.43. | The paper cites experimental tables or figures as evidence. Concrete numeric values are present in the evidence. The cited location is Abstract; Introduction contributions; Results (Link Prediction); Table 3. | <span style=\"color: green;\">✓ Supported</span> | Abstract; Introduction contributions; Results (Link Prediction); Table 3 |\n| Conv-TransE preserves translational characteristics while improving ConvE performance. | Method states Conv-TransE is designed with translational property; Eq. (6) is interpreted as summing subject and relation contributions; Table 3 shows Conv-TransE vs ConvE improvements on FB15k-237 (Hits@10 0.51 vs 0.49, Hits@3 0.37 vs 0.35) and WN18RR (0.52 vs 0.48, 0.47 vs 0.43). | The paper cites experimental tables or figures as evidence. Concrete numeric values are present in the evidence. The cited location is Introduction; Conv-TransE section (Eq. 6–8); Results; Table 3. | <span style=\"color: green;\">✓ Supported</span> | Introduction; Conv-TransE section (Eq. 6–8); Results; Table 3 |\n| Modeling attributes as nodes further improves SACN. | Node Attributes subsection defines attribute nodes; FB15k-237-Attr is constructed by combining FB15k-237 training triples with 78,334 extracted attribute triples (203 attributes/attribute nodes). Table 2 reports “Entities” = 14,744 for FB15k-237-Attr, while Data Construction text describes 14,541 entity nodes plus 203 attribute nodes; Table 2 also reports 350,449 training edges. Table 3 shows SACN using FB15k-237-Attr (0.55/0.40/0.27/0.36) above SACN without attributes (0.54/0.39/0.26/0.35) on FB15k-237 metrics. | The paper cites experimental tables or figures as evidence. Concrete numeric values are present in the evidence. The cited location is Weighted Graph Convolutional Layer (Node Attributes); Data Construction; Table 2; Results; Table 3. | <span style=\"color: green;\">✓ Supported</span> | Weighted Graph Convolutional Layer (Node Attributes); Data Construction; Table 2; Results; Table 3 |\n\n## **4. Summary**\nThis paper presents SACN, an end-to-end knowledge base completion model that combines a weighted GCN encoder with a Conv-TransE decoder. The method targets limitations of ConvE by adding graph structure and node-attribute information and by preserving translational behavior in decoding. Reported results on FB15k-237 and WN18RR show consistent improvements over strong baselines, with additional gains from an attribute-augmented dataset.\n\n**Strengths:** - Clear model decomposition (WGCN encoder + Conv-TransE decoder) with end-to-end training.\n- Method is supported by explicit formulations (Eq. 1–8) and dataset-construction details.\n- Empirical results show consistent improvements over ConvE and other baselines in Table 3.\n- Additional analyses (convergence, kernel size, node indegree) provide broader performance characterization.\n\n**Weaknesses:** - No formal theorem-level proof for translational-property claims; support is mainly derivational and empirical.\n- Some baseline reporting is incomplete for certain dataset/model cells (e.g., missing entries in Table 3).\n- Public code availability is claimed with a citation marker, but the repository URL is not visible in the provided markdown extract.\n- No explicitly labeled ablation-study section separating component-level causal analysis from general analysis.\n\n## **5. Experiment**\n### **Main Result**\n(Status legend: <span style=\"color: green;\">✓ Supported</span>, <span style=\"color: #E6B800;\">⚠ Inconclusive</span>, <span style=\"color: red;\">✗ In conflict</span>.)\n**Location:** Results section, Link Prediction, Table 3 (comparison against external baselines on FB15k-237 and WN18RR).\n| **Task** | **Dataset** | **Metric** | **Best Baseline** | **Paper Result** | **Difference (Δ)** | **Evaluation Status** |\n| --- | --- | --- | --- | --- | --- | --- |\n| Link prediction | FB15k-237 | Hits@10 | 0.49(ConvE) | SACN (0.54) | <span style=\"color: green;\">+0.05</span> | <span style=\"color: #E6B800;\">⚠()</span> |\n| Link prediction | FB15k-237 | Hits@3 | 0.35(ConvE) | SACN (0.39) | <span style=\"color: green;\">+0.04</span> | <span style=\"color: #E6B800;\">⚠()</span> |\n| Link prediction | FB15k-237 | Hits@1 | 0.24(ConvE) | SACN (0.26) | <span style=\"color: green;\">+0.02</span> | <span style=\"color: #E6B800;\">⚠()</span> |\n| Link prediction | FB15k-237 | MRR | 0.32(ConvE) | SACN (0.35) | <span style=\"color: green;\">+0.03</span> | <span style=\"color: #E6B800;\">⚠()</span> |\n| Link prediction | WN18RR | Hits@10 | 0.51(ComplEx) | SACN (0.54) | <span style=\"color: green;\">+0.03</span> | <span style=\"color: #E6B800;\">⚠()</span> |\n| Link prediction | WN18RR | Hits@3 | 0.47(Conv-TransE) | SACN (0.48) | <span style=\"color: green;\">+0.01</span> | <span style=\"color: #E6B800;\">⚠()</span> |\n| Link prediction | WN18RR | Hits@1 | 0.43(Conv-TransE) | SACN (0.43) | **+0.00** | <span style=\"color: #E6B800;\">⚠()</span> |\n| Link prediction | WN18RR | MRR | 0.46(ConvE/Conv-TransE) | SACN (0.47) | <span style=\"color: green;\">+0.01</span> | <span style=\"color: #E6B800;\">⚠()</span> |\n### **Ablation Result**\n(Status legend: <span style=\"color: green;\">✓ Supported</span>, <span style=\"color: #E6B800;\">⚠ Inconclusive</span>, <span style=\"color: red;\">✗ In conflict</span>.)\n**Location:** No section is explicitly titled as ablation, but the manuscript includes implicit ablation-style component comparisons (ConvE vs Conv-TransE vs SACN in Table 3, SACN with vs without attributes in Table 3, and kernel-size variants in Table 4).\n| **Ablation Dimension** | **Configuration** | **Full Model** | **Paper Result** | **Difference (Δ)** | **Evaluation Status** |\n| --- | --- | --- | --- | --- | --- |\n| Optimal setup | Not found in manuscript | Not found in manuscript | Not found in manuscript | **0** | <span style=\"color: #E6B800;\">⚠()</span> |",
+  "final_audit_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Graph\\sacn\\_run\\graph_sacn_2026-05-02_232353\\runtime\\jobs\\6c6c38d7-2f63-4d9f-96de-fcb733c8b20d\\final_report_audit.json",
+  "final_audit": {
+    "enabled": true,
+    "applied": true,
+    "iterations_run": 3,
+    "max_iterations": 3,
+    "stop_reason": "max_iterations_reached",
+    "final_markdown": "[End-to-end Structure-Aware Convolutional Networks for Knowledge Base Completion]\n\n## 1. Metadata\n- **Title**: End-to-end Structure-Aware Convolutional Networks for Knowledge Base Completion\n- **Task**: Knowledge base completion (link prediction) via knowledge graph embedding\n- **Code**: Publicly available is claimed with a citation marker in the manuscript, but the URL is not visible in the provided markdown extract.\n\n## 2. Technical Positioning\nFigure: SACN combines a WGCN encoder with a Conv-TransE decoder for end-to-end link prediction with structural and attribute information.\n\n| Research domain | Method | Graph structure encoding | Node attribute integration | Translational property | Convolutional decoding |\n|---|---|---|---|---|---|\n| Knowledge graph embedding | TransE | × | × | √ | × |\n| Knowledge graph embedding | DistMult | × | × | × | × |\n| Convolutional KG embedding | ConvE | × | × | × | √ |\n| Knowledge graph embedding + GCN | R-GCN | √ | × | × | × |\n| This Work | SACN | √ | √ | √ | √ |\n\nObjectives and contributions are clearly stated in the Introduction, including explicit proposal text and a dedicated contributions summary.\n\n## 3. Claims\nPaper scope: End-to-end SACN for knowledge base completion using WGCN encoder and Conv-TransE decoder.\nEvaluation scope: Link prediction on FB15k-237, WN18RR, and FB15k-237-Attr with Hits@1/3/10 and MRR.\n\n| Claim | Evidence | Assessment | Location |\n|---|---|---|---|\n| SACN improves over ConvE by about 10% relatively on key metrics. | Abstract and contribution text state about 10% relative improvement; Table 3 reports ConvE→SACN gains: FB15k-237 Hits@10 0.49→0.54, Hits@3 0.35→0.39, Hits@1 0.24→0.26; WN18RR Hits@10 0.48→0.54, Hits@3 0.43→0.48, Hits@1 0.39→0.43. | Experimental claim is supported by consistent metric improvements in Table 3 on two benchmarks; magnitude aligns with stated relative gains. | Abstract; Introduction contributions; Results (Link Prediction); Table 3 |\n| Conv-TransE preserves translational characteristics while improving ConvE performance. | Method states Conv-TransE is designed with translational property; Eq. (6) is interpreted as summing subject and relation contributions; Table 3 shows Conv-TransE vs ConvE improvements on FB15k-237 (Hits@10 0.51 vs 0.49, Hits@3 0.37 vs 0.35) and WN18RR (0.52 vs 0.48, 0.47 vs 0.43). | Conv-TransE is designed to preserve translational characteristics and empirically outperforms ConvE on reported metrics; no formal proof or direct diagnostic test of preservation is provided. | Introduction; Conv-TransE section (Eq. 6–8); Results; Table 3 |\n| Modeling attributes as nodes further improves SACN. | Node Attributes subsection defines attribute nodes; FB15k-237-Attr is constructed by combining FB15k-237 training triples with 78,334 extracted attribute triples (203 attributes/attribute nodes). Table 2 reports “Entities” = 14,744 for FB15k-237-Attr, while Data Construction text describes 14,541 entity nodes plus 203 attribute nodes; Table 2 also reports 350,449 training edges. Table 3 shows SACN using FB15k-237-Attr (0.55/0.40/0.27/0.36) above SACN without attributes (0.54/0.39/0.26/0.35) on FB15k-237 metrics. | Experimental support is present with incremental gains across reported metrics; evidence is limited to the constructed attribute dataset setting. | Weighted Graph Convolutional Layer (Node Attributes); Data Construction; Table 2; Results; Table 3 |\n\n## 4. Summary\nThis paper presents SACN, an end-to-end knowledge base completion model that combines a weighted GCN encoder with a Conv-TransE decoder. The method targets limitations of ConvE by adding graph structure and node-attribute information and by preserving translational behavior in decoding. Reported results on FB15k-237 and WN18RR show consistent improvements over strong baselines, with additional gains from an attribute-augmented dataset.\n\nStrengths:\n- Clear model decomposition (WGCN encoder + Conv-TransE decoder) with end-to-end training.\n- Method is supported by explicit formulations (Eq. 1–8) and dataset-construction details.\n- Empirical results show consistent improvements over ConvE and other baselines in Table 3.\n- Additional analyses (convergence, kernel size, node indegree) provide broader performance characterization.\n\nWeaknesses:\n- No formal theorem-level proof for translational-property claims; support is mainly derivational and empirical.\n- Some baseline reporting is incomplete for certain dataset/model cells (e.g., missing entries in Table 3).\n- Public code availability is claimed with a citation marker, but the repository URL is not visible in the provided markdown extract.\n- No explicitly labeled ablation-study section separating component-level causal analysis from general analysis.\n\n## 5. Experiment\n### Main Result\nLocation: Results section, Link Prediction, Table 3 (comparison against external baselines on FB15k-237 and WN18RR).\n\n| Task | Dataset | Metric | Best Baseline | Paper Result | Difference (Δ) |\n|---|---|---|---|---|---|\n| Link prediction | FB15k-237 | Hits@10 | ConvE (0.49) | SACN (0.54) | +0.05 |\n| Link prediction | FB15k-237 | Hits@3 | ConvE (0.35) | SACN (0.39) | +0.04 |\n| Link prediction | FB15k-237 | Hits@1 | ConvE (0.24) | SACN (0.26) | +0.02 |\n| Link prediction | FB15k-237 | MRR | ConvE (0.32) | SACN (0.35) | +0.03 |\n| Link prediction | WN18RR | Hits@10 | ComplEx (0.51) | SACN (0.54) | +0.03 |\n| Link prediction | WN18RR | Hits@3 | Conv-TransE (0.47) | SACN (0.48) | +0.01 |\n| Link prediction | WN18RR | Hits@1 | Conv-TransE (0.43) | SACN (0.43) | +0.00 |\n| Link prediction | WN18RR | MRR | ConvE/Conv-TransE (0.46) | SACN (0.47) | +0.01 |\n\n### Ablation Result\nLocation: No section is explicitly titled as ablation, but the manuscript includes implicit ablation-style component comparisons (ConvE vs Conv-TransE vs SACN in Table 3, SACN with vs without attributes in Table 3, and kernel-size variants in Table 4).\n\n| Ablation Dimension | Configuration | Full Model | Paper Result | Difference (Δ) |\n|---|---|---|---|---|\n| Optimal setup | Not found in manuscript | Not found in manuscript | Not found in manuscript | 0 |",
+    "iterations": [
+      {
+        "iteration": 1,
+        "audit_summary": "The review is largely faithful to the paper. I found one concrete factual mismatch regarding dataset composition in FB15k-237-Attr. Other potential issues are mostly phrasing/interpretation and not clear factual contradictions.",
+        "issues": [
+          {
+            "problem_type": "factual error",
+            "severity": "medium",
+            "section": "3. Claims (attribute modeling claim evidence)",
+            "review_excerpt": "FB15k-237-Attr construction adds 78,334 attribute triples and 203 attributes",
+            "paper_evidence": "Data Construction states: “FB15k-237-Attr ... includes 14,541 entity nodes, 203 attribute nodes, 484 relation types. All the 78,334 attribute triples are combined with the training set of FB15k-237.” Table 2 also shows FB15k-237-Attr has 14,744 entities and 350,449 train edges.",
+            "suggested_fix": "Clarify that FB15k-237-Attr is not only added attribute triples; it is the combined training graph (original FB15k-237 training triples plus 78,334 attribute triples), with 14,744 total nodes/entities in the dataset statistics.",
+            "should_fix": true
+          }
+        ],
+        "issue_count": 1,
+        "high_severity_issue_count": 0,
+        "revised": true,
+        "accepted": true,
+        "validation_ok": true,
+        "validation_reason": null,
+        "validation_message": "ok",
+        "compatibility_ok": true,
+        "compatibility_message": "ok",
+        "error": null
+      },
+      {
+        "iteration": 2,
+        "audit_summary": "The review is largely consistent with the paper, but it contains a few concrete mismatches/overstatements about missing information and availability of objectives/ablations.",
+        "issues": [
+          {
+            "problem_type": "factual error",
+            "severity": "medium",
+            "section": "2. Technical Positioning",
+            "review_excerpt": "Gap: Objective retrieval unavailable.",
+            "paper_evidence": "The paper explicitly states objectives and contributions in multiple places, e.g., Introduction: “In this paper, we propose an end-to-end graph Structure-Aware Convolutional Networks (SACN)...” and “Our contributions are summarized as follows...”.",
+            "suggested_fix": "Replace with a statement reflecting that objectives/contributions are clearly stated in Introduction and contributions bullets.",
+            "should_fix": true
+          },
+          {
+            "problem_type": "factual error",
+            "severity": "low",
+            "section": "5. Experiment",
+            "review_excerpt": "Ablation Result ... Not found in manuscript (no section explicitly identified as Ablation Study/Ablation Analysis/Component Analysis/Analysis dedicated to ablation).",
+            "paper_evidence": "While no section is titled 'Ablation', the paper includes component/comparative analyses that function as ablations: Conv-TransE vs ConvE vs SACN (Table 3), SACN vs SACN using FB15k-237-Attr (Table 3), and kernel size analysis (Table 4).",
+            "suggested_fix": "State that there is no explicitly labeled ablation section, but the paper includes implicit ablation-style comparisons (decoder-only vs full model, with/without attributes, kernel-size variants).",
+            "should_fix": true
+          },
+          {
+            "problem_type": "understatement",
+            "severity": "low",
+            "section": "1. Metadata / 4. Summary",
+            "review_excerpt": "Code: Publicly available (URL Not found in manuscript) ... Public code is claimed but repository URL is not provided in the manuscript text.",
+            "paper_evidence": "Introduction says: “The code for our model and experiments is publicly available 1.” This indicates a provided reference marker (likely footnote/link in original formatting), though the markdown rendering omits the actual URL.",
+            "suggested_fix": "Soften wording to: code availability is claimed with a citation marker, but the URL is not visible in the provided markdown extract.",
+            "should_fix": true
+          }
+        ],
+        "issue_count": 3,
+        "high_severity_issue_count": 0,
+        "revised": true,
+        "accepted": true,
+        "validation_ok": true,
+        "validation_reason": null,
+        "validation_message": "ok",
+        "compatibility_ok": true,
+        "compatibility_message": "ok",
+        "error": null
+      },
+      {
+        "iteration": 3,
+        "audit_summary": "The review is largely faithful to the paper. I found one concrete factual mismatch in dataset/stat wording and one likely overstatement about causal evidence strength for translational-property preservation.",
+        "issues": [
+          {
+            "problem_type": "wrong number/dataset/setting",
+            "severity": "medium",
+            "section": "3. Claims (attributes claim)",
+            "review_excerpt": "FB15k-237-Attr is constructed by combining FB15k-237 training triples with 78,334 extracted attribute triples (203 attribute nodes/types), yielding dataset stats of 14,744 total nodes/entities and 350,449 training edges (Table 2)",
+            "paper_evidence": "Table 2 labels the row as \"Entities\" and gives FB15k-237-Attr = 14,744; separately \"Attributes\" = 203. In Data Construction text, they state FB15k-237-Attr includes \"14,541 entity nodes, 203 attribute nodes\".",
+            "suggested_fix": "Clarify that 14,744 is the entity count reported in Table 2 (per paper labeling), while the text also describes 14,541 entity nodes + 203 attribute nodes. Avoid calling 14,744 explicitly \"total nodes/entities\" unless disambiguated.",
+            "should_fix": true
+          },
+          {
+            "problem_type": "causal overreach",
+            "severity": "low",
+            "section": "3. Claims (Conv-TransE claim)",
+            "review_excerpt": "Conv-TransE preserves translational characteristics while improving ConvE performance... supported by empirical gains",
+            "paper_evidence": "The paper argues translational behavior via architecture/equation interpretation (Eq. 6 discussion: convolution amounts to a sum) and reports better metrics, but does not provide a formal proof or direct diagnostic test that translational property is preserved beyond design rationale.",
+            "suggested_fix": "Rephrase to: \"Conv-TransE is designed to preserve translational characteristics and empirically outperforms ConvE on reported metrics,\" avoiding strong causal wording that preservation is established by experiments.",
+            "should_fix": true
+          }
+        ],
+        "issue_count": 2,
+        "high_severity_issue_count": 0,
+        "revised": true,
+        "accepted": true,
+        "validation_ok": true,
+        "validation_reason": null,
+        "validation_message": "ok",
+        "compatibility_ok": true,
+        "compatibility_message": "ok",
+        "error": null
+      }
+    ],
+    "llm_provider": "openai",
+    "llm_model": "openai/gpt-5.3-codex",
+    "source_markdown_chars": 46372,
+    "source_markdown_chars_sent": 46372,
+    "report_markdown_chars_sent": 5455
+  },
+  "final_markdown_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Graph\\sacn\\_run\\graph_sacn_2026-05-02_232353\\runtime\\jobs\\6c6c38d7-2f63-4d9f-96de-fcb733c8b20d\\final_report.md",
+  "final_pdf_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Graph\\sacn\\_run\\graph_sacn_2026-05-02_232353\\runtime\\jobs\\6c6c38d7-2f63-4d9f-96de-fcb733c8b20d\\final_report.pdf",
+  "teaser_figure": {
+    "status": "prompt_only",
+    "message": "No teaser image API key configured. Prompt was written to disk. Prompt was also copied to the clipboard. Paste it into the Gemini web app to generate the teaser figure manually.",
+    "clipboard_copied": true,
+    "used_gemini_api": false,
+    "model": "imagen-4.0-generate-001",
+    "source_markdown_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Graph\\sacn\\_run\\graph_sacn_2026-05-02_232353\\stages\\review\\report\\final_review_clean.md",
+    "prompt_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Graph\\sacn\\_run\\graph_sacn_2026-05-02_232353\\stages\\review\\teaser\\teaser_figure_prompt.txt",
+    "prompt": "Create a single polished teaser figure for an ML paper review summary.\nThe output should read like a presentation-quality overview graphic, not a raw markdown rendering.\nUse the extracted report content below as authoritative content to place into the figure.\nPreserve factual wording, numeric values, and status labels from the source.\nTreat the following layout/style instructions as fixed constraints derived from the reference demos/compgcn/teaser_reference.png.\nTreat the attached reference image as a hard layout-and-style target, not as loose inspiration.\nIf any conflict appears between content length and layout fidelity, preserve layout fidelity first and shrink or wrap text.\nKeep colors unchanged and keep the relative positions of all modules unchanged; only adjust module width/height slightly based on content length.\nAll text should use Times New Roman.\nThere is no strict text-length limit inside each module; automatically adjust font sizes, line breaks, spacing, and box sizes for the most visually balanced result.\nDo not invent any extra claims, metrics, or statuses.\nThe Summary module is mandatory and must be visible on the right side with both Strengths and Weaknesses content.\nThe Technical Positioning figure must reuse the provided technical reference image, not a substituted architecture image.\nUse final_review content as canonical source text and preserve wording exactly; do not paraphrase, merge, or drop any required module content.\n\n[Fixed Layout Instructions]\n- Keep the overall teaser layout structure and relative module positions consistent with the reference design.\n- The top-right area contains status badges; preserve their relative placement and badge style.\n- All status badges use rounded-rectangle backgrounds.\n- The lower row includes Improvement and Reduction badges; preserve their relative placement.\n- The right-side summary panel keeps Strengths above Weaknesses, with the specified bottom background colors.\n- Claim rows should be laid out adaptively based on content, with no fixed per-line text limit.\n\n[Template Geometry]\nLock these structural regions to the template's geometry:\n- title_banner: bbox=(0.040,0.040)-(0.970,0.150). Restore the dark top banner spanning nearly the full width, with the title left-aligned inside it, followed by the summary text — do not prefix the summary with 'TL;DR' or any other label.\n- task_badge: bbox=(0.750,0.040)-(0.980,0.100). Place the task label as a rounded badge right-aligned at the top-right corner, directly above the status badge row. Its width must auto-fit the text content — do not fix or extend the left edge to fill the full bbox width. Right edge stays pinned at the right margin; only the left edge floats with content length.\n- status_badges: bbox=(0.670,0.080)-(0.980,0.145). Preserve the top-right status badge strip as a tight horizontal run of rounded badges with the original ordering and spacing.\n- delta_badges: bbox=(0.770,0.120)-(0.980,0.175). Keep the Improvement and Reduction badges on their own lower row directly beneath the status badges.\n- main_canvas: bbox=(0.040,0.150)-(0.970,0.920). Preserve the large light-gray body shell under the header; do not switch to a flat white or fully reflowed canvas.\n- technical_panel: bbox=(0.050,0.170)-(0.560,0.560). Keep the technical-positioning block on the left side of the body, occupying the largest panel width.\n- claims_panel: bbox=(0.560,0.170)-(0.800,0.560). Keep the claim/evidence rows in the middle-right column rather than moving them below the figure or into the summary panel.\n- summary_panel: bbox=(0.800,0.170)-(0.960,0.920). Keep the summary column docked on the far right with stacked Strengths and Weaknesses blocks.\n- strengths_panel: bbox=(0.800,0.580)-(0.960,0.750). Restore the green-tinted Strengths background in the upper part of the right summary column.\n- weaknesses_panel: bbox=(0.800,0.750)-(0.960,0.920). Restore the pink-tinted Weaknesses background in the lower part of the right summary column.\n- experiments_panel: bbox=(0.050,0.580)-(0.790,0.900). Keep the experiment/result tables across the lower-left and lower-middle area, below the technical and claims panels.\n\n[Template Visual Anchors]\nReference template image: demos\\compgcn\\teaser_reference.png; rely on the attached template image and fixed module constraints.\n\n[Fixed Badge Styles]\n- Task: text color RGB(30,40,80); rounded-rectangle background RGB(235,238,248); right-aligned directly above the status badge row; width auto-fits content (do not stretch to full row width).\n- Supported: text color RGB(88,144,78); left icon is a check mark with RGB(0,150,100); rounded-rectangle background RGB(172,215,142).\n- Partially supported / Inconclusive (top-right area only — do NOT use this combined label in claims rows): text color RGB(182,140,2); left icon is a triangular warning symbol (⚠) — do NOT use a circle, question mark, or any other icon; the triangle border is RGB(184,134,11) with a white internal exclamation mark; rounded-rectangle background RGB(254,230,149).\n- Partially supported (claims row badge): text color RGB(182,140,2); left icon is a triangular warning symbol (⚠) — same icon as above; rounded-rectangle background RGB(254,230,149). Label reads '⚠ Partially supported'.\n- Inconclusive (claims row badge): text color RGB(182,140,2); left icon is a triangular warning symbol (⚠) — same icon as above; rounded-rectangle background RGB(254,230,149). Label reads '⚠ Inconclusive'.\n- In conflict: text color RGB(200,29,49); left icon is an X with RGB(139,0,0); rounded-rectangle background RGB(239,148,158).\n- Improvement: text color RGB(86,133,44); rounded-rectangle background RGB(117,189,66).\n- Reduction: text color RGB(133,19,44); rounded-rectangle background RGB(229,76,94).\n\n[Fixed Content Rules]\n- The task label badge must always appear right-aligned directly above the status badge row, using fixed colors (background RGB(235,238,248), text RGB(30,40,80)); its width auto-fits the text content — do not fix the left edge or stretch the badge to fill the row width; its text is extracted from the 'Task' field in [Report Content].\n- The top-right status badge area must always show exactly three fixed badges in this order: '✓ Supported', '⚠ Partially supported / Inconclusive', '✗ In conflict'. These are fixed template elements; do not derive, replace, or omit any of them based on claim row statuses or execution results. The second badge must literally read '⚠ Partially supported / Inconclusive' with a triangular ⚠ icon. All three badges are right-aligned as a compact horizontal group; Supported shifts right accordingly.\n- The Improvement and Reduction badges must always appear below the status badges with fixed labels ('Improvement', 'Reduction'), fixed colors, and fixed positions — do not modify their text or derive them from execution results.\n- The claims section should show exactly 3 claim rows, and they must be dynamically extracted from the report's claims table using the Claim, Evidence, and Status information.\n- In claims rows, each claim's status badge must display the exact status label from the claim's Status field (e.g., '⚠ Inconclusive', '⚠ Partially supported', '✓ Supported', '✗ In conflict') — do NOT substitute the combined top-right badge label '⚠ Partially supported / Inconclusive' for individual claim row badges.\n- In the claims module, each claim sentence must be visually bold in the figure.\n- Each claim row has no fixed text-length requirement; wrap and resize based on content for the cleanest layout.\n- The technical positioning module must directly use the extracted figure/image reference and table content.\n- The technical positioning visual must reuse the provided technical reference image faithfully (same subject/structure).\n- The experiment module must directly use the extracted main-result and ablation tables below.\n- For the Strengths section, use bottom background color RGB(200,229,179).\n- For the Weaknesses section, use bottom background color RGB(245,183,191).\n- The Summary column is required: if Summary/Strengths/Weaknesses is missing or empty, the output is invalid.\n- All extracted report content below must be represented in the final figure modules; missing or truncated modules are invalid outputs.\n- Do not alter any extracted factual text/value: keep wording, numbers, status labels, and signs exactly as provided.\n- In experiment tables, difference values annotated [GREEN]...[/GREEN] must be rendered in green text (RGB(86,133,44)); values annotated [RED]...[/RED] must be rendered in red text (RGB(200,29,49)). Strip the [GREEN]/[RED] annotation markers from the displayed text — show only the numeric value in color.\n\n[Rendering Guidance]\n- Make the figure as aesthetically balanced as possible.\n- Use adaptive typography, spacing, and box scaling automatically, but do not alter the fixed colors or the relative placement of modules.\n- Use clear visual hierarchy, concise labels, table-like alignment where needed, and publication-style spacing.\n- Match the original canvas composition literally: same dark header, same light body shell, same right-side stacked summary column, same lower experiments band.\n- This is a dynamic pipeline: for each run, first extract the teaser-display fields from the provided latest_extraction markdown, then compose the final teaser figure prompt from those extracted fields and the fixed style constraints above.\n- Only inject content that is meant to be displayed in the teaser figure; do not add extra extracted fields that are not part of the visible teaser modules.\n\n[Report Content]\nTitle: End-to-end Structure-Aware Convolutional Networks for Knowledge Base Completion\nTask: Knowledge base completion (link prediction) via knowledge graph embedding\nStatus legend: <span style=\"color: green; \">✓ Supported</span>; <span style=\"color: #E6B800; \">⚠ Partially supported</span>; <span style=\"color: red; \">✗ In conflict</span>\n\n[Technical Positioning]\nCaption: Overview of SACN.\nImage reference: E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Graph\\sacn\\_run\\graph_sacn_2026-05-02_232353\\runtime\\jobs\\6c6c38d7-2f63-4d9f-96de-fcb733c8b20d\\technical_positioning_image.jpg\nTable:\n| Research domain | Method | Graph structure encoding | Node attribute integration | Translational property | Convolutional decoding |\n| --- | --- | --- | --- | --- | --- |\n| Knowledge graph embedding | TransE | × | × | √ | × |\n| Knowledge graph embedding | DistMult | × | × | × | × |\n| Convolutional KG embedding | ConvE | × | × | × | √ |\n| Knowledge graph embedding + GCN | R-GCN | √ | × | × | × |\n| This Work | SACN | √ | √ | √ | √ |\n\n[Claims]\nSelected 3 claim rows for direct layout use:\n1. **Claim:** **SACN improves over ConvE by about 10% relatively on key metrics.**; **Evidence:** Abstract and contribution text state about 10% relative improvement; Table 3 reports ConvE→SACN gains: FB15k-237 Hits@10 0.49→0.54, Hits@3 0.35→0.39, Hits@1 0.24→0.26; WN18RR Hits@10 0.48→0.54, Hits@3 0.43→0.48, Hits@1 0.39→0.43.; **Status:** ✓ Supported\n2. **Claim:** **Conv-TransE preserves translational characteristics while improving ConvE performance.**; **Evidence:** Method states Conv-TransE is designed with translational property; Eq. (6) is interpreted as summing subject and relation contributions; Table 3 shows Conv-TransE vs ConvE improvements on FB15k-237 (Hits@10 0.51 vs 0.49, Hits@3 0.37 vs 0.35) and WN18RR (0.52 vs 0.48, 0.47 vs 0.43).; **Status:** ✓ Supported\n3. **Claim:** **Modeling attributes as nodes further improves SACN.**; **Evidence:** Node Attributes subsection defines attribute nodes; FB15k-237-Attr is constructed by combining FB15k-237 training triples with 78,334 extracted attribute triples (203 attributes/attribute nodes). Table 2 reports “Entities” = 14,744 for FB15k-237-Attr, while Data Construction text describes 14,541 entity nodes plus 203 attribute nodes; Table 2 also reports 350,449 training edges. Table 3 shows SACN using FB15k-237-Attr (0.55/0.40/0.27/0.36) above SACN without attributes (0.54/0.39/0.26/0.35) on FB15k-237 metrics.; **Status:** ✓ Supported\n\nFull claims table:\n| Claim | Evidence | Assessment | Status | Location |\n| --- | --- | --- | --- | --- |\n| SACN improves over ConvE by about 10% relatively on key metrics. | Abstract and contribution text state about 10% relative improvement; Table 3 reports ConvE→SACN gains: FB15k-237 Hits@10 0.49→0.54, Hits@3 0.35→0.39, Hits@1 0.24→0.26; WN18RR Hits@10 0.48→0.54, Hits@3 0.43→0.48, Hits@1 0.39→0.43. | The paper cites experimental tables or figures as evidence. Concrete numeric values are present in the evidence. The cited location is Abstract; Introduction contributions; Results (Link Prediction); Table 3. | ✓ Supported | Abstract; Introduction contributions; Results (Link Prediction); Table 3 |\n| Conv-TransE preserves translational characteristics while improving ConvE performance. | Method states Conv-TransE is designed with translational property; Eq. (6) is interpreted as summing subject and relation contributions; Table 3 shows Conv-TransE vs ConvE improvements on FB15k-237 (Hits@10 0.51 vs 0.49, Hits@3 0.37 vs 0.35) and WN18RR (0.52 vs 0.48, 0.47 vs 0.43). | The paper cites experimental tables or figures as evidence. Concrete numeric values are present in the evidence. The cited location is Introduction; Conv-TransE section (Eq. 6–8); Results; Table 3. | ✓ Supported | Introduction; Conv-TransE section (Eq. 6–8); Results; Table 3 |\n| Modeling attributes as nodes further improves SACN. | Node Attributes subsection defines attribute nodes; FB15k-237-Attr is constructed by combining FB15k-237 training triples with 78,334 extracted attribute triples (203 attributes/attribute nodes). Table 2 reports “Entities” = 14,744 for FB15k-237-Attr, while Data Construction text describes 14,541 entity nodes plus 203 attribute nodes; Table 2 also reports 350,449 training edges. Table 3 shows SACN using FB15k-237-Attr (0.55/0.40/0.27/0.36) above SACN without attributes (0.54/0.39/0.26/0.35) on FB15k-237 metrics. | The paper cites experimental tables or figures as evidence. Concrete numeric values are present in the evidence. The cited location is Weighted Graph Convolutional Layer (Node Attributes); Data Construction; Table 2; Results; Table 3. | ✓ Supported | Weighted Graph Convolutional Layer (Node Attributes); Data Construction; Table 2; Results; Table 3 |\n\n[Summary]\nThis paper presents SACN, an end-to-end knowledge base completion model that combines a weighted GCN encoder with a Conv-TransE decoder. The method targets limitations of ConvE by adding graph structure and node-attribute information and by preserving translational behavior in decoding. Reported results on FB15k-237 and WN18RR show consistent improvements over strong baselines, with additional gains from an attribute-augmented dataset.\nStrengths:\n- Clear model decomposition (WGCN encoder + Conv-TransE decoder) with end-to-end training.\n- Method is supported by explicit formulations (Eq. 1–8) and dataset-construction details.\n- Empirical results show consistent improvements over ConvE and other baselines in Table 3.\n- Additional analyses (convergence, kernel size, node indegree) provide broader performance characterization.\nWeaknesses:\n- No formal theorem-level proof for translational-property claims; support is mainly derivational and empirical.\n- Some baseline reporting is incomplete for certain dataset/model cells (e.g., missing entries in Table 3).\n- Public code availability is claimed with a citation marker, but the repository URL is not visible in the provided markdown extract.\n- No explicitly labeled ablation-study section separating component-level causal analysis from general analysis.\n\n[Experiments]\nMain result location: Results section, Link Prediction, Table 3 (comparison against external baselines on FB15k-237 and WN18RR).\nMain result table:\n| Task | Dataset | Metric | Best Baseline | Paper Result | Difference (Δ) | Evaluation Status |\n| --- | --- | --- | --- | --- | --- | --- |\n| Link prediction | FB15k-237 | Hits@10 | 0.49(ConvE) | SACN (0.54) | [GREEN]+0.05[/GREEN] | ⚠() |\n| Link prediction | WN18RR | Hits@10 | 0.51(ComplEx) | SACN (0.54) | [GREEN]+0.03[/GREEN] | ⚠() |\n\nAblation result location: No section is explicitly titled as ablation, but the manuscript includes implicit ablation-style component comparisons (ConvE vs Conv-TransE vs SACN in Table 3, SACN with vs without attributes in Table 3, and kernel-size variants in Table 4).\nAblation result table:\n| Ablation Dimension | Configuration | Full Model | Paper Result | Difference (Δ) | Evaluation Status |\n| --- | --- | --- | --- | --- | --- |\n| Optimal setup | Not found in manuscript | Not found in manuscript | Not found in manuscript | 0 | ⚠() |\n",
+    "image_path": "",
+    "response_path": ""
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "source_pdf": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\Prefix-Tuning\\_run\\text_prefix-tuning_2026-05-02_232205\\inputs\\source_pdf\\paper.pdf",
+  "mineru_markdown_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\Prefix-Tuning\\_run\\text_prefix-tuning_2026-05-02_232205\\runtime\\jobs\\2b30b4a0-a346-40aa-bc96-5c2b82789218\\mineru_full.md",
+  "mineru_content_list_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\Prefix-Tuning\\_run\\text_prefix-tuning_2026-05-02_232205\\runtime\\jobs\\2b30b4a0-a346-40aa-bc96-5c2b82789218\\mineru_content_list.json",
+  "markdown_provider": "mineru_v4",
+  "mineru_batch_id": "222dacb6-3c98-4693-8431-729fbb19ccda",
+  "parse_warning": null,
+  "job_id": "2b30b4a0-a346-40aa-bc96-5c2b82789218",
+  "job_json_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\Prefix-Tuning\\_run\\text_prefix-tuning_2026-05-02_232205\\runtime\\jobs\\2b30b4a0-a346-40aa-bc96-5c2b82789218\\job.json",
+  "shared_execution_extract": {
+    "paper_extracted_dir": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\Prefix-Tuning\\_run\\text_prefix-tuning_2026-05-02_232205\\inputs\\paper_extracted",
+    "paper_extracted_md_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\Prefix-Tuning\\_run\\text_prefix-tuning_2026-05-02_232205\\inputs\\paper_extracted\\paper.mineru.md",
+    "paper_extracted_content_list_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\Prefix-Tuning\\_run\\text_prefix-tuning_2026-05-02_232205\\inputs\\paper_extracted\\paper.mineru.content_list.json",
+    "paper_extracted_assets_dir": "",
+    "paper_extracted_tables_dir": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\Prefix-Tuning\\_run\\text_prefix-tuning_2026-05-02_232205\\inputs\\paper_extracted\\tables"
+  },
+  "annotation_count": 0,
+  "annotations_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\Prefix-Tuning\\_run\\text_prefix-tuning_2026-05-02_232205\\runtime\\jobs\\2b30b4a0-a346-40aa-bc96-5c2b82789218\\annotations.json",
+  "semantic_scholar_candidates_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\Prefix-Tuning\\_run\\text_prefix-tuning_2026-05-02_232205\\runtime\\jobs\\2b30b4a0-a346-40aa-bc96-5c2b82789218\\semantic_scholar_candidates.json",
+  "final_markdown_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\Prefix-Tuning\\_run\\text_prefix-tuning_2026-05-02_232205\\runtime\\jobs\\2b30b4a0-a346-40aa-bc96-5c2b82789218\\final_report.md",
+  "report_pdf_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\Prefix-Tuning\\_run\\text_prefix-tuning_2026-05-02_232205\\runtime\\jobs\\2b30b4a0-a346-40aa-bc96-5c2b82789218\\final_report.pdf",
+  "latest_output_md": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\Prefix-Tuning\\_run\\text_prefix-tuning_2026-05-02_232205\\runtime\\jobs\\2b30b4a0-a346-40aa-bc96-5c2b82789218\\latest_extraction.md",
+  "latest_output_pdf": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\Prefix-Tuning\\_run\\text_prefix-tuning_2026-05-02_232205\\runtime\\jobs\\2b30b4a0-a346-40aa-bc96-5c2b82789218\\latest_extraction.pdf",
+  "runtime_status": "completed",
+  "runtime_message": "Review pipeline completed.",
+  "runtime_error": null,
+  "usage": {
+    "token": {
+      "requests": 5,
+      "input_tokens": 233418,
+      "output_tokens": 3578,
+      "total_tokens": 236996
+    },
+    "tool": {
+      "total_calls": 5,
+      "distinct_tools": 1,
+      "per_tool": {
+        "review_final_markdown_write": 5
+      }
+    },
+    "paper_search": {
+      "total_calls": 0,
+      "successful_calls": 0,
+      "effective_calls": 0,
+      "papers_found": 0,
+      "distinct_queries": 0
+    }
+  },
+  "paper_search_runtime_state": {
+    "enabled": true,
+    "started": false,
+    "availability": "missing_base_url",
+    "base_url": null,
+    "health_url": null,
+    "error": null
+  }
+}

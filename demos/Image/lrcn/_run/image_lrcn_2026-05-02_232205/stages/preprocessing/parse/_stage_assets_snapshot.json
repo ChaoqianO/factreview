@@ -1,0 +1,9 @@
+{
+  "job_json_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\lrcn\\_run\\image_lrcn_2026-05-02_232205\\runtime\\jobs\\209e9be6-2826-4c90-aaa5-f9bd5b048612\\job.json",
+  "job_dir": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\lrcn\\_run\\image_lrcn_2026-05-02_232205\\runtime\\jobs\\209e9be6-2826-4c90-aaa5-f9bd5b048612",
+  "job_state_snapshot_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\lrcn\\_run\\image_lrcn_2026-05-02_232205\\stages\\preprocessing\\parse\\_job_state_snapshot.json",
+  "annotations_snapshot_path": "",
+  "final_markdown_snapshot_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\lrcn\\_run\\image_lrcn_2026-05-02_232205\\stages\\preprocessing\\parse\\snapshot_artifacts\\final_review.md",
+  "report_pdf_snapshot_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\lrcn\\_run\\image_lrcn_2026-05-02_232205\\stages\\preprocessing\\parse\\snapshot_artifacts\\final_review.pdf",
+  "semantic_scholar_candidates_snapshot_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\lrcn\\_run\\image_lrcn_2026-05-02_232205\\stages\\preprocessing\\parse\\snapshot_artifacts\\semantic_scholar_candidates.json"
+}
