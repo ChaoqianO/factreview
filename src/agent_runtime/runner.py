@@ -2805,6 +2805,27 @@ def _publish_outputs_to_output_dir(
     return job_latest_md, job_latest_pdf
 
 
+def _long_path_str(path: Path) -> str:
+    """Return a path string that survives Windows MAX_PATH (260 chars).
+
+    On other platforms, this is just ``str(path)``. On Windows, paths longer
+    than 260 chars are rewritten with the ``\\\\?\\`` prefix so the underlying
+    Win32 calls bypass the legacy limit. No-op for already-prefixed inputs.
+    """
+    s = str(path)
+    if sys.platform != "win32":
+        return s
+    # Already prefixed.
+    if s.startswith("\\\\?\\") or s.startswith("//?/"):
+        return s
+    # Only expand absolute paths; relative paths can't be prefixed safely.
+    if not os.path.isabs(s):
+        return s
+    if len(s) < 248:  # comfortably under MAX_PATH=260
+        return s
+    return "\\\\?\\" + os.path.normpath(s)
+
+
 def _persist_mineru_image_files(
     *,
     job_dir: Path,
@@ -2815,6 +2836,7 @@ def _persist_mineru_image_files(
         return mapping
     assets_root = job_dir / "mineru_assets"
     assets_root.mkdir(parents=True, exist_ok=True)
+    skipped_too_long = 0
     for key, value in image_files.items():
         rel = str(key or "").strip().replace("\\", "/")
         if not rel:
@@ -2824,9 +2846,28 @@ def _persist_mineru_image_files(
         # ensure write stays inside assets_root
         if assets_root.resolve() not in target.parents and target != assets_root.resolve():
             continue
-        target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_bytes(value)
+        try:
+            target.parent.mkdir(parents=True, exist_ok=True)
+            # On Windows, deep run-dir trees + 64-char hex MinerU filenames
+            # routinely overflow MAX_PATH. Use the \\?\ long-path prefix so
+            # the underlying Win32 write goes through the long-path-aware API.
+            target_str = _long_path_str(target)
+            with open(target_str, "wb") as fh:
+                fh.write(value)
+        except OSError:
+            # Last-resort: skip the asset rather than crash the whole job.
+            # Downstream consumers degrade gracefully (figures missing from
+            # the rendered PDF) instead of the parse stage exploding.
+            skipped_too_long += 1
+            continue
         mapping[rel] = target
+    if skipped_too_long:
+        # Best-effort visibility — printed to the runner stderr; the parent
+        # subprocess captures it into the per-demo log file.
+        print(
+            f"[mineru_assets] skipped {skipped_too_long} oversized asset paths",
+            file=sys.stderr,
+        )
     return mapping
 
 

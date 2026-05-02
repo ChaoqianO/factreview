@@ -37,6 +37,12 @@ def _llm_judge_enabled(cfg: dict[str, Any]) -> str:
 
 
 def judge_node(state: dict[str, Any]) -> dict[str, Any]:
+    from ..graph import is_budget_exhausted
+
+    if is_budget_exhausted(state):
+        state["status"] = "partial"
+        return state
+
     run_info = state.get("run", {})
     run_dir = Path(run_info.get("dir") or "")
     artifacts_dir = Path(run_info.get("artifacts_dir") or (run_dir / "artifacts"))

@@ -41,7 +41,14 @@ def _materialize_execution_paper_extract(
 
     copied_md = copy_file_if_exists(mineru_md, md_dst)
     copied_content = copy_file_if_exists(mineru_content, content_dst)
-    copied_assets = copy_dir_if_exists(assets_src, assets_dst)
+    # Asset copy is best-effort: MinerU dumps figures with 64-char hex names
+    # which routinely overflow Windows MAX_PATH once nested under deep run
+    # subtrees. The text content is what downstream stages consume; missing
+    # figure assets only degrade the rendered PDF gracefully.
+    try:
+        copied_assets = copy_dir_if_exists(assets_src, assets_dst)
+    except Exception:
+        copied_assets = False
 
     tables_dir = extracted_dir / "tables"
     tables_dir.mkdir(parents=True, exist_ok=True)

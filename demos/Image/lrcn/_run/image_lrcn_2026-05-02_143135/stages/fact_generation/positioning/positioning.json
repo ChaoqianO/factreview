@@ -1,0 +1,19 @@
+{
+  "semantic_scholar": {
+    "enabled": true,
+    "query": "Long-term Recurrent Convolutional Networks for Visual Recognition and Description",
+    "success": false,
+    "papers": [],
+    "message": "HTTPStatusError: Client error '429 ' for url 'https://api.semanticscholar.org/graph/v1/paper/search?query=Long-term+Recurrent+Convolutional+Networks+for+Visual+Recognition+and+Description&limit=24&fields=title%2Cyear%2CcitationCount%2Cvenue%2Curl%2Cauthors%2CexternalIds'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429"
+  },
+  "paper_search_runtime_state": {
+    "enabled": true,
+    "started": false,
+    "availability": "missing_base_url",
+    "base_url": null,
+    "health_url": null,
+    "error": null
+  },
+  "job_id": "8ed52fb2-6bf3-4fdb-aaf6-b9429240f558",
+  "job_json_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\lrcn\\_run\\image_lrcn_2026-05-02_143135\\runtime\\jobs\\8ed52fb2-6bf3-4fdb-aaf6-b9429240f558\\job.json"
+}

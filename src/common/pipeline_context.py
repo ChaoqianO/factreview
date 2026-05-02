@@ -310,8 +310,20 @@ def _reuse_job_candidates(*, repo_root: Path, run_dir: Path, job_ref: str) -> li
 
 
 def _pick_python_executable(repo_root: Path) -> Path:
-    candidate = repo_root / ".venv" / "bin" / "python"
-    if candidate.exists():
+    # Allow operators to pin the runtime interpreter explicitly. Useful on
+    # Windows where ``python3`` resolves to the Microsoft Store stub.
+    override = os.environ.get("REVIEW_RUNTIME_PYTHON", "").strip()
+    if override:
+        return Path(override)
+
+    candidates: list[Path] = []
+    # POSIX-style and Windows-style venv layouts.
+    candidates.append(repo_root / ".venv" / "bin" / "python")
+    candidates.append(repo_root / ".venv" / "Scripts" / "python.exe")
+
+    for candidate in candidates:
+        if not candidate.exists():
+            continue
         try:
             chk = subprocess.run(
                 [str(candidate), "-c", "import agents"],
@@ -325,6 +337,14 @@ def _pick_python_executable(repo_root: Path) -> Path:
         except (subprocess.TimeoutExpired, OSError):
             pass
         return candidate
+
+    # Fall back to the parent process's interpreter so child stages reuse the
+    # same environment (and import path) the user invoked us with.
+    import sys as _sys
+
+    parent = Path(_sys.executable)
+    if parent.exists():
+        return parent
     return Path("python3")
 
 

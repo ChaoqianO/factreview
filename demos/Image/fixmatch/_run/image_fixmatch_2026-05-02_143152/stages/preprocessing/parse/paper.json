@@ -1,0 +1,48 @@
+{
+  "source_pdf": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\fixmatch\\_run\\image_fixmatch_2026-05-02_143152\\inputs\\source_pdf\\paper.pdf",
+  "mineru_markdown_path": "",
+  "mineru_content_list_path": "",
+  "markdown_provider": null,
+  "mineru_batch_id": null,
+  "parse_warning": null,
+  "job_id": "b649e892-e140-48bd-986a-947196e873b7",
+  "job_json_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\fixmatch\\_run\\image_fixmatch_2026-05-02_143152\\runtime\\jobs\\b649e892-e140-48bd-986a-947196e873b7\\job.json",
+  "shared_execution_extract": {
+    "paper_extracted_dir": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\fixmatch\\_run\\image_fixmatch_2026-05-02_143152\\inputs\\paper_extracted",
+    "paper_extracted_md_path": "",
+    "paper_extracted_content_list_path": "",
+    "paper_extracted_assets_dir": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\fixmatch\\_run\\image_fixmatch_2026-05-02_143152\\inputs\\paper_extracted\\mineru_assets",
+    "paper_extracted_tables_dir": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\fixmatch\\_run\\image_fixmatch_2026-05-02_143152\\inputs\\paper_extracted\\tables"
+  },
+  "annotation_count": 0,
+  "annotations_path": "",
+  "semantic_scholar_candidates_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\fixmatch\\_run\\image_fixmatch_2026-05-02_143152\\runtime\\jobs\\b649e892-e140-48bd-986a-947196e873b7\\semantic_scholar_candidates.json",
+  "final_markdown_path": "",
+  "report_pdf_path": "",
+  "latest_output_md": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\fixmatch\\_run\\image_fixmatch_2026-05-02_143152\\runtime\\jobs\\b649e892-e140-48bd-986a-947196e873b7\\latest_extraction.md",
+  "latest_output_pdf": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Image\\fixmatch\\_run\\image_fixmatch_2026-05-02_143152\\runtime\\jobs\\b649e892-e140-48bd-986a-947196e873b7\\latest_extraction.pdf",
+  "runtime_status": "failed",
+  "runtime_message": "Review pipeline failed.",
+  "runtime_error": "FileNotFoundError: [Errno 2] No such file or directory: 'E:\\\\code\\\\fastMCP\\\\ai_review\\\\.claude\\\\worktrees\\\\awesome-mirzakhani\\\\demos\\\\Image\\\\fixmatch\\\\_run\\\\image_fixmatch_2026-05-02_143152\\\\runtime\\\\jobs\\\\b649e892-e140-48bd-986a-947196e873b7\\\\mineru_assets\\\\images\\\\4dea5e24dc975e063344edebf434a1e220558b857946461f86eb10f90e512567.jpg'",
+  "usage": {
+    "token": {
+      "requests": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0
+    },
+    "tool": {
+      "total_calls": 0,
+      "distinct_tools": 0,
+      "per_tool": {}
+    },
+    "paper_search": {
+      "total_calls": 0,
+      "successful_calls": 0,
+      "effective_calls": 0,
+      "papers_found": 0,
+      "distinct_queries": 0
+    }
+  },
+  "paper_search_runtime_state": {}
+}

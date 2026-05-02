@@ -181,6 +181,10 @@ def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
                 ),
                 max_attempts=int(args.max_attempts),
                 no_pdf_extract=bool(args.no_pdf_extract),
+                auto_tasks=bool(args.auto_tasks),
+                auto_tasks_mode=str(args.auto_tasks_mode),
+                auto_tasks_force=bool(args.auto_tasks_force),
+                paper_budget_sec=int(args.paper_budget_sec),
             ),
         )
     report_result = _run_stage(
@@ -314,6 +318,28 @@ def parse_args() -> argparse.Namespace:
         "--no-pdf-extract",
         action="store_true",
         help="Pass through to external execution stage (skip MinerU in execution prepare).",
+    )
+    p.add_argument(
+        "--auto-tasks",
+        action="store_true",
+        help="Let the execution stage auto-infer tasks via LLM when tasks.yaml is missing.",
+    )
+    p.add_argument(
+        "--auto-tasks-mode",
+        choices=("smoke", "full"),
+        default="smoke",
+        help="Auto-task aggressiveness. 'smoke' = lightweight checks only; 'full' = include heavier tasks (paper-agnostic).",
+    )
+    p.add_argument(
+        "--auto-tasks-force",
+        action="store_true",
+        help="Overwrite an existing tasks.yaml with the auto-inferred one.",
+    )
+    p.add_argument(
+        "--paper-budget-sec",
+        type=int,
+        default=0,
+        help="Soft wall-clock budget for the execution stage (seconds). 0 = unbounded.",
     )
     return p.parse_args()
 

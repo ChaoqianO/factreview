@@ -1,0 +1,37 @@
+{
+  "paper_key": "graph_sacn",
+  "paper_source": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Graph\\sacn\\paper.pdf",
+  "paper_source_type": "path",
+  "paper_pdf": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Graph\\sacn\\_run\\graph_sacn_2026-05-02_143146\\inputs\\source_pdf\\paper.pdf",
+  "run_id": "2026-05-02_143146",
+  "run_dir": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Graph\\sacn\\_run\\graph_sacn_2026-05-02_143146",
+  "job_id": "37ad82c9-55be-4338-823f-14a2cdcca617",
+  "job_dir": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Graph\\sacn\\_run\\graph_sacn_2026-05-02_143146\\runtime\\jobs\\37ad82c9-55be-4338-823f-14a2cdcca617",
+  "stages": {
+    "parse": "ok",
+    "claim_extract": "ok",
+    "refcheck": "skipped",
+    "positioning": "ok",
+    "execution": "failed",
+    "report": "failed",
+    "teaser": "failed"
+  },
+  "stage_errors": {
+    "execution": "execution orchestrator exit_status='failed'",
+    "report": "agent runner produced no final_markdown_path",
+    "teaser": "no review markdown produced by the report stage (checked final_review_clean.md and final_review.md)"
+  },
+  "outputs": {
+    "parse": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Graph\\sacn\\_run\\graph_sacn_2026-05-02_143146\\stages\\preprocessing\\parse\\paper.json",
+    "claim_extract": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Graph\\sacn\\_run\\graph_sacn_2026-05-02_143146\\stages\\preprocessing\\claim_extract\\facts.json",
+    "refcheck": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Graph\\sacn\\_run\\graph_sacn_2026-05-02_143146\\stages\\fact_generation\\refcheck\\reference_check.json",
+    "positioning": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Graph\\sacn\\_run\\graph_sacn_2026-05-02_143146\\stages\\fact_generation\\positioning\\positioning.json",
+    "execution": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Graph\\sacn\\_run\\graph_sacn_2026-05-02_143146\\stages\\fact_generation\\execution\\execution.json",
+    "report_json": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Graph\\sacn\\_run\\graph_sacn_2026-05-02_143146\\stages\\review\\report\\final_review.json"
+  },
+  "reference_check": {
+    "enabled": false,
+    "attempted": false
+  },
+  "teaser_figure": {}
+}

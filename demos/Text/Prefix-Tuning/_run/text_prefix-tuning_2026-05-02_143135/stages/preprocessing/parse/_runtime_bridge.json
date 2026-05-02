@@ -1,0 +1,56 @@
+{
+  "paper_pdf": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\Prefix-Tuning\\_run\\text_prefix-tuning_2026-05-02_143135\\inputs\\source_pdf\\paper.pdf",
+  "paper_key": "text_Prefix-Tuning",
+  "job_id": "15daebe4-7752-4a32-b192-d18d5f6c8b0e",
+  "job_dir": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\Prefix-Tuning\\_run\\text_prefix-tuning_2026-05-02_143135\\runtime\\jobs\\15daebe4-7752-4a32-b192-d18d5f6c8b0e",
+  "job_json_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\Prefix-Tuning\\_run\\text_prefix-tuning_2026-05-02_143135\\runtime\\jobs\\15daebe4-7752-4a32-b192-d18d5f6c8b0e\\job.json",
+  "own_payload": {
+    "job_id": "15daebe4-7752-4a32-b192-d18d5f6c8b0e",
+    "status": "failed",
+    "message": "Review pipeline failed.",
+    "error": "FileNotFoundError: [Errno 2] No such file or directory: 'E:\\\\code\\\\fastMCP\\\\ai_review\\\\.claude\\\\worktrees\\\\awesome-mirzakhani\\\\demos\\\\Text\\\\Prefix-Tuning\\\\_run\\\\text_prefix-tuning_2026-05-02_143135\\\\runtime\\\\jobs\\\\15daebe4-7752-4a32-b192-d18d5f6c8b0e\\\\mineru_assets\\\\images\\\\4045a5c845f3d9b65e271b801ae400c46bde9c5513073a3a0504f6619305517d.jpg'",
+    "artifacts": {
+      "source_pdf_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\Prefix-Tuning\\_run\\text_prefix-tuning_2026-05-02_143135\\runtime\\jobs\\15daebe4-7752-4a32-b192-d18d5f6c8b0e\\source.pdf",
+      "mineru_markdown_path": null,
+      "mineru_content_list_path": null,
+      "annotations_path": null,
+      "final_markdown_path": null,
+      "final_report_audit_path": null,
+      "report_pdf_path": null,
+      "latest_output_md_path": null,
+      "latest_output_pdf_path": null,
+      "prompt_snapshot_path": null
+    },
+    "usage": {
+      "token": {
+        "requests": 0,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0
+      },
+      "tool": {
+        "total_calls": 0,
+        "distinct_tools": 0,
+        "per_tool": {}
+      },
+      "paper_search": {
+        "total_calls": 0,
+        "successful_calls": 0,
+        "effective_calls": 0,
+        "papers_found": 0,
+        "distinct_queries": 0
+      }
+    },
+    "metadata": {
+      "llm_api_mode": "chat_completions"
+    },
+    "annotation_count": 0,
+    "final_report_ready": false,
+    "pdf_ready": false,
+    "job_json_path": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\Prefix-Tuning\\_run\\text_prefix-tuning_2026-05-02_143135\\runtime\\jobs\\15daebe4-7752-4a32-b192-d18d5f6c8b0e\\job.json",
+    "job_dir": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\Prefix-Tuning\\_run\\text_prefix-tuning_2026-05-02_143135\\runtime\\jobs\\15daebe4-7752-4a32-b192-d18d5f6c8b0e",
+    "latest_output_md": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\Prefix-Tuning\\_run\\text_prefix-tuning_2026-05-02_143135\\runtime\\jobs\\15daebe4-7752-4a32-b192-d18d5f6c8b0e\\latest_extraction.md",
+    "latest_output_pdf": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\Prefix-Tuning\\_run\\text_prefix-tuning_2026-05-02_143135\\runtime\\jobs\\15daebe4-7752-4a32-b192-d18d5f6c8b0e\\latest_extraction.pdf",
+    "final_report_audit_json": "E:\\code\\fastMCP\\ai_review\\.claude\\worktrees\\awesome-mirzakhani\\demos\\Text\\Prefix-Tuning\\_run\\text_prefix-tuning_2026-05-02_143135\\runtime\\jobs\\15daebe4-7752-4a32-b192-d18d5f6c8b0e\\final_report_audit.json"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "enabled": true,
+  "query": "Unsupervised Data Augmentation for Consistency Training",
+  "success": false,
+  "papers": [],
+  "message": "HTTPStatusError: Client error '429 ' for url 'https://api.semanticscholar.org/graph/v1/paper/search?query=Unsupervised+Data+Augmentation+for+Consistency+Training&limit=24&fields=title%2Cyear%2CcitationCount%2Cvenue%2Curl%2Cauthors%2CexternalIds'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429"
+}

@@ -89,6 +89,15 @@ def _ensure_task_output_roots(*, cwd: str, artifact_paths: list[Any]) -> None:
 
 
 def run_node(state: dict[str, Any]) -> dict[str, Any]:
+    # Soft wall-clock budget: short-circuit before launching another batch of
+    # tasks if the per-paper budget is already exhausted.
+    from ..graph import is_budget_exhausted
+
+    if is_budget_exhausted(state):
+        state["status"] = "partial"
+        state["run_result"] = {"success": False, "partial": True, "reason": "paper_budget_exhausted"}
+        return state
+
     cfg = state.get("config", {})
     run_info = state.get("run", {})
     run_dir = Path(run_info.get("dir") or "")
@@ -120,9 +129,26 @@ def run_node(state: dict[str, Any]) -> dict[str, Any]:
         state["run_result"] = {"success": False, "error": msg}
         return state
 
+    from ..graph import is_budget_exhausted as _bx
+
     results = []
     total_tasks = len(tasks)
     for idx, task in enumerate(tasks, 1):
+        if _bx(state):
+            append_event(
+                run_dir,
+                "run_partial",
+                {"reason": "paper_budget_exhausted", "skipped_from_index": idx, "total": total_tasks},
+            )
+            state["status"] = "partial"
+            state["run_result"] = {
+                "success": False,
+                "partial": True,
+                "reason": "paper_budget_exhausted",
+                "tasks": results,
+                "tasks_skipped": total_tasks - idx + 1,
+            }
+            return state
         task_id = str(task.get("id") or f"task_{idx}")
         enabled = bool(task.get("enabled", True))
         pr_host = paper_root or "."
