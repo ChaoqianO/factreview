@@ -15,12 +15,17 @@ from util.cutoff_date import CutoffDate, filter_papers
 @dataclass
 class PaperSearchConfig:
     enabled: bool
+    provider: str
     base_url: str | None
     api_key: str | None
     endpoint: str
     timeout_seconds: int
     health_endpoint: str
     health_timeout_seconds: int
+    semantic_scholar_base_url: str = "https://api.semanticscholar.org/graph/v1"
+    semantic_scholar_api_key: str | None = None
+    openalex_base_url: str = "https://api.openalex.org"
+    openalex_api_key: str | None = None
 
 
 @dataclass
@@ -36,6 +41,7 @@ class PaperSearchRuntimeState:
     enabled: bool
     started: bool
     availability: str
+    provider: str = "remote"
     base_url: str | None = None
     health_url: str | None = None
     error: str | None = None
@@ -45,6 +51,7 @@ class PaperSearchRuntimeState:
             "enabled": bool(self.enabled),
             "started": bool(self.started),
             "availability": str(self.availability or "").strip(),
+            "provider": str(self.provider or "").strip() or "remote",
             "base_url": str(self.base_url or "").strip() or None,
             "health_url": str(self.health_url or "").strip() or None,
             "error": str(self.error or "").strip() or None,
@@ -59,7 +66,9 @@ class PaperSearchAdapter:
 
     @property
     def search_configured(self) -> bool:
-        return bool(self.search_cfg.enabled and self.search_cfg.base_url)
+        return bool(self.search_cfg.enabled and self._search_provider() != "remote") or bool(
+            self.search_cfg.enabled and self.search_cfg.base_url
+        )
 
     @property
     def read_configured(self) -> bool:
@@ -83,12 +92,30 @@ class PaperSearchAdapter:
                 payload["cutoff_date"] = cutoff_date.to_metadata()
             return payload
         try:
-            result = await self._search_remote(query=query, question_list=question_list)
+            provider = self._search_provider()
+            if provider == "remote":
+                result = await self._search_remote(query=query, question_list=question_list)
+            elif provider == "arxiv":
+                result = await self._search_arxiv_fallback(query=query, question_list=question_list)
+            elif provider == "semantic_scholar":
+                result = await self._search_semantic_scholar(query=query, question_list=question_list)
+            elif provider == "openalex":
+                result = await self._search_openalex(query=query, question_list=question_list)
+            else:
+                result = {
+                    "success": False,
+                    "error": "unsupported_provider",
+                    "provider": provider,
+                    "papers": [],
+                    "count": 0,
+                    "question_results": [],
+                }
         except Exception as exc:
             self._search_state_cache = PaperSearchRuntimeState(
                 enabled=bool(self.search_cfg.enabled),
                 started=False,
                 availability="became_unavailable_during_run",
+                provider=self._search_provider(),
                 base_url=self.search_cfg.base_url,
                 health_url=self._search_health_url(),
                 error=f"{type(exc).__name__}: {exc}",
@@ -110,6 +137,7 @@ class PaperSearchAdapter:
         if self._search_state_cache is not None and not force_refresh:
             return self._search_state_cache
 
+        provider = self._search_provider()
         base_url = str(self.search_cfg.base_url or "").strip() or None
         health_url = self._search_health_url()
         if not bool(self.search_cfg.enabled):
@@ -117,8 +145,34 @@ class PaperSearchAdapter:
                 enabled=False,
                 started=False,
                 availability="disabled_by_config",
+                provider=provider,
                 base_url=base_url,
                 health_url=health_url,
+            )
+            self._search_state_cache = state
+            return state
+
+        if provider in {"arxiv", "semantic_scholar", "openalex"}:
+            state = PaperSearchRuntimeState(
+                enabled=True,
+                started=True,
+                availability="ready",
+                provider=provider,
+                base_url=self._provider_base_url(provider),
+                health_url=None,
+            )
+            self._search_state_cache = state
+            return state
+
+        if provider != "remote":
+            state = PaperSearchRuntimeState(
+                enabled=True,
+                started=False,
+                availability="unsupported_provider",
+                provider=provider,
+                base_url=base_url,
+                health_url=health_url,
+                error=f"unsupported paper_search provider: {provider}",
             )
             self._search_state_cache = state
             return state
@@ -128,6 +182,7 @@ class PaperSearchAdapter:
                 enabled=True,
                 started=False,
                 availability="missing_base_url",
+                provider=provider,
                 base_url=None,
                 health_url=health_url,
             )
@@ -139,6 +194,7 @@ class PaperSearchAdapter:
                 enabled=True,
                 started=True,
                 availability="ready",
+                provider=provider,
                 base_url=base_url,
                 health_url=None,
             )
@@ -178,6 +234,7 @@ class PaperSearchAdapter:
                 enabled=True,
                 started=True,
                 availability="ready",
+                provider=provider,
                 base_url=base_url,
                 health_url=health_url,
             )
@@ -186,6 +243,7 @@ class PaperSearchAdapter:
                 enabled=True,
                 started=False,
                 availability="health_check_failed",
+                provider=provider,
                 base_url=base_url,
                 health_url=health_url,
                 error=f"{type(exc).__name__}: {exc}",
@@ -193,6 +251,21 @@ class PaperSearchAdapter:
 
         self._search_state_cache = state
         return state
+
+    def _search_provider(self) -> str:
+        provider = str(self.search_cfg.provider or "").strip().lower().replace("-", "_")
+        return provider or "remote"
+
+    def _provider_base_url(self, provider: str) -> str | None:
+        if provider == "arxiv":
+            return "https://export.arxiv.org/api"
+        if provider == "semantic_scholar":
+            return str(
+                self.search_cfg.semantic_scholar_base_url or "https://api.semanticscholar.org/graph/v1"
+            ).strip()
+        if provider == "openalex":
+            return str(self.search_cfg.openalex_base_url or "https://api.openalex.org").strip()
+        return str(self.search_cfg.base_url or "").strip() or None
 
     def _search_health_url(self) -> str | None:
         base_url = str(self.search_cfg.base_url or "").strip()
@@ -284,6 +357,166 @@ class PaperSearchAdapter:
             "error": "invalid_remote_payload",
             "papers": [],
             "count": 0,
+        }
+
+    async def _search_semantic_scholar(
+        self,
+        *,
+        query: str | None,
+        question_list: list[str] | None,
+    ) -> dict:
+        questions = [q for q in (question_list or []) if str(q or "").strip()]
+        query_text = str(query or "").strip()
+        if query_text and query_text not in questions:
+            questions = [query_text, *questions]
+        if not questions:
+            return _empty_search_result(provider="semantic_scholar", error="empty_query")
+
+        base_url = self._provider_base_url("semantic_scholar") or "https://api.semanticscholar.org/graph/v1"
+        url = f"{base_url.rstrip('/')}/paper/search"
+        fields = ",".join(
+            [
+                "paperId",
+                "title",
+                "abstract",
+                "url",
+                "year",
+                "authors",
+                "externalIds",
+                "openAccessPdf",
+                "citationCount",
+                "venue",
+                "publicationDate",
+            ]
+        )
+        headers: dict[str, str] = {}
+        api_key = str(self.search_cfg.semantic_scholar_api_key or "").strip()
+        if api_key:
+            headers["x-api-key"] = api_key
+
+        all_papers: list[dict] = []
+        seen: set[str] = set()
+        question_results: list[dict] = []
+        async with httpx.AsyncClient(timeout=max(20, int(self.search_cfg.timeout_seconds))) as client:
+            for q in questions:
+                response = await client.get(
+                    url,
+                    headers=headers,
+                    params={"query": q, "limit": 8, "fields": fields},
+                )
+                response.raise_for_status()
+                payload = response.json()
+                rows = payload.get("data") if isinstance(payload, dict) else []
+                papers = [
+                    self._normalize_semantic_scholar_item(item)
+                    for item in (rows or [])
+                    if isinstance(item, dict)
+                ]
+                papers = [paper for paper in papers if paper.get("title")]
+                question_results.append(
+                    {
+                        "question": q,
+                        "success": bool(papers),
+                        "count": len(papers),
+                        "papers": papers,
+                    }
+                )
+                for paper in papers:
+                    key = str(
+                        paper.get("arxiv_id")
+                        or paper.get("semantic_scholar_id")
+                        or paper.get("url")
+                        or paper.get("title")
+                        or ""
+                    )
+                    if key and key in seen:
+                        continue
+                    if key:
+                        seen.add(key)
+                    all_papers.append(paper)
+
+        return {
+            "success": True,
+            "query": questions[0],
+            "questions": questions,
+            "papers": all_papers,
+            "count": len(all_papers),
+            "question_results": question_results,
+            "provider": "semantic_scholar",
+        }
+
+    async def _search_openalex(
+        self,
+        *,
+        query: str | None,
+        question_list: list[str] | None,
+    ) -> dict:
+        questions = [q for q in (question_list or []) if str(q or "").strip()]
+        query_text = str(query or "").strip()
+        if query_text and query_text not in questions:
+            questions = [query_text, *questions]
+        if not questions:
+            return _empty_search_result(provider="openalex", error="empty_query")
+
+        base_url = self._provider_base_url("openalex") or "https://api.openalex.org"
+        url = f"{base_url.rstrip('/')}/works"
+        api_key = str(self.search_cfg.openalex_api_key or "").strip()
+
+        all_papers: list[dict] = []
+        seen: set[str] = set()
+        question_results: list[dict] = []
+        async with httpx.AsyncClient(timeout=max(20, int(self.search_cfg.timeout_seconds))) as client:
+            for q in questions:
+                params = {
+                    "search": q,
+                    "per-page": 8,
+                }
+                if api_key:
+                    params["api_key"] = api_key
+                response = await client.get(
+                    url,
+                    params=params,
+                )
+                response.raise_for_status()
+                payload = response.json()
+                rows = payload.get("results") if isinstance(payload, dict) else []
+                papers = [
+                    self._normalize_openalex_item(item)
+                    for item in (rows or [])
+                    if isinstance(item, dict)
+                ]
+                papers = [paper for paper in papers if paper.get("title")]
+                question_results.append(
+                    {
+                        "question": q,
+                        "success": bool(papers),
+                        "count": len(papers),
+                        "papers": papers,
+                    }
+                )
+                for paper in papers:
+                    key = str(
+                        paper.get("arxiv_id")
+                        or paper.get("openalex_id")
+                        or paper.get("doi")
+                        or paper.get("url")
+                        or paper.get("title")
+                        or ""
+                    )
+                    if key and key in seen:
+                        continue
+                    if key:
+                        seen.add(key)
+                    all_papers.append(paper)
+
+        return {
+            "success": True,
+            "query": questions[0],
+            "questions": questions,
+            "papers": all_papers,
+            "count": len(all_papers),
+            "question_results": question_results,
+            "provider": "openalex",
         }
 
     async def _read_remote(self, items: list[dict]) -> dict:
@@ -648,6 +881,94 @@ class PaperSearchAdapter:
             "source": "remote",
         }
 
+    def _normalize_semantic_scholar_item(self, item: dict) -> dict:
+        external = item.get("externalIds") if isinstance(item.get("externalIds"), dict) else {}
+        arxiv_id = str(external.get("ArXiv") or external.get("arXiv") or "").strip()
+        if arxiv_id.startswith("arXiv:"):
+            arxiv_id = arxiv_id.split(":", 1)[1].strip()
+        open_pdf = item.get("openAccessPdf") if isinstance(item.get("openAccessPdf"), dict) else {}
+        pdf_url = str(open_pdf.get("url") or "").strip()
+        if arxiv_id and not pdf_url:
+            pdf_url = f"https://arxiv.org/pdf/{arxiv_id}.pdf"
+
+        authors_raw = item.get("authors") if isinstance(item.get("authors"), list) else []
+        authors = [
+            str(author.get("name") or "").strip()
+            for author in authors_raw
+            if isinstance(author, dict) and str(author.get("name") or "").strip()
+        ]
+        paper_id = str(item.get("paperId") or "").strip()
+        url = str(item.get("url") or "").strip()
+        return {
+            "id": arxiv_id or paper_id or url,
+            "arxiv_id": arxiv_id,
+            "semantic_scholar_id": paper_id,
+            "title": str(item.get("title") or "").strip(),
+            "abstract": str(item.get("abstract") or "").strip(),
+            "authors": authors,
+            "year": item.get("year"),
+            "published": str(item.get("publicationDate") or "").strip(),
+            "venue": str(item.get("venue") or "").strip(),
+            "citation_count": int(item.get("citationCount") or 0),
+            "url": f"https://arxiv.org/abs/{arxiv_id}" if arxiv_id else url,
+            "abs_url": f"https://arxiv.org/abs/{arxiv_id}" if arxiv_id else url,
+            "pdf_url": pdf_url,
+            "source": "semantic_scholar",
+        }
+
+    def _normalize_openalex_item(self, item: dict) -> dict:
+        ids = item.get("ids") if isinstance(item.get("ids"), dict) else {}
+        primary_location = (
+            item.get("primary_location") if isinstance(item.get("primary_location"), dict) else {}
+        )
+        best_oa_location = (
+            item.get("best_oa_location") if isinstance(item.get("best_oa_location"), dict) else {}
+        )
+        openalex_id = str(item.get("id") or ids.get("openalex") or "").strip()
+        doi = str(item.get("doi") or ids.get("doi") or "").strip()
+        url = str(ids.get("openalex") or openalex_id or doi or "").strip()
+        pdf_url = str(
+            best_oa_location.get("pdf_url")
+            or primary_location.get("pdf_url")
+            or ""
+        ).strip()
+        landing_url = str(
+            best_oa_location.get("landing_page_url")
+            or primary_location.get("landing_page_url")
+            or ""
+        ).strip()
+        arxiv_id = _extract_arxiv_id_from_text(" ".join([url, doi, pdf_url, landing_url]))
+        if arxiv_id and not pdf_url:
+            pdf_url = f"https://arxiv.org/pdf/{arxiv_id}.pdf"
+
+        authorships = item.get("authorships") if isinstance(item.get("authorships"), list) else []
+        authors: list[str] = []
+        for row in authorships:
+            if not isinstance(row, dict):
+                continue
+            author = row.get("author") if isinstance(row.get("author"), dict) else {}
+            name = str(author.get("display_name") or "").strip()
+            if name:
+                authors.append(name)
+
+        return {
+            "id": arxiv_id or openalex_id or doi or url,
+            "arxiv_id": arxiv_id,
+            "openalex_id": openalex_id,
+            "doi": doi,
+            "title": str(item.get("display_name") or item.get("title") or "").strip(),
+            "abstract": _openalex_abstract_text(item.get("abstract_inverted_index")),
+            "authors": authors,
+            "year": item.get("publication_year"),
+            "published": str(item.get("publication_date") or "").strip(),
+            "venue": _openalex_venue(item),
+            "citation_count": int(item.get("cited_by_count") or 0),
+            "url": f"https://arxiv.org/abs/{arxiv_id}" if arxiv_id else (landing_url or url),
+            "abs_url": f"https://arxiv.org/abs/{arxiv_id}" if arxiv_id else (landing_url or url),
+            "pdf_url": pdf_url,
+            "source": "openalex",
+        }
+
     def _parse_arxiv_feed(self, xml_text: str) -> list[dict]:
         root = ET.fromstring(xml_text)
         ns = {"atom": "http://www.w3.org/2005/Atom"}
@@ -725,6 +1046,53 @@ def _apply_cutoff_to_search_result(result: dict, cutoff: CutoffDate | None) -> d
             )
         result["question_results"] = rebuilt
     return result
+
+
+def _empty_search_result(*, provider: str, error: str) -> dict:
+    return {
+        "success": False,
+        "error": error,
+        "papers": [],
+        "count": 0,
+        "question_results": [],
+        "provider": provider,
+    }
+
+
+def _openalex_abstract_text(value: object) -> str:
+    if not isinstance(value, dict):
+        return ""
+    positions: list[tuple[int, str]] = []
+    for token, raw_indexes in value.items():
+        if not isinstance(raw_indexes, list):
+            continue
+        for raw_idx in raw_indexes:
+            try:
+                positions.append((int(raw_idx), str(token)))
+            except (TypeError, ValueError):
+                continue
+    if not positions:
+        return ""
+    return " ".join(token for _, token in sorted(positions, key=lambda row: row[0]))
+
+
+def _openalex_venue(item: dict) -> str:
+    primary_location = item.get("primary_location") if isinstance(item.get("primary_location"), dict) else {}
+    source = primary_location.get("source") if isinstance(primary_location.get("source"), dict) else {}
+    return str(source.get("display_name") or item.get("host_venue") or "").strip()
+
+
+def _extract_arxiv_id_from_text(text: str) -> str:
+    match = re.search(
+        r"(?i)(?:arxiv(?:\.org)?/(?:abs|pdf)/|arxiv:)([0-9]{4}\.[0-9]{4,5}(?:v[0-9]+)?|[a-z\-]+/[0-9]{7}(?:v[0-9]+)?)",
+        str(text or ""),
+    )
+    if not match:
+        return ""
+    token = match.group(1).strip()
+    if token.lower().endswith(".pdf"):
+        token = token[:-4]
+    return token
 
 
 _TEXT_STOPWORDS = {

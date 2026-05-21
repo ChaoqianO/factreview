@@ -72,6 +72,7 @@ class Settings(BaseSettings):
 
     # Optional external paper search/read service
     paper_search_enabled: bool = False
+    paper_search_provider: str = "arxiv"
     paper_search_base_url: str | None = None
     paper_search_api_key: str | None = None
     paper_search_endpoint: str = "/pasa/search"
@@ -90,6 +91,8 @@ class Settings(BaseSettings):
     semantic_scholar_api_key: str | None = None
     semantic_scholar_timeout_seconds: int = 20
     semantic_scholar_top_k: int = 8
+    openalex_base_url: str = "https://api.openalex.org"
+    openalex_api_key: str | None = None
 
     # Final-report finalization gates
     enable_final_gates: bool = False

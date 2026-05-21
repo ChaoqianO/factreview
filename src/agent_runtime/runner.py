@@ -108,12 +108,17 @@ def _build_paper_adapter() -> PaperSearchAdapter:
     return PaperSearchAdapter(
         search_cfg=PaperSearchConfig(
             enabled=settings.paper_search_enabled,
+            provider=settings.paper_search_provider,
             base_url=settings.paper_search_base_url,
             api_key=settings.paper_search_api_key,
             endpoint=settings.paper_search_endpoint,
             timeout_seconds=settings.paper_search_timeout_seconds,
             health_endpoint=settings.paper_search_health_endpoint,
             health_timeout_seconds=settings.paper_search_health_timeout_seconds,
+            semantic_scholar_base_url=settings.semantic_scholar_base_url,
+            semantic_scholar_api_key=settings.semantic_scholar_api_key,
+            openalex_base_url=settings.openalex_base_url,
+            openalex_api_key=settings.openalex_api_key,
         ),
         read_cfg=PaperReadConfig(
             base_url=settings.paper_read_base_url,
