@@ -8,6 +8,7 @@ from urllib.parse import quote_plus
 
 import httpx
 
+from preprocessing.parse.markdown_parser import parse_pdf_locally
 from util.cutoff_date import CutoffDate, filter_papers
 
 
@@ -402,7 +403,12 @@ class PaperSearchAdapter:
                 )
                 continue
 
-            answer = self._build_read_answer(detail=detail, question=question)
+            full_text_payload = await self._try_read_arxiv_full_text(detail=detail, question=question)
+            if full_text_payload:
+                outputs.append(full_text_payload)
+                continue
+
+            answer = self._build_abstract_read_answer(detail=detail, question=question)
             outputs.append(
                 {
                     "id": arxiv_id,
@@ -410,6 +416,7 @@ class PaperSearchAdapter:
                     "success": True,
                     "paper": detail,
                     "answer": answer,
+                    "reader_provider": "arxiv_abstract_fallback",
                 }
             )
 
@@ -420,7 +427,51 @@ class PaperSearchAdapter:
             "provider": "arxiv_fallback",
         }
 
-    def _build_read_answer(self, *, detail: dict, question: str) -> str:
+    async def _try_read_arxiv_full_text(self, *, detail: dict, question: str) -> dict | None:
+        pdf_url = str(detail.get("pdf_url") or "").strip()
+        arxiv_id = str(detail.get("arxiv_id") or detail.get("id") or "").strip()
+        if not pdf_url:
+            return None
+
+        try:
+            pdf_bytes = await self._download_pdf(pdf_url)
+            parsed = parse_pdf_locally(pdf_bytes)
+        except Exception:
+            return None
+
+        pages = [page.strip() for page in parsed.pages if str(page or "").strip()]
+        if not pages:
+            return None
+
+        evidence = self._select_relevant_passages(pages=pages, question=question, max_items=5)
+        if not evidence:
+            return None
+
+        answer = self._build_full_text_read_answer(
+            detail=detail,
+            question=question,
+            evidence=evidence,
+        )
+        return {
+            "id": arxiv_id,
+            "question": question,
+            "success": True,
+            "paper": detail,
+            "answer": answer,
+            "evidence": evidence,
+            "reader_provider": "arxiv_full_text_fallback",
+        }
+
+    async def _download_pdf(self, url: str) -> bytes:
+        async with httpx.AsyncClient(timeout=60, follow_redirects=True) as client:
+            response = await client.get(url)
+        response.raise_for_status()
+        content = response.content
+        if not content.startswith(b"%PDF"):
+            raise RuntimeError("downloaded content is not a PDF")
+        return content
+
+    def _build_abstract_read_answer(self, *, detail: dict, question: str) -> str:
         title = str(detail.get("title") or "").strip()
         abstract = str(detail.get("abstract") or "").strip()
         if not abstract:
@@ -434,6 +485,75 @@ class PaperSearchAdapter:
             f"From paper '{title}', available evidence (abstract-level) is:\n{abstract}\n\n"
             "Note: This fallback reader uses arXiv metadata/abstract, not full-text deep parsing."
         )
+
+    def _build_full_text_read_answer(
+        self,
+        *,
+        detail: dict,
+        question: str,
+        evidence: list[dict],
+    ) -> str:
+        title = str(detail.get("title") or "").strip()
+        header = f"Question: {question}\n\n" if question else ""
+        lines = [
+            f"{header}From paper '{title}', available full-text evidence from arXiv PDF is:",
+        ]
+        for item in evidence:
+            page = int(item.get("page") or 0)
+            text = str(item.get("text") or "").strip()
+            if not text:
+                continue
+            lines.append(f"- Page {page}: {text}")
+        lines.append(
+            "\nNote: This fallback reader downloaded the arXiv PDF and used local text extraction; "
+            "evidence quality depends on PDF text extractability."
+        )
+        return "\n".join(lines).strip()
+
+    def _select_relevant_passages(
+        self,
+        *,
+        pages: list[str],
+        question: str,
+        max_items: int,
+    ) -> list[dict]:
+        query_tokens = set(_normalize_text_tokens(question))
+        scored: list[tuple[float, int, str]] = []
+
+        for page_no, page_text in enumerate(pages, start=1):
+            for passage in _split_passages(page_text):
+                tokens = set(_normalize_text_tokens(passage))
+                if not tokens:
+                    continue
+                overlap = len(query_tokens & tokens) if query_tokens else 0
+                # Keep a little signal from informative text even when the
+                # question is broad or empty, but prefer direct token overlap.
+                score = float(overlap) + min(1.0, len(tokens) / 80.0)
+                if score <= 0:
+                    continue
+                scored.append((score, page_no, passage))
+
+        if not scored:
+            return []
+
+        ranked = sorted(scored, key=lambda row: (-row[0], row[1], len(row[2])))
+        evidence: list[dict] = []
+        seen: set[str] = set()
+        for score, page_no, passage in ranked:
+            key = " ".join(passage.lower().split())
+            if key in seen:
+                continue
+            seen.add(key)
+            evidence.append(
+                {
+                    "page": page_no,
+                    "text": _truncate_text(passage, 900),
+                    "score": round(float(score), 3),
+                }
+            )
+            if len(evidence) >= max(1, int(max_items or 1)):
+                break
+        return evidence
 
     async def _arxiv_query(self, question: str, *, max_results: int) -> list[dict]:
         tokens = self._question_to_arxiv_query(question)
@@ -605,6 +725,80 @@ def _apply_cutoff_to_search_result(result: dict, cutoff: CutoffDate | None) -> d
             )
         result["question_results"] = rebuilt
     return result
+
+
+_TEXT_STOPWORDS = {
+    "a",
+    "an",
+    "and",
+    "are",
+    "as",
+    "at",
+    "be",
+    "by",
+    "can",
+    "for",
+    "from",
+    "how",
+    "in",
+    "is",
+    "it",
+    "of",
+    "on",
+    "or",
+    "paper",
+    "that",
+    "the",
+    "this",
+    "to",
+    "what",
+    "which",
+    "with",
+}
+
+
+def _normalize_text_tokens(text: str) -> list[str]:
+    raw = re.sub(r"[^a-z0-9]+", " ", str(text or "").lower())
+    return [token for token in raw.split() if len(token) >= 3 and token not in _TEXT_STOPWORDS]
+
+
+def _split_passages(page_text: str) -> list[str]:
+    text = re.sub(r"[ \t]+", " ", str(page_text or "")).strip()
+    if not text:
+        return []
+
+    raw_parts = [part.strip() for part in re.split(r"\n{2,}", text) if part.strip()]
+    if len(raw_parts) <= 1:
+        raw_parts = [part.strip() for part in text.splitlines() if part.strip()]
+
+    passages: list[str] = []
+    buffer: list[str] = []
+    buffer_words = 0
+    for part in raw_parts:
+        words = part.split()
+        if not words:
+            continue
+        if buffer and buffer_words + len(words) > 180:
+            passages.append(" ".join(buffer).strip())
+            buffer = []
+            buffer_words = 0
+        buffer.append(part)
+        buffer_words += len(words)
+        if buffer_words >= 80:
+            passages.append(" ".join(buffer).strip())
+            buffer = []
+            buffer_words = 0
+    if buffer:
+        passages.append(" ".join(buffer).strip())
+
+    return [_truncate_text(passage, 1200) for passage in passages if len(passage.split()) >= 6]
+
+
+def _truncate_text(text: str, limit: int) -> str:
+    normalized = " ".join(str(text or "").split())
+    if len(normalized) <= limit:
+        return normalized
+    return normalized[: max(0, limit - 3)].rstrip() + "..."
 
 
 def normalize_question_list(raw: object) -> list[str]:

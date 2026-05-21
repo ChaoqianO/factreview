@@ -164,7 +164,9 @@ The prompt refers to "the attached reference image" — when you paste it into G
 
 </details>
 
-**Semantic Scholar (recommended).** Set `SEMANTIC_SCHOLAR_API_KEY` to avoid rate limits during positioning retrieval. Free key at <https://www.semanticscholar.org/product/api>.
+**Semantic Scholar related-work retrieval (on by default).** The positioning stage uses Semantic Scholar for objective related-work neighbors unless `SEMANTIC_SCHOLAR_ENABLED=false` is set. Set `SEMANTIC_SCHOLAR_API_KEY` to avoid rate limits during positioning retrieval. Free key at <https://www.semanticscholar.org/product/api>. Disable it for one run with `--disable-semantic-scholar`.
+
+**External `paper_search/read_paper` service (optional, off by default).** The review agent has `paper_search` and `read_paper` tools wired in, but no remote search is started unless `PAPER_SEARCH_ENABLED=true` and `PAPER_SEARCH_BASE_URL` is configured. Leave it disabled for manuscript-only review plus Semantic Scholar positioning context. When `read_paper` is called without `PAPER_READ_BASE_URL`, FactReview uses a built-in arXiv PDF full-text fallback; set `PAPER_READ_BASE_URL` only if you run a stronger compatible reader service.
 
 For OpenAlex, local MinerU fallback, agent-tracing knobs, and other rarely-touched variables see [Advanced Configuration](#advanced-configuration).
 
@@ -208,6 +210,7 @@ Or globally via `FACTREVIEW_ENABLE_REFCHECK=true`. The full result lands in `sta
 | `--mineru-api-token` | from `.env` | One-off override for `MINERU_API_TOKEN`. |
 | `--gemini-api-key` | from `.env` | One-off override for `GEMINI_API_KEY`. |
 | `--teaser-mode` | `auto` | `auto` = use Gemini when `GEMINI_API_KEY` is set, otherwise prompt-only. `prompt` = always prompt-only. `api` = always attempt the Gemini image API. |
+| `--disable-semantic-scholar` | off | Disable Semantic Scholar objective related-work retrieval for this run. Equivalent to setting `SEMANTIC_SCHOLAR_ENABLED=false` before loading settings. |
 | `--enable-refcheck` | off | Run RefCopilot as the refcheck stage. |
 | `--run-execution` | off | Enables the code-execution stage. Requires Docker. |
 | `--max-attempts` | `5` | Max iterations of the execution stage's `judge → fix` loop. |
@@ -292,7 +295,13 @@ Less common environment variables — set in `.env` or via the shell. `.env.exam
 | `OPENAI_AGENTS_DISABLE_TRACING` | Set to `0` to enable the openai-agents SDK trace exporter. Disabled (`1`) by default to avoid POSTing traces to the Agents tracing endpoint. |
 | `TEASER_USE_GEMINI` | Force prompt-only teaser output (`false`) even when a Gemini key is configured. Equivalent to `--teaser-mode prompt`. |
 | `OPENAI_CODEX_BASE_URL` | Point Codex at a different Codex-compatible endpoint (default: `https://chatgpt.com/backend-api/codex`). |
+| `SEMANTIC_SCHOLAR_ENABLED` | Enable or disable Semantic Scholar objective related-work retrieval. Defaults to `true`; set `false` to skip it persistently. |
 | `SEMANTIC_SCHOLAR_API_KEY` | Recommended. Free API key from [Semantic Scholar](https://www.semanticscholar.org/product/api) for the positioning stage. Without it, unauthenticated requests may be rate-limited. |
+| `PAPER_SEARCH_ENABLED` | Enable the optional external `paper_search` service. Defaults to `false`; set `true` with `PAPER_SEARCH_BASE_URL` to start remote retrieval. |
+| `PAPER_SEARCH_BASE_URL` / `PAPER_SEARCH_ENDPOINT` | Optional external `paper_search` service URL and endpoint. Leave base URL empty to keep `paper_search` in retrieval-disabled mode. Default endpoint: `/pasa/search`. |
+| `PAPER_SEARCH_API_KEY` / `PAPER_SEARCH_HEALTH_ENDPOINT` | Optional bearer token and health endpoint for the external `paper_search` service. Default health endpoint: `/health`. |
+| `PAPER_READ_BASE_URL` / `PAPER_READ_ENDPOINT` | Optional external `read_paper` service URL and endpoint. Leave base URL empty to use the built-in arXiv PDF full-text fallback when `read_paper` is called. Default endpoint: `/read`. |
+| `PAPER_READ_API_KEY` | Optional bearer token for the external `read_paper` service. |
 
 ## Development
 

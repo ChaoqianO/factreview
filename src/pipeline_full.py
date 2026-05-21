@@ -110,6 +110,9 @@ def _apply_cli_env_overrides(args: argparse.Namespace) -> None:
     elif teaser_mode == "api":
         os.environ["TEASER_USE_GEMINI"] = "true"
 
+    if bool(getattr(args, "disable_semantic_scholar", False)):
+        os.environ["SEMANTIC_SCHOLAR_ENABLED"] = "false"
+
     get_settings.cache_clear()
 
 
@@ -398,6 +401,11 @@ def parse_args() -> argparse.Namespace:
         choices=("auto", "prompt", "api"),
         default="auto",
         help="Teaser figure mode: auto attempts Gemini when a key exists, prompt saves/copies the prompt, api attempts the configured image API.",
+    )
+    p.add_argument(
+        "--disable-semantic-scholar",
+        action="store_true",
+        help="Disable Semantic Scholar objective related-work retrieval for this run.",
     )
     p.add_argument(
         "--enable-refcheck",

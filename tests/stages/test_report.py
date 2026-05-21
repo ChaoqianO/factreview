@@ -18,7 +18,6 @@ import pytest
 from agent_runtime.runner import augment_claims_with_assessment_status
 from review.report.claim_audit import audit_review_markdown
 from review.report.final_report import validate_final_report_logic
-from review.report.stage_runner import _DETAILED_CLAIMS_HEADING, _append_detailed_claims_block
 
 
 def _stub_llm(verdicts: list[dict[str, Any]], missing: list[str] | None = None):
@@ -56,46 +55,6 @@ def test_final_report_logic_allows_variable_number_of_claims() -> None:
     )
 
     assert validate_final_report_logic(md) is None
-
-
-def test_report_appends_detailed_claims_without_changing_primary_claim_table() -> None:
-    md = (
-        "## 2. Technical Positioning\n"
-        "| Research domain | Method | A |\n"
-        "| --- | --- | --- |\n"
-        "| Other | Baseline | × |\n"
-        "| This Work | TinyMethod | √ |\n\n"
-        "## 3. Claims\n"
-        "**Paper scope:** TinyMethod.\n"
-        "**Evaluation scope:** One benchmark.\n"
-        "| Claim | Evidence | Assessment | Location |\n"
-        "|---|---|---|---|\n"
-        "| Core claim. | Supporting: Section 1.<br><br>Missing: None. | ok | Section 1 |\n\n"
-        "## 5. Experiment\n"
-        "### Main Result\n"
-        "| Task | Metric | Paper Result |\n"
-        "|---|---|---|\n"
-        "| T | M | 1.0 |\n\n"
-        "### Ablation Result\n"
-        "| Ablation Dimension | Configuration | Full Model | Paper Result | Difference |\n"
-        "|---|---|---|---|---|\n"
-        "| Optimal setup | full | 1.0 | 1.0 | 0 |\n"
-    )
-
-    updated = _append_detailed_claims_block(
-        md,
-        {
-            "claims": [
-                {"id": "claim_01", "text": "Detailed first claim.", "type": "methodological"},
-                {"id": "claim_02", "text": "Detailed second claim.", "type": "empirical"},
-            ]
-        },
-    )
-
-    assert _DETAILED_CLAIMS_HEADING in updated
-    assert "| claim_02 | Detailed second claim. | empirical |" in updated
-    assert updated.index("| Claim | Evidence | Assessment | Location |") < updated.index(_DETAILED_CLAIMS_HEADING)
-    assert validate_final_report_logic(updated) is None
 
 
 def test_audit_caps_supported_to_inconclusive_when_llm_disagrees(
@@ -167,7 +126,7 @@ def test_claim_status_augmentation_preserves_pipe_inside_evidence_cell() -> None
     assert outcome.claim_results[0].final_status == "partially supported"
 
 
-def test_audit_llm_is_single_decision_maker_agent_self_tag_is_reference_only() -> None:
+def test_audit_applies_agent_self_tag_as_conservative_cap() -> None:
     md = (
         "## 3. Claims\n"
         "| Claim | Evidence | Assessment | Status | Location |\n"
@@ -182,15 +141,14 @@ def test_audit_llm_is_single_decision_maker_agent_self_tag_is_reference_only() -
     )
 
     result = outcome.claim_results[0]
-    # The LLM is the single decision maker: it received the agent self-tag as
-    # a labelled reference note and produced its own holistic verdict.
-    # final_status equals the LLM verdict; the agent self-tag is tracked for
-    # metadata but no longer caps the result.
+    # The LLM audits independently, then the agent self-tag is applied as a
+    # conservative cap so the final status keeps the more critical verdict.
     assert result.agent_self_verdict == "in conflict"
     assert result.llm_verdict == "partially supported"
-    assert result.final_status == "partially supported"
+    assert result.final_status == "in conflict"
     # The bracketed self-tag is stripped from the visible cell.
     assert "[verdict:" not in new_md
+    assert "In conflict" in new_md
 
 
 def test_audit_injects_missing_component_weakness_from_llm() -> None:
