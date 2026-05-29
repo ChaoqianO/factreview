@@ -274,27 +274,3 @@ ruff format --check .
 mypy src/schemas src/util src/common
 pytest tests/unit -m "not slow and not e2e and not requires_docker and not requires_llm and not requires_mineru"
 ```
-
-## Paper
-
-Read the paper on [arXiv](https://arxiv.org/abs/2604.04074) or from the local
-PDF at [`factreview.pdf`](factreview.pdf).
-
-If you use FactReview, please cite:
-
-```bibtex
-@misc{xu2026factreview,
-  title = {FactReview: Evidence-Grounded Reviews with Literature Positioning and Execution-Based Claim Verification},
-  author = {Xu, Hang and Yue, Ling and Ouyang, Chaoqian and Liu, Yuchen and Zheng, Libin and Pan, Shaowu and Di, Shimin and Zhang, Min-Ling},
-  year = {2026},
-  eprint = {2604.04074},
-  archivePrefix = {arXiv},
-  primaryClass = {cs.AI},
-  doi = {10.48550/arXiv.2604.04074},
-  url = {https://arxiv.org/abs/2604.04074}
-}
-```
-
-## License
-
-Apache-2.0.
