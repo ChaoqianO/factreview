@@ -211,19 +211,6 @@ Primary artifacts:
 The run dir also contains `workspace/`, `logs/`, and `debug/` directories used
 for intermediate artefacts; you usually don't need to look at these.
 
-## What the Pipeline Produces
-
-The final review tags every claim with one of five judgments:
-
-- **Supported** — independent literature evidence agrees with the claim.
-- **Supported by the paper** — only the paper itself supports the claim; no external corroboration was found.
-- **Partially supported** — evidence agrees with part of the claim and disagrees with or fails to address the rest.
-- **In conflict** — independent evidence contradicts the claim.
-- **Inconclusive** — neither external nor in-paper evidence is sufficient to judge.
-
-When `--run-execution` is on, the execution stage runs a bounded
-`prepare → plan → run → judge → fix → finalize` loop (default `--max-attempts 5`)
-and writes its verdict into `stages/fact_generation/execution/execution.json`.
 
 ## Troubleshooting
 
