@@ -185,7 +185,7 @@ def _prompt_only_message(
 
     upload_lines: list[str] = []
     template_path = _template_png_path()
-    if template_path.exists():
+    if template_path is not None and template_path.exists():
         upload_lines.append(
             f"  1. The reference layout image at `{_format_path_for_message(template_path)}` "
             "(the prompt calls it 'the attached reference image' and uses it for the overall layout/style)."
@@ -216,37 +216,18 @@ def _repo_root() -> Path:
     return Path(__file__).resolve().parents[3]
 
 
-def _template_png_path() -> Path:
-    """Path to the layout/style reference image attached to the image API call.
-
-    Falls back through a list of candidates so the function still returns
-    something useful after the demos directory was reorganized into
-    domain-specific subfolders (Graph/Image/Text). Allows an env override.
-    """
+def _template_png_path() -> Path | None:
+    """Return the optional user-supplied layout reference image."""
     override = str(os.getenv("TEASER_TEMPLATE_REFERENCE_PNG") or "").strip()
-    repo_root = _repo_root()
-    candidates: list[Path] = []
-    if override:
-        override_path = Path(override).expanduser()
-        candidates.append(
-            override_path if override_path.is_absolute() else (repo_root / override_path)
-        )
-    # Legacy location (kept first so an explicitly placed file wins).
-    candidates.append(repo_root / "demos" / "compgcn" / "teaser_reference.png")
-    # Current demo locations after the demos/ reorganization.
-    candidates.append(repo_root / "demos" / "Graph" / "compgcn" / "teaser_reference.png")
-    candidates.append(repo_root / "demos" / "Graph" / "compgcn" / "teaser_figure.png")
-    for candidate in candidates:
-        if candidate.exists() and candidate.is_file():
-            return candidate
-    # Return the first candidate as a "what we expected" path so logs/UX
-    # surface a sensible filename, even though the file is missing.
-    return candidates[0]
+    if not override:
+        return None
+    path = Path(override).expanduser()
+    return path if path.is_absolute() else _repo_root() / path
 
 
 def _template_reference_png_bytes(scale: float = 0.9) -> bytes | None:
     png_path = _template_png_path()
-    if not png_path.exists():
+    if png_path is None or not png_path.exists():
         return None
     try:
         if scale <= 0 or abs(scale - 1.0) < 0.001:
@@ -266,7 +247,7 @@ def _template_reference_png_bytes(scale: float = 0.9) -> bytes | None:
 def _template_layout_signature(max_panels: int = 14) -> str:
     _ = max_panels
     png_path = _template_png_path()
-    if not png_path.exists():
+    if png_path is None or not png_path.exists():
         return "Template PNG missing."
     try:
         with Image.open(png_path) as image:

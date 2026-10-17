@@ -54,8 +54,6 @@ Each run is saved under `runs/<paper-key>_<timestamp>_<unique-id>/`:
 - `materials/`, `screening/`, `verification/`, `execution/`: source records and stage audits.
 - `full_pipeline_summary.json`, `run_stats.json`, `cutoff.json`: completion, usage and literature cutoff records.
 
-See [demos](demos/) for example papers.
-
 ## Tests
 
 ```bash

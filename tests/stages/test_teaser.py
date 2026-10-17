@@ -103,3 +103,20 @@ def test_teaser_claim_selection_prioritizes_novelty_and_weak_statuses(tmp_path: 
     selected_block = result.prompt.split("Audited claims table:", 1)[0]
     assert "TinyMethod is the first framework for X" in selected_block
     assert "TinyMethod beats all baselines" in selected_block
+
+
+def test_template_reference_is_optional_and_configurable(tmp_path, monkeypatch):
+    from PIL import Image
+    from review.teaser import teaser
+
+    monkeypatch.delenv("TEASER_TEMPLATE_REFERENCE_PNG", raising=False)
+    assert teaser._template_png_path() is None
+    assert teaser._template_reference_png_bytes() is None
+    assert teaser._template_layout_signature() == "Template PNG missing."
+
+    reference = tmp_path / "reference.png"
+    monkeypatch.setenv("TEASER_TEMPLATE_REFERENCE_PNG", str(reference))
+    assert teaser._template_reference_png_bytes() is None
+    Image.new("RGB", (8, 4), "white").save(reference)
+    assert teaser._template_reference_png_bytes(scale=1) == reference.read_bytes()
+    assert "Canvas size 8x4" in teaser._template_layout_signature()

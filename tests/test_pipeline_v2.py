@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import hashlib
-import importlib.util
 import json
 import os
 import sys
@@ -684,29 +682,6 @@ def test_invalid_explicit_cutoff_is_a_durable_pipeline_failure(tiny_inputs, monk
     assert all(value == "skipped" for name, value in summary["stages"].items() if name != "materials")
     saved = json.loads((Path(summary["run_dir"]) / "full_pipeline_summary.json").read_text(encoding="utf-8"))
     assert saved["stage_errors"] == summary["stage_errors"]
-
-
-def test_compgcn_fixture_replay_preserves_reference_artifacts_and_records_limits(tmp_path):
-    source = Path(__file__).resolve().parents[1] / "scripts" / "check_v2_compgcn.py"
-    spec = importlib.util.spec_from_file_location("compgcn_fixture_script", source)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    comparison = module.replay_compgcn(tmp_path / "compgcn")
-    assert comparison["live_run_completed"] is False
-    assert comparison["reference_hashes_unchanged"]
-    assert "fixtures" in module.__doc__
-    assert comparison["comparison_limits"] and comparison["submission_deadline"] is None
-    assert comparison["fixture_counts"] == {"supported": 2, "flawed": 0, "questioned": 0, "unverified": 1}
-    assert set(comparison["summary"]["stages"].values()) == {"ok"}
-    root = Path(comparison["summary"]["run_dir"])
-    assert (root / "comparison.json").is_file() and (root / "comparison.md").is_file()
-    ledger = json.loads((root / "execution" / "ledger.json").read_text(encoding="utf-8"))
-    assert len(ledger) == 1 and ledger[0]["approved"] is False
-    assert ledger[0]["attempts"] == []
-    assert "Unresolved paper target" in ledger[0]["reason"]
-    assert len(comparison["old_report"]) == 3
-    actual_pdf = module.ROOT / "demos" / "Graph" / "compgcn" / "paper.pdf"
-    assert comparison["reference_hashes"]["paper.pdf"] == hashlib.sha256(actual_pdf.read_bytes()).hexdigest()
 
 
 @pytest.mark.parametrize(

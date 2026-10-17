@@ -1,10 +1,4 @@
-"""Execution stage tests.
-
-Code execution requires a Docker daemon, so this stage's only test is gated
-behind ``@pytest.mark.requires_docker`` and skipped by default. The real
-execution path is covered by manual runs of ``demos/`` papers (see the plan
-doc's verification section).
-"""
+"""Execution stage tests with mocked services and optional Docker checks."""
 
 from __future__ import annotations
 
@@ -3739,7 +3733,7 @@ def test_run_execution_stage_passes_resolved_llm_identity(monkeypatch, tmp_path)
     assert captured["llm_model"] == "gpt-5.5"
 
 
-def test_explicit_source_does_not_load_same_key_demo_fixture(tmp_path) -> None:
+def test_explicit_source_prepares_without_bundled_artifacts(tmp_path) -> None:
     from fact_generation.execution.stage_runner import run_execution_stage
 
     repo = tmp_path / "repo"
