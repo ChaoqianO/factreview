@@ -1,8 +1,6 @@
 # Demo Papers
 
-These reports and teaser images were generated with the earlier pipeline. They are retained as examples; rerun a paper with the current entry point to obtain a Method v2 review.
-
-This directory contains demo review results for papers from different research domains. The selected papers are grouped into three directions so that the review outputs can be compared across text/language modeling, image/video understanding, and graph/knowledge graph research.
+Example papers and saved review artifacts, grouped by research area. Rerun a paper to generate a review with your configuration.
 
 ## Research Directions
 

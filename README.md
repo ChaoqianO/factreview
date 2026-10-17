@@ -25,7 +25,7 @@ Edit `.env` and set `MINERU_API_TOKEN`. The supplied model configuration uses a 
 
 ## Run
 
-The default entry point runs Method v2:
+Review a paper:
 
 ```bash
 python scripts/execute_review_pipeline.py path/to/paper.pdf \
@@ -54,7 +54,7 @@ Each run is saved under `runs/<paper-key>_<timestamp>_<unique-id>/`:
 - `materials/`, `screening/`, `verification/`, `execution/`: source records and stage audits.
 - `full_pipeline_summary.json`, `run_stats.json`, `cutoff.json`: completion, usage and literature cutoff records.
 
-Unavailable services, missing resources and failed stages are recorded as limitations. The reports in [demos](demos/README.md) come from the earlier pipeline; rerun their PDFs for current results.
+See [demos](demos/README.md) for example papers.
 
 ## Tests
 
