@@ -1,4 +1,8 @@
-"""RefCopilot — reference-accuracy checker for academic papers."""
+"""RefCopilot — reference-accuracy checker for academic papers.
+
+Parts of the implementation and design were informed by Mark Russinovich's
+refchecker (https://github.com/markrussinovich/refchecker).
+"""
 
 from refcopilot.models import (
     CheckedReference,

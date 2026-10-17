@@ -122,10 +122,10 @@
     "paper_key": "exactmatch-integration-v1",
     "title": "ExactMatch: a controlled integration manuscript",
     "abstract": "This synthetic manuscript and its released code provide a small software integration example. The numerical result describes four fixed predictions and does not establish generalization performance. It contains a literature attribution, a mathematical statement, an implementation description and an evaluation result.",
-    "source_pdf": "E:\\kabuda\\FactReview\\runs\\v2_method_delivery\\actual-full-9800dedbaa\\runs\\exactmatch-integration-v1_2026-10-09_114245_3f380155\\inputs\\source_pdf\\paper.pdf",
+    "source_pdf": "C:\\workspace\\FactReview\\runs\\v2_method_delivery\\actual-full-9800dedbaa\\runs\\exactmatch-integration-v1_2026-10-09_114245_3f380155\\inputs\\source_pdf\\paper.pdf",
     "markdown": "# ExactMatch: a controlled integration manuscript\n\n## Abstract\n\nThis synthetic manuscript and its released code provide a small software integration example. The numerical result describes four fixed predictions and does not establish generalization performance. It contains a literature attribution, a mathematical statement, an implementation description and an evaluation result.\n\n## 1. Background\n\nVaswani et al. (2017) introduced the Transformer, whose architecture relies on attention and omits recurrence and convolution [1]. This is background attribution; our ExactMatch evaluator makes no architectural novelty claim.\n\n## 2. Method and implementation\n\nThe ExactMatch evaluator computes accuracy as the number of predictions equal to their labels divided by the number of examples. The public implementation is scripts/evaluate.py; its configuration and four predictions are distributed with the code. It performs evaluation without training.\n\nTheorem 1. For every real number x, the square x\\*x is nonnegative. The proof appears in Appendix A. This elementary statement is independent of the evaluation procedure.\n\n## 3. Evaluation\n\nOn MiniSet test, model ExactMatch has accuracy 0.75. Accuracy is a fraction, computed by exact equality of each prediction and label. Three of the four fixed test predictions are correct. Table 1 reports the result and Figure 1 shows the corresponding counts. No repeated-run uncertainty or population-performance conclusion is claimed.\n\n<table><tr><td>Model</td><td>Test accuracy</td><td>Examples</td></tr><tr><td>ExactMatch</td><td>0.75</td><td>4</td></tr></table>\n\nTable 1. MiniSet test result. Accuracy is a fraction; bold type identifies the measured accuracy, with no ranking against other models.\n\n## Figure and proof\n\nNumber of predictions  \n![](images/c69d336feb914cc311368c81d283c57b5ef4db26167af720962f11994ae60be8.jpg)  \nPrediction outcome  \nFigure 1. ExactMatch prediction counts on MiniSet test: three correct and one incorrect. The vertical axis counts examples; both outcome categories are labeled.\n\n## Appendix A. Proof of Theorem 1\n\nProof of Theorem 1. If x is nonnegative, multiplying x by itself gives a nonnegative product. If x is negative, write $\\mathsf { x } = - \\mathsf { y }$ for a positive real y. Then $\\mathsf { x } ^ { \\star } \\mathsf { x } = ( \\mathsf { - y } ) ^ { \\star } ( \\mathsf { - y } ) = \\mathsf { y } ^ { \\star } \\mathsf { y }$ , which is positive. These two cases cover every real x, including zero. Therefore $\\mathsf { x } ^ { \\star } \\mathsf { x }$ is nonnegative for every real x.\n\n## References\n\n[1] Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N. Gomez, Lukasz Kaiser, and Illia Polosukhin. 2017. Attention Is All You Need. Advances in Neural Information Processing Systems 30. https://arxiv.org/abs/1706.03762",
-    "markdown_path": "E:\\kabuda\\FactReview\\runs\\v2_method_delivery\\actual-full-9800dedbaa\\runs\\exactmatch-integration-v1_2026-10-09_114245_3f380155\\materials\\paper.md",
-    "content_list_path": "E:\\kabuda\\FactReview\\runs\\v2_method_delivery\\actual-full-9800dedbaa\\runs\\exactmatch-integration-v1_2026-10-09_114245_3f380155\\materials\\content_list.json",
+    "markdown_path": "C:\\workspace\\FactReview\\runs\\v2_method_delivery\\actual-full-9800dedbaa\\runs\\exactmatch-integration-v1_2026-10-09_114245_3f380155\\materials\\paper.md",
+    "content_list_path": "C:\\workspace\\FactReview\\runs\\v2_method_delivery\\actual-full-9800dedbaa\\runs\\exactmatch-integration-v1_2026-10-09_114245_3f380155\\materials\\content_list.json",
     "provider": "mineru_v4",
     "blocks": [
       {
@@ -340,14 +340,14 @@
     "pages": [
       {
         "page": 1,
-        "path": "E:\\kabuda\\FactReview\\runs\\v2_method_delivery\\actual-full-9800dedbaa\\runs\\exactmatch-integration-v1_2026-10-09_114245_3f380155\\materials\\images\\page_1.png",
+        "path": "C:\\workspace\\FactReview\\runs\\v2_method_delivery\\actual-full-9800dedbaa\\runs\\exactmatch-integration-v1_2026-10-09_114245_3f380155\\materials\\images\\page_1.png",
         "width_points": 595.0,
         "height_points": 842.0,
         "dpi": 200
       },
       {
         "page": 2,
-        "path": "E:\\kabuda\\FactReview\\runs\\v2_method_delivery\\actual-full-9800dedbaa\\runs\\exactmatch-integration-v1_2026-10-09_114245_3f380155\\materials\\images\\page_2.png",
+        "path": "C:\\workspace\\FactReview\\runs\\v2_method_delivery\\actual-full-9800dedbaa\\runs\\exactmatch-integration-v1_2026-10-09_114245_3f380155\\materials\\images\\page_2.png",
         "width_points": 595.0,
         "height_points": 842.0,
         "dpi": 200
@@ -385,8 +385,8 @@
           449.82,
           308.172
         ],
-        "crop_path": "E:\\kabuda\\FactReview\\runs\\v2_method_delivery\\actual-full-9800dedbaa\\runs\\exactmatch-integration-v1_2026-10-09_114245_3f380155\\materials\\images\\figure_1.png",
-        "printed_crop_path": "E:\\kabuda\\FactReview\\runs\\v2_method_delivery\\actual-full-9800dedbaa\\runs\\exactmatch-integration-v1_2026-10-09_114245_3f380155\\materials\\images\\figure_1_printed.png",
+        "crop_path": "C:\\workspace\\FactReview\\runs\\v2_method_delivery\\actual-full-9800dedbaa\\runs\\exactmatch-integration-v1_2026-10-09_114245_3f380155\\materials\\images\\figure_1.png",
+        "printed_crop_path": "C:\\workspace\\FactReview\\runs\\v2_method_delivery\\actual-full-9800dedbaa\\runs\\exactmatch-integration-v1_2026-10-09_114245_3f380155\\materials\\images\\figure_1_printed.png",
         "printed_dpi": 96
       }
     ],
@@ -424,8 +424,8 @@
           534.905,
           710.648
         ],
-        "crop_path": "E:\\kabuda\\FactReview\\runs\\v2_method_delivery\\actual-full-9800dedbaa\\runs\\exactmatch-integration-v1_2026-10-09_114245_3f380155\\materials\\images\\table_1.png",
-        "printed_crop_path": "E:\\kabuda\\FactReview\\runs\\v2_method_delivery\\actual-full-9800dedbaa\\runs\\exactmatch-integration-v1_2026-10-09_114245_3f380155\\materials\\images\\table_1_printed.png",
+        "crop_path": "C:\\workspace\\FactReview\\runs\\v2_method_delivery\\actual-full-9800dedbaa\\runs\\exactmatch-integration-v1_2026-10-09_114245_3f380155\\materials\\images\\table_1.png",
+        "printed_crop_path": "C:\\workspace\\FactReview\\runs\\v2_method_delivery\\actual-full-9800dedbaa\\runs\\exactmatch-integration-v1_2026-10-09_114245_3f380155\\materials\\images\\table_1_printed.png",
         "printed_dpi": 96,
         "issues": []
       }
@@ -447,7 +447,7 @@
       }
     ],
     "repository": {
-      "root": "E:\\kabuda\\FactReview\\runs\\v2_method_delivery\\live-fixture-v1\\repository",
+      "root": "C:\\workspace\\FactReview\\runs\\v2_method_delivery\\live-fixture-v1\\repository",
       "files": [
         {
           "path": "configs/evaluation.json",

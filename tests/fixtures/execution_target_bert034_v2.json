@@ -62,7 +62,7 @@
       {
         "source": "paper_internal",
         "pointer": {
-          "locator": "E:\\kabuda\\FactReview\\runs\\v2_cross_domain\\bert_framework_2026-10-09_014934_be4796cb\\inputs\\source_pdf\\paper.pdf",
+          "locator": "C:\\workspace\\FactReview\\runs\\v2_cross_domain\\bert_framework_2026-10-09_014934_be4796cb\\inputs\\source_pdf\\paper.pdf",
           "quote": "Table 1: GLUE Test results, scored by the evaluation server (https://gluebenchmark.com/leaderboard). The number below each task denotes the number of training examples. The “Average” column is slightly different than the official GLUE score, since we exclude the problematic WNLI set.<sup>8</sup> BERT and OpenAI GPT are singlemodel, single task. F1 scores are reported for QQP and MRPC, Spearman correlations are reported for STS-B, and accuracy scores are reported for the other tasks. We exclude entries that use BERT as one of their components.\n<table><tr><td>System</td><td>MNLI-(m/mm)392k</td><td>QQP363k</td><td>QNLI108k</td><td>SST-267k</td><td>CoLA8.5k</td><td>STS-B5.7k</td><td>MRPC3.5k</td><td>RTE2.5k</td><td>Average-</td></tr><tr><td>Pre-OpenAI SOTA</td><td>80.6/80.1</td><td>66.1</td><td>82.3</td><td>93.2</td><td>35.0</td><td>81.0</td><td>86.0</td><td>61.7</td><td>74.0</td></tr><tr><td>BiLSTM+ELMo+Attn</td><td>76.4/76.1</td><td>64.8</td><td>79.8</td><td>90.4</td><td>36.0</td><td>73.3</td><td>84.9</td><td>56.8</td><td>71.0</td></tr><tr><td>OpenAI GPT</td><td>82.1/81.4</td><td>70.3</td><td>87.4</td><td>91.3</td><td>45.4</td><td>80.0</td><td>82.3</td><td>56.0</td><td>75.1</td></tr><tr><td>BERTBASE</td><td>84.6/83.4</td><td>71.2</td><td>90.5</td><td>93.5</td><td>52.1</td><td>85.8</td><td>88.9</td><td>66.4</td><td>79.6</td></tr><tr><td>BERTLARGE</td><td>86.7/85.9</td><td>72.1</td><td>92.7</td><td>94.9</td><td>60.5</td><td>86.5</td><td>89.3</td><td>70.1</td><td>82.1</td></tr></table>",
           "page": 6,
           "line": null,
@@ -83,7 +83,7 @@
       {
         "source": "paper_internal",
         "pointer": {
-          "locator": "E:\\kabuda\\FactReview\\runs\\v2_cross_domain\\bert_framework_2026-10-09_014934_be4796cb\\materials\\paper.md",
+          "locator": "C:\\workspace\\FactReview\\runs\\v2_cross_domain\\bert_framework_2026-10-09_014934_be4796cb\\materials\\paper.md",
           "quote": "For the largest and most widely reported GLUE task, MNLI, BERT obtains a 4.6% absolute accuracy improvement.",
           "page": 6,
           "line": null,
@@ -104,7 +104,7 @@
       {
         "source": "paper_internal",
         "pointer": {
-          "locator": "E:\\kabuda\\FactReview\\runs\\v2_cross_domain\\bert_framework_2026-10-09_014934_be4796cb\\materials\\paper.md",
+          "locator": "C:\\workspace\\FactReview\\runs\\v2_cross_domain\\bert_framework_2026-10-09_014934_be4796cb\\materials\\paper.md",
           "quote": "BERT and OpenAI GPT are singlemodel, single task.",
           "page": 6,
           "line": null,
@@ -125,7 +125,7 @@
       {
         "source": "paper_internal",
         "pointer": {
-          "locator": "E:\\kabuda\\FactReview\\runs\\v2_cross_domain\\bert_framework_2026-10-09_014934_be4796cb\\materials\\paper.md",
+          "locator": "C:\\workspace\\FactReview\\runs\\v2_cross_domain\\bert_framework_2026-10-09_014934_be4796cb\\materials\\paper.md",
           "quote": "The core argument of this work is that the bi-directionality and the two pretraining tasks presented in Section 3.1 account for the majority of the empirical improvements, but we do note that there are several other differences between how BERT and GPT were trained:",
           "page": 14,
           "line": null,
@@ -146,7 +146,7 @@
       {
         "source": "paper_internal",
         "pointer": {
-          "locator": "E:\\kabuda\\FactReview\\runs\\v2_cross_domain\\bert_framework_2026-10-09_014934_be4796cb\\materials\\paper.md",
+          "locator": "C:\\workspace\\FactReview\\runs\\v2_cross_domain\\bert_framework_2026-10-09_014934_be4796cb\\materials\\paper.md",
           "quote": "• GPT is trained on the BooksCorpus (800M words); BERT is trained on the BooksCorpus (800M words) and Wikipedia (2,500M words).",
           "page": 14,
           "line": null,
@@ -167,7 +167,7 @@
       {
         "source": "paper_internal",
         "pointer": {
-          "locator": "E:\\kabuda\\FactReview\\runs\\v2_cross_domain\\bert_framework_2026-10-09_014934_be4796cb\\materials\\paper.md",
+          "locator": "C:\\workspace\\FactReview\\runs\\v2_cross_domain\\bert_framework_2026-10-09_014934_be4796cb\\materials\\paper.md",
           "quote": "• GPT was trained for 1M steps with a batch size of 32,000 words; BERT was trained for 1M steps with a batch size of 128,000 words.",
           "page": 14,
           "line": null,
@@ -188,7 +188,7 @@
       {
         "source": "paper_internal",
         "pointer": {
-          "locator": "E:\\kabuda\\FactReview\\runs\\v2_cross_domain\\bert_framework_2026-10-09_014934_be4796cb\\materials\\paper.md",
+          "locator": "C:\\workspace\\FactReview\\runs\\v2_cross_domain\\bert_framework_2026-10-09_014934_be4796cb\\materials\\paper.md",
           "quote": "• GPT used the same learning rate of 5e-5 for all fine-tuning experiments; BERT chooses a task-specific fine-tuning learning rate which performs the best on the development set.",
           "page": 14,
           "line": null,
@@ -209,7 +209,7 @@
       {
         "source": "paper_internal",
         "pointer": {
-          "locator": "E:\\kabuda\\FactReview\\runs\\v2_cross_domain\\bert_framework_2026-10-09_014934_be4796cb\\materials\\paper.md",
+          "locator": "C:\\workspace\\FactReview\\runs\\v2_cross_domain\\bert_framework_2026-10-09_014934_be4796cb\\materials\\paper.md",
           "quote": "We demonstrate the importance of the deep bidirectionality of BERT by evaluating two pretraining objectives using exactly the same pretraining data, fine-tuning scheme, and hyperparameters as $\\mathbf { B E R T _ { B A S E } } \\colon$",
           "page": 8,
           "line": null,
@@ -230,7 +230,7 @@
       {
         "source": "paper_internal",
         "pointer": {
-          "locator": "E:\\kabuda\\FactReview\\runs\\v2_cross_domain\\bert_framework_2026-10-09_014934_be4796cb\\inputs\\source_pdf\\paper.pdf",
+          "locator": "C:\\workspace\\FactReview\\runs\\v2_cross_domain\\bert_framework_2026-10-09_014934_be4796cb\\inputs\\source_pdf\\paper.pdf",
           "quote": "Table 5: Ablation over the pre-training tasks using the $\\mathbf { B E R T _ { B A S E } }$ architecture. “No NSP” is trained without the next sentence prediction task. “LTR & No NSP” is trained as a left-to-right LM without the next sentence prediction, like OpenAI GPT. “+ BiLSTM” adds a randomly initialized BiLSTM on top of the $\\mathrm { \\Sigma ^ { 6 } L T R } + \\mathrm { N o }$ NSP” model during fine-tuning.\n<table><tr><td rowspan=\"2\">Tasks</td><td colspan=\"5\">Dev Set</td></tr><tr><td>MNLI-m (Acc)</td><td>QNLI (Acc)</td><td>MRPC (Acc)</td><td>SST-2 (Acc)</td><td>SQuAD (F1)</td></tr><tr><td> $BERT_{BASE}$ </td><td>84.4</td><td>88.4</td><td>86.7</td><td>92.7</td><td>88.5</td></tr><tr><td>No NSP</td><td>83.9</td><td>84.9</td><td>86.5</td><td>92.6</td><td>87.9</td></tr><tr><td>LTR &amp; No NSP</td><td>82.1</td><td>84.3</td><td>77.5</td><td>92.1</td><td>77.8</td></tr><tr><td>+ BiLSTM</td><td>82.1</td><td>84.1</td><td>75.7</td><td>91.6</td><td>84.9</td></tr></table>",
           "page": 8,
           "line": null,
@@ -251,7 +251,7 @@
       {
         "source": "paper_internal",
         "pointer": {
-          "locator": "E:\\kabuda\\FactReview\\runs\\v2_cross_domain\\bert_framework_2026-10-09_014934_be4796cb\\inputs\\source_pdf\\paper.pdf",
+          "locator": "C:\\workspace\\FactReview\\runs\\v2_cross_domain\\bert_framework_2026-10-09_014934_be4796cb\\inputs\\source_pdf\\paper.pdf",
           "quote": "<sup>9</sup>The GLUE data set distribution does not include the Test labels, and we only made a single GLUE evaluation server submission for each of BERT and BERT .",
           "page": 6,
           "line": null,
@@ -272,7 +272,7 @@
       {
         "source": "paper_internal",
         "pointer": {
-          "locator": "E:\\kabuda\\FactReview\\runs\\v2_cross_domain\\bert_framework_2026-10-09_014934_be4796cb\\materials\\paper.md",
+          "locator": "C:\\workspace\\FactReview\\runs\\v2_cross_domain\\bert_framework_2026-10-09_014934_be4796cb\\materials\\paper.md",
           "quote": "For the largest and most widely reported GLUE task, MNLI, BERT obtains a 4.6% absolute accuracy improvement.",
           "page": 6,
           "line": null,
@@ -293,7 +293,7 @@
       {
         "source": "paper_internal",
         "pointer": {
-          "locator": "E:\\kabuda\\FactReview\\runs\\v2_cross_domain\\bert_framework_2026-10-09_014934_be4796cb\\materials\\paper.md",
+          "locator": "C:\\workspace\\FactReview\\runs\\v2_cross_domain\\bert_framework_2026-10-09_014934_be4796cb\\materials\\paper.md",
           "quote": "BERT is conceptually simple and empirically powerful. It obtains new state-of-the-art results on eleven natural language processing tasks, including pushing the GLUE score to 80.5% (7.7% point absolute improvement), MultiNLI accuracy to 86.7% (4.6% absolute improvement), SQuAD v1.1 question answering Test F1 to 93.2 (1.5 point absolute improvement) and SQuAD v2.0 Test F1 to 83.1 (5.1 point absolute improvement).",
           "page": 1,
           "line": null,
@@ -314,7 +314,7 @@
       {
         "source": "paper_internal",
         "pointer": {
-          "locator": "E:\\kabuda\\FactReview\\runs\\v2_cross_domain\\bert_framework_2026-10-09_014934_be4796cb\\materials\\paper.md",
+          "locator": "C:\\workspace\\FactReview\\runs\\v2_cross_domain\\bert_framework_2026-10-09_014934_be4796cb\\materials\\paper.md",
           "quote": "For the largest and most widely reported GLUE task, MNLI, BERT obtains a 4.6% absolute accuracy improvement.",
           "page": 6,
           "line": null,
@@ -335,7 +335,7 @@
       {
         "source": "paper_internal",
         "pointer": {
-          "locator": "E:\\kabuda\\FactReview\\runs\\v2_cross_domain\\bert_framework_2026-10-09_014934_be4796cb\\inputs\\source_pdf\\paper.pdf",
+          "locator": "C:\\workspace\\FactReview\\runs\\v2_cross_domain\\bert_framework_2026-10-09_014934_be4796cb\\inputs\\source_pdf\\paper.pdf",
           "quote": "Table 1: GLUE Test results, scored by the evaluation server (https://gluebenchmark.com/leaderboard). The number below each task denotes the number of training examples. The “Average” column is slightly different than the official GLUE score, since we exclude the problematic WNLI set.<sup>8</sup> BERT and OpenAI GPT are singlemodel, single task. F1 scores are reported for QQP and MRPC, Spearman correlations are reported for STS-B, and accuracy scores are reported for the other tasks. We exclude entries that use BERT as one of their components.\n<table><tr><td>System</td><td>MNLI-(m/mm)392k</td><td>QQP363k</td><td>QNLI108k</td><td>SST-267k</td><td>CoLA8.5k</td><td>STS-B5.7k</td><td>MRPC3.5k</td><td>RTE2.5k</td><td>Average-</td></tr><tr><td>Pre-OpenAI SOTA</td><td>80.6/80.1</td><td>66.1</td><td>82.3</td><td>93.2</td><td>35.0</td><td>81.0</td><td>86.0</td><td>61.7</td><td>74.0</td></tr><tr><td>BiLSTM+ELMo+Attn</td><td>76.4/76.1</td><td>64.8</td><td>79.8</td><td>90.4</td><td>36.0</td><td>73.3</td><td>84.9</td><td>56.8</td><td>71.0</td></tr><tr><td>OpenAI GPT</td><td>82.1/81.4</td><td>70.3</td><td>87.4</td><td>91.3</td><td>45.4</td><td>80.0</td><td>82.3</td><td>56.0</td><td>75.1</td></tr><tr><td>BERTBASE</td><td>84.6/83.4</td><td>71.2</td><td>90.5</td><td>93.5</td><td>52.1</td><td>85.8</td><td>88.9</td><td>66.4</td><td>79.6</td></tr><tr><td>BERTLARGE</td><td>86.7/85.9</td><td>72.1</td><td>92.7</td><td>94.9</td><td>60.5</td><td>86.5</td><td>89.3</td><td>70.1</td><td>82.1</td></tr></table>",
           "page": 6,
           "line": null,

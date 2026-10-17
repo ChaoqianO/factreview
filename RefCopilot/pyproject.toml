@@ -6,9 +6,7 @@ build-backend = "hatchling.build"
 name = "refcopilot"
 version = "0.1.0"
 description = "Reference checker — detects fake / outdated / incomplete citations in academic papers."
-readme = "README.md"
 requires-python = ">=3.11"
-authors = [{ name = "Anonymous authors" }]
 
 dependencies = [
   "pydantic>=2.5",
@@ -34,7 +32,7 @@ refcopilot = "refcopilot.cli:main"
 packages = ["src/refcopilot"]
 
 [tool.hatch.build.targets.sdist]
-include = ["src", "tests", "README.md"]
+include = ["src", "tests"]
 
 [tool.ruff]
 line-length = 110
