@@ -6,15 +6,7 @@ FactReview extracts claims and their conditions, checks them against literature,
 
 ## Pipeline
 
-```mermaid
-flowchart LR
-    A[Paper and optional repository] --> B[L1: Screening and claim extraction]
-    B --> C[L2: Literature / Theory / Code / Experiments]
-    C --> D[L3: Optional execution]
-    C --> E[Evidence assessment]
-    D --> E
-    E --> F[Review report and teaser]
-```
+[![FactReview pipeline](docs/factreview-pipeline.png)](docs/factreview-pipeline.pdf)
 
 Screening includes writing, figure, table and reference checks. Claims retain their source locations and conditions; a coverage review checks for omitted or merged claims. Verification follows the evidence needs of each claim. Missing evidence and failed checks remain visible in the report.
 
