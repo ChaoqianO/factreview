@@ -1,7 +1,5 @@
 # FactReview
 
-Anonymous code release for evidence-grounded review of machine learning papers.
-
 FactReview extracts claims and their conditions, checks them against literature, theory, code and experiments, and produces a review with traceable evidence. Each claim is assessed as `supported`, `flawed`, `questioned` or `unverified`. It assists reviewers and provides no publication decision.
 
 ## Pipeline
