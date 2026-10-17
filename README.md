@@ -64,7 +64,3 @@ python -m pytest
 ```
 
 The default suite excludes tests marked as slow or requiring live LLM, MinerU or Docker services.
-
-## License
-
-[AGPL-3.0](LICENSE).
