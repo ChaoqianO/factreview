@@ -1,16 +1,16 @@
 # FactReview
 
-FactReview extracts claims and their conditions, checks them against literature, theory, code and experiments, and produces a review with traceable evidence. Each claim is assessed as `supported`, `flawed`, `questioned` or `unverified`. It assists reviewers and provides no publication decision.
+FactReview extracts claims and their conditions, checks them against literature, theory, code and experiments, and produces a review with traceable evidence. Each claim is assessed as `supported`, `flawed`, `questioned` or `unverified`.
 
 ## Pipeline
 
 [![FactReview pipeline](docs/factreview-pipeline.png)](docs/factreview-pipeline.pdf)
 
-Screening includes writing, figure, table and reference checks. Claims retain their source locations and conditions; a coverage review checks for omitted or merged claims. Verification follows the evidence needs of each claim. Missing evidence and failed checks remain visible in the report.
+Screening checks writing, figures, tables and references. Claims retain their source locations and conditions, and a coverage review identifies omitted or merged claims. Literature, theory, code and experiment checks provide evidence for each assessment. Optional execution runs released code in Docker and records commands, metrics and changes.
 
 ## Quick start
 
-Requirements: Python 3.11+, a configured language model with image support, and a MinerU API token. Docker is required only for optional execution.
+Requirements: Python 3.11+, a configured language model with image support, and a MinerU API token. Install Docker to enable code execution.
 
 From the downloaded repository directory:
 
@@ -21,7 +21,7 @@ pip install -e ".[runtime,refcheck,positioning]"
 cp .env.example .env              # Windows PowerShell: Copy-Item .env.example .env
 ```
 
-Edit `.env` and set `MINERU_API_TOKEN`. The supplied model configuration uses a local Codex login; run `codex login` before using it. To use an OpenAI-compatible endpoint, set `MODEL_PROVIDER=openai`, `OPENAI_API_KEY`, `OPENAI_MODEL` and, when needed, `OPENAI_BASE_URL`. The selected model must accept images for visual checks. Optional `VLM_*` settings in `.env.example` select a separate visual model.
+Edit `.env` and set `MINERU_API_TOKEN`. The supplied model configuration uses a local Codex login; run `codex login` before using it. To use an OpenAI-compatible endpoint, set `MODEL_PROVIDER=openai`, `OPENAI_API_KEY`, `OPENAI_MODEL` and, when needed, `OPENAI_BASE_URL`. Use the `VLM_*` settings in `.env.example` to select a separate visual model.
 
 ## Run
 
@@ -32,7 +32,7 @@ python scripts/execute_review_pipeline.py path/to/paper.pdf \
   --paper-key my_paper --submission-deadline YYYY-MM-DD
 ```
 
-Replace `YYYY-MM-DD` with the venue's actual submission deadline. Literature treats the preceding three calendar months as concurrent work; a missing deadline leaves its assessment unresolved. A PDF URL or arXiv abstract URL can also be used as input.
+Set `YYYY-MM-DD` to the venue's submission deadline. The preceding three calendar months define the concurrent-work window for literature verification. A PDF URL or arXiv abstract URL can also be used as input.
 
 | Option | Purpose |
 |---|---|
@@ -61,4 +61,4 @@ pip install -e ".[runtime,refcheck,positioning,dev]"
 python -m pytest
 ```
 
-The default suite excludes tests marked as slow or requiring live LLM, MinerU or Docker services.
+The default suite runs fast, offline tests.
