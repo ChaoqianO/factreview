@@ -7,6 +7,7 @@ import os
 import re
 import shutil
 import subprocess
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -16,6 +17,7 @@ import requests
 from PIL import Image
 
 from common.env import load_env_file
+from common import run_stats
 
 _SECTION_RE = re.compile(
     r"(?ims)^##\s+(?P<title>(?:\*\*)?\d+\.\s+.+?(?:\*\*)?)\s*$\n(?P<body>.*?)(?=^##\s+|\Z)"
@@ -91,7 +93,7 @@ _TEMPLATE_REGION_BBOXES: dict[str, tuple[float, float, float, float]] = {
 
 _TEMPLATE_REGION_PROMPT_HINTS: dict[str, str] = {
     "title_banner": "Restore the dark top banner spanning nearly the full width, with the title left-aligned inside it, followed by the summary text — do not prefix the summary with 'TL;DR' or any other label.",
-    "task_badge": "Place the task label as a rounded badge right-aligned at the top-right corner, directly above the status badge row. Its width must auto-fit the text content — do not fix or extend the left edge to fill the full bbox width. Right edge stays pinned at the right margin; only the left edge floats with content length.",
+    "task_badge": "Place the task label as a rounded badge right-aligned at the top-right corner, directly above the status badge row. Its width must auto-fit the text content. Right edge stays pinned at the right margin; only the left edge floats with content length.",
     "status_badges": "Preserve the top-right status badge strip as a tight horizontal run of rounded badges with the original ordering and spacing.",
     "delta_badges": "Keep the Improvement and Reduction badges on their own lower row directly beneath the status badges.",
     "main_canvas": "Preserve the large light-gray body shell under the header; do not switch to a flat white or fully reflowed canvas.",
@@ -101,6 +103,25 @@ _TEMPLATE_REGION_PROMPT_HINTS: dict[str, str] = {
     "strengths_panel": "Restore the green-tinted Strengths background in the upper part of the right summary column.",
     "weaknesses_panel": "Restore the pink-tinted Weaknesses background in the lower part of the right summary column.",
     "experiments_panel": "Keep the experiment/result tables across the lower-left and lower-middle area, below the technical and claims panels.",
+}
+
+
+# Friendly region labels used in the rendered prompt. These intentionally avoid
+# the underscore-prefixed internal names (e.g. "technical_panel") because some
+# image generation models will literally render those names as panel labels in
+# the output figure.
+_TEMPLATE_REGION_DISPLAY_LABELS: dict[str, str] = {
+    "title_banner": "Title banner",
+    "task_badge": "Task badge",
+    "status_badges": "Status badges row",
+    "delta_badges": "Improvement / Reduction badges row",
+    "main_canvas": "Body canvas",
+    "technical_panel": "Technical Positioning panel",
+    "claims_panel": "Claims panel",
+    "summary_panel": "Summary panel",
+    "strengths_panel": "Strengths panel",
+    "weaknesses_panel": "Weaknesses panel",
+    "experiments_panel": "Experiments panel",
 }
 
 
@@ -142,16 +163,53 @@ def _copy_text_to_clipboard(text: str) -> bool:
     return False
 
 
-def _prompt_only_message(reason: str, *, clipboard_copied: bool) -> str:
+def _format_path_for_message(path: Path) -> str:
+    """Render a path relative to the repo root when possible, else absolute."""
+    try:
+        return str(path.relative_to(_repo_root()))
+    except ValueError:
+        return str(path)
+
+
+def _prompt_only_message(
+    reason: str,
+    *,
+    clipboard_copied: bool,
+    technical_image_path: Path | None = None,
+) -> str:
     copy_sentence = (
         "Prompt was also copied to the clipboard."
         if clipboard_copied
         else "Automatic clipboard copy was unavailable; open the prompt file and copy it manually."
     )
-    return (
-        f"{reason} Prompt was written to disk. {copy_sentence} "
-        "Paste it into the Gemini web app to generate the teaser figure manually."
-    )
+
+    upload_lines: list[str] = []
+    template_path = _template_png_path()
+    if template_path.exists():
+        upload_lines.append(
+            f"  1. The reference layout image at `{_format_path_for_message(template_path)}` "
+            "(the prompt calls it 'the attached reference image' and uses it for the overall layout/style)."
+        )
+    if technical_image_path is not None and technical_image_path.exists():
+        upload_lines.append(
+            f"  2. The manuscript's technical-positioning figure at "
+            f"`{_format_path_for_message(technical_image_path)}` "
+            "(the prompt calls it 'the attached technical reference image' and uses it for the technical panel)."
+        )
+
+    if upload_lines:
+        upload_block = (
+            "Paste the prompt into the Gemini (or other image-model) web UI, and in the same message attach:\n"
+            + "\n".join(upload_lines)
+        )
+    else:
+        upload_block = (
+            "Paste the prompt into the Gemini (or other image-model) web UI. The prompt refers to "
+            "'the attached reference image' for layout and 'the attached technical reference image' for the "
+            "technical panel — attach those two images alongside the prompt."
+        )
+
+    return f"{reason} Prompt was written to disk. {copy_sentence} {upload_block}"
 
 
 def _repo_root() -> Path:
@@ -159,7 +217,31 @@ def _repo_root() -> Path:
 
 
 def _template_png_path() -> Path:
-    return _repo_root() / "demos" / "compgcn" / "teaser_reference.png"
+    """Path to the layout/style reference image attached to the image API call.
+
+    Falls back through a list of candidates so the function still returns
+    something useful after the demos directory was reorganized into
+    domain-specific subfolders (Graph/Image/Text). Allows an env override.
+    """
+    override = str(os.getenv("TEASER_TEMPLATE_REFERENCE_PNG") or "").strip()
+    repo_root = _repo_root()
+    candidates: list[Path] = []
+    if override:
+        override_path = Path(override).expanduser()
+        candidates.append(
+            override_path if override_path.is_absolute() else (repo_root / override_path)
+        )
+    # Legacy location (kept first so an explicitly placed file wins).
+    candidates.append(repo_root / "demos" / "compgcn" / "teaser_reference.png")
+    # Current demo locations after the demos/ reorganization.
+    candidates.append(repo_root / "demos" / "Graph" / "compgcn" / "teaser_reference.png")
+    candidates.append(repo_root / "demos" / "Graph" / "compgcn" / "teaser_figure.png")
+    for candidate in candidates:
+        if candidate.exists() and candidate.is_file():
+            return candidate
+    # Return the first candidate as a "what we expected" path so logs/UX
+    # surface a sensible filename, even though the file is missing.
+    return candidates[0]
 
 
 def _template_reference_png_bytes(scale: float = 0.9) -> bytes | None:
@@ -211,24 +293,34 @@ def _template_visual_anchors() -> list[TemplateAnchor]:
 def _template_visual_anchor_summary() -> str:
     anchors = _template_visual_anchors()
     if not anchors:
-        try:
-            relative = _template_png_path().relative_to(_repo_root())
-        except ValueError:
-            relative = _template_png_path()
-        return f"Reference template image: {relative}; rely on the attached template image and fixed module constraints."
-    lines = [
-        "Exact visual anchors extracted from the template image (normalized coordinates on a 16:9 canvas):"
-    ]
+        return (
+            "Rely on the attached reference image plus the fixed module constraints above; "
+            "the constraints describe the same reference and must agree with it."
+        )
+    # Anchor list path is unused today, but keep it consistent and free of raw
+    # bbox coordinates that would otherwise leak into the rendered figure.
+    lines = ["Exact visual anchors extracted from the reference image:"]
     for anchor in anchors:
-        lines.append(f"- {anchor.name}: bbox={_format_bbox(anchor.bbox)}; text={anchor.text}")
+        lines.append(f"- {anchor.name}: {anchor.text}")
     return "\n".join(lines)
 
 
 def _template_region_constraints() -> str:
+    """Render layout constraints as semantic instructions only.
+
+    We intentionally do NOT emit raw bbox coordinates here because image
+    generation models will sometimes splice those numbers into the rendered
+    output as visible labels. The semantic hints + the attached/referenced
+    template image are sufficient to guide layout.
+    """
     lines = ["Lock these structural regions to the template's geometry:"]
-    for name, bbox in _TEMPLATE_REGION_BBOXES.items():
+    for name in _TEMPLATE_REGION_BBOXES.keys():
         hint = _TEMPLATE_REGION_PROMPT_HINTS.get(name, "")
-        lines.append(f"- {name}: bbox={_format_bbox(bbox)}. {hint}".strip())
+        label = _TEMPLATE_REGION_DISPLAY_LABELS.get(name, name)
+        if hint:
+            lines.append(f"- {label}: {hint}")
+        else:
+            lines.append(f"- {label}.")
     return "\n".join(lines)
 
 
@@ -932,17 +1024,40 @@ def _row_to_dict(table: TableBlock, row: list[str]) -> dict[str, str]:
     }
 
 
+def _claim_display_priority(row: dict[str, str], original_index: int) -> tuple[int, int, int]:
+    """Prioritize claim rows for teaser: primary importance first, then by content signals."""
+    importance = row.get("Importance", "").lower().strip()
+    importance_rank = 0 if importance == "primary" else 1
+
+    claim = _strip_inline_markup(row.get("Claim", "")).lower()
+    status = _strip_inline_markup(row.get("Status", "")).lower()
+    evidence = _strip_inline_markup(row.get("Evidence", "")).lower()
+    text = f"{claim} {evidence}"
+    content_rank = 50
+    if any(token in text for token in ("first", "novel", "to our knowledge", "innovation")):
+        content_rank = min(content_rank, 0)
+    if "in conflict" in status:
+        content_rank = min(content_rank, 1)
+    elif "partial" in status or "inconclusive" in status:
+        content_rank = min(content_rank, 2)
+    elif "missing:" in evidence and "missing: none" not in evidence:
+        content_rank = min(content_rank, 3)
+    return importance_rank, content_rank, original_index
+
+
 def _select_claim_rows(table: TableBlock | None, limit: int = 3) -> list[dict[str, str]]:
     if table is None:
         return []
     claim_idx = next((idx for idx, header in enumerate(table.headers) if "claim" in header.lower()), -1)
     evidence_idx = next((idx for idx, header in enumerate(table.headers) if "evidence" in header.lower()), -1)
     status_idx = next((idx for idx, header in enumerate(table.headers) if "status" in header.lower()), -1)
+    importance_idx = next((idx for idx, header in enumerate(table.headers) if "importance" in header.lower()), -1)
     selected: list[dict[str, str]] = []
     for row in table.rows:
-        claim_text = row[claim_idx].strip() if claim_idx >= 0 and claim_idx < len(row) else ""
-        evidence_text = row[evidence_idx].strip() if evidence_idx >= 0 and evidence_idx < len(row) else ""
-        status_text = row[status_idx].strip() if status_idx >= 0 and status_idx < len(row) else ""
+        claim_text = row[claim_idx].strip() if 0 <= claim_idx < len(row) else ""
+        evidence_text = row[evidence_idx].strip() if 0 <= evidence_idx < len(row) else ""
+        status_text = row[status_idx].strip() if 0 <= status_idx < len(row) else ""
+        importance_text = row[importance_idx].strip() if 0 <= importance_idx < len(row) else ""
         if not any([claim_text, evidence_text, status_text]):
             continue
         selected.append(
@@ -950,11 +1065,12 @@ def _select_claim_rows(table: TableBlock | None, limit: int = 3) -> list[dict[st
                 "Claim": claim_text or "Not found in manuscript",
                 "Evidence": evidence_text or "Not found in manuscript",
                 "Status": status_text or "Not found in manuscript",
+                "Importance": importance_text,
             }
         )
-        if len(selected) >= limit:
-            break
-    return selected
+    selected_with_index = [(row, idx) for idx, row in enumerate(selected)]
+    selected_with_index.sort(key=lambda item: _claim_display_priority(item[0], item[1]))
+    return [row for row, _idx in selected_with_index[:limit]]
 
 
 def _derive_claims_aggregate_status(rows: list[dict[str, str]]) -> str:
@@ -979,12 +1095,14 @@ def _derive_claims_aggregate_status(rows: list[dict[str, str]]) -> str:
 def _format_selected_claims(rows: list[dict[str, str]]) -> str:
     if not rows:
         return "1. **Claim:** **Not found in manuscript**"
-    return "\n".join(
-        f"{idx}. **Claim:** **{row.get('Claim', 'Not found in manuscript')}**; "
-        f"**Evidence:** {row.get('Evidence', 'Not found in manuscript')}; "
-        f"**Status:** {row.get('Status', 'Not found in manuscript')}"
-        for idx, row in enumerate(rows, start=1)
-    )
+    lines: list[str] = []
+    for idx, row in enumerate(rows, start=1):
+        lines.append(
+            f"{idx}. **Claim:** **{row.get('Claim', 'Not found in manuscript')}**; "
+            f"**Evidence:** {row.get('Evidence', 'Not found in manuscript')}; "
+            f"**Status:** {row.get('Status', 'Not found in manuscript')}"
+        )
+    return "\n".join(lines)
 
 
 def extract_teaser_figure_payload(markdown_text: str) -> TeaserFigurePayload:
@@ -1052,6 +1170,7 @@ def build_teaser_figure_prompt(
     selected_claims_text = _format_selected_claims(payload.selected_claim_rows)
     anchor_summary = _template_visual_anchor_summary()
     region_constraints = _template_region_constraints()
+
     retry_text = ""
     if correction_hints:
         retry_lines = [
@@ -1066,8 +1185,8 @@ def build_teaser_figure_prompt(
         "The output should read like a presentation-quality overview graphic, not a raw markdown rendering.\n"
         "Use the extracted report content below as authoritative content to place into the figure.\n"
         "Preserve factual wording, numeric values, and status labels from the source.\n"
-        "Treat the following layout/style instructions as fixed constraints derived from the reference demos/compgcn/teaser_reference.png.\n"
-        "Treat the attached reference image as a hard layout-and-style target, not as loose inspiration.\n"
+        "Treat the attached reference image as a hard layout-and-style target, not as loose inspiration; "
+        "the layout/style instructions below describe that same reference and must agree with it.\n"
         "If any conflict appears between content length and layout fidelity, preserve layout fidelity first and shrink or wrap text.\n"
         "Keep colors unchanged and keep the relative positions of all modules unchanged; only adjust module width/height "
         "slightly based on content length.\n"
@@ -1125,8 +1244,10 @@ def build_teaser_figure_prompt(
         "- The Improvement and Reduction badges must always appear below the status badges with fixed "
         "labels ('Improvement', 'Reduction'), fixed colors, and fixed positions — do not modify their "
         "text or derive them from execution results.\n"
-        "- The claims section should show exactly 3 claim rows, and they must be dynamically extracted from the report's claims table using the Claim, Evidence, and Status information.\n"
-        "- In claims rows, each claim's status badge must display the exact status label from the claim's Status field "
+        "- The claims section may show up to 3 compact display claim rows because of visual space limits; the audited claims table below is supporting context, while the report markdown remains the complete claim record. "
+        "Prefer the provided Core claim rows when present; otherwise prioritize novelty/positioning claims, in-conflict claims, partially supported or inconclusive claims, and claims with non-empty Missing evidence before fully supported claims.\n"
+        "- If a selected display row is labelled `Core claim`, render it as a neutral compact claim statement without a per-row status badge; detailed support/status lives in the report's claim tables.\n"
+        "- For selected display rows that include a real Status field from the audited claims table, each claim's status badge must display the exact status label from the claim's Status field "
         "(e.g., '⚠ Inconclusive', '⚠ Partially supported', '✓ Supported', '✗ In conflict') — "
         "do NOT substitute the combined top-right badge label '⚠ Partially supported / Inconclusive' for individual claim row badges.\n"
         "- In the claims module, each claim sentence must be visually bold in the figure.\n"
@@ -1165,15 +1286,15 @@ def build_teaser_figure_prompt(
         "\n"
         "[Technical Positioning]\n"
         f"Caption: {payload.technical_positioning_caption}\n"
-        f"Image reference: {payload.technical_positioning_image}\n"
+        "Image: use the attached technical reference image (the manuscript's technical-positioning figure) faithfully for the technical panel — same subject and structure.\n"
         "Table:\n"
         f"{_table_to_markdown(payload.technical_positioning_table)}\n"
         "\n"
         "[Claims]\n"
-        "Selected 3 claim rows for direct layout use:\n"
+        "Selected display claim rows for direct layout use (space-limited; audited claims table follows):\n"
         f"{selected_claims_text}\n"
         "\n"
-        "Full claims table:\n"
+        "Audited claims table:\n"
         f"{_table_to_markdown(payload.claims_table)}\n"
         "\n"
         "[Summary]\n"
@@ -1201,8 +1322,6 @@ def build_teaser_figure_prompt_from_latest_extraction(latest_extraction_path: st
 
 def _default_teaser_output_dir(latest_extraction_path: Path) -> Path:
     parent = latest_extraction_path.parent.resolve()
-    if parent.name == "output":
-        return parent / "teaser_figure"
     return parent / "teaser_figure"
 
 
@@ -1360,6 +1479,76 @@ def _call_gemini_image_api(
     return payload
 
 
+def _extract_image_api_usage(payload: dict[str, Any]) -> dict[str, int]:
+    if not isinstance(payload, dict):
+        return {}
+    usage = payload.get("usage")
+    if isinstance(usage, dict):
+        input_tokens = usage.get("input_tokens", usage.get("prompt_tokens"))
+        output_tokens = usage.get("output_tokens", usage.get("completion_tokens"))
+        total_tokens = usage.get("total_tokens")
+        result = {
+            "input_tokens": max(0, int(input_tokens or 0)),
+            "output_tokens": max(0, int(output_tokens or 0)),
+            "total_tokens": max(0, int(total_tokens or 0)),
+        }
+        if result["total_tokens"] <= 0:
+            result["total_tokens"] = result["input_tokens"] + result["output_tokens"]
+        if result["total_tokens"] > 0:
+            return result
+    usage_meta = payload.get("usageMetadata") or payload.get("usage_metadata")
+    if isinstance(usage_meta, dict):
+        input_tokens = usage_meta.get("promptTokenCount", usage_meta.get("prompt_token_count"))
+        output_tokens = usage_meta.get("candidatesTokenCount", usage_meta.get("candidates_token_count"))
+        total_tokens = usage_meta.get("totalTokenCount", usage_meta.get("total_token_count"))
+        result = {
+            "input_tokens": max(0, int(input_tokens or 0)),
+            "output_tokens": max(0, int(output_tokens or 0)),
+            "total_tokens": max(0, int(total_tokens or 0)),
+        }
+        if result["total_tokens"] <= 0:
+            result["total_tokens"] = result["input_tokens"] + result["output_tokens"]
+        if result["total_tokens"] > 0:
+            return result
+    return {}
+
+
+def _record_teaser_image_usage(
+    *,
+    provider: str,
+    model: str,
+    prompt: str,
+    response_payload: dict[str, Any] | None,
+    duration_sec: float,
+    failed: bool = False,
+) -> None:
+    usage = _extract_image_api_usage(response_payload or {})
+    estimated = not bool(usage)
+    warning = ""
+    if estimated:
+        warning = (
+            "Estimated teaser image token usage from the text prompt only; "
+            "the image API response did not include token usage."
+        )
+        if failed:
+            warning = (
+                "Estimated teaser image request tokens after an API failure; "
+                "the response did not include token usage."
+            )
+    run_stats.record_llm_call(
+        module="teaser_figure",
+        provider=provider,
+        model=model,
+        usage=usage,
+        prompt=prompt,
+        system="",
+        response_text="",
+        duration_sec=duration_sec,
+        estimated=estimated,
+        warning=warning,
+    )
+
+
 def _resolve_technical_reference_image_bytes(
     *,
     latest_path: Path,
@@ -1394,6 +1583,38 @@ def _resolve_technical_reference_image_bytes(
     return None
 
 
+def _resolve_technical_reference_image_path(
+    *,
+    latest_path: Path,
+    payload: TeaserFigurePayload,
+) -> Path | None:
+    """Locate the technical-positioning image on disk so we can mention it
+    by path in the prompt-only message. Mirrors the candidate search in
+    `_resolve_technical_reference_image_bytes` but returns the Path rather
+    than the bytes.
+    """
+    token = str(payload.technical_positioning_image or "").strip()
+    if not token or token.lower() == "not found in manuscript":
+        return None
+    raw_path = Path(token).expanduser()
+    candidates: list[Path] = []
+    if raw_path.is_absolute():
+        candidates.append(raw_path)
+    else:
+        candidates.append((latest_path.parent / raw_path).resolve())
+        candidates.append((_repo_root() / raw_path).resolve())
+        candidates.append((latest_path.parent / "overview_figure.jpg").resolve())
+    seen: set[str] = set()
+    for candidate in candidates:
+        key = str(candidate)
+        if key in seen:
+            continue
+        seen.add(key)
+        if candidate.exists() and candidate.is_file():
+            return candidate
+    return None
+
+
 def generate_teaser_figure(
     latest_extraction_path: str | Path,
     *,
@@ -1407,7 +1628,10 @@ def generate_teaser_figure(
     _ensure_env_loaded()
     latest_path = _coerce_path(latest_extraction_path).resolve()
     teaser_payload = extract_teaser_figure_payload_from_latest_extraction(latest_path)
-    prompt = build_teaser_figure_prompt(teaser_payload, execution_skipped=execution_skipped)
+    prompt = build_teaser_figure_prompt(
+        teaser_payload,
+        execution_skipped=execution_skipped,
+    )
     final_output_dir = (
         _coerce_path(output_dir).resolve()
         if output_dir is not None
@@ -1417,6 +1641,11 @@ def generate_teaser_figure(
 
     prompt_path = final_output_dir / "teaser_figure_prompt.txt"
     prompt_path.write_text(prompt, encoding="utf-8")
+
+    technical_image_path = _resolve_technical_reference_image_path(
+        latest_path=latest_path,
+        payload=teaser_payload,
+    )
 
     if not generate_image:
         clipboard_copied = _copy_text_to_clipboard(prompt)
@@ -1432,7 +1661,11 @@ def generate_teaser_figure(
             image_path="",
             response_path="",
             model=model,
-            message=_prompt_only_message("Image generation disabled.", clipboard_copied=clipboard_copied),
+            message=_prompt_only_message(
+                "Image generation disabled.",
+                clipboard_copied=clipboard_copied,
+                technical_image_path=technical_image_path,
+            ),
             clipboard_copied=clipboard_copied,
             used_gemini_api=False,
             source_markdown_path=str(latest_path),
@@ -1458,6 +1691,7 @@ def generate_teaser_figure(
             message=_prompt_only_message(
                 "No teaser image API key configured.",
                 clipboard_copied=clipboard_copied,
+                technical_image_path=technical_image_path,
             ),
             clipboard_copied=clipboard_copied,
             used_gemini_api=False,
@@ -1486,18 +1720,39 @@ def generate_teaser_figure(
             teaser_payload,
             correction_hints=correction_hints,
             attempt_index=attempt_index,
+            execution_skipped=execution_skipped,
         )
         attempt_prompt_path = final_output_dir / f"teaser_figure_prompt_attempt_{attempt_index}.txt"
         attempt_prompt_path.write_text(attempt_prompt, encoding="utf-8")
 
-        attempt_response = _call_gemini_image_api(
-            prompt=attempt_prompt,
-            api_key=api_key,
+        api_provider = "openrouter" if str(base_url or "").strip() else "gemini"
+        api_t0 = time.monotonic()
+        try:
+            attempt_response = _call_gemini_image_api(
+                prompt=attempt_prompt,
+                api_key=api_key,
+                model=model,
+                timeout_seconds=timeout_seconds,
+                base_url=base_url,
+                template_image_png_bytes=template_image_png_bytes,
+                technical_image_png_bytes=technical_image_png_bytes,
+            )
+        except Exception:
+            _record_teaser_image_usage(
+                provider=api_provider,
+                model=model,
+                prompt=attempt_prompt,
+                response_payload=None,
+                duration_sec=time.monotonic() - api_t0,
+                failed=True,
+            )
+            raise
+        _record_teaser_image_usage(
+            provider=api_provider,
             model=model,
-            timeout_seconds=timeout_seconds,
-            base_url=base_url,
-            template_image_png_bytes=template_image_png_bytes,
-            technical_image_png_bytes=technical_image_png_bytes,
+            prompt=attempt_prompt,
+            response_payload=attempt_response,
+            duration_sec=time.monotonic() - api_t0,
         )
         attempt_response_path = (
             final_output_dir / f"teaser_figure_gemini_response_attempt_{attempt_index}.json"

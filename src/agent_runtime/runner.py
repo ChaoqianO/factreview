@@ -5,6 +5,7 @@ import os
 import re
 import shutil
 import sys
+import time
 import traceback
 from datetime import UTC, datetime
 from pathlib import Path
@@ -20,6 +21,7 @@ from openai.types.shared import Reasoning
 
 from agent_runtime.agent_prompt import build_review_agent_system_prompt
 from agent_runtime.agent_tools import ReviewRuntimeContext, build_review_tools
+from common import run_stats
 from common.config import get_settings
 from common.state import (
     ensure_artifact_paths,
@@ -44,6 +46,7 @@ from preprocessing.parse.mineru_adapter import MineruAdapter, MineruConfig
 from review.report.final_report_audit import audit_and_refine_final_report
 from review.report.pdf_renderer import build_review_report_pdf
 from review.report.source_annotations import build_source_annotations_for_export
+from util.cutoff_date import CutoffDate, parse_cutoff
 
 
 def _resolved_api_key() -> str:
@@ -105,12 +108,20 @@ def _build_paper_adapter() -> PaperSearchAdapter:
     return PaperSearchAdapter(
         search_cfg=PaperSearchConfig(
             enabled=settings.paper_search_enabled,
+            provider=settings.paper_search_provider,
             base_url=settings.paper_search_base_url,
             api_key=settings.paper_search_api_key,
             endpoint=settings.paper_search_endpoint,
             timeout_seconds=settings.paper_search_timeout_seconds,
             health_endpoint=settings.paper_search_health_endpoint,
             health_timeout_seconds=settings.paper_search_health_timeout_seconds,
+            semantic_scholar_base_url=settings.semantic_scholar_base_url,
+            semantic_scholar_api_key=settings.semantic_scholar_api_key,
+            openalex_base_url=settings.openalex_base_url,
+            openalex_api_key=settings.openalex_api_key,
+            page_size=settings.paper_search_page_size,
+            max_pages=settings.paper_search_max_pages,
+            max_results=settings.paper_search_max_results,
         ),
         read_cfg=PaperReadConfig(
             base_url=settings.paper_read_base_url,
@@ -134,6 +145,26 @@ def _build_semantic_scholar_adapter() -> SemanticScholarAdapter:
     )
 
 
+def _resolve_runtime_cutoff(job: Any) -> CutoffDate | None:
+    """Pull the publication-date cutoff out of ``JobState.metadata``.
+
+    The cutoff is set by ``execute_review_runtime_job.py`` from the
+    ``--cutoff-date`` arg propagated by ``pipeline_full``. A malformed value is
+    logged and ignored rather than failing the whole run.
+    """
+    metadata = getattr(job, "metadata", None)
+    token = ""
+    if isinstance(metadata, dict):
+        token = str(metadata.get("paper_cutoff_date") or "").strip()
+    if not token:
+        return None
+    try:
+        return parse_cutoff(token)
+    except ValueError as exc:
+        append_event(str(getattr(job, "id", "")), "paper_cutoff_invalid", value=token, error=str(exc))
+        return None
+
+
 def _extract_title_hint(markdown_text: str, fallback_name: str) -> str:
     lines = [line.strip() for line in str(markdown_text or "").splitlines() if line.strip()]
     for line in lines[:30]:
@@ -155,17 +186,33 @@ def _format_semantic_scholar_context(payload: dict[str, Any]) -> str:
     success = bool(payload.get("success"))
     query = str(payload.get("query") or "").strip()
     papers = payload.get("papers") if isinstance(payload.get("papers"), list) else []
-    if not success or not papers:
-        msg = str(payload.get("message") or "No results").strip()
-        return (
-            f"success: false\n"
-            f"query: {query or '(empty)'}\n"
-            f"message: {msg or 'No results'}\n"
-            "papers: []\n"
-            "strict_rule: objective_retrieval_unavailable_do_not_invent_papers"
+    cutoff_meta = payload.get("cutoff_date") if isinstance(payload.get("cutoff_date"), dict) else None
+    cutoff_lines: list[str] = []
+    if cutoff_meta:
+        cutoff_lines.append(
+            f"cutoff_date: {cutoff_meta.get('value')} (precision={cutoff_meta.get('precision')})"
+        )
+        filtered_out = payload.get("filtered_out_count")
+        if filtered_out is not None:
+            cutoff_lines.append(f"filtered_out_after_cutoff: {filtered_out}")
+        cutoff_lines.append(
+            "strict_rule: do_not_cite_or_compare_against_papers_published_after_cutoff"
         )
 
-    lines = ["success: true", f"query: {query or '(empty)'}", "papers:"]
+    if not success or not papers:
+        msg = str(payload.get("message") or "No results").strip()
+        base = [
+            "success: false",
+            f"query: {query or '(empty)'}",
+            f"message: {msg or 'No results'}",
+            "papers: []",
+            "strict_rule: objective_retrieval_unavailable_do_not_invent_papers",
+        ]
+        return "\n".join(base + cutoff_lines)
+
+    lines = ["success: true", f"query: {query or '(empty)'}"]
+    lines.extend(cutoff_lines)
+    lines.append("papers:")
     for row in papers:
         if not isinstance(row, dict):
             continue
@@ -379,19 +426,15 @@ def _extract_scope_line(text: str, prefix: str) -> str:
 
 def _collect_table_rows(text: str) -> list[list[str]]:
     rows: list[list[str]] = []
-    in_table = False
     for raw in str(text or "").splitlines():
         line = raw.strip()
-        if line.startswith("|") and line.endswith("|"):
-            cells = [cell.strip() for cell in line.strip("|").split("|")]
-            # skip markdown separator line
-            if all(re.fullmatch(r":?-{3,}:?", cell or "") for cell in cells):
-                continue
-            rows.append(cells)
-            in_table = True
-        else:
-            if in_table:
-                in_table = False
+        if not (line.startswith("|") and line.endswith("|")):
+            continue
+        cells = [cell.strip() for cell in line.strip("|").split("|")]
+        # skip markdown separator line
+        if all(re.fullmatch(r":?-{3,}:?", cell or "") for cell in cells):
+            continue
+        rows.append(cells)
     return rows
 
 
@@ -768,7 +811,10 @@ def _stabilize_experiment_section(markdown_text: str) -> str:
     text = str(markdown_text or "")
     if not text.strip():
         return text
-    sec = re.search(r"(?ims)^##\s+5\.\s+Experiment\s*$\n(?P<body>.*?)(?=^##\s+|\Z)", text)
+    sec = re.search(
+        r"(?ims)^##\s+(?:\*\*)?5\.\s+Experiment(?:\*\*)?\s*$\n(?P<body>.*?)(?=^##\s+|\Z)",
+        text,
+    )
     if not sec:
         return text
     body = sec.group("body")
@@ -798,7 +844,10 @@ def _ensure_experiment_contract(markdown_text: str) -> str:
     text = str(markdown_text or "")
     if not text.strip():
         return text
-    sec = re.search(r"(?ims)^##\s+5\.\s+Experiment\s*$\n(?P<body>.*?)(?=^##\s+|\Z)", text)
+    sec = re.search(
+        r"(?ims)^##\s+(?:\*\*)?5\.\s+Experiment(?:\*\*)?\s*$\n(?P<body>.*?)(?=^##\s+|\Z)",
+        text,
+    )
     if not sec:
         return text
 
@@ -925,7 +974,10 @@ def _hard_validate_experiment_tables(
     text = str(markdown_text or "")
     if not text.strip():
         return text
-    sec = re.search(r"(?ims)^##\s+5\.\s+Experiment\s*$\n(?P<body>.*?)(?=^##\s+|\Z)", text)
+    sec = re.search(
+        r"(?ims)^##\s+(?:\*\*)?5\.\s+Experiment(?:\*\*)?\s*$\n(?P<body>.*?)(?=^##\s+|\Z)",
+        text,
+    )
     if not sec:
         return text
     body = sec.group("body")
@@ -1012,44 +1064,297 @@ def _global_eval_status(summary: dict[str, Any], alignment: dict[str, Any]) -> t
 
 def _metric_higher_is_better(metric: str) -> bool:
     key = _norm_metric_key(metric)
-    if key in {"mr", "error", "loss", "wer", "cer", "perplexity"}:
-        return False
-    return True
+    return key not in {
+        "mr",
+        "error",
+        "error_rate",
+        "loss",
+        "wer",
+        "cer",
+        "perplexity",
+        "mae",
+        "rmse",
+        "mse",
+        "fid",
+        "latency",
+        "time",
+    }
 
 
 def _norm_metric_key(metric: str) -> str:
     s = str(metric or "").strip().lower()
+    compact = re.sub(r"[\s_\-]+", "", s)
     if "mrr" in s:
         return "mrr"
     if s in {"mr", "mean rank"} or "mean rank" in s:
         return "mr"
-    if "hits@10" in s or "h@10" in s:
+    if "hits@10" in s or "h@10" in s or compact in {"hits10", "hit10", "h10"}:
         return "hits@10"
-    if "hits@3" in s or "h@3" in s:
+    if "hits@3" in s or "h@3" in s or compact in {"hits3", "hit3", "h3"}:
         return "hits@3"
-    if "hits@1" in s or "h@1" in s:
+    if "hits@1" in s or "h@1" in s or compact in {"hits1", "hit1", "h1"}:
         return "hits@1"
     if "acc" in s:
         return "accuracy"
+    if compact in {"f1", "f1score"}:
+        return "f1"
+    if "precision" in s:
+        return "precision"
+    if "recall" in s:
+        return "recall"
+    if compact in {"auc", "auroc"}:
+        return "auc"
+    if compact in {"map", "meanaverageprecision"}:
+        return "map"
+    if "ndcg" in s:
+        return "ndcg"
+    if "bleu" in s:
+        return "bleu"
+    if "rouge-l" in s or "rougel" in compact:
+        return "rouge-l"
+    if "rouge-1" in s or "rouge1" in compact:
+        return "rouge-1"
+    if "rouge-2" in s or "rouge2" in compact:
+        return "rouge-2"
     if "wer" in s:
         return "wer"
     if "cer" in s:
         return "cer"
     if "perplex" in s or "ppl" in s:
         return "perplexity"
+    if "mae" in s:
+        return "mae"
+    if "rmse" in s:
+        return "rmse"
+    if compact == "mse" or "mean square" in s:
+        return "mse"
+    if "fid" in s:
+        return "fid"
     if "loss" in s:
         return "loss"
     if "error" in s or "err" in s:
         return "error"
+    if "latency" in s:
+        return "latency"
+    if s in {"time", "runtime", "wall time"}:
+        return "time"
     return ""
 
 
-def _lookup_observed_metric(*, dataset: str, metric: str, alignment: dict[str, Any]) -> float | None:
+def _alignment_comparison_rows(alignment: dict[str, Any]) -> list[dict[str, Any]]:
+    if not isinstance(alignment, dict):
+        return []
+
+    rows = alignment.get("comparisons")
+    if isinstance(rows, list):
+        return [r for r in rows if isinstance(r, dict)]
+
+    out: list[dict[str, Any]] = []
     matches = alignment.get("matches") if isinstance(alignment.get("matches"), list) else []
+    for match in matches:
+        if not isinstance(match, dict):
+            continue
+        nested = match.get("comparisons")
+        if isinstance(nested, list):
+            out.extend([r for r in nested if isinstance(r, dict)])
+            continue
+        expected = match.get("expected") if isinstance(match.get("expected"), dict) else {}
+        observed = match.get("observed") if isinstance(match.get("observed"), dict) else {}
+        delta = match.get("delta") if isinstance(match.get("delta"), dict) else {}
+        within = match.get("within_tolerance") if isinstance(match.get("within_tolerance"), dict) else {}
+        for metric, paper_value in expected.items():
+            key = str(metric or "")
+            if key not in observed:
+                continue
+            try:
+                paper_f = float(paper_value)
+                obs_f = float(observed.get(key))
+            except Exception:
+                continue
+            out.append(
+                {
+                    "paper_key": f"{match.get('dataset') or ''} {match.get('paper_row_label') or ''} {key}".strip(),
+                    "observed_key": f"{match.get('run_metrics_file') or ''} {key}".strip(),
+                    "metric": key,
+                    "dataset": str(match.get("dataset") or ""),
+                    "paper_value": paper_f,
+                    "observed_value": obs_f,
+                    "delta": delta.get(key, obs_f - paper_f),
+                    "passed": bool(within.get(key, match.get("passed"))),
+                    "within_tolerance": bool(within.get(key, match.get("passed"))),
+                    "run_metrics_file": str(match.get("run_metrics_file") or ""),
+                    "paper_table_id": str(match.get("paper_table_id") or ""),
+                    "paper_row_label": str(match.get("paper_row_label") or ""),
+                }
+            )
+    return out
+
+
+def _float_or_none(value: Any) -> float | None:
+    try:
+        return float(value)
+    except Exception:
+        return None
+
+
+def _normalized_metric_pair(metric: str, paper_value: float, observed_value: float) -> tuple[float, float]:
+    metric_key = _norm_metric_key(metric)
+    if metric_key == "mr":
+        return paper_value, observed_value
+    if paper_value > 1.0 and observed_value <= 1.0:
+        return paper_value / 100.0, observed_value
+    if observed_value > 1.0 and paper_value <= 1.0:
+        return paper_value, observed_value / 100.0
+    return paper_value, observed_value
+
+
+def _comparison_context_score(row: dict[str, Any], context: str) -> int:
+    norm_context = re.sub(r"[^a-z0-9]+", "", str(context or "").lower())
+    if not norm_context:
+        return 0
+    score = 0
+    for field in ("paper_row_label", "paper_key", "observed_key", "paper_scoring_function"):
+        raw = str(row.get(field) or "")
+        for token in re.findall(r"[A-Za-z][A-Za-z0-9_\-]{2,}", raw):
+            compact = re.sub(r"[^a-z0-9]+", "", token.lower())
+            if compact and compact in norm_context:
+                score += 1
+    return score
+
+
+def _lookup_alignment_metric_comparison(
+    *,
+    dataset: str,
+    metric: str,
+    alignment: dict[str, Any],
+    context: str = "",
+) -> tuple[dict[str, Any], float, float] | None:
     ds = str(dataset or "").strip().lower().replace(" ", "")
     k = _norm_metric_key(metric)
     if not k:
         return None
+    candidates: list[tuple[int, dict[str, Any], float, float]] = []
+    for row in _alignment_comparison_rows(alignment):
+        rds = str(row.get("dataset") or "").strip().lower().replace(" ", "")
+        if ds and rds and ds not in rds and rds not in ds:
+            continue
+        rk = _norm_metric_key(str(row.get("metric") or ""))
+        if rk != k:
+            continue
+        paper = _float_or_none(row.get("paper_value"))
+        observed = _float_or_none(row.get("observed_value"))
+        if paper is None or observed is None:
+            continue
+        paper_norm, observed_norm = _normalized_metric_pair(metric, paper, observed)
+        candidates.append((_comparison_context_score(row, context), row, paper_norm, observed_norm))
+    if not candidates:
+        return None
+    candidates.sort(key=lambda item: item[0], reverse=True)
+    return candidates[0][1], candidates[0][2], candidates[0][3]
+
+
+def _lookup_alignment_metric_pair(
+    *,
+    dataset: str,
+    metric: str,
+    alignment: dict[str, Any],
+    context: str = "",
+) -> tuple[float, float] | None:
+    comparison = _lookup_alignment_metric_comparison(
+        dataset=dataset,
+        metric=metric,
+        alignment=alignment,
+        context=context,
+    )
+    if comparison is None:
+        return None
+    _row, paper, observed = comparison
+    return paper, observed
+
+
+def _comparison_bool(row: dict[str, Any]) -> bool | None:
+    for key in ("passed", "within_tolerance"):
+        value = row.get(key)
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, str):
+            lowered = value.strip().lower()
+            if lowered in {"true", "pass", "passed", "yes", "y", "1"}:
+                return True
+            if lowered in {"false", "fail", "failed", "no", "n", "0"}:
+                return False
+    return None
+
+
+def _performance_drop(metric: str, paper_value: float, observed_value: float) -> float:
+    if _metric_higher_is_better(metric):
+        return float(paper_value) - float(observed_value)
+    return float(observed_value) - float(paper_value)
+
+
+def _status_from_alignment_comparison(
+    row: dict[str, Any],
+    *,
+    metric: str,
+    partial_status: str,
+) -> tuple[str, str, float, float] | None:
+    paper_raw = _float_or_none(row.get("paper_value"))
+    observed_raw = _float_or_none(row.get("observed_value"))
+    if paper_raw is None or observed_raw is None:
+        return None
+
+    paper, observed = _normalized_metric_pair(metric, paper_raw, observed_raw)
+    tolerance = _float_or_none(row.get("tolerance"))
+    threshold = abs(float(tolerance)) if tolerance is not None else max(float(get_settings().eval_status_threshold), 0.0)
+    performance_drop = _performance_drop(metric, paper, observed)
+    delta = observed - paper
+    comparison_passed = _comparison_bool(row)
+
+    if performance_drop <= 0.0 or comparison_passed is True or performance_drop <= threshold:
+        status = "Supported"
+    elif performance_drop <= (2.0 * threshold):
+        status = partial_status
+    else:
+        status = "In conflict"
+
+    comparison_label = (
+        "alignment=PASS"
+        if comparison_passed is True
+        else "alignment=FAIL"
+        if comparison_passed is False
+        else "alignment=unknown"
+    )
+    note = (
+        f"Delta={abs(delta):.4f}, performance_drop={performance_drop:.4f}, "
+        f"tolerance={threshold:.4f}, {comparison_label}"
+    )
+    return status, note, paper, observed
+
+
+def _lookup_observed_metric(*, dataset: str, metric: str, alignment: dict[str, Any]) -> float | None:
+    pair = _lookup_alignment_metric_pair(dataset=dataset, metric=metric, alignment=alignment)
+    if pair is not None:
+        return pair[1]
+
+    ds = str(dataset or "").strip().lower().replace(" ", "")
+    k = _norm_metric_key(metric)
+    if not k:
+        return None
+    for row in _alignment_comparison_rows(alignment):
+        rds = str(row.get("dataset") or "").strip().lower().replace(" ", "")
+        if ds and rds and ds not in rds and rds not in ds:
+            continue
+        rk = _norm_metric_key(str(row.get("metric") or ""))
+        if rk != k:
+            continue
+        obs = row.get("observed_value")
+        if isinstance(obs, (int, float)):
+            return float(obs)
+        try:
+            return float(str(obs).strip())
+        except Exception:
+            return None
+    matches = alignment.get("matches") if isinstance(alignment.get("matches"), list) else []
     for m in matches:
         if not isinstance(m, dict):
             continue
@@ -1075,17 +1380,45 @@ def _row_eval_cell(
     paper_result: str,
     alignment: dict[str, Any],
     observed_override: float | None = None,
+    context: str = "",
 ) -> str:
     observed = observed_override
+    paper_from_alignment: float | None = None
+    comparison_row: dict[str, Any] | None = None
     if observed is None:
-        observed = _lookup_observed_metric(dataset=dataset, metric=metric, alignment=alignment)
+        comparison = _lookup_alignment_metric_comparison(
+            dataset=dataset,
+            metric=metric,
+            alignment=alignment,
+            context=context,
+        )
+        if comparison is not None:
+            comparison_row, paper_from_alignment, observed = comparison
+        else:
+            observed = _lookup_observed_metric(
+                dataset=dataset,
+                metric=metric,
+                alignment=alignment,
+            )
     if observed is None:
         return "Inconclusive"
-    paper_val = _metric_aware_value(paper_result, metric_hint=metric)
+    paper_val = paper_from_alignment
+    if paper_val is None:
+        paper_val = _metric_aware_value(paper_result, metric_hint=metric)
     if paper_val is None:
         return "Inconclusive"
 
     mk = _norm_metric_key(metric)
+    if comparison_row is not None:
+        comparison_status = _status_from_alignment_comparison(
+            comparison_row,
+            metric=metric,
+            partial_status="In conflict",
+        )
+        if comparison_status is not None:
+            status, _note, _paper, comparison_observed = comparison_status
+            return f"{status} ({_fmt_value(comparison_observed, metric_key=mk)})"
+
     # Normalize scale for percentage-style paper values.
     if mk != "mr":
         if paper_val > 1.0 and observed <= 1.0:
@@ -1126,20 +1459,14 @@ def _status_with_symbol(text: str) -> str:
     return raw
 
 
-def _looks_like_data_evidence(text: str) -> bool:
-    raw = str(text or "")
-    if re.search(
-        r"(?i)\b(mrr|mean rank|hits?@\d+|h@\d+|accuracy|acc|f1|bleu|rouge|map|auc|error rate|top-1|top-5)\b",
-        raw,
-    ):
-        return True
-    return bool(
-        re.search(r"(?i)\b(table|figure|experiment|result|dataset|benchmark|baseline|ablation)\b", raw)
-        and _first_float(raw) is not None
-    )
-
-
 def _normalize_claim_type_label(value: str) -> str:
+    """Normalize the agent-emitted Claim Type cell.
+
+    Returns one of {"Experimental", "Theoretical", "Methodological"} or "" when
+    the cell is empty or unrecognized. Callers fall back to "Methodological"
+    when this returns ""; the post-hoc claim audit (LLM-driven) re-evaluates
+    every claim regardless of the type label.
+    """
     raw = _strip_inline_formatting(value).strip().lower()
     if not raw:
         return ""
@@ -1152,27 +1479,9 @@ def _normalize_claim_type_label(value: str) -> str:
     return ""
 
 
-def _infer_claim_type_label(*, claim: str, evidence: str, location: str) -> str:
-    joined = f"{claim}\n{evidence}\n{location}"
-    if _looks_like_data_evidence(joined):
-        return "Experimental"
-    lowered = joined.lower()
-    if re.search(r"(?i)\b(theorem|proposition|lemma|corollary|proof|derivation|bound)\b", joined):
-        return "Theoretical"
-    if re.search(
-        r"(?i)\b(module|architecture|algorithm|design|mechanism|encoder|decoder|attention)\b", joined
-    ):
-        return "Methodological"
-    if "equation" in lowered or "objective" in lowered or "loss" in lowered:
-        return "Theoretical"
-    return "Methodological"
-
-
-def _resolve_claim_type_label(*, model_claim_type: str, claim: str, evidence: str, location: str) -> str:
-    normalized = _normalize_claim_type_label(model_claim_type)
-    if normalized:
-        return normalized
-    return _infer_claim_type_label(claim=claim, evidence=evidence, location=location)
+def _resolve_claim_type_label(model_claim_type: str) -> str:
+    """Trust the agent's Claim Type cell, defaulting to Methodological."""
+    return _normalize_claim_type_label(model_claim_type) or "Methodological"
 
 
 def _claims_status_legend_colored() -> str:
@@ -1202,9 +1511,13 @@ def _claim_dataset_metric_hint(
     dataset = ""
     metric = ""
     if isinstance(alignment, dict):
-        matches = alignment.get("matches") if isinstance(alignment.get("matches"), list) else []
         text_norm = re.sub(r"[^a-z0-9]+", "", s)
         candidates: list[str] = []
+        for item in _alignment_comparison_rows(alignment):
+            ds = str(item.get("dataset") or "").strip()
+            if ds and ds not in candidates:
+                candidates.append(ds)
+        matches = alignment.get("matches") if isinstance(alignment.get("matches"), list) else []
         for item in matches:
             if not isinstance(item, dict):
                 continue
@@ -1230,6 +1543,28 @@ def _claim_dataset_metric_hint(
         metric = "H@1"
     elif "acc" in s or "accuracy" in s:
         metric = "Accuracy"
+    elif re.search(r"\bf1\b|f1 score", s):
+        metric = "F1"
+    elif "precision" in s:
+        metric = "Precision"
+    elif "recall" in s:
+        metric = "Recall"
+    elif "auc" in s or "auroc" in s:
+        metric = "AUC"
+    elif "bleu" in s:
+        metric = "BLEU"
+    elif "rouge" in s:
+        metric = "ROUGE"
+    elif "loss" in s:
+        metric = "Loss"
+    elif "perplex" in s or "ppl" in s:
+        metric = "Perplexity"
+    elif "fid" in s:
+        metric = "FID"
+    elif "mae" in s:
+        metric = "MAE"
+    elif "rmse" in s:
+        metric = "RMSE"
     return dataset, metric
 
 
@@ -1260,137 +1595,61 @@ def _status_from_paper_observed(
     return ("In conflict", note)
 
 
-def _score_paper_evidence(*, claim: str, evidence: str, location: str, claim_type: str) -> tuple[int, list[str]]:
-    """Score how strongly the paper's own text supports a claim.
-
-    Returns (score, explanation_parts). Score >= 3 → strong, -1 < score < 3 → partial, <= -1 → conflict.
-    claim_type should be 'theoretical', 'methodological', or 'experimental'.
-    """
-    text = f"{claim}\n{evidence}\n{location}"
-    lower = text.lower()
-
-    has_location = bool(str(location or "").strip() and "not found in manuscript" not in lower)
-    has_missing_marker = bool(
-        re.search(r"(?i)\b(not found in manuscript|not provided|missing|unclear|unspecified)\b", text)
-    )
-    has_contradiction_marker = bool(
-        re.search(r"(?i)\b(contradict|inconsistent|does not hold|invalid|fails?)\b", text)
-    )
-
-    score = 0
-    parts: list[str] = []
-
-    if claim_type == "theoretical":
-        has_anchor = bool(
-            re.search(r"(?i)\b(theorem|proposition|lemma|corollary|proof|equation|derivation)\b", text)
-        )
-        has_signal = bool(
-            re.search(r"(?i)(\\[a-z]+|\bO\(|=|<=|>=|->|⇒|∇|argmin|argmax|loss|objective)", text)
-        )
-        if has_anchor:
-            score += 2
-            parts.append("The paper gives a formal anchor for the reasoning.")
-        else:
-            parts.append("The paper gives no clear theorem/proposition/proof anchor.")
-        if has_signal:
-            score += 1
-            parts.append("The evidence contains explicit mathematical derivation signals.")
-        else:
-            parts.append("The evidence lacks explicit derivation details.")
-    elif claim_type == "methodological":
-        has_design_anchor = bool(
-            re.search(
-                r"(?i)\b(module|architecture|algorithm|design|pipeline|encoder|decoder|attention|component)\b",
-                text,
-            )
-        )
-        has_impl_anchor = bool(
-            re.search(r"(?i)\b(section|table|figure|equation|appendix|implementation)\b", text)
-        )
-        if has_design_anchor:
-            score += 2
-            parts.append("The claim has concrete method-design anchors in the manuscript.")
-        else:
-            parts.append("The claim lacks explicit method-design anchors.")
-        if has_impl_anchor:
-            score += 1
-            parts.append("Supporting evidence references implementation-level manuscript artifacts.")
-        else:
-            parts.append("Supporting evidence lacks direct implementation-level anchors.")
-    else:  # experimental / no execution
-        has_data_anchor = bool(
-            re.search(
-                r"(?i)\b(table|figure|experiment|result|dataset|benchmark|baseline|ablation)\b", text
-            )
-        )
-        has_numeric = _first_float(text) is not None
-        if has_data_anchor:
-            score += 2
-            parts.append("The paper cites experimental tables or figures as evidence.")
-        else:
-            parts.append("The paper provides no direct experimental table or figure reference.")
-        if has_numeric:
-            score += 1
-            parts.append("Concrete numeric values are present in the evidence.")
-        else:
-            parts.append("No concrete numeric values found in the evidence.")
-
-    if has_location:
-        score += 1
-        parts.append(f"The cited location is {location.strip()}.")
-    else:
-        parts.append("No reliable manuscript location is provided.")
-    if has_missing_marker:
-        score -= 2
-        parts.append("The evidence indicates missing or incomplete support.")
-    if has_contradiction_marker:
-        score -= 2
-        parts.append("The evidence text suggests an unresolved inconsistency risk.")
-
-    return score, parts
-
-
-def _paper_status_from_score(score: int) -> str:
-    if score >= 3:
-        return "Supported"
-    if score <= -1:
-        return "In conflict"
-    return "Partially supported"
-
-
 def _build_experimental_claim_assessment(
     *,
     claim: str,
     evidence: str,
     location: str,
     alignment: dict[str, Any],
+    authored_assessment: str = "",
 ) -> tuple[str, str]:
+    """Build an assessment cell + status for an experimental claim.
+
+    When alignment data and parseable paper / observed values are both
+    available, we emit a deterministic numeric verdict via
+    ``_status_from_paper_observed``. Otherwise we emit a "Pending" status
+    and let the post-hoc LLM audit decide.
+    """
     joined = f"{claim} {evidence} {location}"
     dataset, metric = _claim_dataset_metric_hint(joined, alignment=alignment)
-    observed = (
-        _lookup_observed_metric(dataset=dataset, metric=metric, alignment=alignment)
-        if (dataset and metric)
-        else None
-    )
-    paper_val = _metric_aware_value(evidence, metric_hint=metric) or _metric_aware_value(
-        claim, metric_hint=metric
-    )
+    paper_val: float | None = None
+    observed: float | None = None
+    comparison_row: dict[str, Any] | None = None
+    if dataset and metric:
+        comparison = _lookup_alignment_metric_comparison(
+            dataset=dataset,
+            metric=metric,
+            alignment=alignment,
+            context=joined,
+        )
+        if comparison is not None:
+            comparison_row, paper_val, observed = comparison
+        else:
+            observed = _lookup_observed_metric(dataset=dataset, metric=metric, alignment=alignment)
+    if paper_val is None:
+        paper_val = _metric_aware_value(evidence, metric_hint=metric)
+    if paper_val is None:
+        paper_val = _metric_aware_value(claim, metric_hint=metric)
 
     has_execution = bool(alignment)
-
     if has_execution and paper_val is not None and observed is not None:
-        # Both paper value and reproduced value available — apply the 2×2 matrix.
-        exec_status, delta_note = _status_from_paper_observed(
-            paper_val=paper_val,
-            observed=observed,
-            metric=metric or "metric",
+        comparison_status = (
+            _status_from_alignment_comparison(
+                comparison_row,
+                metric=metric or "metric",
+                partial_status="Partially supported",
+            )
+            if comparison_row is not None
+            else None
         )
-        exec_passes = exec_status == "Supported"
-        paper_score, _ = _score_paper_evidence(
-            claim=claim, evidence=evidence, location=location, claim_type="experimental"
-        )
-        paper_strong = paper_score >= 3
-        paper_conflict = paper_score <= -1
+        if comparison_status is not None:
+            exec_status, delta_note, paper_val, observed = comparison_status
+        else:
+            exec_status, delta_note = _status_from_paper_observed(
+                paper_val=paper_val,
+                observed=observed,
+                metric=metric or "metric",
+            )
         norm_metric = _norm_metric_key(metric)
         base = (
             f"Claim mapped to {dataset} / {metric}. "
@@ -1398,46 +1657,24 @@ def _build_experimental_claim_assessment(
             f"Reproduced={_fmt_value(observed, metric_key=norm_metric)}. "
             f"{delta_note}."
         )
-        if paper_strong and exec_passes:
-            return base, "Supported"
-        if paper_strong and not exec_passes:
-            return base + " Paper evidence is strong but reproduction did not align.", "Partially supported"
-        if paper_conflict:
-            return base + " Paper evidence is internally inconsistent.", "In conflict"
-        # paper partial
-        if exec_passes:
-            return base + " Results reproduced but paper evidence is incomplete.", "Partially supported"
-        return base + " Incomplete paper evidence and reproduction did not align.", "In conflict"
+        return base, exec_status
 
-    # No execution data or values could not be extracted — fall back to paper-only scoring.
-    paper_score, parts = _score_paper_evidence(
-        claim=claim, evidence=evidence, location=location, claim_type="experimental"
-    )
-    return " ".join(parts), _paper_status_from_score(paper_score)
+    # No execution data or values could not be extracted; defer status to
+    # the post-hoc claim audit.
+    return "", "Pending"
 
 
-def _build_theoretical_claim_assessment(*, claim: str, evidence: str, location: str) -> tuple[str, str]:
-    score, parts = _score_paper_evidence(
-        claim=claim, evidence=evidence, location=location, claim_type="theoretical"
-    )
-    return " ".join(parts), _paper_status_from_score(score)
-
-
-def _build_methodological_claim_assessment(*, claim: str, evidence: str, location: str) -> tuple[str, str]:
-    score, parts = _score_paper_evidence(
-        claim=claim, evidence=evidence, location=location, claim_type="methodological"
-    )
-    return " ".join(parts), _paper_status_from_score(score)
-
-
-def _augment_claims_with_assessment_status(
+def augment_claims_with_assessment_status(
     markdown_text: str,
     *,
     summary: dict[str, Any],
     alignment: dict[str, Any],
 ) -> str:
     text = str(markdown_text or "")
-    sec = re.search(r"(?ims)^##\s+3\.\s+Claims\s*$\n(?P<body>.*?)(?=^##\s+|\Z)", text)
+    sec = re.search(
+        r"(?ims)^##\s+(?:\*\*)?3\.\s+Claims(?:\*\*)?\s*$\n(?P<body>.*?)(?=^##\s+|\Z)",
+        text,
+    )
     if not sec:
         return text
     body = sec.group("body")
@@ -1450,10 +1687,6 @@ def _augment_claims_with_assessment_status(
             break
     if header_idx < 0:
         return text
-
-    def _cell_safe(v: str) -> str:
-        # Prevent markdown table column break due to literal pipe in generated text.
-        return str(v or "").replace("|", "/").strip()
 
     legend = _claims_status_legend_colored()
     if legend not in body:
@@ -1475,7 +1708,6 @@ def _augment_claims_with_assessment_status(
                 return idx
         return -1
 
-    claim_type_idx = _header_index("claim type", exact="claim type")
     claim_idx = _header_index("claim", exact="claim")
     evidence_idx = _header_index("evidence")
     assessment_idx = _header_index("assessment")
@@ -1485,6 +1717,37 @@ def _augment_claims_with_assessment_status(
         if idx < 0 or idx >= len(cells):
             return default
         return str(cells[idx] or "").strip()
+
+    def _cell_safe(value: str) -> str:
+        # Generated evidence sometimes contains math/set notation such as
+        # ``B | R | d``. Raw pipes split markdown tables, so preserve the
+        # visible character with an HTML entity inside cells.
+        return str(value or "").replace("|", "&#124;").strip()
+
+    def _normalized_claim_cells(cells: list[str]) -> list[str]:
+        expected = len(header_cells)
+        if len(cells) <= expected:
+            return cells + [""] * max(0, expected - len(cells))
+
+        header_signature = [
+            _strip_inline_formatting(cell).strip().lower() for cell in header_cells
+        ]
+        if header_signature == ["claim", "evidence", "assessment", "location"]:
+            return [
+                cells[0],
+                " | ".join(cells[1:-2]),
+                cells[-2],
+                cells[-1],
+            ]
+        if header_signature == ["claim", "evidence", "assessment", "status", "location"]:
+            return [
+                cells[0],
+                " | ".join(cells[1:-3]),
+                cells[-3],
+                cells[-2],
+                cells[-1],
+            ]
+        return [*cells[: expected - 1], " | ".join(cells[expected - 1 :])]
 
     def _is_meaningful_assessment(value: str) -> bool:
         plain = _strip_inline_formatting(value).strip().lower()
@@ -1519,7 +1782,7 @@ def _augment_claims_with_assessment_status(
         s = ln.strip()
         if not (s.startswith("|") and s.endswith("|")):
             continue
-        cells = [c.strip() for c in s.strip("|").split("|")]
+        cells = _normalized_claim_cells([c.strip() for c in s.strip("|").split("|")])
         if len(cells) < 2:
             continue
         claim = _cell_value(cells, claim_idx, _cell_value(cells, 0, "Not found in manuscript"))
@@ -1527,40 +1790,25 @@ def _augment_claims_with_assessment_status(
         default_location = _cell_value(cells, len(cells) - 1, "Not found in manuscript")
         location = _cell_value(cells, location_idx, default_location)
         authored_assessment = _cell_value(cells, assessment_idx, "")
-        model_claim_type = _cell_value(cells, claim_type_idx, "")
-        resolved_claim_type = _resolve_claim_type_label(
-            model_claim_type=model_claim_type,
+        # Try execution-alignment path for all claims; the helper naturally
+        # returns ("", "Pending") when no dataset/metric match is found,
+        # so non-experimental claims fall through to the authored-assessment
+        # fallback below. This avoids depending on a "Claim Type" column that
+        # the prompt no longer instructs the agent to emit.
+        assess, stat = _build_experimental_claim_assessment(
             claim=claim,
             evidence=evidence,
             location=location,
+            alignment=alignment,
+            authored_assessment=authored_assessment,
         )
-        if resolved_claim_type == "Experimental":
-            _generated_assess, stat = _build_experimental_claim_assessment(
-                claim=claim,
-                evidence=evidence,
-                location=location,
-                alignment=alignment,
+        if not assess:
+            assess = (
+                authored_assessment
+                if _is_meaningful_assessment(authored_assessment)
+                else "Not found in manuscript"
             )
-        elif resolved_claim_type == "Theoretical":
-            _generated_assess, stat = _build_theoretical_claim_assessment(
-                claim=claim,
-                evidence=evidence,
-                location=location,
-            )
-        else:
-            _generated_assess, stat = _build_methodological_claim_assessment(
-                claim=claim,
-                evidence=evidence,
-                location=location,
-            )
-        # The final assessment is system-derived and type-aware:
-        # experimental claims compare with aligned execution evidence,
-        # while theoretical/methodological claims are judged from manuscript anchors.
-        assess = _generated_assess or (
-            authored_assessment
-            if _is_meaningful_assessment(authored_assessment)
-            else "Not found in manuscript"
-        )
+            stat = "Pending"
         claim = _cell_safe(claim)
         evidence = _cell_safe(evidence)
         assess = _cell_safe(assess)
@@ -1584,7 +1832,10 @@ def _augment_experiment_with_eval_status(
     alignment: dict[str, Any],
 ) -> str:
     text = str(markdown_text or "")
-    sec = re.search(r"(?ims)^##\s+5\.\s+Experiment\s*$\n(?P<body>.*?)(?=^##\s+|\Z)", text)
+    sec = re.search(
+        r"(?ims)^##\s+(?:\*\*)?5\.\s+Experiment(?:\*\*)?\s*$\n(?P<body>.*?)(?=^##\s+|\Z)",
+        text,
+    )
     if not sec:
         return text
     body = sec.group("body")
@@ -1603,6 +1854,12 @@ def _augment_experiment_with_eval_status(
         r"(?im)^(\|\s*Task\s*\|[^\n]*Difference\s*\(Δ\)\s*\|)\n(\|[-:\| ]+\|)\n(?P<rows>(?:\|[^\n]*\|\n?)*)",
         body,
     )
+    if not main_match:
+        main_match = re.search(
+            r"(?im)^(\|\s*(?:\*\*)?Task(?:\*\*)?\s*\|[^\n]*Difference\s*\([^)]*\)(?:\*\*)?\s*\|)\n"
+            r"(\|[-:\| ]+\|)\n(?P<rows>(?:\|[^\n]*\|\n?)*)",
+            body,
+        )
     if main_match:
         header = "| **Task** | **Dataset** | **Metric** | **Best Baseline** | **Paper Result** | **Difference (Δ)** | **Evaluation Status** |"
         sep = "|---|---|---|---|---|---|---|"
@@ -1623,6 +1880,7 @@ def _augment_experiment_with_eval_status(
                 metric=metric,
                 paper_result=paper_result,
                 alignment=alignment,
+                context=" ".join(cells[:6]),
             )
             new_rows.append("| " + " | ".join([*cells[:6], _status_with_symbol(cell)]) + " |")
         rebuilt = "\n".join([header, sep, *new_rows]) + "\n"
@@ -1644,6 +1902,12 @@ def _augment_experiment_with_eval_status(
         r"(?im)^(\|\s*Ablation Dimension\s*\|[^\n]*Difference\s*\(Δ\)\s*\|)\n(\|[-:\| ]+\|)\n(?P<rows>(?:\|[^\n]*\|\n?)*)",
         body,
     )
+    if not abl_match:
+        abl_match = re.search(
+            r"(?im)^(\|\s*(?:\*\*)?Ablation Dimension(?:\*\*)?\s*\|[^\n]*Difference\s*\([^)]*\)(?:\*\*)?\s*\|)\n"
+            r"(\|[-:\| ]+\|)\n(?P<rows>(?:\|[^\n]*\|\n?)*)",
+            body,
+        )
     if abl_match:
         header = "| **Ablation Dimension** | **Configuration** | **Full Model** | **Paper Result** | **Difference (Δ)** | **Evaluation Status** |"
         sep = "|---|---|---|---|---|---|"
@@ -1674,6 +1938,7 @@ def _augment_experiment_with_eval_status(
                 metric=metric_hint,
                 paper_result=paper_result,
                 alignment=alignment,
+                context=" ".join(cells),
             )
             new_rows.append("| " + " | ".join([*cells[:5], _status_with_symbol(cell)]) + " |")
         rebuilt = "\n".join([header, sep, *new_rows]) + "\n"
@@ -1683,11 +1948,29 @@ def _augment_experiment_with_eval_status(
     return text[: sec.start("body")] + new_body + text[sec.end("body") :]
 
 
+def augment_experiment_with_eval_status(
+    markdown_text: str,
+    *,
+    summary: dict[str, Any],
+    alignment: dict[str, Any],
+) -> str:
+    """Public wrapper used by the report stage after execution finishes."""
+
+    return _augment_experiment_with_eval_status(
+        markdown_text,
+        summary=summary,
+        alignment=alignment,
+    )
+
+
 def _compress_experiment_note(markdown_text: str) -> str:
     text = str(markdown_text or "")
     if not text.strip():
         return text
-    sec = re.search(r"(?ims)^##\s+5\.\s+Experiment\s*$\n(?P<body>.*?)(?=^##\s+|\Z)", text)
+    sec = re.search(
+        r"(?ims)^##\s+(?:\*\*)?5\.\s+Experiment(?:\*\*)?\s*$\n(?P<body>.*?)(?=^##\s+|\Z)",
+        text,
+    )
     if not sec:
         return text
     body = sec.group("body")
@@ -1830,11 +2113,13 @@ def _best_baseline_numeric_model(
 
 
 def _style_status_value(value: str) -> str:
+    # Pending means the claim status is unresolved; leave it unstyled so the
+    # downstream audit can replace it with the resolved verdict.
+    if _strip_inline_formatting(value).strip().lower() == "pending":
+        return value
     normalized = _as_status_label(value)
-    if normalized == "Supported":
+    if normalized in ("Supported", "paper-supported"):
         return '<span style="color: green;">✓ Supported</span>'
-    if normalized == "paper-supported":
-        return '<span style="color: #1E5EFF;">☑ Paper-supported</span>'
     if normalized == "Partially supported":
         return '<span style="color: #E6B800;">⚠ Partially supported</span>'
     if normalized == "In conflict":
@@ -1926,7 +2211,6 @@ def _normalize_experiment_tables_in_block(block: str) -> tuple[str, list[str]]:
         diff_idx = next((idx for idx, h in enumerate(lower_headers) if "difference" in h), -1)
         metric_idx = next((idx for idx, h in enumerate(lower_headers) if h == "metric"), -1)
         best_baseline_idx = next((idx for idx, h in enumerate(lower_headers) if "best baseline" in h), -1)
-        full_model_idx = next((idx for idx, h in enumerate(lower_headers) if h == "full model"), -1)
         paper_result_idx = next((idx for idx, h in enumerate(lower_headers) if h == "paper result"), -1)
         status_idx = next((idx for idx, h in enumerate(lower_headers) if "status" in h), -1)
         table_metric_hint = _infer_metric_hint_from_table(headers=headers, rows=rows, block_text=block)
@@ -1970,7 +2254,6 @@ def _normalize_experiment_tables_in_block(block: str) -> tuple[str, list[str]]:
                     )
                 row[diff_idx] = colored_diff
             row[status_idx] = _as_status_label(raw_status_cell)
-            # Experiment section is restricted to 3 statuses only.
             if row[status_idx] == "paper-supported":
                 row[status_idx] = "Inconclusive"
             row_statuses.append(_as_status_label(row[status_idx]))
@@ -2371,9 +2654,7 @@ def _extract_paper_method_hint(markdown_text: str) -> str:
         if low in banned:
             return False
         # Ignore retrieval-id like R1/R2.
-        if re.fullmatch(r"R\d+", t, flags=re.IGNORECASE):
-            return False
-        return True
+        return not re.fullmatch(r"R\d+", t, flags=re.IGNORECASE)
 
     # Strong cue patterns from manuscript/report body.
     cue_patterns = (
@@ -2864,16 +3145,10 @@ def _render_report_pdf(
     final_report_markdown = _stabilize_experiment_section(final_report_markdown)
     final_report_markdown = _ensure_experiment_contract(final_report_markdown)
     final_report_markdown = _compress_experiment_note(final_report_markdown)
-    # The execution stage now runs as a separate sub-stage after the agent
-    # runtime job (``stages/fact_generation/execution``) and emits its own
-    # outputs there. The two augment helpers below still produce useful work
-    # against empty payloads — they normalise the Claims / Experiment table
-    # columns and insert their colour legends — but they cannot mark
-    # execution-aligned status until/unless the execution-stage outputs are
-    # wired back into this in-process render pass.
+    # The execution stage runs separately; this first augmentation pass uses
     execution_summary: dict[str, Any] = {}
     execution_alignment: dict[str, Any] = {}
-    final_report_markdown = _augment_claims_with_assessment_status(
+    final_report_markdown = augment_claims_with_assessment_status(
         final_report_markdown,
         summary=execution_summary,
         alignment=execution_alignment,
@@ -3124,7 +3399,15 @@ async def run_job_async(job_id: str) -> None:
     set_status(job_id, JobStatus.pdf_parsing, "Polling MinerU parse result and assembling markdown...")
 
     mineru = _build_mineru_adapter()
-    parse_result = await mineru.parse_pdf(pdf_path=source_pdf, data_id=job_id)
+    parse_t0 = time.monotonic()
+    try:
+        parse_result = await mineru.parse_pdf(pdf_path=source_pdf, data_id=job_id)
+    except Exception:
+        run_stats.record_duration("parse", time.monotonic() - parse_t0)
+        run_stats.record_module_status("parse", "failed")
+        raise
+    run_stats.record_duration("parse", time.monotonic() - parse_t0)
+    run_stats.record_module_status("parse", "ok")
     mineru_image_map = _persist_mineru_image_files(
         job_dir=source_pdf.parent,
         image_files=parse_result.image_files,
@@ -3163,6 +3446,7 @@ async def run_job_async(job_id: str) -> None:
     page_index = build_page_index(parse_result.markdown, parse_result.content_list)
 
     set_status(job_id, JobStatus.agent_running, "Running review agent with tool loop...")
+    analysis_started_at = time.monotonic()
 
     paper_adapter = _build_paper_adapter()
     paper_search_runtime_state = (await paper_adapter.get_search_runtime_state()).to_dict()
@@ -3184,10 +3468,17 @@ async def run_job_async(job_id: str) -> None:
 
     mutate_job_state(job_id, apply_paper_search_state)
 
+    # Resolve the publication-date cutoff (set by the parse-stage subprocess
+    # via metadata["paper_cutoff_date"]). Both server-side year filtering and
+    # the client-side double-check key off this value.
+    cutoff_date = _resolve_runtime_cutoff(job)
+
     # Objective retrieval context for section-2 niche positioning matrix.
     semantic_adapter = _build_semantic_scholar_adapter()
     title_hint = _extract_title_hint(parse_result.markdown, job.source_pdf_name)
-    semantic_payload = await semantic_adapter.search_related(query=title_hint)
+    semantic_payload = await semantic_adapter.search_related(
+        query=title_hint, cutoff_date=cutoff_date
+    )
     semantic_context = _format_semantic_scholar_context(semantic_payload)
     write_json_atomic(
         Path(artifacts["source_pdf"]).parent / "semantic_scholar_candidates.json", semantic_payload
@@ -3201,6 +3492,7 @@ async def run_job_async(job_id: str) -> None:
         use_meta_review=False,
         paper_search_runtime_state=paper_search_runtime_state,
         semantic_scholar_context=semantic_context,
+        paper_cutoff_date=cutoff_date.to_metadata() if cutoff_date else None,
     )
     write_text_atomic(Path(artifacts["prompt_snapshot"]), prompt)
 
@@ -3217,6 +3509,10 @@ async def run_job_async(job_id: str) -> None:
         paper_adapter=paper_adapter,
         paper_search_runtime_state=paper_search_runtime_state,
         settings=settings,
+        cutoff_date=cutoff_date,
+        analysis_started_at=analysis_started_at,
+        agent_provider=str(settings.model_provider or ""),
+        agent_model=_resolved_agent_model(),
     )
 
     tools = build_review_tools(runtime)
@@ -3240,8 +3536,13 @@ async def run_job_async(job_id: str) -> None:
             reason="hard_cap_2",
         )
     run_config = _build_run_config()
-    # Use the exact same full review prompt as user input (parity requirement).
-    next_input: str | list[Any] = prompt
+    # The full extraction contract already lives in the agent instructions.
+    # Keep the initial user input short so the first model request does not
+    # pay for the same paper-sized prompt twice.
+    next_input: str | list[Any] = (
+        "Begin the extraction for the bound paper. Follow the instructions and "
+        "submit the required report sections through review_final_markdown_write."
+    )
     usage_totals = {
         "requests": 0,
         "input_tokens": 0,
@@ -3251,13 +3552,14 @@ async def run_job_async(job_id: str) -> None:
 
     def _consume_run_result(run_result: Any, *, output_tag: str) -> str:
         usage = run_result.context_wrapper.usage
+        runtime.record_agent_usage_delta(usage)
         usage_totals["requests"] += int(getattr(usage, "requests", 0) or 0)
         usage_totals["input_tokens"] += int(getattr(usage, "input_tokens", 0) or 0)
         usage_totals["output_tokens"] += int(getattr(usage, "output_tokens", 0) or 0)
         usage_totals["total_tokens"] += int(getattr(usage, "total_tokens", 0) or 0)
         usage_payload = SimpleNamespace(**usage_totals)
         _sync_token_usage(job_id, usage_payload)
-        runtime.sync_state_usage(usage_payload)
+        runtime.sync_state_usage(usage_payload, record_stats=False)
 
         final_output_text = str(run_result.final_output or "").strip()
         if final_output_text:
@@ -3484,6 +3786,10 @@ async def run_job_async(job_id: str) -> None:
             "Final report gate was not satisfied."
         )
 
+    if not runtime.report_generation_started:
+        runtime.mark_report_generation_started()
+    report_generation_started_at = runtime.report_generation_started_at or time.monotonic()
+
     set_status(job_id, JobStatus.pdf_exporting, "Rendering final markdown report into PDF...")
 
     final_md_path = Path(artifacts["final_markdown"])
@@ -3562,6 +3868,11 @@ async def run_job_async(job_id: str) -> None:
 
     mutate_job_state(job_id, apply_completed)
     append_event(job_id, "completed", report_pdf_path=str(report_pdf_path))
+    run_stats.record_duration(
+        "report_generation",
+        time.monotonic() - float(report_generation_started_at),
+    )
+    run_stats.record_module_status("report_generation", "ok")
 
 
 def run_job(job_id: str) -> None:

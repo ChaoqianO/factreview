@@ -1,9 +1,14 @@
 from __future__ import annotations
 
 import os
+import time
+from collections.abc import Callable
+from pathlib import Path
 from typing import Any
 
 from langgraph.graph import END, START, StateGraph
+
+from util.recorder import append_event
 
 from .nodes.finalize import finalize_node
 from .nodes.fix import fix_node
@@ -15,6 +20,44 @@ from .nodes.run import run_node
 State = dict[str, Any]
 
 
+def _truthy(value: Any) -> bool:
+    return str(value or "").strip().lower() in {"1", "true", "yes", "y", "on"}
+
+
+def _paper_budget_enabled(cfg: dict[str, Any]) -> bool:
+    return _truthy(cfg.get("enable_paper_budget") or os.environ.get("EXECUTION_ENABLE_PAPER_BUDGET"))
+
+
+def _record_node_timing(state: State, node: str, duration_sec: float) -> None:
+    duration = max(0.0, float(duration_sec or 0.0))
+    timings = state.setdefault("node_timings", {})
+    if isinstance(timings, dict):
+        rows = timings.setdefault(node, [])
+        if isinstance(rows, list):
+            rows.append({"duration_sec": round(duration, 3), "attempt": int(state.get("attempt") or 0)})
+    run_info = state.get("run") if isinstance(state.get("run"), dict) else {}
+    run_dir = str(run_info.get("dir") or "").strip()
+    if run_dir:
+        try:
+            append_event(
+                Path(run_dir),
+                "node_timing",
+                {"node": node, "duration_sec": round(duration, 3), "attempt": int(state.get("attempt") or 0)},
+            )
+        except Exception:
+            pass
+
+
+def _timed_node(node: str, fn: Callable[[State], State]) -> Callable[[State], State]:
+    def wrapped(state: State) -> State:
+        start = time.monotonic()
+        out = fn(state)
+        _record_node_timing(out, node, time.monotonic() - start)
+        return out
+
+    return wrapped
+
+
 def _is_inconclusive_no_baseline(state: State) -> bool:
     results = (state.get("judge", {}) or {}).get("results") or []
     if not isinstance(results, list):
@@ -24,11 +67,19 @@ def _is_inconclusive_no_baseline(state: State) -> bool:
 
 def _compute_exit_status(state: State) -> str:
     """
-    Three-value exit status for clear reviewer semantics:
+    Exit-status semantics for reviewer consumption:
     - "success"      : passed baseline checks deterministically  (exit code 0)
     - "inconclusive" : run succeeded but no/insufficient baseline (exit code 2)
+    - "partial"      : wall-clock budget exhausted before all tasks/checks ran
+    - "skipped"      : no executable repository/source was available
     - "failed"       : execution failed or checks failed          (exit code 1)
     """
+    if state.get("status") == "skipped":
+        return "skipped"
+    if state.get("status") == "partial":
+        return "partial"
+    if state.get("status") == "inconclusive":
+        return "inconclusive"
     if state.get("status") == "failed":
         return "failed"
     judge = state.get("judge", {}) or {}
@@ -39,7 +90,40 @@ def _compute_exit_status(state: State) -> str:
     return "failed"
 
 
+def is_budget_exhausted(state: State) -> bool:
+    """Optional soft wall-clock budget check shared by run/judge nodes.
+
+    The paper-level budget is disabled by default because real paper
+    reproduction often spends a long time in source download, task planning,
+    Docker build, or training before useful metrics appear. Set
+    ``EXECUTION_ENABLE_PAPER_BUDGET=1`` or ``cfg.enable_paper_budget`` to use
+    this as an explicit smoke/CI guard.
+    """
+    cfg = state.get("config") or {}
+    budget = int(cfg.get("paper_budget_sec") or 0)
+    if budget <= 0 or not _paper_budget_enabled(cfg):
+        return False
+    t0 = float(cfg.get("t_start_monotonic") or 0.0)
+    if t0 <= 0.0:
+        return False
+    elapsed = time.monotonic() - t0
+    if elapsed < budget:
+        return False
+    if not cfg.get("_budget_exhausted_logged"):
+        cfg["_budget_exhausted_logged"] = True
+        state["config"] = cfg
+        state.setdefault("history", []).append(
+            {
+                "kind": "budget_exhausted",
+                "data": {"elapsed_sec": round(elapsed, 2), "budget_sec": budget},
+            }
+        )
+    return True
+
+
 def _route_after_prepare(state: State) -> str:
+    if state.get("status") == "skipped":
+        return "finalize"
     if state.get("status") == "failed":
         # Some prepare failures are recoverable via fix loop.
         last_err = ""
@@ -58,6 +142,7 @@ def _route_after_prepare(state: State) -> str:
         recoverable = {
             "docker_env_ensure_failed",
             "docker_image_build_failed",
+            "docker_paper_image_build_failed",
         }
         if last_err in recoverable:
             return "fix"
@@ -72,24 +157,54 @@ def _route_after_plan(state: State) -> str:
 
 
 def _route_after_run(state: State) -> str:
+    if state.get("status") == "partial":
+        return "finalize"
+    if state.get("status") == "inconclusive":
+        return "finalize"
     if state.get("status") == "failed":
         return "fix"
     return "judge"
 
 
 def _route_after_judge(state: State) -> str:
+    if state.get("status") == "partial":
+        return "finalize"
     if state.get("judge", {}).get("passed") is True:
         return "finalize"
     # If judge is inconclusive, do not enter fix loop.
     results = (state.get("judge", {}) or {}).get("results") or []
-    if isinstance(results, list) and any(
-        isinstance(r, dict) and r.get("type") == "inconclusive_no_baseline" for r in results
-    ):
-        return "finalize"
+    if isinstance(results, list):
+        has_no_baseline = any(
+            isinstance(r, dict) and r.get("type") == "inconclusive_no_baseline" for r in results
+        )
+        alignment_metric_mismatch = any(
+            isinstance(r, dict)
+            and r.get("type") in {"paper_metric_alignment", "paper_table_alignment"}
+            and int(r.get("matched") or 0) > 0
+            and int(r.get("failed_n") or 0) > 0
+            for r in results
+        )
+        alignment_unmatched = any(
+            isinstance(r, dict)
+            and r.get("type") in {"paper_metric_alignment", "paper_table_alignment"}
+            and (
+                int(r.get("extracted_targets") or 0) > 0
+                and int(r.get("matched") or 0) == 0
+            )
+            for r in results
+        )
+        # A matched metric that is outside tolerance is a reviewer-facing
+        # deviation, not an execution error to "repair" by changing the code.
+        if alignment_metric_mismatch:
+            return "finalize"
+        if has_no_baseline and not alignment_unmatched:
+            return "finalize"
     return "fix"
 
 
 def _route_after_fix(state: State) -> str:
+    if state.get("status") == "partial":
+        return "finalize"
     if state.get("status") == "failed":
         return "finalize"
     # try again
@@ -114,6 +229,10 @@ class ExecutionOrchestrator:
         enable_bibtex: bool = False,
         paper_extracted_dir: str = "",
         run_dir: str = "",
+        paper_budget_sec: int = 0,
+        docker_enabled: bool | None = None,
+        docker_build_timeout_sec: int = 0,
+        paper_repo_url: str = "",
     ) -> None:
         self.run_root = run_root
         self.max_attempts = max_attempts
@@ -130,17 +249,21 @@ class ExecutionOrchestrator:
         self.enable_bibtex = enable_bibtex
         self.paper_extracted_dir = paper_extracted_dir
         self.run_dir = run_dir
+        self.paper_budget_sec = int(paper_budget_sec or 0)
+        self.docker_enabled = docker_enabled
+        self.docker_build_timeout_sec = int(docker_build_timeout_sec or 0)
+        self.paper_repo_url = paper_repo_url
 
         self._workflow = self._build_workflow()
         self._app = self._workflow.compile()
 
     def _build_workflow(self) -> StateGraph:
         g = StateGraph(State)
-        g.add_node("prepare", prepare_node)
-        g.add_node("plan", plan_node)
-        g.add_node("run", run_node)
-        g.add_node("judge", judge_node)
-        g.add_node("fix", fix_node)
+        g.add_node("prepare", _timed_node("prepare", prepare_node))
+        g.add_node("plan", _timed_node("plan", plan_node))
+        g.add_node("run", _timed_node("run", run_node))
+        g.add_node("judge", _timed_node("judge", judge_node))
+        g.add_node("fix", _timed_node("fix", fix_node))
         g.add_node("finalize", finalize_node)
 
         g.add_edge(START, "prepare")
@@ -161,7 +284,9 @@ class ExecutionOrchestrator:
         baseline_path: str,
         local_source_path: str = "",
         no_pdf_extract: bool = False,
+        paper_repo_url: str = "",
     ) -> dict[str, Any]:
+        paper_repo_url = str(paper_repo_url or self.paper_repo_url or "").strip()
         initial: State = {
             "status": "running",
             "attempt": 0,
@@ -170,6 +295,7 @@ class ExecutionOrchestrator:
                 "paper_root": paper_root,
                 "paper_pdf": paper_pdf,
                 "paper_key": paper_key,
+                "paper_repo_url": paper_repo_url,
                 "tasks_path": tasks_path,
                 "baseline_path": baseline_path,
                 "local_source_path": local_source_path,
@@ -188,9 +314,14 @@ class ExecutionOrchestrator:
                 "enable_bibtex": self.enable_bibtex,
                 "paper_extracted_dir": self.paper_extracted_dir,
                 "run_dir": self.run_dir,
+                "paper_budget_sec": self.paper_budget_sec,
+                "t_start_monotonic": time.monotonic(),
             },
             "history": [],
         }
+        if self.docker_enabled is not None:
+            initial["config"]["docker_enabled"] = bool(self.docker_enabled)
+        initial["config"]["docker_build_timeout_sec"] = self.docker_build_timeout_sec
         final_state: State = await self._app.ainvoke(
             initial, config={"configurable": {"thread_id": "execution"}}
         )

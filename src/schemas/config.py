@@ -10,13 +10,9 @@ from __future__ import annotations
 from pydantic import BaseModel, Field
 
 
-class ClaimExtractCfg(BaseModel):
-    mode: str = "auto"  # auto | llm | heuristic
-    decompose_broad_claims: bool = True
-
-
 class LLMCfg(BaseModel):
     provider: str = "openai-codex"
     model: str = ""
     base_url: str = ""
+    max_tokens: int | None = None
     route: dict[str, str] = Field(default_factory=dict)

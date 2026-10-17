@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import json
+import time
 from pathlib import Path
 from typing import Any
 
 from util.fs import ensure_dir, write_text
 from util.meta import index_artifacts
 from util.recorder import append_event, write_issues_md
+
+from ..tools.evidence_summary import build_execution_evidence_summary
 
 
 def _load_json_if_exists(path: Path) -> dict[str, Any]:
@@ -17,6 +20,20 @@ def _load_json_if_exists(path: Path) -> dict[str, Any]:
     except Exception:
         pass
     return {}
+
+
+def _record_finalize_timing(state: dict[str, Any], run_dir: Path, duration_sec: float) -> None:
+    duration = round(max(0.0, float(duration_sec or 0.0)), 3)
+    timings = state.setdefault("node_timings", {})
+    if isinstance(timings, dict):
+        rows = timings.setdefault("finalize", [])
+        if isinstance(rows, list):
+            rows.append({"duration_sec": duration, "attempt": int(state.get("attempt") or 0)})
+    append_event(
+        run_dir,
+        "node_timing",
+        {"node": "finalize", "duration_sec": duration, "attempt": int(state.get("attempt") or 0)},
+    )
 
 
 def _read_text_if_exists(path: Path) -> str:
@@ -125,7 +142,19 @@ def _judge_highlights(
         isinstance(r, dict) and r.get("type") == "inconclusive_no_baseline" for r in results
     )
 
-    if not run_ok:
+    if bool(run_result.get("skipped")):
+        label = "skipped"
+        msg = str(run_result.get("message") or run_result.get("reason") or "").strip()
+        if msg:
+            notes.append(msg)
+    elif bool(run_result.get("inconclusive")) or run_result.get("semantic_failure") == "semantic_no_metrics":
+        label = "inconclusive"
+        failed_task = run_result.get("failed_task") or ""
+        if failed_task:
+            notes.append(
+                f"Task `{failed_task}` completed without machine-readable metrics needed for paper-claim comparison."
+            )
+    elif not run_ok:
         label = "execution_failed"
         failed_task = run_result.get("failed_task") or ""
         if failed_task:
@@ -152,11 +181,11 @@ def _judge_highlights(
             checks = resp.get("suggested_baseline_checks") or []
             if isinstance(checks, list):
                 baseline_checks.extend([c for c in checks if isinstance(c, dict)])
-        elif r.get("type") == "paper_table_alignment":
+        elif r.get("type") in {"paper_table_alignment", "paper_metric_alignment"}:
             matched = int(r.get("matched") or 0)
             failed_n = int(r.get("failed_n") or 0)
             notes.append(
-                f"Deterministic paper-table alignment matched {matched} targets with {failed_n} mismatches."
+                f"Deterministic paper-metric alignment matched {matched} targets with {failed_n} mismatches."
             )
         elif r.get("type") == "reference_check":
             errs = int(r.get("errors") or 0)
@@ -192,7 +221,21 @@ def _artifact_highlights(artifacts_index: dict[str, Any]) -> list[str]:
     return [str(x) for x in files[:12]]
 
 
+def _alignment_comparisons(artifacts_dir: Path) -> list[dict[str, Any]]:
+    payload = _load_json_if_exists(artifacts_dir / "alignment" / "alignment.json")
+    rows = payload.get("comparisons") if isinstance(payload, dict) else []
+    return [r for r in rows if isinstance(r, dict)] if isinstance(rows, list) else []
+
+
+def _fmt_metric_value(value: Any) -> str:
+    try:
+        return f"{float(value):.6g}"
+    except Exception:
+        return str(value or "")
+
+
 def finalize_node(state: dict[str, Any]) -> dict[str, Any]:
+    finalize_start = time.monotonic()
     run_info = state.get("run", {})
     run_dir = Path(run_info.get("dir") or "")
     artifacts_dir = Path(run_info.get("artifacts_dir") or (run_dir / "artifacts"))
@@ -204,18 +247,49 @@ def finalize_node(state: dict[str, Any]) -> dict[str, Any]:
     if state.get("judge", {}).get("passed") is True and state.get("status") != "failed":
         state["status"] = "success"
     else:
-        # If we cannot judge due to missing baseline but the run itself succeeded, mark as inconclusive.
+        # Make reviewer-facing non-success outcomes explicit before writing summaries.
         results = (state.get("judge", {}) or {}).get("results") or []
         run_ok = bool((state.get("run_result", {}) or {}).get("success"))
+        has_deviation = isinstance(results, list) and any(
+            isinstance(r, dict)
+            and (
+                (
+                    r.get("type") in {"paper_metric_alignment", "paper_table_alignment"}
+                    and int(r.get("matched") or 0) > 0
+                    and int(r.get("failed_n") or 0) > 0
+                )
+                or (
+                    r.get("type") not in {"inconclusive_no_baseline", "llm_judge"}
+                    and r.get("passed") is False
+                    and r.get("type") not in {"paper_metric_alignment", "paper_table_alignment"}
+                )
+            )
+            for r in results
+        )
+        if state.get("status") != "failed" and run_ok and has_deviation:
+            state["status"] = "deviated"
+        # If we cannot judge due to missing baseline but the run itself succeeded, mark as inconclusive.
         if (
             state.get("status") != "failed"
             and run_ok
+            and not has_deviation
             and isinstance(results, list)
             and any(isinstance(r, dict) and r.get("type") == "inconclusive_no_baseline" for r in results)
         ):
             state["status"] = "inconclusive"
 
-    # 2) write a deterministic summary.json in run dir
+    # 2) write machine-readable execution evidence before indexing artifacts.
+    execution_evidence = build_execution_evidence_summary(
+        state=state,
+        run_dir=run_dir,
+        artifacts_dir=artifacts_dir,
+    )
+    write_text(
+        artifacts_dir / "execution_evidence.json",
+        json.dumps(execution_evidence, ensure_ascii=False, indent=2) + "\n",
+    )
+
+    # 3) write a deterministic summary.json in run dir
     artifacts_index = index_artifacts(artifacts_dir)
     summary = {
         "run_id": run_info.get("id"),
@@ -223,11 +297,12 @@ def finalize_node(state: dict[str, Any]) -> dict[str, Any]:
         "attempts": state.get("attempt", 0),
         "run_result": state.get("run_result", {}),
         "judge": state.get("judge", {}),
+        "execution_evidence": execution_evidence,
         "artifacts": artifacts_index,
     }
     write_text(run_dir / "summary.json", json.dumps(summary, ensure_ascii=False, indent=2) + "\n")
 
-    # 3) keep reviewer-facing report and diff summaries inside this execution run.
+    # 4) keep reviewer-facing report and diff summaries inside this execution run.
     paper_key = str((state.get("config") or {}).get("paper_key") or "paper")
     reports_dir = ensure_dir(run_dir / "reports")
     diffs_dir = ensure_dir(run_dir / "diffs")
@@ -240,6 +315,7 @@ def finalize_node(state: dict[str, Any]) -> dict[str, Any]:
     task_summary = _summarize_tasks(tasks)
     judge_label, judge_notes, suggested_checks = _judge_highlights(judge, run_result)
     artifact_files = _artifact_highlights(artifacts_index)
+    alignment_comparisons = _alignment_comparisons(artifacts_dir)
 
     # main report (human-readable, reviewer-oriented)
     md_lines: list[str] = []
@@ -317,7 +393,7 @@ def finalize_node(state: dict[str, Any]) -> dict[str, Any]:
     md_lines.append(f"- Review verdict: **{judge_label}**")
     verdict_desc = {
         "verified": "All deterministic baseline checks passed within tolerance.",
-        "inconclusive": "Run succeeded but no/insufficient baseline checks to verify paper claims.",
+        "inconclusive": "Run lacks sufficient metric evidence to verify paper claims.",
         "deviated": "Run succeeded but some quantitative checks exceeded tolerance.",
         "execution_failed": "Task execution failed before producing sufficient evidence.",
     }
@@ -353,6 +429,30 @@ def finalize_node(state: dict[str, Any]) -> dict[str, Any]:
         md_lines.append("")
         md_lines.extend(
             _md_table(["Check", "Path", "Expected", "Observed", "Tolerance", "Result"], evidence_rows)
+        )
+        md_lines.append("")
+
+    if alignment_comparisons:
+        comparison_rows: list[list[str]] = []
+        for row in alignment_comparisons[:80]:
+            comparison_rows.append(
+                [
+                    str(row.get("dataset") or "n/a"),
+                    str(row.get("metric") or ""),
+                    _fmt_metric_value(row.get("paper_value")),
+                    _fmt_metric_value(row.get("observed_value")),
+                    _fmt_metric_value(row.get("delta")),
+                    _fmt_metric_value(row.get("tolerance")),
+                    "PASS" if row.get("passed") else "FAIL",
+                ]
+            )
+        md_lines.append("### Paper-vs-Run Metric Comparison")
+        md_lines.append("")
+        md_lines.extend(
+            _md_table(
+                ["Dataset", "Metric", "Paper", "Reproduced", "Delta", "Tolerance", "Result"],
+                comparison_rows,
+            )
         )
         md_lines.append("")
 
@@ -452,10 +552,20 @@ def finalize_node(state: dict[str, Any]) -> dict[str, Any]:
     md_lines.append("")
     md_lines.append("### 3. Quantitative Comparison")
     md_lines.append("")
-    md_lines.append(
-        "- Insert aligned paper-vs-run metric tables here once baseline checks and artifact metrics are available."
-    )
-    md_lines.append("- Prefer MRR, MR, Hits@1, Hits@3, and Hits@10 when those metrics exist.")
+    if alignment_comparisons:
+        for row in alignment_comparisons[:10]:
+            status = "within tolerance" if row.get("passed") else "outside tolerance"
+            md_lines.append(
+                "- "
+                f"{row.get('dataset') or 'n/a'} {row.get('metric')}: "
+                f"paper={_fmt_metric_value(row.get('paper_value'))}, "
+                f"reproduced={_fmt_metric_value(row.get('observed_value'))}, "
+                f"delta={_fmt_metric_value(row.get('delta'))} ({status})."
+            )
+    else:
+        md_lines.append(
+            "- No aligned paper-vs-run metric table is available yet; treat quantitative reproduction claims as inconclusive."
+        )
     md_lines.append("")
     md_lines.append("### 4. Deviations and Risks")
     md_lines.append("")
@@ -498,7 +608,7 @@ def finalize_node(state: dict[str, Any]) -> dict[str, Any]:
     # Deterministic actionable hints (no LLM)
     suggestions: list[dict[str, Any]] = []
     # missing baseline => can't conclude
-    if any(
+    if judge.get("passed") is not True and any(
         isinstance(r, dict) and r.get("type") == "inconclusive_no_baseline"
         for r in (judge.get("results") or [])
     ):
@@ -563,29 +673,35 @@ def finalize_node(state: dict[str, Any]) -> dict[str, Any]:
                     "report_file": r.get("report_file", ""),
                 }
             )
-        elif rtype == "paper_table_alignment":
+        elif rtype in {"paper_table_alignment", "paper_metric_alignment"}:
             alignment_summary = {
+                "extracted_targets": r.get("extracted_targets", 0),
                 "matched": r.get("matched", 0),
                 "passed": r.get("passed_n", 0),
                 "failed": r.get("failed_n", 0),
                 "unmatched_run_metrics": r.get("unmatched_run_metrics", []),
                 "critiques": r.get("critiques_n", 0),
+                "comparisons": r.get("comparisons_n", len(alignment_comparisons)),
                 "artifact": r.get("alignment_artifact", ""),
             }
 
     # Coverage gaps: identify what's missing for a complete reproduction verdict
     coverage_gaps: list[str] = []
-    if any(
+    if judge.get("passed") is not True and any(
         isinstance(r, dict) and r.get("type") == "inconclusive_no_baseline"
         for r in (judge.get("results") or [])
     ):
-        coverage_gaps.append("No baseline checks defined — cannot verify paper claims quantitatively.")
+        coverage_gaps.append("No baseline checks defined; cannot verify paper claims quantitatively.")
     if not checks_summary:
         coverage_gaps.append("No deterministic checks (file_exists/json_value/csv_agg) were evaluated.")
     if not alignment_summary:
         coverage_gaps.append(
-            "No paper-table alignment data available (paper_extracted/tables/ may be missing)."
+            "No paper-metric alignment data available (paper_extracted/tables/ or metric artifacts may be missing)."
         )
+    elif not alignment_comparisons:
+        coverage_gaps.append("Paper-metric alignment ran but produced no metric-level comparison rows.")
+    if isinstance(run_result, dict) and run_result.get("semantic_failure") == "semantic_no_metrics":
+        coverage_gaps.append("An eval/reproduction task completed without machine-readable metric evidence.")
     eval_tasks = [t for t in tasks if _task_family(t) == "eval"]
     if not eval_tasks:
         coverage_gaps.append("No evaluation tasks were defined or executed; only smoke/prepare tasks ran.")
@@ -642,6 +758,7 @@ def finalize_node(state: dict[str, Any]) -> dict[str, Any]:
         "task_summary": task_summary,
         "checks_summary": checks_summary,
         "alignment_summary": alignment_summary,
+        "alignment_comparisons": alignment_comparisons,
         "coverage_gaps": coverage_gaps,
         "paths": {
             "run_dir": str(run_dir),
@@ -660,6 +777,32 @@ def finalize_node(state: dict[str, Any]) -> dict[str, Any]:
         "This folder contains **facts-only** artifacts to support writing a final review.\n\n"
         f"- `facts.json`: structured evidence and pointers (paper_key={paper_key}, run_id={run_info.get('id')})\n",
     )
+
+    _record_finalize_timing(state, run_dir, time.monotonic() - finalize_start)
+    execution_evidence = build_execution_evidence_summary(
+        state=state,
+        run_dir=run_dir,
+        artifacts_dir=artifacts_dir,
+    )
+    write_text(
+        artifacts_dir / "execution_evidence.json",
+        json.dumps(execution_evidence, ensure_ascii=False, indent=2) + "\n",
+    )
+    artifacts_index = index_artifacts(artifacts_dir)
+    summary.update(
+        {
+            "status": state.get("status"),
+            "run_result": state.get("run_result", {}),
+            "judge": state.get("judge", {}),
+            "execution_evidence": execution_evidence,
+            "artifacts": artifacts_index,
+        }
+    )
+    write_text(run_dir / "summary.json", json.dumps(summary, ensure_ascii=False, indent=2) + "\n")
+    write_text(diffs_dir / "summary.json", json.dumps(summary, ensure_ascii=False, indent=2) + "\n")
+    facts["artifacts_index"] = artifacts_index
+    facts["execution_evidence"] = execution_evidence
+    write_text(review_root / "facts.json", json.dumps(facts, ensure_ascii=False, indent=2) + "\n")
 
     append_event(run_dir, "finalize", {"report": str(report_path), "diff_dir": str(diffs_dir)})
     state.setdefault("history", []).append({"kind": "finalize", "data": {"report": str(report_path)}})

@@ -9,6 +9,7 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
+from common import run_stats
 from common.config import get_settings
 from common.env import load_env_file
 from common.pipeline_context import execution_stage_dir, init_full_pipeline_context
@@ -16,12 +17,12 @@ from fact_generation.execution.stage_runner import run_execution_stage
 from fact_generation.positioning.stage_runner import run_positioning_stage
 from fact_generation.refcheck.stage_runner import run_refcheck_stage
 from llm.provider_capabilities import is_codex_provider
-from preprocessing.claim_extract.stage_runner import run_claim_extract_stage
 from preprocessing.parse.stage_runner import run_parse_stage
 from review.report.stage_runner import run_report_stage
 from review.teaser.stage_runner import run_teaser_stage
 from schemas.execution import ExecutionPayload
 from schemas.stage import StageResult
+from util.cutoff_date import CutoffDate, derive_cutoff_from_source, parse_cutoff, parse_submission_deadline
 from util.paper_input import infer_paper_key, materialize_paper_pdf
 from util.run_layout import build_run_dir, ensure_run_subdirs, make_run_id
 
@@ -31,18 +32,40 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
-_TOTAL_STAGES = 7
+_TOTAL_STAGES = 6
 
 
 def _log(msg: str) -> None:
     print(msg, flush=True, file=sys.stderr)
 
 
-def _run_stage(index: int, name: str, fn: Callable[[], StageResult]) -> StageResult:
+def _run_stage(
+    index: int,
+    name: str,
+    fn: Callable[[], StageResult],
+    *,
+    stats_module: str | None = None,
+) -> StageResult:
     _log(f"[{index}/{_TOTAL_STAGES}] {name}: starting...")
     t0 = time.monotonic()
-    result = fn()
+    try:
+        if stats_module:
+            with run_stats.module_scope(stats_module):
+                result = fn()
+        else:
+            result = fn()
+    except Exception as exc:
+        dt = time.monotonic() - t0
+        if stats_module:
+            run_stats.record_duration(stats_module, dt)
+            run_stats.record_module_status(stats_module, "failed", warning=str(exc))
+        _log(f"[{index}/{_TOTAL_STAGES}] {name}: failed ({dt:.1f}s) — {exc}")
+        return StageResult(status="failed", error=str(exc), extra={"duration_sec": dt})
     dt = time.monotonic() - t0
+    result.extra["duration_sec"] = dt
+    if stats_module:
+        run_stats.record_duration(stats_module, dt)
+        run_stats.record_module_status(stats_module, result.status)
     status = result.status
     err = (result.error or "").strip()
     suffix = f" — {err}" if err else ""
@@ -77,9 +100,22 @@ def _apply_cli_env_overrides(args: argparse.Namespace) -> None:
     if llm_model:
         os.environ["AGENT_MODEL"] = llm_model
         os.environ["EXECUTION_OPENAI_MODEL"] = llm_model
-        provider = str(getattr(args, "llm_provider", "") or os.getenv("MODEL_PROVIDER") or "").strip()
+        provider = (
+            str(
+                llm_provider
+                or os.getenv("EXECUTION_MODEL_PROVIDER")
+                or os.getenv("MODEL_PROVIDER")
+                or os.getenv("AGENT_MODEL_PROVIDER")
+                or "openai-codex"
+            )
+            .strip()
+            .lower()
+            .replace("_", "-")
+        )
         if is_codex_provider(provider):
             os.environ["OPENAI_CODEX_MODEL"] = llm_model
+        elif provider in {"claude", "qwen", "deepseek"}:
+            os.environ[f"{provider.upper()}_MODEL"] = llm_model
 
     teaser_mode = str(getattr(args, "teaser_mode", "auto") or "auto").strip().lower()
     if teaser_mode == "prompt":
@@ -87,10 +123,29 @@ def _apply_cli_env_overrides(args: argparse.Namespace) -> None:
     elif teaser_mode == "api":
         os.environ["TEASER_USE_GEMINI"] = "true"
 
+    if bool(getattr(args, "disable_semantic_scholar", False)):
+        os.environ["SEMANTIC_SCHOLAR_ENABLED"] = "false"
+
     get_settings.cache_clear()
 
 
-def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
+def _resolve_cutoff(*, args: argparse.Namespace, paper_source: str) -> CutoffDate | None:
+    """Resolve an explicit deadline; arXiv derivation requires an explicit opt-in."""
+    deadline = str(getattr(args, "submission_deadline", "") or "").strip()
+    if deadline:
+        return parse_submission_deadline(deadline)
+    if bool(getattr(args, "no_cutoff", False)):
+        return None
+    explicit = str(getattr(args, "cutoff_date", "") or "").strip()
+    if explicit:
+        return parse_cutoff(explicit)
+    return (
+        derive_cutoff_from_source(paper_source) if getattr(args, "derive_cutoff_from_arxiv", False) else None
+    )
+
+
+def run_legacy_pipeline(args: argparse.Namespace) -> dict[str, Any]:
+    pipeline_t0 = time.monotonic()
     repo_root = Path(__file__).resolve().parents[1]
     settings = get_settings()
     paper_source = str(args.paper_pdf or "").strip()
@@ -98,6 +153,9 @@ def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
     run_id = make_run_id()
     run_dir = build_run_dir(args.run_root, paper_key, run_id)
     layout = ensure_run_subdirs(run_dir)
+    stats_path = run_dir / "run_stats.json"
+    run_stats.initialize(stats_path)
+    run_stats.enable_cli_status()
     paper_input = materialize_paper_pdf(
         paper_source,
         layout["inputs"] / "source_pdf",
@@ -107,10 +165,17 @@ def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
     init_full_pipeline_context(run_dir=run_dir)
     run_execution = bool(getattr(args, "run_execution", False))
 
+    cutoff = _resolve_cutoff(args=args, paper_source=paper_input.source)
+
     _log("FactReview pipeline starting")
     _log(f"  paper_key : {paper_key}")
     _log(f"  paper_pdf : {paper_pdf}")
     _log(f"  run_dir   : {run_dir}")
+    _log(f"  stats     : {stats_path}")
+    if cutoff is not None:
+        _log(f"  cutoff    : {cutoff.to_string()} (precision={cutoff.precision})")
+    else:
+        _log("  cutoff    : (none — using current date; all retrieved papers will be considered)")
 
     parse_result = _run_stage(
         1,
@@ -122,19 +187,20 @@ def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
             paper_key=paper_key,
             reuse_job_id=str(args.reuse_job_id or "").strip(),
             materialize_execution_extract=run_execution,
+            cutoff_date=cutoff.to_string() if cutoff is not None else "",
         ),
     )
-    claim_extract_result = _run_stage(
-        2,
-        "claim_extract",
-        lambda: run_claim_extract_stage(
-            repo_root=repo_root,
-            run_dir=run_dir,
-        ),
-    )
+    if parse_result.status == "failed":
+        run_stats.record_module_status("parse", "failed", warning=parse_result.error)
+    elif run_stats.read(stats_path)["modules"]["parse"].get("status") == "pending":
+        # Reused jobs do not run the parse subprocess, so no child process marks
+        # the parse module complete. Keep token usage at zero and make the reuse
+        # explicit in the summary table.
+        parse_status = "reused" if str(args.reuse_job_id or "").strip() else "ok"
+        run_stats.record_module_status("parse", parse_status)
     enable_refcheck = bool(getattr(args, "enable_refcheck", False) or settings.reference_check_enabled)
     refcheck_result = _run_stage(
-        3,
+        2,
         "refcheck",
         lambda: run_refcheck_stage(
             repo_root=repo_root,
@@ -143,17 +209,20 @@ def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
             paper_key=paper_key,
             enable_refcheck=enable_refcheck,
         ),
+        stats_module="reference_check",
     )
     positioning_result = _run_stage(
-        4,
+        3,
         "positioning",
         lambda: run_positioning_stage(
             repo_root=repo_root,
             run_dir=run_dir,
         ),
+        stats_module="analysis",
     )
     if not run_execution:
-        _log(f"[5/{_TOTAL_STAGES}] execution: skipped (use --run-execution to enable)")
+        _log(f"[4/{_TOTAL_STAGES}] execution: skipped (use --run-execution to enable)")
+        run_stats.record_module_status("execution", "skipped")
         skipped_payload = ExecutionPayload(
             paper_key=paper_key,
             paper_pdf=str(paper_pdf),
@@ -169,7 +238,7 @@ def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
         )
     else:
         execution_result = _run_stage(
-            5,
+            4,
             "execution",
             lambda: run_execution_stage(
                 run_dir=run_dir,
@@ -181,21 +250,45 @@ def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
                 ),
                 max_attempts=int(args.max_attempts),
                 no_pdf_extract=bool(args.no_pdf_extract),
+                no_llm=bool(getattr(args, "execution_no_llm", False)),
+                auto_tasks=bool(getattr(args, "execution_auto_tasks", False)),
+                auto_tasks_mode=str(getattr(args, "execution_auto_tasks_mode", "smoke") or "smoke"),
+                auto_tasks_force=bool(getattr(args, "execution_auto_tasks_force", False)),
+                paper_budget_sec=int(getattr(args, "execution_paper_budget_sec", 0) or 0),
+                docker_enabled=False if bool(getattr(args, "execution_no_docker", False)) else None,
+                docker_build_timeout_sec=int(getattr(args, "execution_docker_build_timeout_sec", 0) or 0),
             ),
+            stats_module="execution",
         )
     report_result = _run_stage(
-        6,
+        5,
         "report",
         lambda: run_report_stage(
             repo_root=repo_root,
             run_dir=run_dir,
         ),
+        stats_module="report_generation",
     )
-    teaser_result = _run_stage(7, "teaser", lambda: run_teaser_stage(run_dir=run_dir))
+    if report_result.status == "failed":
+        _log(f"[6/{_TOTAL_STAGES}] teaser: skipped — report stage failed")
+        run_stats.record_module_status("teaser_figure", "skipped", warning="report stage failed")
+        teaser_result = StageResult(status="skipped", error="report stage failed")
+    else:
+        teaser_result = _run_stage(
+            6,
+            "teaser",
+            lambda: run_teaser_stage(run_dir=run_dir),
+            stats_module="teaser_figure",
+        )
+        teaser_info = (
+            teaser_result.extra.get("teaser_figure") if isinstance(teaser_result.extra, dict) else {}
+        )
+        teaser_status = str((teaser_info or {}).get("status") or "").strip()
+        if teaser_status:
+            run_stats.record_module_status("teaser_figure", teaser_status)
 
     results: dict[str, StageResult] = {
         "parse": parse_result,
-        "claim_extract": claim_extract_result,
         "refcheck": refcheck_result,
         "positioning": positioning_result,
         "execution": execution_result,
@@ -203,6 +296,11 @@ def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
         "teaser": teaser_result,
     }
     statuses = {name: r.status for name, r in results.items()}
+    stage_durations = {
+        name: float(r.extra.get("duration_sec") or 0.0)
+        for name, r in results.items()
+        if isinstance(r.extra, dict) and "duration_sec" in r.extra
+    }
     stage_errors = {name: r.error for name, r in results.items() if r.error}
     # PDF render is best-effort within the report stage (markdown is canonical),
     # so the stage stays status="ok" even when the PDF fails. Surface the cause
@@ -212,7 +310,7 @@ def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
         stage_errors["report_pdf"] = report_pdf_error
 
     outputs: dict[str, str] = {}
-    for name in ("parse", "claim_extract", "refcheck", "positioning", "execution"):
+    for name in ("parse", "refcheck", "positioning", "execution"):
         main = results[name].outputs.get("main")
         if main:
             outputs[name] = main
@@ -228,6 +326,11 @@ def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
     for key, value in granular:
         if value:
             outputs[key] = value
+    outputs["run_stats"] = str(stats_path)
+
+    run_stats.set_pipeline_duration(time.monotonic() - pipeline_t0)
+    stats_payload = run_stats.with_totals(run_stats.read(stats_path))
+    _write_json(stats_path, stats_payload)
 
     summary = {
         "paper_key": paper_key,
@@ -239,10 +342,13 @@ def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
         "job_id": parse_result.extra.get("job_id"),
         "job_dir": parse_result.extra.get("job_dir"),
         "stages": statuses,
+        "stage_durations_sec": stage_durations,
         "stage_errors": stage_errors,
         "outputs": outputs,
+        "run_stats": stats_payload,
         "reference_check": refcheck_result.extra.get("reference_check") or {"enabled": enable_refcheck},
         "teaser_figure": teaser_result.extra.get("teaser_figure") or {},
+        "paper_cutoff_date": cutoff.to_metadata() if cutoff is not None else None,
     }
 
     summary_path = run_dir / "full_pipeline_summary.json"
@@ -260,15 +366,143 @@ def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
     if review_md:
         _log(f"Final review: {review_md}")
     _log(f"Summary: {summary_path}")
+    _log("")
+    for line in run_stats.format_summary_table(stats_payload):
+        _log(line)
+
+    # Surface teaser prompt-only guidance at the very end so it's the last
+    # thing the user sees and can act on without scrolling through JSON.
+    teaser_info = summary.get("teaser_figure") or {}
+    if isinstance(teaser_info, dict) and teaser_info.get("status") == "prompt_only":
+        teaser_message = str(teaser_info.get("message") or "").strip()
+        teaser_prompt_path = outputs.get("teaser_figure_prompt") or ""
+        if teaser_message:
+            _log("")
+            _log("Teaser figure (manual step):")
+            _log(f"  {teaser_message}")
+            if teaser_prompt_path:
+                _log(f"  Prompt file: {teaser_prompt_path}")
+
     return summary
 
 
+def run_full_pipeline(args: argparse.Namespace) -> dict[str, Any]:
+    from pipeline_v2 import run_v2_pipeline
+
+    return run_v2_pipeline(args)
+
+
+def _coverage_batch_size(value):
+    if value == "auto":
+        return "auto"
+    if value == "legacy":
+        return None
+    try:
+        size = int(value)
+    except (TypeError, ValueError):
+        raise argparse.ArgumentTypeError("Use auto, legacy, or a positive batch size") from None
+    if size < 1:
+        raise argparse.ArgumentTypeError("Batch size must be positive")
+    return size
+
+
 def parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser("factreview_full_pipeline")
+    p = argparse.ArgumentParser(
+        "factreview_full_pipeline",
+        description="Run the default v2 review pipeline; Docker execution is opt-in.",
+        epilog=(
+            "Visual checks inherit the main model. Optional VLM_MODEL_PROVIDER, VLM_MODEL, "
+            "VLM_BASE_URL and VLM_API_KEY environment variables select an image-capable model. "
+            "The openai-codex provider uses Codex login and accepts no VLM_API_KEY."
+        ),
+    )
     p.add_argument("paper_pdf", type=str, help="Path or URL to a paper PDF")
     p.add_argument("--paper-key", type=str, default="")
     p.add_argument("--run-root", type=str, default="runs")
-    p.add_argument("--reuse-job-id", type=str, default="", help="Reuse an existing runtime job snapshot")
+    p.add_argument(
+        "--submission-deadline",
+        default="",
+        help="Venue submission deadline, YYYY-MM-DD; required for Literature assessment",
+    )
+    p.add_argument(
+        "--repository-root", default="", help="Read-only local snapshot of the released repository"
+    )
+    p.add_argument("--repository-url", default="", help="HTTPS URL of the released repository")
+    p.add_argument(
+        "--report-presentation",
+        choices=("full", "layered"),
+        default="full",
+        help="Report layout: full detail, or primary report with complete technical appendix and linked PDF bundle",
+    )
+    p.add_argument(
+        "--anonymity-policy",
+        choices=("unspecified", "required", "not_required"),
+        default="unspecified",
+        help="Submission anonymity requirement; unspecified cannot establish an anonymity violation",
+    )
+    p.add_argument(
+        "--approval-mode",
+        choices=("auto", "interactive"),
+        default="auto",
+        help="Execution approval mode (default: auto)",
+    )
+    p.add_argument(
+        "--claim-coverage-window-chars",
+        type=int,
+        default=24000,
+        help="Source characters per claim coverage review window (default: 24000)",
+    )
+    p.add_argument(
+        "--claim-coverage-review-calls",
+        type=int,
+        default=12,
+        help="Maximum claim coverage review calls; unreached windows remain visible (default: 12)",
+    )
+    p.add_argument(
+        "--claim-coverage-followup-calls",
+        type=int,
+        default=12,
+        help="Maximum claim correction calls after coverage review (default: 12)",
+    )
+    p.add_argument(
+        "--claim-coverage-validation-calls",
+        type=int,
+        default=12,
+        help="Maximum independent reviews before adopting claim corrections (default: 12)",
+    )
+    p.add_argument(
+        "--claim-coverage-original-batch-size", type=_coverage_batch_size, default="auto",
+        help="auto (default) batches more than 3 original-review duties by 3; legacy uses one request; a positive integer forces that size. Existing validation call cap applies.",
+    )
+    p.add_argument(
+        "--claim-coverage-first-batch-size", type=_coverage_batch_size, default="auto",
+        help="auto (default) batches more than 3 first-review duties by 3; legacy uses one request; a positive integer forces that size. Discovery and children share the existing review cap.",
+    )
+    p.add_argument(
+        "--training-budget",
+        type=int,
+        default=0,
+        help="Maximum training runs, including retries (default: 0)",
+    )
+    p.add_argument(
+        "--execution-config",
+        default="",
+        help="JSON execution configuration: output mappings, frozen author artifacts, paper variances and policy",
+    )
+    p.add_argument(
+        "--derive-cutoff-from-arxiv",
+        action="store_true",
+        help="If no explicit deadline is supplied, resolve arXiv's first-submission date and record its provenance",
+    )
+    p.add_argument(
+        "--arxiv-id", default="", help="arXiv identity for a local PDF when using --derive-cutoff-from-arxiv"
+    )
+    p.add_argument(
+        "--reuse-job-id",
+        type=str,
+        default="",
+        help="Legacy option; v2 reports job-snapshot reuse as unsupported",
+    )
     p.add_argument(
         "--llm-provider",
         type=str,
@@ -291,31 +525,99 @@ def parse_args() -> argparse.Namespace:
         "--gemini-api-key",
         type=str,
         default="",
-        help="Optional Gemini API key override for teaser image generation.",
+        help="Legacy v1 teaser key; v2 writes a local SVG and does not call Gemini.",
     )
     p.add_argument(
         "--teaser-mode",
         choices=("auto", "prompt", "api"),
         default="auto",
-        help="Teaser figure mode: auto attempts Gemini when a key exists, prompt saves/copies the prompt, api attempts the configured image API.",
+        help="V2 writes a local SVG and prompt in auto/prompt modes; legacy api mode is unsupported.",
+    )
+    p.add_argument(
+        "--disable-semantic-scholar",
+        action="store_true",
+        help="Disable Semantic Scholar objective related-work retrieval for this run.",
     )
     p.add_argument(
         "--enable-refcheck",
         action="store_true",
-        help="Run RefChecker reference-accuracy validation and append warning/error results to the final report.",
+        help="Compatibility flag: v2 L1 always checks bibliography entries with RefCopilot.",
     )
     p.add_argument(
         "--run-execution",
         action="store_true",
         help="Run the repository execution stage. Disabled by default.",
     )
-    p.add_argument("--max-attempts", type=int, default=5, help="Execution-stage max fix loop attempts")
+    p.add_argument(
+        "--max-attempts", type=int, choices=range(4), default=3, help="Maximum repair rounds, capped at 3"
+    )
     p.add_argument(
         "--no-pdf-extract",
         action="store_true",
         help="Pass through to external execution stage (skip MinerU in execution prepare).",
     )
-    return p.parse_args()
+    p.add_argument(
+        "--execution-auto-tasks",
+        action="store_true",
+        help="Legacy option; v2 accepts only claim-linked Experiments plans and reports this option as unsupported.",
+    )
+    p.add_argument(
+        "--execution-auto-tasks-mode",
+        choices=("smoke", "full"),
+        default="smoke",
+        help="Task inference mode for execution auto-tasks.",
+    )
+    p.add_argument(
+        "--execution-auto-tasks-force",
+        action="store_true",
+        help="Legacy option; forced task invention is unsupported in v2.",
+    )
+    p.add_argument(
+        "--execution-paper-budget-sec",
+        type=int,
+        default=0,
+        help=(
+            "Legacy per-paper time budget; nonzero values are unsupported in v2. "
+            "Use --execution-config for per-run timeout_seconds."
+        ),
+    )
+    p.add_argument(
+        "--execution-docker-build-timeout-sec",
+        type=int,
+        default=0,
+        help="Docker image build timeout in seconds; 0 uses the v2 default of 3600 seconds.",
+    )
+    p.add_argument(
+        "--execution-no-docker",
+        action="store_true",
+        help="Legacy option; enabled v2 execution requires Docker and rejects this flag.",
+    )
+    p.add_argument(
+        "--execution-no-llm",
+        action="store_true",
+        help="Disable LLM-assisted execution task inference/fixes.",
+    )
+    p.add_argument(
+        "--cutoff-date",
+        type=str,
+        default="",
+        help=(
+            "Explicit legacy cutoff; day-level values are accepted as a submission deadline. "
+            "Prefer --submission-deadline YYYY-MM-DD for v2."
+        ),
+    )
+    p.add_argument(
+        "--no-cutoff",
+        action="store_true",
+        help=(
+            "Legacy option; v2 records an unsupported-option error. Supply the actual submission deadline."
+        ),
+    )
+    args = p.parse_args()
+    args._execution_overrides = {
+        token.split("=", 1)[0][2:].replace("-", "_") for token in sys.argv[1:] if token.startswith("--")
+    }
+    return args
 
 
 def main() -> None:
@@ -324,6 +626,8 @@ def main() -> None:
     _apply_cli_env_overrides(args)
     summary = run_full_pipeline(args)
     print(json.dumps(summary, ensure_ascii=False, indent=2))
+    if any(status == "failed" for status in summary.get("stages", {}).values()):
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":

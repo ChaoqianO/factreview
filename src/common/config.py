@@ -3,7 +3,7 @@ from __future__ import annotations
 from functools import lru_cache
 from pathlib import Path
 
-from pydantic import AliasChoices, Field
+from pydantic import AliasChoices, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -53,6 +53,22 @@ class Settings(BaseSettings):
     agent_max_tokens: int = 4096
     agent_max_turns: int = 1000
     agent_resume_attempts: int = 2
+    experiment_scope_binding_repair_rounds: int = Field(default=0, ge=0, le=1)
+    theory_visual_recheck_rounds: int = Field(default=1, ge=0, le=1)
+
+    @field_validator("theory_visual_recheck_rounds", mode="before")
+    @classmethod
+    def bounded_theory_visual_rounds(cls, value):
+        if (type(value) is int and value in (0, 1)) or (type(value) is str and value in {"0", "1"}):
+            return int(value)
+        raise ValueError("theory_visual_recheck_rounds must be 0 or 1")
+
+    @field_validator("experiment_scope_binding_repair_rounds", mode="before")
+    @classmethod
+    def bounded_binding_repair_rounds(cls, value):
+        if (type(value) is int and value in (0, 1)) or (type(value) is str and value in {"0", "1"}):
+            return int(value)
+        raise ValueError("experiment_scope_binding_repair_rounds must be 0 or 1")
 
     max_pdf_bytes: int = 50 * 1024 * 1024
 
@@ -72,12 +88,16 @@ class Settings(BaseSettings):
 
     # Optional external paper search/read service
     paper_search_enabled: bool = True
+    paper_search_provider: str = "arxiv"
     paper_search_base_url: str | None = None
     paper_search_api_key: str | None = None
     paper_search_endpoint: str = "/pasa/search"
     paper_search_timeout_seconds: int = 120
     paper_search_health_endpoint: str = "/health"
     paper_search_health_timeout_seconds: int = 5
+    paper_search_page_size: int = Field(default=8, ge=1, le=100)
+    paper_search_max_pages: int = Field(default=1, ge=1, le=100)
+    paper_search_max_results: int = Field(default=8, ge=1, le=10_000)
 
     paper_read_base_url: str | None = None
     paper_read_api_key: str | None = None
@@ -90,6 +110,8 @@ class Settings(BaseSettings):
     semantic_scholar_api_key: str | None = None
     semantic_scholar_timeout_seconds: int = 20
     semantic_scholar_top_k: int = 8
+    openalex_base_url: str = "https://api.openalex.org"
+    openalex_api_key: str | None = None
 
     # Final-report finalization gates
     enable_final_gates: bool = False
@@ -106,7 +128,7 @@ class Settings(BaseSettings):
     final_report_audit_max_source_chars: int = 80000
     final_report_audit_max_review_chars: int = 50000
 
-    # Optional reference-accuracy checking with tools/refchecker.
+    # Optional reference-accuracy checking via RefCopilot/.
     reference_check_enabled: bool = Field(
         default=False,
         validation_alias=AliasChoices(

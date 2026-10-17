@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -9,11 +10,13 @@ from uuid import uuid4
 from agents import RunContextWrapper, function_tool
 
 from common.config import Settings
+from common import run_stats
 from common.state import mutate_job_state
 from common.storage import annotations_path, append_event, write_json_atomic, write_text_atomic
 from common.types import AnnotationItem, PaperSearchUsage
 from fact_generation.positioning.paper_search import PaperSearchAdapter, normalize_question_list
 from review.report.final_report import validate_final_report
+from util.cutoff_date import CutoffDate
 
 
 def _normalize_signature(text: str) -> str:
@@ -92,6 +95,18 @@ def _paper_search_not_started(state: Any) -> bool:
     if availability in _RETRIEVAL_DISABLED_AVAILABILITIES:
         return True
     return availability == "not_started" or not bool(payload.get("started", True))
+
+
+def _missing_required_read_paper_call(
+    usage: PaperSearchUsage,
+    *,
+    retrieval_not_started: bool,
+) -> bool:
+    if retrieval_not_started:
+        return False
+    if int(usage.effective_calls or 0) <= 0:
+        return False
+    return int(usage.read_paper_successful_calls or 0) <= 0
 
 
 def _build_annotation_gate_hint(
@@ -484,11 +499,18 @@ class ReviewRuntimeContext:
     paper_adapter: PaperSearchAdapter
     paper_search_runtime_state: dict[str, Any]
     settings: Settings
+    cutoff_date: CutoffDate | None = None
+    analysis_started_at: float = field(default_factory=time.monotonic)
+    agent_provider: str = ""
+    agent_model: str = ""
 
     annotations: list[AnnotationItem] = field(default_factory=list)
     final_markdown_text: str | None = None
     final_report_draft_sections: dict[str, str] = field(default_factory=dict)
     final_report_draft_version: int = 0
+    report_generation_started: bool = False
+    report_generation_started_at: float | None = None
+    last_agent_usage: dict[str, int] = field(default_factory=dict)
 
     tool_counts: dict[str, int] = field(default_factory=dict)
     paper_search_usage: PaperSearchUsage = field(default_factory=PaperSearchUsage)
@@ -499,11 +521,70 @@ class ReviewRuntimeContext:
     def record_tool(self, name: str) -> None:
         self.tool_counts[name] = int(self.tool_counts.get(name, 0)) + 1
 
+    def mark_report_generation_started(self) -> None:
+        if self.report_generation_started:
+            return
+        now = time.monotonic()
+        self.report_generation_started = True
+        self.report_generation_started_at = now
+        run_stats.record_duration("analysis", now - float(self.analysis_started_at or now))
+        run_stats.record_module_status("analysis", "ok")
+
+    def record_agent_usage_delta(self, token_usage: Any | None) -> None:
+        if token_usage is None or run_stats.stats_path() is None:
+            return
+        current = {
+            "requests": int(getattr(token_usage, "requests", 0) or 0),
+            "input_tokens": int(getattr(token_usage, "input_tokens", 0) or 0),
+            "output_tokens": int(getattr(token_usage, "output_tokens", 0) or 0),
+            "total_tokens": int(getattr(token_usage, "total_tokens", 0) or 0),
+        }
+        if current["total_tokens"] <= 0:
+            current["total_tokens"] = current["input_tokens"] + current["output_tokens"]
+
+        previous = self.last_agent_usage or {
+            "requests": 0,
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "total_tokens": 0,
+        }
+        if (
+            current["requests"] < int(previous.get("requests") or 0)
+            or current["total_tokens"] < int(previous.get("total_tokens") or 0)
+        ):
+            previous = {
+                "requests": 0,
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "total_tokens": 0,
+            }
+
+        delta = {
+            key: max(0, int(current.get(key) or 0) - int(previous.get(key) or 0))
+            for key in current
+        }
+        self.last_agent_usage = current
+        if not any(delta.values()):
+            return
+        module = "report_generation" if self.report_generation_started else "analysis"
+        run_stats.add_token_delta(
+            module=module,
+            provider=self.agent_provider or str(self.settings.model_provider or ""),
+            model=self.agent_model or str(self.settings.agent_model or ""),
+            requests=delta["requests"],
+            input_tokens=delta["input_tokens"],
+            output_tokens=delta["output_tokens"],
+            total_tokens=delta["total_tokens"],
+        )
+
     @property
     def annotation_count(self) -> int:
         return len(self.annotations)
 
-    def sync_state_usage(self, token_usage: Any | None = None) -> None:
+    def sync_state_usage(self, token_usage: Any | None = None, *, record_stats: bool = True) -> None:
+        if record_stats:
+            self.record_agent_usage_delta(token_usage)
+
         def apply(job):
             tool_counts = dict(self.tool_counts)
             job.usage.tool.per_tool = tool_counts
@@ -559,6 +640,8 @@ def build_review_tools(runtime: ReviewRuntimeContext) -> list[Any]:
             "todo": str(todo or "").strip(),
         }
         rt.status_updates.append(row)
+        if row["step"]:
+            run_stats.log_status(f"[agent] {row['step']}")
 
         def apply(job):
             job.metadata["last_status_update"] = row
@@ -841,6 +924,7 @@ def build_review_tools(runtime: ReviewRuntimeContext) -> list[Any]:
             result = await rt.paper_adapter.search(
                 query=query_text if query_text else None,
                 question_list=questions or None,
+                cutoff_date=rt.cutoff_date,
             )
         except Exception as exc:
             runtime_state = (await rt.paper_adapter.get_search_runtime_state()).to_dict()
@@ -861,6 +945,7 @@ def build_review_tools(runtime: ReviewRuntimeContext) -> list[Any]:
                 "retry_required": True,
                 "retry_tool": "paper_search",
                 "paper_search_state": runtime_state,
+                "cutoff_date": rt.cutoff_date.to_metadata() if rt.cutoff_date else None,
             }
 
         runtime_state_payload = _paper_search_state_payload(
@@ -947,9 +1032,7 @@ def build_review_tools(runtime: ReviewRuntimeContext) -> list[Any]:
         result_payload["can_start_pdf_annotate"] = can_start_pdf_annotate
         result_payload["annotation_gate_hint"] = annotation_gate_hint
         existing_message = str(result_payload.get("message") or "").strip()
-        if retrieval_not_started:
-            pass
-        elif bool(result_payload.get("success")) or not existing_message:
+        if not retrieval_not_started and (bool(result_payload.get("success")) or not existing_message):
             result_payload["message"] = annotation_gate_hint
         result_payload["next_action"] = (
             "enter_retrieval_disabled_mode"
@@ -995,9 +1078,24 @@ def build_review_tools(runtime: ReviewRuntimeContext) -> list[Any]:
             return {"status": "error", "reason": "empty_items", "message": "items is required"}
 
         result = await rt.paper_adapter.read_papers(items=rows)
+        rt.paper_search_usage.read_paper_calls += 1
+        rt.paper_search_usage.read_paper_items += len(rows)
+        result_items = result.get("items") if isinstance(result, dict) else []
+        successful_items = 0
+        if isinstance(result_items, list):
+            successful_items = sum(
+                1 for item in result_items if isinstance(item, dict) and bool(item.get("success"))
+            )
+        rt.paper_search_usage.read_paper_successful_items += successful_items
+        if bool(result.get("success")) and (successful_items > 0 or not isinstance(result_items, list)):
+            rt.paper_search_usage.read_paper_successful_calls += 1
         rt.sync_state_usage(ctx.usage)
         append_event(
-            rt.job_id, "read_paper_called", item_count=len(rows), success=bool(result.get("success"))
+            rt.job_id,
+            "read_paper_called",
+            item_count=len(rows),
+            success=bool(result.get("success")),
+            successful_items=successful_items,
         )
         return result
 
@@ -1034,6 +1132,7 @@ def build_review_tools(runtime: ReviewRuntimeContext) -> list[Any]:
     ) -> dict[str, Any]:
         rt = ctx.context
         rt.record_tool("review_final_markdown_write")
+        rt.mark_report_generation_started()
         attempt_no = int(rt.tool_counts.get("review_final_markdown_write", 0))
         usage = rt.paper_search_usage
         section_order = _required_final_report_section_order()
@@ -1312,6 +1411,36 @@ def build_review_tools(runtime: ReviewRuntimeContext) -> list[Any]:
                             "Then re-call review_final_markdown_write after updating novelty and "
                             "contribution judgment."
                         ),
+                    ],
+                    current_section_id=current_section_id,
+                )
+            )
+
+        if _missing_required_read_paper_call(
+            usage,
+            retrieval_not_started=retrieval_not_started,
+        ):
+            return _return_final_write_failure(
+                _build_final_report_progress_payload(
+                    source=normalized_source,
+                    completed_section_ids=completed_section_ids,
+                    missing_section_ids=missing_section_ids,
+                    annotation_count=rt.annotation_count,
+                    paper_search_usage=usage.model_dump(),
+                    required_paper_search_calls=required_paper_calls,
+                    required_annotation_count=required_annotations,
+                    draft_version=draft_version,
+                    status="error",
+                    reason="read_paper_calls_not_met",
+                    message=(
+                        "At least one effective paper_search call returned usable papers, "
+                        "but no successful read_paper call was recorded before final submission."
+                    ),
+                    retry_required=True,
+                    next_steps=[
+                        "Call read_paper on 1-3 selected overlap-risk papers from the paper_search results.",
+                        "Use the deep-read evidence to update Technical Positioning and novelty/comparison claims.",
+                        "If no readable candidate is available, document that limitation and rerun with a compatible reader or arXiv-backed candidates.",
                     ],
                     current_section_id=current_section_id,
                 )

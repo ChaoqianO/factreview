@@ -24,6 +24,11 @@ def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser("execute_review_runtime_job")
     p.add_argument("--paper-pdf", required=True, help="Path or URL to a paper PDF")
     p.add_argument("--title", default="factreview-job")
+    p.add_argument(
+        "--cutoff-date",
+        default="",
+        help="Inclusive publication-date cutoff (YYYY[-MM[-DD]]) for positioning retrieval.",
+    )
     return p.parse_args()
 
 
@@ -54,8 +59,14 @@ def main() -> None:
 
     shutil.copy2(source_pdf, artifacts["source_pdf"])
 
+    cutoff_token = str(args.cutoff_date or "").strip()
+
     def _apply(state: JobState) -> None:
         state.artifacts.source_pdf_path = str(artifacts["source_pdf"])
+        if cutoff_token:
+            metadata = dict(state.metadata)
+            metadata["paper_cutoff_date"] = cutoff_token
+            state.metadata = metadata
 
     mutate_job_state(str(job.id), _apply)
 

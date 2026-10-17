@@ -1,263 +1,80 @@
 # FactReview
 
-Evidence-grounded AI reviewing for empirical ML papers. Given a paper PDF,
-FactReview extracts the major claims, positions the paper against nearby
-literature, and writes a concise review linked to evidence. Repository/code
-execution is available, but disabled by default.
+Anonymous code release for evidence-grounded review of machine learning papers.
 
-## Quick Start
+FactReview extracts claims and their conditions, checks them against literature, theory, code and experiments, and produces a review with traceable evidence. Each claim is assessed as `supported`, `flawed`, `questioned` or `unverified`. It assists reviewers and provides no publication decision.
 
-**Requirements:** Python 3.11+ and a local Codex login.
-Docker is only needed if you explicitly enable code execution.
+## Pipeline
+
+```mermaid
+flowchart LR
+    A[Paper and optional repository] --> B[L1: Screening and claim extraction]
+    B --> C[L2: Literature / Theory / Code / Experiments]
+    C --> D[L3: Optional execution]
+    C --> E[Evidence assessment]
+    D --> E
+    E --> F[Review report and teaser]
+```
+
+Screening includes writing, figure, table and reference checks. Claims retain their source locations and conditions; a coverage review checks for omitted or merged claims. Verification follows the evidence needs of each claim. Missing evidence and failed checks remain visible in the report.
+
+## Quick start
+
+Requirements: Python 3.11+, a configured language model with image support, and a MinerU API token. Docker is required only for optional execution.
+
+From the downloaded repository directory:
 
 ```bash
-git clone https://github.com/ChaoqianO/factreview.git
-cd factreview
-
 python -m venv .venv
 source .venv/bin/activate          # Windows: .venv\Scripts\activate
-
-pip install -e ".[runtime]"
-codex login
-
-cp .env.example .env
-# Then open .env and set MINERU_API_TOKEN (free tier from https://mineru.net is
-# enough for most papers). See "Required Configuration" below if you want to
-# override the LLM backend or enable Gemini.
+pip install -e ".[runtime,refcheck,positioning]"
+cp .env.example .env              # Windows PowerShell: Copy-Item .env.example .env
 ```
 
-If `codex` is not on your PATH, install the Codex CLI first, then rerun
-`codex login`.
+Edit `.env` and set `MINERU_API_TOKEN`. The supplied model configuration uses a local Codex login; run `codex login` before using it. To use an OpenAI-compatible endpoint, set `MODEL_PROVIDER=openai`, `OPENAI_API_KEY`, `OPENAI_MODEL` and, when needed, `OPENAI_BASE_URL`. The selected model must accept images for visual checks. Optional `VLM_*` settings in `.env.example` select a separate visual model.
 
-Run the pipeline against the bundled CompGCN PDF to verify your install — no
-need to supply your own paper:
+## Run
+
+The default entry point runs Method v2:
 
 ```bash
-python scripts/execute_review_pipeline.py demos/compgcn/paper.pdf
+python scripts/execute_review_pipeline.py path/to/paper.pdf \
+  --paper-key my_paper --submission-deadline YYYY-MM-DD
 ```
 
-Once the demo works, see [Running](#running) below for arbitrary PDFs and
-arXiv URLs. The headline output is always:
+Replace `YYYY-MM-DD` with the venue's actual submission deadline. Literature treats the preceding three calendar months as concurrent work; a missing deadline leaves its assessment unresolved. A PDF URL or arXiv abstract URL can also be used as input.
 
-```text
-runs/<paper_key>_<timestamp>/stages/review/report/final_review.md
-```
+| Option | Purpose |
+|---|---|
+| `--repository-root path/to/repo` | Bind a local copy of the paper's released implementation. |
+| `--repository-url URL` | Bind the paper's released repository by URL. |
+| `--run-execution` | Enable Docker execution; off by default. |
+| `--approval-mode interactive` | Review execution plans before running them; default is `auto`. |
+| `--training-budget N` | Limit training runs, including retries; default is `0`. |
+| `--report-presentation layered` | Produce a reading report, technical appendix and combined PDF. |
 
-## Required Configuration
-
-FactReview intentionally keeps routine configuration to two places:
-
-- `.env` / environment variables for secrets and normal runtime choices.
-- CLI flags for one-off overrides.
-
-### LLM Backend
-
-The default backend is Codex login. The model id and provider are pre-filled
-in `.env.example` (currently `MODEL_PROVIDER=openai-codex` with the Codex
-backend's expected model alias) — copy that file to `.env` and you're done.
-The Codex model alias is *not* a public OpenAI Platform model id, so don't try
-to use it with `OPENAI_API_KEY` against `api.openai.com`.
-
-Run `codex login` once and choose the ChatGPT sign-in flow. FactReview reads
-the local Codex OAuth cache, so no OpenAI Platform API key is needed for the
-default path.
-
-### MinerU PDF Parsing
-
-`MINERU_API_TOKEN` is required. FactReview uses MinerU's cloud API by default
-because it is free to start with generous quota and avoids local CUDA/GPU and
-MinerU model setup.
-
-```bash
-MINERU_API_TOKEN=your_mineru_token
-```
-
-You can also pass it once from CLI:
-
-```bash
-python scripts/execute_review_pipeline.py paper.pdf --mineru-api-token your_mineru_token
-```
-
-### Gemini Teaser Figure
-
-Gemini is optional. If `GEMINI_API_KEY` is empty, FactReview treats teaser
-generation as successful prompt-only output: it writes
-`teaser_figure_prompt.txt`, copies the prompt to the clipboard when possible,
-and tells you to paste it into the Gemini web app. If `GEMINI_API_KEY` is set,
-FactReview uses it automatically.
-
-```bash
-GEMINI_API_KEY=
-```
-
-To force prompt-only output even when a Gemini key is configured, pass
-`--teaser-mode prompt` on the CLI (or set `TEASER_USE_GEMINI=false` in `.env`).
-
-## Running
-
-Full default pipeline on a local PDF:
-
-```bash
-python scripts/execute_review_pipeline.py path/to/paper.pdf --paper-key my_paper
-```
-
-You can also pass a PDF URL. arXiv abstract links are normalized to the PDF
-download automatically:
-
-```bash
-python scripts/execute_review_pipeline.py https://arxiv.org/abs/1911.03082 --paper-key compgcn
-```
-
-This runs the pipeline's seven sub-stages, grouped into three phases. `refcheck`
-and `execution` are skipped by default; see the flags below to enable them.
-
-```text
-preprocessing                fact_generation                        review
-parse → claim_extract  →  refcheck? → positioning → execution? → report → teaser
-```
-
-- **parse** — PDF → structured `Paper`.
-- **claim_extract** — `Paper` → list of major claims.
-- **refcheck** — bibliography validation (off by default; see `--enable-refcheck`).
-- **positioning** — neighbour papers, design axes, novelty verdict.
-- **execution?** — optional code-running stage (off by default; see `--run-execution`).
-- **report** — synthesises the final review markdown / PDF.
-- **teaser** — teaser figure prompt and (optionally) image.
-
-Code execution is off by default. Enable it only when you want repository/code
-evaluation. The execution stage drives Docker via the `docker` CLI, so the only
-prerequisite beyond the `runtime` extra is a working Docker daemon — no
-additional Python packages need to be installed:
-
-```bash
-python scripts/execute_review_pipeline.py path/to/paper.pdf --run-execution
-```
-
-Reference-accuracy checking is also off by default. Enable it when you want
-RefChecker to validate bibliography entries and append warning/error details to
-the final report. RefChecker ships as a git submodule, so fresh clones need a
-one-time setup:
-
-```bash
-git submodule update --init --recursive
-pip install -e ".[refcheck]"
-python scripts/execute_review_pipeline.py path/to/paper.pdf --enable-refcheck
-```
-
-You can also enable it through the environment with `FACTREVIEW_ENABLE_REFCHECK=true`.
-Results are written under `stages/fact_generation/refcheck/reference_check.*` and
-appended to `stages/review/report/final_review.md`. The report sub-stage also writes
-`final_review_clean.md` (without the refcheck section); the teaser sub-stage reads
-that clean copy so refcheck warnings don't pollute teaser prompts.
-
-### CLI Flags
-
-Common one-off overrides:
-
-| Flag | Default | Notes |
-|---|---|---|
-| `--llm-provider` | `openai-codex` | Switches the LLM provider. Mirrors to `MODEL_PROVIDER`. |
-| `--llm-model` | provider default | Mirrors to `AGENT_MODEL`, `EXECUTION_OPENAI_MODEL`, and `OPENAI_CODEX_MODEL` (when the provider is Codex). |
-| `--mineru-api-token` | from `.env` | One-off override for `MINERU_API_TOKEN`. |
-| `--gemini-api-key` | from `.env` | One-off override for `GEMINI_API_KEY`. |
-| `--teaser-mode` | `auto` | `auto` = use Gemini when `GEMINI_API_KEY` is set, otherwise prompt-only. `prompt` = always prompt-only. `api` = always attempt the Gemini image API. |
-| `--enable-refcheck` | off | See above. |
-| `--run-execution` | off | Enables the code-execution stage. Requires Docker. |
-| `--max-attempts` | `5` | Max iterations of the execution stage's `judge → fix` loop. |
-| `--no-pdf-extract` | off | Skip MinerU re-extraction inside the execution `prepare` node when the parse stage already produced the snapshot. |
-| `--reuse-job-id` | – | Reuse a prior agent-runtime job, skipping the parse-stage agent run. Accepts either an absolute path to a `runtime/jobs/<id>` directory (taken as-is) or a bare job id (looked up under the current run dir, then under `<run-root>/**/runtime/jobs/<id>`). Useful for re-rendering the report after a downstream-stage tweak without paying the parse cost again. |
-| `--run-root` | `runs` | Override the root output directory. |
-
-### Single-Stage Reruns
-
-Each stage has a standalone script that reads the same per-run layout. `parse`
-takes the original PDF (because the bridge state may not exist yet); the rest
-work off the run dir alone:
-
-```bash
-python scripts/execute_stage_parse.py          path/to/paper.pdf --run-dir runs/<run>
-python scripts/execute_stage_claim_extract.py  --run-dir runs/<run>
-python scripts/execute_stage_refcheck.py       --run-dir runs/<run>
-python scripts/execute_stage_positioning.py    --run-dir runs/<run>
-python scripts/execute_stage_execution.py      --run-dir runs/<run>
-python scripts/execute_stage_report.py         --run-dir runs/<run>
-python scripts/execute_stage_teaser.py         --run-dir runs/<run>
-```
+Reference checking uses the bundled RefCopilot library. Literature retrieval uses arXiv by default; further provider settings are documented in `.env.example`. Use `--help` for all options.
 
 ## Outputs
 
-Each run writes to:
+Each run is saved under `runs/<paper-key>_<timestamp>_<unique-id>/`:
 
-```text
-runs/<paper_key>_<timestamp>/
-```
+- `review/report/final_review.{json,md,pdf}`: claim assessments, evidence and reviewer advice.
+- `review/teaser/teaser.{json,svg}`: local four-status summary.
+- `materials/`, `screening/`, `verification/`, `execution/`: source records and stage audits.
+- `full_pipeline_summary.json`, `run_stats.json`, `cutoff.json`: completion, usage and literature cutoff records.
 
-Primary artifacts:
+Unavailable services, missing resources and failed stages are recorded as limitations. The reports in [demos](demos/README.md) come from the earlier pipeline; rerun their PDFs for current results.
 
-- `full_pipeline_summary.json` — per-stage status, error reasons, and output paths.
-- `inputs/source_pdf/` — copy of the input paper PDF.
-- `runtime/jobs/<job_id>/` — raw runtime job state, MinerU output, prompts, and agent traces.
-- `stages/preprocessing/parse/paper.json` — parse-stage outputs and bridge state.
-- `stages/preprocessing/claim_extract/` — extracted claim list.
-- `stages/fact_generation/refcheck/` — reference check report (only when `--enable-refcheck`).
-- `stages/fact_generation/positioning/` — literature neighbours and design-axis table.
-- `stages/fact_generation/execution/current/` — in-place workspace for the latest execution attempt; the prior attempt is archived alongside as `current.<timestamp>` (only when `--run-execution`).
-- `stages/fact_generation/execution/history/` — per-attempt orchestrator outputs (only when `--run-execution`).
-- `stages/review/report/final_review.{json,md,pdf}` — the headline review.
-- `stages/review/report/final_review_clean.md` — same review without the refcheck section, used by the teaser.
-- `stages/review/teaser/teaser_figure_prompt.txt` — teaser figure prompt.
-- `stages/review/teaser/teaser_figure.png` — teaser image (only when Gemini is enabled).
-
-The run dir also contains `workspace/`, `logs/`, and `debug/` directories used
-for intermediate artefacts; you usually don't need to look at these.
-
-
-## Troubleshooting
-
-- **`codex login` fails or is not on PATH** — install OpenAI's Codex CLI
-  (`npm install -g @openai/codex`), then rerun `codex login` and pick the
-  ChatGPT sign-in flow.
-- **`MINERU_API_TOKEN` missing** — the parse stage will raise on the first run.
-  Get a token from <https://mineru.net> (free tier is sufficient for most
-  papers) and set it in `.env` or pass `--mineru-api-token`.
-- **`--enable-refcheck` errors with "tools/refchecker not found"** — RefChecker
-  is a git submodule that fresh clones don't pull by default. Run
-  `git submodule update --init --recursive` and `pip install -e ".[refcheck]"`.
-- **Positioning stage is slow or returns sparse results** — unauthenticated Semantic Scholar requests are rate-limited. Set `SEMANTIC_SCHOLAR_API_KEY` in `.env` (free key from <https://www.semanticscholar.org/product/api>).
-- **Teaser stage skips silently / no `teaser_figure.png`** — `GEMINI_API_KEY`
-  is unset (this is the default). The prompt is still written to
-  `stages/review/teaser/teaser_figure_prompt.txt` and copied to your
-  clipboard; paste it into the Gemini web app to generate the image
-  manually.
-
-## Advanced Configuration
-
-Less common environment variables — set in `.env` or via the shell. `.env.example`
-is the authoritative list; the table below covers the ones most users will
-touch.
-
-| Variable | Purpose |
-|---|---|
-| `FACTREVIEW_ENABLE_REFCHECK` | Enable RefChecker globally (equivalent to the `--enable-refcheck` flag). |
-| `FACTREVIEW_EXECUTION_ENABLE_REFCHECK` | Enable a refcheck sweep *inside* the execution stage's refcheck node. Independent from the global gate above. |
-| `MINERU_BASE_URL` | Override the MinerU cloud API endpoint (default: `https://mineru.net/api/v4`). |
-| `MINERU_ALLOW_LOCAL_FALLBACK` | Set to `true` to let the execution stage's `prepare` node fall back to the local `mineru` CLI when the cloud snapshot is unavailable. |
-| `MINERU_LOCAL_BACKEND` / `MINERU_LOCAL_DEVICE` / `MINERU_LOCAL_SOURCE` | Tune the local `mineru` CLI's pipeline backend, device, and source mirror. Only consulted when `MINERU_ALLOW_LOCAL_FALLBACK=true` and a local MinerU install is present. |
-| `OPENAI_AGENTS_DISABLE_TRACING` | Set to `0` to enable the openai-agents SDK trace exporter. Disabled (`1`) by default to avoid POSTing traces to the Agents tracing endpoint. |
-| `TEASER_USE_GEMINI` | Force prompt-only teaser output (`false`) even when a Gemini key is configured. Equivalent to `--teaser-mode prompt`. |
-| `OPENAI_CODEX_BASE_URL` | Point Codex at a different Codex-compatible endpoint (default: `https://chatgpt.com/backend-api/codex`). |
-| `SEMANTIC_SCHOLAR_API_KEY` | Recommended. Free API key from [Semantic Scholar](https://www.semanticscholar.org/product/api) for the positioning stage. Without it, unauthenticated requests may be rate-limited. |
-
-## Development
+## Tests
 
 ```bash
-pip install -e ".[runtime,dev]"
-
-ruff check .
-ruff format --check .
-# Narrow CI smoke check (the contracts most likely to break consumers). For a
-# full pass, run `mypy` with no args — it picks up the broader package list
-# from pyproject.toml's [tool.mypy] section.
-mypy src/schemas src/util src/common
-pytest tests/unit -m "not slow and not e2e and not requires_docker and not requires_llm and not requires_mineru"
+pip install -e ".[runtime,refcheck,positioning,dev]"
+python -m pytest
 ```
+
+The default suite excludes tests marked as slow or requiring live LLM, MinerU or Docker services.
+
+## License
+
+[AGPL-3.0](LICENSE).

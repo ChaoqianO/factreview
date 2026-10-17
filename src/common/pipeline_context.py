@@ -22,6 +22,8 @@ import json
 import os
 import shutil
 import subprocess
+import sys
+import threading
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -35,7 +37,6 @@ _STAGE_ASSETS_SNAPSHOT_FILE = "_stage_assets_snapshot.json"
 # snapshot artifacts. Kept here (not in parse/) because the snapshot loaders
 # are called from every downstream stage and we want a single source of truth.
 _PARSE_STAGE_PATH: tuple[str, ...] = ("preprocessing", "parse")
-_CLAIM_EXTRACT_STAGE_PATH: tuple[str, ...] = ("preprocessing", "claim_extract")
 _REFCHECK_STAGE_PATH: tuple[str, ...] = ("fact_generation", "refcheck")
 _POSITIONING_STAGE_PATH: tuple[str, ...] = ("fact_generation", "positioning")
 _EXECUTION_STAGE_PATH: tuple[str, ...] = ("fact_generation", "execution")
@@ -129,10 +130,9 @@ def ensure_full_pipeline_context(*, run_dir: Path, allow_standalone: bool = Fals
             "Invalid pipeline context marker. Expected full_pipeline or standalone_stage, "
             f"got runner={runner!r}. Marker: {marker}"
         )
-    if runner != "full_pipeline":
-        raise RuntimeError(
-            "Invalid pipeline context marker. Please run through scripts/execute_review_pipeline.py."
-        )
+    raise RuntimeError(
+        "Invalid pipeline context marker. Please run through scripts/execute_review_pipeline.py."
+    )
 
 
 # ── Stage directory helpers ──────────────────────────────────────────────────
@@ -145,11 +145,6 @@ def ensure_full_pipeline_context(*, run_dir: Path, allow_standalone: bool = Fals
 def parse_stage_dir(run_dir: Path) -> Path:
     """Return ``run_dir/stages/preprocessing/parse``."""
     return run_dir.joinpath("stages", *_PARSE_STAGE_PATH)
-
-
-def claim_extract_stage_dir(run_dir: Path) -> Path:
-    """Return ``run_dir/stages/preprocessing/claim_extract``."""
-    return run_dir.joinpath("stages", *_CLAIM_EXTRACT_STAGE_PATH)
 
 
 def refcheck_stage_dir(run_dir: Path) -> Path:
@@ -328,32 +323,78 @@ def _pick_python_executable(repo_root: Path) -> Path:
     return Path("python3")
 
 
-def _run_review_runtime(*, repo_root: Path, run_dir: Path, paper_pdf: Path, title: str) -> dict[str, Any]:
+def _run_review_runtime(
+    *,
+    repo_root: Path,
+    run_dir: Path,
+    paper_pdf: Path,
+    title: str,
+    cutoff_date: str = "",
+) -> dict[str, Any]:
     py_exec = _pick_python_executable(repo_root)
     script = repo_root / "scripts" / "execute_review_runtime_job.py"
 
     env = os.environ.copy()
     env["DATA_DIR"] = str((run_dir / "runtime").resolve())
 
+    cmd: list[str] = [str(py_exec), str(script), "--paper-pdf", str(paper_pdf), "--title", title]
+    cutoff_token = str(cutoff_date or "").strip()
+    if cutoff_token:
+        cmd.extend(["--cutoff-date", cutoff_token])
+
     # Hard ceiling: a single agent runtime job for one paper should never need
     # more than a few hours. Without this, a hung subprocess would pin the
     # entire pipeline indefinitely.
     runtime_timeout_seconds = 3 * 60 * 60
     try:
-        proc = subprocess.run(
-            [str(py_exec), str(script), "--paper-pdf", str(paper_pdf), "--title", title],
+        proc = subprocess.Popen(
+            cmd,
             cwd=str(repo_root),
             env=env,
-            capture_output=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             text=True,
-            timeout=runtime_timeout_seconds,
+            bufsize=1,
         )
-    except subprocess.TimeoutExpired as exc:
-        raise RuntimeError(f"agent runtime pipeline timed out after {runtime_timeout_seconds}s") from exc
-    if proc.returncode != 0:
-        raise RuntimeError(f"agent runtime pipeline failed\nstdout:\n{proc.stdout}\nstderr:\n{proc.stderr}\n")
+    except OSError as exc:
+        raise RuntimeError(f"failed to start agent runtime pipeline: {exc}") from exc
 
-    text = (proc.stdout or "").strip()
+    stdout_parts: list[str] = []
+    stderr_parts: list[str] = []
+
+    def collect_stdout() -> None:
+        if proc.stdout is None:
+            return
+        for line in proc.stdout:
+            stdout_parts.append(line)
+
+    def collect_stderr() -> None:
+        if proc.stderr is None:
+            return
+        for line in proc.stderr:
+            stderr_parts.append(line)
+            print(line, end="", file=sys.stderr, flush=True)
+
+    stdout_thread = threading.Thread(target=collect_stdout, daemon=True)
+    stderr_thread = threading.Thread(target=collect_stderr, daemon=True)
+    stdout_thread.start()
+    stderr_thread.start()
+    try:
+        return_code = proc.wait(timeout=runtime_timeout_seconds)
+    except subprocess.TimeoutExpired as exc:
+        proc.kill()
+        stdout_thread.join(timeout=5)
+        stderr_thread.join(timeout=5)
+        raise RuntimeError(f"agent runtime pipeline timed out after {runtime_timeout_seconds}s") from exc
+    stdout_thread.join(timeout=10)
+    stderr_thread.join(timeout=10)
+
+    stdout_text = "".join(stdout_parts)
+    stderr_text = "".join(stderr_parts)
+    if return_code != 0:
+        raise RuntimeError(f"agent runtime pipeline failed\nstdout:\n{stdout_text}\nstderr:\n{stderr_text}\n")
+
+    text = stdout_text.strip()
     payload: dict[str, Any] | None = None
     if text:
         try:
@@ -449,6 +490,7 @@ def bootstrap_bridge_state(
     paper_pdf: Path | None = None,
     paper_key: str,
     reuse_job_id: str = "",
+    cutoff_date: str = "",
 ) -> RuntimeBridgeState:
     run_dir.mkdir(parents=True, exist_ok=True)
     existing = load_bridge_state(run_dir)
@@ -518,7 +560,13 @@ def bootstrap_bridge_state(
         raise FileNotFoundError(f"paper pdf not found: {resolved_pdf}")
 
     key = str(paper_key or "").strip() or resolved_pdf.parent.name or "paper"
-    own_payload = _run_review_runtime(repo_root=repo_root, run_dir=run_dir, paper_pdf=resolved_pdf, title=key)
+    own_payload = _run_review_runtime(
+        repo_root=repo_root,
+        run_dir=run_dir,
+        paper_pdf=resolved_pdf,
+        title=key,
+        cutoff_date=cutoff_date,
+    )
     return save_bridge_state(
         run_dir=run_dir,
         paper_pdf=resolved_pdf,

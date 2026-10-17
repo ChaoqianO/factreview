@@ -6,7 +6,20 @@ is defined here. Internal per-module types stay local.
 
 from __future__ import annotations
 
-from schemas.claim import Claim, ClaimLabel, ClaimType, SubClaim
+from schemas.claim import (
+    AuthorQuestion,
+    Claim,
+    ClaimLocation,
+    ClaimStatus,
+    Condition,
+    Evidence,
+    EvidenceNeed,
+    EvidencePointer,
+    ExecutionPlan,
+    ExecutionProvenance,
+    ExecutionTask,
+    Finding,
+)
 from schemas.execution import (
     ExecutionEvidence,
     ExecutionExitStatus,
@@ -15,34 +28,39 @@ from schemas.execution import (
     RunArtifact,
     Task,
 )
-from schemas.paper import Figure, Paper, PaperMetadata, ReportedResult, Section, Table
+from schemas.paper import Figure, Paper, PaperMetadata, Section, Table
 from schemas.positioning import LiteratureContext, NeighborMethod, NoveltyType
-from schemas.review import ClaimAssessment, EvidenceLink, FinalReview
+from schemas.review import FinalReview
 from schemas.stage import StageResult, StageStatus
 
 __all__ = [
+    "AuthorQuestion",
     "Claim",
-    "ClaimAssessment",
-    "ClaimLabel",
-    "ClaimType",
-    "EvidenceLink",
+    "ClaimLocation",
+    "ClaimStatus",
+    "Condition",
+    "Evidence",
+    "EvidenceNeed",
+    "EvidencePointer",
     "ExecutionEvidence",
     "ExecutionExitStatus",
     "ExecutionPayload",
+    "ExecutionPlan",
+    "ExecutionProvenance",
     "ExecutionStageStatus",
+    "ExecutionTask",
     "Figure",
     "FinalReview",
+    "Finding",
     "LiteratureContext",
     "NeighborMethod",
     "NoveltyType",
     "Paper",
     "PaperMetadata",
-    "ReportedResult",
     "RunArtifact",
     "Section",
     "StageResult",
     "StageStatus",
-    "SubClaim",
     "Table",
     "Task",
 ]

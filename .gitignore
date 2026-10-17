@@ -1,6 +1,7 @@
 # Secrets and local configuration
 .env
 .env.*
+!.env.example
 auth.json
 auth-profiles.json
 
@@ -41,8 +42,22 @@ output/
 src/baseline/
 compare/
 
+# Local paper parsing / execution artifacts
+*.extracted.txt
+*.columns.txt
+_paper_pages/
+demos/**/_run_*/
+demos/**/execution/
+!demos/Graph/compgcn/execution/
+!demos/Graph/compgcn/execution/**
+
 # Codex CLI scratch placeholder
 .codex
 
 # Local uv state (prefer committing uv.lock instead)
 .uv/
+
+# Project
+refcopilot-out/
+/RefCopilot/out/
+tmp

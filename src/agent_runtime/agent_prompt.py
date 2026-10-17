@@ -230,7 +230,7 @@ def _build_review_annotator_prompt(
         "  Phase 1 Plan/Audit -> Phase 2 Contribution+Retrieval -> Phase 3 Section Audit+Annotations -> Phase 4 Final Report.\n"
         "  In that first status update, include explicit go/no-go gates for each phase and the trigger condition for entering the next phase.\n"
         "  Also include explicit fields: `step`, `completed`, `blocked`, `todo`.\n"
-        "  `todo` must be a single concise string (not a list), with concrete immediate actions for Step 1 (claim extraction + novelty-plan draft), not generic placeholders.\n"
+        "  `todo` must be a single concise string with concrete immediate actions for Step 1 (load supplied claim records + novelty-plan draft).\n"
         "- PHASE STATUS REPORTING CONTRACT (MANDATORY):\n"
         "  publish mcp_status_update at each phase boundary (Step 1 done, Step 2 done, Step 3 done, Step 4 done) and include gate pass/fail reason.\n"
         "  for Step 2, include retrieval progress summary (total paper_search calls, distinct intent count, unresolved novelty claims).\n"
@@ -247,9 +247,9 @@ def _build_review_annotator_prompt(
         "- Page-level thinking gate (strict): before first annotation on each page, complete page-level diagnosis and validation; annotation is allowed only after this gate passes.\n"
         "- Default thinking budget: use moderate-depth reasoning before each major action, then execute tools; avoid long speculative chains without new evidence.\n"
         "- Step-level execution requirements (strict, within the same workflow above):\n"
-        "  Step 1 - Plan/Audit gate: produce a concrete page-wise plan + contribution claims (C1-C3) + novelty-verification plan before the first annotation.\n"
+        "  Step 1 - Plan/Audit gate: produce a concrete page-wise plan + contribution claims (supplied claim records) + novelty-verification plan before the first annotation.\n"
         "  Step 1 success condition: planning is specific enough to drive next actions (not vague high-level notes).\n"
-        "  Step 2 - Retrieval gate: perform claim-driven retrieval and keep updating provisional novelty tags for C1-C3.\n"
+        "  Step 2 - Retrieval gate: perform claim-driven retrieval and keep updating provisional novelty tags for supplied claim records.\n"
         "  Step 2 minimum hard condition: complete at least 3 paper_search calls with >=3 distinct query/question intents before final submission.\n"
         "  Step 2 effectiveness hard condition: after Step 1 analysis, at least 3 paper_search calls must be effective (successful call + >=1 usable paper).\n"
         "  Step 2 value-focus hard condition: retrieval must explicitly determine manuscript novelty, research position in the field, and value magnitude (how much scientific/practical value is solved).\n"
@@ -284,27 +284,25 @@ def _build_review_annotator_prompt(
         "You must self-judge whether coverage gates are satisfied; do not rely on annotation count alone.\n"
         "- Core UI rule: all substantive feedback must be delivered as PDF annotations via pdf_annotate.\n"
         "- PDF annotation novelty rule: when evidence supports it, explicitly annotate novelty/comparison risks at paragraph level (not only in final summary).\n"
-        "- Ensure final annotation set contains reasonable novelty coverage across core contribution claims (C1-C3), while keeping quality-over-quantity.\n"
+        "- Ensure final annotation set contains reasonable novelty coverage across core contribution claims (supplied claim records), while keeping quality-over-quantity.\n"
         "- Do NOT place actionable review content in plain chat text.\n"
         "- Allowed non-annotation chat text is status-only (very short): start/progress/done/error.\n"
         "- For each substantive annotation, include a compact `summary` in pdf_annotate when possible (soft target: about 10-40 words, no hard limit).\n"
         "- `summary` is for hover preview only: concise, specific, and human-readable; full technical analysis remains in `comment`.\n"
-        "- **Novelty & Retrieval subsection (authoritative block continuation):** this subsection governs contribution extraction, retrieval formatting, novelty verdicts, taxonomy construction, and citation scope.\n"
-        "- Contribution extraction constraints (strict):\n"
-        "  (a) extract 1-3 contribution claims only,\n"
-        "  (b) use Title/Abstract/Introduction/Conclusion as primary evidence,\n"
-        "  (c) do not invent claims,\n"
-        "  (d) exclude performance-only claims that contain only metric gains without conceptual intervention.\n"
-        "- For each contribution C1-C3, maintain four fields in reasoning: `claim_id`, `author_claim_text`, `source_hint`, `prior_work_question`.\n"
+        "- **Novelty & Retrieval subsection (authoritative block continuation):** this subsection governs supplied claim records, retrieval formatting, novelty verdicts, taxonomy construction, and citation scope.\n"
+        "- Consume the supplied upfront claim records, including every claim id, text, location, conditions and needs.\n"
+        "- Claim extraction, splitting and deduplication are complete before this reporting stage. Do not extract, merge, split, discard or cap supplied claims.\n"
+        "- Preserve each supplied claim's evidence and assessment; missing records must be reported as unavailable.\n"
         "- Retrieval format constraints (strict):\n"
         "  paper_search uses `query` (plain string) or `question_list` (true JSON array of strings);\n"
         '  read_paper uses `items=[{"id":"<arxiv_id>","question":"<question>"}, ...]` (max 8 per call).\n'
         "- read_paper usage policy (strict): always use paper_search first to discover relevant papers, then pass selected arXiv ids + concrete research questions into read_paper for deep reading.\n"
+        "- read_paper sequencing rule (strict): after the first effective paper_search call that returns any relevant arXiv-id candidate, call read_paper on 1-3 selected overlap-risk papers before issuing more paper_search calls or drafting Section 2. Do not defer all deep reading until after multiple searches, because search availability may degrade mid-run.\n"
         "- After each paper_search call, analyze the returned papers yourself; if deeper verification is needed, call read_paper for full-paper reading and reasoning.\n"
         "- read_paper deepening rule (strict): do not stop at title/abstract-level comparison when deep reading is feasible; use read_paper to verify mechanism overlap, assumption matching, and residual novelty/value space.\n"
         "- read_paper question style: you may request a concise paper summary, or ask for targeted feedback on specific technical questions.\n"
         "- Retrieval quality constraints: each major retrieval action must map to at least one contribution claim; avoid detached search that does not change novelty judgment.\n"
-        "- **NOVELTY SEARCH PLAYBOOK (MANDATORY, PER C1-C3):**\n"
+        "- **NOVELTY SEARCH PLAYBOOK (MANDATORY, PER supplied claim records):**\n"
         "  N1. Claim decomposition: split each contribution into `core mechanism`, `target setting`, `evaluation protocol/metrics`, and `claimed gain`.\n"
         "  N2. Broad landscape query: ask what families of methods already address the same problem under similar assumptions.\n"
         "  N3. Nearest-neighbor query: ask for papers with the most comparable task/setting/protocol/budget to test overlap risk directly.\n"
@@ -396,9 +394,7 @@ def _build_review_annotator_prompt(
         "- Build a prioritized annotation plan (critical/major/minor) before writing any annotation.\n"
         "- Build an explicit page-wise plan before first annotation: page -> target annotation count -> likely defect focus -> expected revision direction.\n"
         "- **NOVELTY VERIFICATION BLUEPRINT (MANDATORY BEFORE ANY ANNOTATION):** define exactly how novelty will be checked in this run.\n"
-        "- First extract 1-3 explicit contribution claims (C1-C3) from the manuscript (author-claimed, no invention).\n"
-        "- Contribution extraction source discipline: prioritize Title/Abstract/Introduction/Conclusion; use other sections only for terminology clarification.\n"
-        "- Do not treat pure metric improvements (without conceptual intervention) as standalone contribution claims.\n"
+        "- Read the supplied upfront claim records before constructing the verification plan. Preserve their identifiers and boundaries.\n"
         "- For each claim, preserve claim evidence fields in reasoning: `author_claim_text` + `source_hint`.\n"
         "- For each claim Ck, define: (a) novelty question, (b) falsification signal, (c) minimum evidence required to keep the claim.\n"
         "- For each claim Ck, prepare one canonical prior-work question and 1-2 targeted follow-up questions.\n"
@@ -435,7 +431,7 @@ def _build_review_annotator_prompt(
         f"{pass_b_block}"
         "Pass B2 — Contribution-driven novelty verification and related-paper retrieval:\n"
         "- Authoritative rule: follow the **AUTHORITATIVE EXECUTION BLOCK** above (especially its novelty/retrieval subsection); if any local wording conflicts, the authoritative block wins.\n"
-        "- Before first retrieval call, freeze contribution list C1-C3 from Pass 0 and keep it stable unless manuscript evidence forces revision.\n"
+        "- Before first retrieval call, load the upfront claim records and preserve their identifiers and boundaries.\n"
         "- Retrieval must be claim-driven: each major retrieval action must map to at least one contribution claim.\n"
         "- For each contribution claim, run a loop: broad discovery -> targeted narrowing -> deep validation via read_paper.\n"
         "- For each contribution claim, continuously update a provisional novelty tag: `supported`, `partially_overlapping`, `substantially_overlapped`, or `unclear`.\n"
@@ -455,6 +451,7 @@ def _build_review_annotator_prompt(
         "- Use paper_search mainly to improve actionable suggestions and clarify novelty/comparison uncertainty.\n"
         "- Retrieval objective focus (strict): use Step 2 retrieval to answer three core questions for this manuscript: how novel it is, where it sits in the field, and how large the solved research/practical value is.\n"
         "- Effective-call accounting rule (strict): count a paper_search call as effective only when it succeeds and returns at least one usable relevant paper.\n"
+        "- Deep-reading sequencing gate (strict): once an effective paper_search result includes arXiv ids, immediately run read_paper for the strongest 1-3 overlap-risk candidates before additional broadening searches; this protects the review from using only title/abstract evidence.\n"
         "- **RETRIEVAL BUDGET (DEFAULT):** under normal retrieval health, when external evidence is needed, run 3-10 paper_search calls total, with >=3 distinct query/question intents by finalization; prefer bundled parallel calls over serial single-question calls.\n"
         "- In most runs, keep deep reading within about 10 papers total; exceed this only for unusually specialized manuscripts requiring deeper cross-paper validation/comparison.\n"
         "- Multi-hop evidence collection is allowed: start broad, then hop to targeted follow-up papers (methods, assumptions, failure modes, contradictory evidence) to broaden and stabilize conclusions.\n"
@@ -562,7 +559,7 @@ def _build_review_annotator_prompt(
         "- For major items, prefer 3-5 complete sentences over keyword-only shorthand.\n"
         "\n"
         "Explicit thinking checklist (execute in order, do not skip):\n"
-        "- [ ] Step 1 — Claim extraction: What exact claim is this paragraph making?\n"
+        "- [ ] Step 1 — Claim lookup: Which supplied claim record is located in this paragraph?\n"
         "- [ ] Step 2 — Evidence binding: Which sentence, table, equation, or experiment directly supports the claim?\n"
         "- [ ] Step 3 — Gap test: What is missing that prevents the claim from being fully trustworthy?\n"
         "- [ ] Step 4 — Risk test: If this gap remains, what scientific risk appears (invalidity, irreproducibility, overclaim)?\n"
@@ -1206,7 +1203,7 @@ def _build_review_annotator_prompt(
         "  **Checklist A — Pre-Write Gate (all required before review_final_markdown_write)**\n"
         "  [ ] A0. Ranked Error Board is fixed: Top 5 core defects ranked by Severity | Research-Value Impact | Validity Risk | Fixability | Confidence.\n"
         "  [ ] A1. Core verdict is fixed: strongest strengths, fatal risks, major risks, and fixability boundaries are explicitly decided.\n"
-        "  [ ] A2. Novelty verification plan is fixed: contribution claims (C1-C3), per-claim evidence gates, and per-claim novelty verdict criteria are explicit.\n"
+        "  [ ] A2. Novelty verification plan is fixed: contribution claims (supplied claim records), per-claim evidence gates, and per-claim novelty verdict criteria are explicit.\n"
         "  [ ] A3. Related-work taxonomy plan is fixed: root -> branches -> leaf families and mapping criteria are explicit.\n"
         "  [ ] A4. Full outline is fixed: section-by-section skeleton with objective, key claims, required evidence, and expected citations.\n"
         "  [ ] A5. Evidence map is fixed: every major judgment is bound to concrete manuscript evidence (page + section/paragraph context).\n"
@@ -1233,7 +1230,7 @@ def _build_review_annotator_prompt(
         "  [ ] C6. Language quality: plain, direct, rigorous, and professional; no decorative filler.\n"
         "  [ ] C7. Human-readability gate: a domain reader can follow the report end-to-end without additional explanation.\n"
         "  [ ] C8. Final weakness audit: every issue/major weakness has explicit manuscript-grounded evidence; unsupported claims are removed.\n"
-        "  [ ] C9. Novelty audit closure: C1-C3 novelty verdicts are evidence-complete, conflict-checked, and conservatively bounded when uncertainty remains.\n"
+        "  [ ] C9. Novelty audit closure: supplied claim records novelty verdicts are evidence-complete, conflict-checked, and conservatively bounded when uncertainty remains.\n"
         "  [ ] C10. Objectivity audit closure: overclaims, unsupported certainty wording, and causal overreach are corrected or downgraded.\n"
         "  [ ] C11. Thinking-completeness gate: no key reasoning step is skipped; each final judgment has a clear evidence path and validation note.\n"
         "  [ ] C12. ASCII layered taxonomy tree gate: include one user-facing ASCII layered classification tree showing novelty positioning and value contribution across branches/leaves.\n"
@@ -1311,7 +1308,7 @@ def _build_review_annotator_prompt(
         "  (9A) `Contribution Novelty Verdict Board` (mandatory):\n"
         "      `Claim ID | Author Contribution Claim | Key Evidence Papers [n] | Novelty Verdict Tag | Why | Confidence | Required Repositioning`.\n"
         "      Allowed verdict tags only: `supported`, `partially_overlapping`, `substantially_overlapped`, `unclear`.\n"
-        "      Every C1-C3 contribution claim must appear exactly once in this board.\n"
+        "      Every supplied claim records contribution claim must appear exactly once in this board.\n"
         "      Do not keep a claim as `supported` when decisive conflicting prior evidence remains unresolved.\n"
         "  (9B) `Related-Work Taxonomy Matrix` (mandatory):\n"
         "      `Taxonomy Layer | Branch/Leaf | Representative Papers [n] | Common Assumptions | Difference vs This Paper | Novelty Risk Signal`.\n"
@@ -1324,7 +1321,7 @@ def _build_review_annotator_prompt(
         "- Citation scope constraints for section (9):\n"
         "  citations used in 9A/9B/9C and `Contribution-level Novelty Conclusion` should come from the taxonomy-mapped paper set.\n"
         "  Keep citation indices stable; do not introduce uncited or out-of-taxonomy references in novelty verdict statements.\n"
-        "- Add one short `Contribution-level Novelty Conclusion` paragraph after these tables, explicitly summarizing C1-C3 verdict tags and one-line justification per claim.\n"
+        "- Add one short `Contribution-level Novelty Conclusion` paragraph after these tables, explicitly summarizing supplied claim records verdict tags and one-line justification per claim.\n"
         "- If any claim is `substantially_overlapped`, include explicit repositioning guidance in that conclusion paragraph.\n"
         "- For textual revision advice in Actionable Suggestions / Priority Revision Plan, when citing a concrete paragraph, provide one mentor-style copy-ready revised version directly.\n"
         "- In that markdown, include risk ranking, revision order, and expected impact after fixes.\n"
@@ -1417,10 +1414,39 @@ def _build_fact_review_extractor_prompt(
     source_file_name: str,
     semantic_scholar_context: str = "",
     ui_language: str = "en",
+    paper_cutoff_date: dict | None = None,
+    paper_search_runtime_state: dict | None = None,
 ) -> str:
     markdown_text = (paper_markdown or "").strip()
     if len(markdown_text) > 120000:
         markdown_text = f"{markdown_text[:120000]}\n\n[...truncated...]"
+
+    search_state = paper_search_runtime_state if isinstance(paper_search_runtime_state, dict) else {}
+    search_started = bool(search_state.get("started", True))
+    search_error = str(search_state.get("error") or "").strip()
+    search_availability = str(search_state.get("availability") or "").strip() or (
+        "ready" if search_started else "unknown"
+    )
+    if search_started:
+        retrieval_status_block = (
+            "[Runtime Retrieval Status]\n"
+            "External paper search is available for this run. "
+            "For Section 2, combine the provided [Semantic Scholar Retrieval] block with targeted "
+            "paper_search results; after any effective paper_search result with readable candidates, "
+            "you must call read_paper on the most relevant overlap-risk papers before writing Section 2. "
+            "If no readable candidate is available, state that limitation explicitly and keep the "
+            "positioning matrix limited to search metadata and manuscript evidence.\n\n"
+        )
+    else:
+        reason_detail = search_availability
+        if search_error:
+            reason_detail = f"{reason_detail}; {search_error}"
+        retrieval_status_block = (
+            "[Runtime Retrieval Status]\n"
+            f"External paper search is NOT available for this run ({reason_detail}). "
+            "Use only the manuscript text and any [Semantic Scholar Retrieval] content already injected below. "
+            "Do not call paper_search; mark any novelty/comparison conclusions as requiring manual verification.\n\n"
+        )
 
     resolved_ui_language = normalize_ui_language(ui_language, fallback="en", strict=False)
     output_language_rule = (
@@ -1429,7 +1455,25 @@ def _build_fact_review_extractor_prompt(
         else "All user-visible final report content must be in English."
     )
 
+    if isinstance(paper_cutoff_date, dict) and str(paper_cutoff_date.get("value") or "").strip():
+        cutoff_block = (
+            "[Publication-Date Cutoff]\n"
+            f"value: {paper_cutoff_date.get('value')}\n"
+            f"precision: {paper_cutoff_date.get('precision')}\n"
+            "rule: when judging novelty/positioning, treat papers published AFTER this cutoff as out of scope. "
+            "Do not cite them as prior work that the manuscript should have addressed.\n"
+            "rule: paper_search and Semantic Scholar results have already been filtered to <= cutoff "
+            "(client-side double-check applied), so all listed papers are eligible for novelty comparison.\n\n"
+        )
+    else:
+        cutoff_block = (
+            "[Publication-Date Cutoff]\n"
+            "value: (none)\n"
+            "rule: no cutoff is applied; treat all retrieved papers as eligible for positioning.\n\n"
+        )
+
     return (
+        f"{retrieval_status_block}"
         "You are a paper-information extraction agent.\n"
         "Your job is to extract factual manuscript information and organize it into a fixed structured report.\n"
         "\n"
@@ -1448,14 +1492,20 @@ def _build_fact_review_extractor_prompt(
         "\n"
         "Extraction-only operating rules:\n"
         "- Prefer manuscript evidence over inference.\n"
-        "- Default to zero retrieval calls: extract directly from the provided `[Paper Markdown]` in this prompt.\n"
+        "- Default to manuscript-first extraction for Sections 1, 3, 4, and 5; Section 2 must use paper_search when external paper search is available.\n"
         "- Do not run `pdf_search`/`pdf_read_lines` unless a critical field cannot be found in `[Paper Markdown]`.\n"
         "- Use `mcp_status_update` only for concise progress updates.\n"
-        "- Use the provided Semantic Scholar retrieval block for objective related-work comparison in section 2; it was retrieved by querying the current paper title against Semantic Scholar.\n"
+        "- For Section 2, use the provided Semantic Scholar retrieval block as one objective related-work source, and augment it with targeted paper_search/read_paper evidence when the runtime retrieval status says paper_search is available.\n"
+        "- Section 2 retrieval budget: when paper_search is available, run 1-3 focused paper_search calls using query or question_list before writing Section 2.\n"
+        "- Section 2 read_paper requirement: if any paper_search call succeeds and returns usable candidate papers, you must call read_paper on 1-3 selected close-overlap papers before writing Section 2.\n"
+        "- Section 2 read_paper sequencing: after the first effective paper_search result with readable candidates, run read_paper before drafting Section 2 or launching more searches unless the result set contains no plausible overlap-risk paper.\n"
+        "- If no readable candidate is available from paper_search, explicitly state that Technical Positioning used search metadata/abstracts without deep-read evidence.\n"
         "- Do not use reviewer-style annotations as the main output channel.\n"
         "- Final completion happens only after `review_final_markdown_write` succeeds.\n"
         "- Avoid repeated search loops: if required evidence cannot be confirmed quickly, write `Not found in manuscript` and continue to the next section.\n"
         "- Tool-call cap for extraction mode: total `pdf_search` calls must be <= 1 for the whole run, and `pdf_read_lines` calls must be <= 1 for the whole run.\n"
+        "- Anti-stall rule: if evidence for a field cannot be found after one scan of [Paper Markdown], write `Not found in manuscript` immediately and move to the next field. Do not re-scan the same section more than once for the same field.\n"
+        "- Think-budget rule: complete all reasoning and evidence gathering for one section before submitting it via `review_final_markdown_write`, then move to the next section. Do not interleave evidence gathering across sections or defer submission indefinitely.\n"
         "\n"
         "Required final sections and order:\n"
         "1. `metadata`\n"
@@ -1471,9 +1521,9 @@ def _build_fact_review_extractor_prompt(
         "- `2. Technical Positioning`: do not output markers like `[Figure Placeholder]`, `Overview Figure`, or `Overview Figure Page`.\n"
         "- `2. Technical Positioning`: run 3-step logic strictly:\n"
         "  Step 1: from Introduction/Related Work in manuscript, extract declared baselines and author self-positioning.\n"
-        "  Step 2: use `[Semantic Scholar Retrieval]` papers as the objective top related works returned for the current paper title.\n"
-        "  Step 3: perform gap analysis between declared set and objective set.\n"
-        "- `2. Technical Positioning`: if `[Semantic Scholar Retrieval]` has `success: false` or empty `papers`, do NOT invent external papers; output `Objective retrieval unavailable` and skip R-columns expansion.\n"
+        "  Step 2: build the objective related-work set from `[Semantic Scholar Retrieval]` plus paper_search results when paper_search is available; when paper_search returns usable candidates, use read_paper to verify close-overlap mechanisms or protocols.\n"
+        "  Step 3: perform gap analysis between declared set and objective set, then choose matrix rows/dimensions from the combined evidence.\n"
+        "- `2. Technical Positioning`: if both `[Semantic Scholar Retrieval]` and available paper_search return no relevant papers, do NOT invent external papers; output `Objective retrieval unavailable` and use only manuscript-declared baselines/related work for any external rows.\n"
         "- `2. Technical Positioning`: table must use fixed first two columns exactly `Research domain | Method`.\n"
         "- `2. Technical Positioning`: row semantics are strict: `Research domain` = field/subfield category or ecological niche; `Method` = concrete model/method/paper short name.\n"
         "- `2. Technical Positioning`: external related works must appear first; add `This Work` as the final row only.\n"
@@ -1481,23 +1531,53 @@ def _build_fact_review_extractor_prompt(
         "- `2. Technical Positioning`: derive the self-row method by this priority: (1) named method/acronym explicitly introduced in title/abstract/introduction/method, (2) concise proposed-method phrase from the manuscript, (3) `Not found in manuscript`.\n"
         "- `2. Technical Positioning`: never write `This Work`, `Ours`, the current paper title, a dataset name, a metric name, `Baseline`, `Val`, `Test`, or another generic table word in the self-row `Method` cell.\n"
         "- `2. Technical Positioning`: never place the current paper title as an external row. Use only the final `This Work` row for self-row identity.\n"
-        "- `2. Technical Positioning`: before writing the table, internally (do NOT output this reasoning as text) enumerate candidate niche dimensions: (a) list each claimed contribution of the current paper; (b) for each Semantic Scholar retrieval paper, identify its 1-2 key distinguishing capabilities; (c) select the 3-8 most discriminating dimensions — those that produce different √/× patterns across method rows. Output only the figure caption and the table, nothing else.\n"
-        "- `2. Technical Positioning`: after the first two columns, append the selected niche-dimension columns; minimum 4 dimensions if Semantic Scholar returns ≥5 papers, minimum 3 dimensions derived from manuscript claims if fewer than 3 papers are returned.\n"
-        "- `2. Technical Positioning`: the table must include at least 2 external method rows before the `This Work` row; if Semantic Scholar returns fewer than 2 relevant papers, use baselines or competing methods explicitly named in the manuscript's Introduction or Related Work sections to fill external rows.\n"
+        "- `2. Technical Positioning`: before writing the table, internally (do NOT output this reasoning as text) run this 3-step reasoning:\n"
+        "  (a) Contribution decomposition: for each core contribution C of this paper, decompose it into four fields — `core mechanism` (what the method does differently), `target setting` (task/domain/data regime), `evaluation protocol` (metrics and benchmark setup), `claimed gain` (quantitative or qualitative improvement asserted). This identifies what dimensions actually matter for positioning.\n"
+        "  (b) Per-paper gap analysis: for each relevant external paper from Semantic Scholar or paper_search, identify its 1-2 key distinguishing capabilities and compare them against the core mechanism and target setting of each C. Use read_paper evidence when available for close-overlap candidates. Record where overlap exists and where gaps remain.\n"
+        "  (c) Dimension selection: choose the 3-8 niche dimensions that produce an objective comparison, including both overlap dimensions and difference dimensions. Do not choose axes merely because only This Work wins them; if every selected axis is exclusively won by This Work, revise the axes to include omitted common capabilities or report that objective novelty cannot be established from the available related work.\n"
+        "  Output only the figure caption and the table, nothing else.\n"
+        "- `2. Technical Positioning`: after the first two columns, append the selected niche-dimension columns; minimum 4 dimensions if the combined objective related-work set has ≥5 relevant papers, minimum 3 dimensions derived from manuscript claims if fewer than 3 relevant external papers are available.\n"
+        "- `2. Technical Positioning`: the table must include at least 2 external method rows before the `This Work` row; if the combined objective related-work set has fewer than 2 relevant papers, use baselines or competing methods explicitly named in the manuscript's Introduction or Related Work sections to fill external rows.\n"
         "- `2. Technical Positioning`: niche-dimension column names must be plain capability/ecological-niche labels, not Semantic Scholar paper titles, not R-IDs such as R1/R2/R3, and not a legend.\n"
         "- `2. Technical Positioning`: cells in niche-dimension columns must use only `√` or `×`; for the `This Work` row, use `√` only if the manuscript explicitly addresses that dimension, otherwise use `×`.\n"
+        "- `2. Technical Positioning`: the matrix is descriptive evidence, not a proof of novelty. Do not use it to imply `first`, `unique`, or `novel` unless Section 3 Claims separately includes and audits that author-positioning claim.\n"
         "- `2. Technical Positioning`: include 4-10 method rows; keep wording short academic phrases.\n"
         "- `2. Technical Positioning`: do not output a separate legend block.\n"
         "- `2. Technical Positioning`: after the table, include one short line `Gap:` describing missing high-impact related work if any.\n"
-        "- `3. Claims`: begin with `Paper scope:` and `Evaluation scope:` lines, then one blank line.\n"
-        "- `3. Claims`: provide exactly 3 most important claims only.\n"
-        "- `3. Claims`: provide a markdown table with columns `Claim | Evidence | Assessment | Location`.\n"
-        "- `3. Claims`: internally classify each claim as `Experimental`, `Theoretical`, or `Methodological` before writing `Assessment`, but do not add a separate `Claim Type` column.\n"
-        "- `3. Claims`: `Evidence` must quote/paraphrase the exact manuscript support for the claim, including table/figure/equation/section anchors where available.\n"
-        "- `3. Claims`: `Assessment` must be evidence-driven and type-aware: for `Experimental`, evaluate numeric/empirical support; for `Theoretical`, evaluate theorem/proof/derivation support; for `Methodological`, evaluate design-description and implementation traceability support. Avoid repeated boilerplate sentences.\n"
+        "- `3. Claims` SOURCE: consume every supplied upfront claim record and its assessment.\n"
+        "- Preserve claim identifiers, text, conditions, locations and evidence. Report unavailable records explicitly.\n"
+        "- Do not extract, split, merge, drop or cap claims while rendering the report.\n"
+        "- `3. Claims`: provide a markdown table with columns `Claim | Type | Importance | Evidence | Assessment | Location`.\n"
+        "- `3. Claims`: `Type` must be exactly one of `empirical` / `methodological` / `theoretical`: "
+        "`empirical` for numeric results, comparisons, statistical tests, null results, efficiency/cost/latency claims, or benchmark statistics; "
+        "`methodological` for proposed methods, frameworks, designs, or resource construction; "
+        "`theoretical` for conceptual framing, explanatory/causal interpretation, generality, or literature-positioning claims that are not themselves numeric. "
+        "`Importance` must be `primary` for claims that directly drive the paper's novelty or validity assessment (core contribution, headline result, main causal claim), "
+        "or `secondary` for supporting claims a reviewer still needs to check but that do not stand alone as a key contribution. "
+        "`primary` claims must be stated at headline contribution level — they must preserve the supplied claim boundaries and qualifiers "
+        "(e.g., 'The proposed method achieves state-of-the-art on knowledge graph completion tasks' rather than three separate metric rows for MRR/Hits@1/Hits@10). "
+        "`secondary` claims carry the specific metrics, sub-results, ablation components, and causal interpretations that underpin each primary claim. "
+        "Before writing a primary claim, ask: would this read naturally as a top-3 bullet in a one-paragraph paper summary? If not, mark it secondary. "
+        "Write all rows in descending importance order: most important primary claim first, least important secondary claim last. "
+        "Within primary claims, order by centrality to the paper's key contribution (novelty/positioning assertion first, then main empirical result, then methodological claim). "
+        "Within secondary claims, order by how much the claim affects validity assessment (claims whose failure would undermine a primary claim come before peripheral supporting details).\n"
+        "- `3. Claims`: `Evidence` must have two parts separated by `<br><br>` (not a blank line, which would break the table): "
+        "(1) `Supporting:` — quote/paraphrase the exact manuscript support for the claim, including table/figure/equation/section anchors; "
+        "(2) `Missing:` — explicitly list what evidence is absent but would be needed to fully support the claim scope "
+        "(e.g. no variance/CI for a statistical claim, missing key baselines, claim scope broader than tested setting, no ablation for a methodological claim). "
+        "If nothing critical is missing, write `Missing: None`.\n"
+        "- `3. Claims`: `Assessment` must be evidence-driven and type-aware: for `empirical` type, evaluate numeric/empirical support; for `theoretical` type, evaluate theorem/proof/derivation support; for `methodological` type, evaluate design-description and implementation traceability support. Avoid repeated boilerplate sentences.\n"
+        "- `3. Claims`: before writing each `Assessment` cell, internally verify three checks (do NOT output these checks as text — they inform the verdict only):\n"
+        "  F1 (Numerical consistency): are gains stated in the abstract/text consistent with the actual numbers in tables and figures? If abstract says '+5%' but the table shows '+3.1%', note the mismatch in the Assessment.\n"
+        "  F2 (Text-table consistency): does the narrative claim match what the reported table numbers actually show? If the claim says 'outperforms all baselines' but a baseline is missing from the comparison table, reflect this in `Missing:`.\n"
+        "  F5 (Causal validity): for claims attributing gains to a specific mechanism or component, is there an ablation or controlled experiment that supports the causal direction? If not, the verdict must be at most `partially_supported` — do not use `supported` for unverified causal claims.\n"
         "- `3. Claims`: do not include a `Status` column (status will be appended by the system).\n"
+        "- `3. Claims`: at the END of each `Assessment` cell, append exactly one self-verdict tag in the form `[verdict: <label>; reason: <one short clause>]`, where `<label>` is one of `supported`, `partially_supported`, `inconclusive`, or `in_conflict`. Decision rules: use `supported` only when the cited evidence directly proves the claim's verb (for comparative claims like 'leading'/'outperforms'/'best', the gap vs. the strongest comparator must clearly exceed the reported error bar — Δ ≥ 2σ if σ is reported); use `partially_supported` when the evidence supports the qualitative direction but the magnitude or scope is weaker than what the claim asserts, or only some components of a multi-component claim are evidenced; use `inconclusive` when the gap is within ~1σ, the comparator is a system-card / proprietary report rather than an apples-to-apples re-run, or evidence is anecdotal (case study / appendix); use `in_conflict` only when evidence contradicts the claim. The system reconciles your tag with its own audit and keeps whichever is more conservative; over-claim and your tag will be ignored.\n"
         "- `4. Summary`: first give a short whole-paper summary paragraph, then include two sublabels exactly named `Strengths:` and `Weaknesses:` followed by bullet lists.\n"
         "- `4. Summary`: `Strengths` and `Weaknesses` must evaluate the manuscript end-to-end (problem, method, evidence, and presentation), not a single subsection only.\n"
+        "- `4. Summary`: each `Strengths:` bullet must cite a specific manuscript anchor (table number, equation, section name, or figure) that justifies the strength. Do not write generic praise without evidence.\n"
+        "- `4. Summary`: each `Weaknesses:` bullet must follow this format: `[Problem] → [Root cause] → [Validity/novelty impact] → [Repair direction]`. Example: 'Causal attribution of gains to the routing module is unverified → no matched-capacity ablation is reported → core mechanism claim is partially supported at best → add a controlled ablation removing only the routing component under identical parameter budget.'\n"
+        "- `4. Summary`: sort `Weaknesses:` by impact — validity-critical issues first (claims unsupported by evidence, missing controls, causal overreach), methodological gaps second, presentation issues last.\n"
         "- `5. Experiment`: include two subsection headings exactly `### Main Result` and `### Ablation Result`; never use `## Main Result` or `## Ablation Result` inside section 5.\n"
         "- `5. Experiment`: extract `Main Result` and `Ablation Result` from DIFFERENT source sections; never classify the same table as both.\n"
         "- `5. Experiment`: extract and display all reported main experimental-result rows; do not sample, summarize-only, or truncate valid main-result rows.\n"
@@ -1528,6 +1608,7 @@ def _build_fact_review_extractor_prompt(
         "\n"
         f"Output language rule: {output_language_rule}\n"
         "\n"
+        f"{cutoff_block}"
         "[Semantic Scholar Retrieval]\n"
         f"{semantic_scholar_context or '(empty)'}\n"
         "\n"
@@ -1547,6 +1628,7 @@ def build_review_agent_system_prompt(
     paper_search_runtime_state: dict | None = None,
     semantic_scholar_context: str = "",
     ui_language: str = "en",
+    paper_cutoff_date: dict | None = None,
 ) -> str:
     return _build_fact_review_extractor_prompt(
         paper_markdown=paper_markdown,
@@ -1554,6 +1636,8 @@ def build_review_agent_system_prompt(
         source_file_name=source_file_name,
         semantic_scholar_context=semantic_scholar_context,
         ui_language=ui_language,
+        paper_cutoff_date=paper_cutoff_date,
+        paper_search_runtime_state=paper_search_runtime_state,
     )
 
 

@@ -8,13 +8,13 @@ version = "0.1.0"
 description = "Evidence-grounded AI reviewing system with literature positioning and execution-based claim verification."
 readme = "README.md"
 requires-python = ">=3.11"
-license = { text = "Apache-2.0" }
-authors = [{ name = "FactReview authors" }]
+license = { text = "AGPL-3.0-only" }
+authors = [{ name = "Anonymous authors" }]
 keywords = ["peer-review", "claim-verification", "reproducibility", "langgraph", "llm"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Science/Research",
-  "License :: OSI Approved :: Apache Software License",
+  "License :: OSI Approved :: GNU Affero General Public License v3",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Topic :: Scientific/Engineering",
@@ -64,19 +64,14 @@ positioning = [
 ]
 
 # ── fact_generation/refcheck (reference-accuracy validation) ─────────────────
+# Runtime dependencies of the unchanged RefCopilot library, bundled from
+# RefCopilot/src in distributions and imported directly in installed wheels.
 refcheck = [
-  "numpy>=1.26.0,<2",
-  "requests>=2.32.5",
-  "beautifulsoup4>=4.12.0",
-  "arxiv>=2.1.0",
-  "python-dateutil>=2.9.0.post0",
-  "tqdm>=4.67.0",
-  "colorama>=0.4.4",
-  "fuzzywuzzy>=0.18.0",
-  "python-Levenshtein>=0.25.0",
-  "pandas>=2.0.0",
+  "httpx>=0.27.0",
+  "rapidfuzz>=3.5.0",
   "pdfplumber>=0.10.0",
   "pybtex>=0.25.1",
+  "python-dotenv>=1.0",
 ]
 
 # ── fact_generation/execution (§3.3 code execution / verification) ───────────
@@ -119,23 +114,28 @@ all = [
   "factreview[runtime]",
 ]
 
-[project.urls]
-Homepage = "https://github.com/ChaoqianO/factreview"
-
 [tool.hatch.build.targets.wheel]
 packages = [
   "src/agent_runtime",
+  "src/assessment",
   "src/common",
   "src/fact_generation",
   "src/llm",
   "src/preprocessing",
   "src/review",
   "src/schemas",
+  "src/screening",
+  "src/verification",
   "src/util",
+  "RefCopilot/src/refcopilot",
 ]
 
 [tool.hatch.build.targets.sdist]
-include = ["src", "demos", "README.md"]
+include = ["src", "RefCopilot/src", "RefCopilot/README.md", "scripts", "demos", "README.md", "LICENSE", "pyproject.toml"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"src/pipeline_full.py" = "pipeline_full.py"
+"src/pipeline_v2.py" = "pipeline_v2.py"
 
 # ── Ruff ──────────────────────────────────────────────────────────────────────
 [tool.ruff]
@@ -144,7 +144,7 @@ target-version = "py311"
 src = ["src", "tests"]
 extend-exclude = [
   "demos/*/execution/repo",
-  "tools",
+  "RefCopilot",
 ]
 
 [tool.ruff.lint]
@@ -187,7 +187,7 @@ warn_unused_ignores = true
 disallow_untyped_defs = false
 ignore_missing_imports = true
 exclude = [
-  "tools/",
+  "RefCopilot/",
 ]
 
 # ── Pytest ────────────────────────────────────────────────────────────────────
@@ -198,6 +198,13 @@ addopts = [
   "-ra",
   "--strict-markers",
   "--strict-config",
+  # Default to fast-only. Heavy / external tests opt back in via marker:
+  #   pytest -m e2e
+  #   pytest -m requires_docker
+  #   pytest -m requires_llm
+  # CI runs the full set with: pytest -m ""
+  "-m",
+  "not slow and not e2e and not requires_docker and not requires_llm and not requires_mineru",
 ]
 markers = [
   "slow: marks slow tests (>10s); deselect with '-m \"not slow\"'",
